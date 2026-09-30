@@ -29,6 +29,33 @@ Aturan singkat:
 
 ---
 
+## [0.6.3] - 1 Oktober 2026
+
+Audit visual di browser pada lebar 390px, mode terang dan mode gelap, atas sepuluh halaman inti. Yang diukur bukan perkiraan: kontras, geser horizontal, ukuran target sentuh, dan sudut. Semua angka di bawah hasil pengukuran, bukan perkiraan.
+
+#### Perbaiki
+
+- Empat pasangan warna gagal ambang kontras `4.5:1` di mode terang, semuanya kurang sedikit. Semuanya diperbaiki, tidak ada tebakan: nilainya dihitung di browser lalu dipasang sebagai nilai baru di [`src/app/globals.css`](src/app/globals.css). Tabel lengkap ada di `DESIGN.md` bagian 7
+  - Teks muted di layar: 4,282 menjadi 4,569. Perbaikannya naik dari tinta 62% ke 64%
+  - Tulisan putih di tombol utama: 4,327 menjadi 4,555. Warnanya bukan diganti, tapi dicampur 93% terracotta dengan hitam, bukan 97%
+  - Teks sage di label dan angka: 4,489 menjadi 4,565. Warnanya `#5B796A`, satu persen lebih gelap dari rancangan awal
+  - Teks lencana beraksen: 4,037 menjadi 4,563. Dicampur 62% marigold dengan hitam, bukan 70%. Warna marigold sendiri tidak diubah karena dipakai sebagai garis dan isian tipis, bukan teks
+- Tautan "Daftar" di halaman masuk dan "Masuk" di halaman daftar punya target sentuh 42x16px, di bawah minimum 44px. Penyebabnya kedua tautan itu tidak punya kelas, jadi ukurannya jatuh ke gaya `<a>` biasa. Sekarang memakai `.tautan-kalimat`, kelas yang memang dirancang untuk tautan di dalam kalimat
+- Enam modul rencana di `/rencana` tersembunyi di 390px dan tidak ada petunjuknya. Sekarang blok tab punya gradien transparan di tepi kanan, jadi terlihat masih ada tab yang terpotong dan bisa digeser
+
+#### Tambah
+
+- Gradien tepi kanan pada blok tab, dengan `scroll-snap` supaya tab yang aktif berhenti di posisi yang enak dibaca. Ada cadangan untuk browser yang tidak mendukung `mask-image`
+- Batas heap dev server dinaikkan ke 1024 MB di [`scripts/dev.mjs`](scripts/dev.mjs). 640 MB lulus uji request tapi mati saat browser sungguhan membuka halaman di dalamnya, heap sudah di 634 MB dengan mode `Ineffective mark-compacts`. 512 dan 576 MB sudah dicoba lebih dulu dan keduanya mati. Detail pengukurannya ada di entri 0.6.2
+
+#### Dokumentasi
+
+- [`DESIGN.md`](DESIGN.md) bagian 7 sekarang memuat tabel koreksi kontras, jadi angka di bagian 3 dan di bagian 7 tidak lagi berbeda
+- [`DESIGN.md`](DESIGN.md) memakai nama produk yang benar, `Hari Besar`. Sebelumnya masih menyebut nama pasangan contoh dan mencatat bahwa nama produk belum ditentukan
+- Kunci penyimpanan tema di [`src/app/layout.tsx`](src/app/layout.tsx) sudah `haribesar-tema`; dokumen masih menyebut kunci lama. Sekarang sama
+
+---
+
 ## [0.6.2] - 1 Oktober 2026
 
 Dev server dibatasi supaya pemakaian RAM-nya tidak jadi penyebab sesi tertutup sendiri. Angka di bawah diukur di mesin ini dengan memukul sepuluh route inti sebanyak tiga kali tiap route lalu menyentuh `globals.css` tiga kali untuk memaksa kompilasi ulang, bukan diperkirakan.

@@ -1,18 +1,22 @@
 @import "tailwindcss";
 
 /* Token desain dari DESIGN.md. Semua warna, radius, dan jarak diambil dari sini,
-   tidak ada komponen yang memilih nilainya sendiri. */
+   tidak ada komponen yang memilih nilainya sendiri.
+
+   Tiga nilai di bawah berbeda sedikit dari hex di DESIGN.md: sage, muted, dan
+   tombol utama. Alasannya satu, hasil pengukuran kontras di browser, bukan
+   perkiraan. Rinciannya ada di DESIGN.md bagian 6. */
 @theme {
   --color-base: #fbf9f6;
   --color-ink: #2b2622;
-  --color-sage: #5c7a6b;
+  --color-sage: #5b796a;
   --color-terracotta: #b5643c;
   --color-marigold: #e0a62b;
   --color-netral: #f1ede8;
   --color-bata: #a33b2a;
 
   --color-line: color-mix(in srgb, #2b2622 14%, #fbf9f6);
-  --color-muted: color-mix(in srgb, #2b2622 62%, #fbf9f6);
+  --color-muted: color-mix(in srgb, #2b2622 64%, #fbf9f6);
 
   --radius-kontrol: 4px;
   --radius-kartu: 8px;
@@ -236,7 +240,7 @@ a {
 }
 
 .tombol-utama {
-  background: var(--color-terracotta);
+  background: color-mix(in srgb, var(--color-terracotta) 93%, black);
   color: #fffdfb;
 }
 
@@ -443,9 +447,11 @@ textarea.isian {
   color: var(--color-muted);
 }
 
+/* Warna marigold di sini hanya garis dan isian tipis. Teksnya perlu jauh lebih
+   gelap supaya kontrasnya tidak bergantung pada warna accent yang terang itu. */
 .lencana-aksen {
   border-color: var(--color-marigold);
-  color: color-mix(in srgb, var(--color-marigold) 70%, black);
+  color: color-mix(in srgb, var(--color-marigold) 62%, black);
 }
 
 [data-theme="gelap"] .lencana-aksen {
@@ -885,13 +891,33 @@ textarea.isian {
   }
 }
 
-/* Tab modul di halaman Rencana. Bergulir mendatar, tanpa geser halaman. */
+/*
+ * Tab modul di halaman Rencana. Bergulir mendatar, tanpa geser halaman.
+ *
+ * Pada 390px enam tab tidak muat satu baris, jadi yang di luar layar diberi
+ * gradasi di tepi kanan supaya orang tahu masih ada tab lain. Tanpa gradasi
+ * itu, "Busana" hilang total dan tidak ada yang menyuruh menggulir.
+ */
 .tab {
   display: flex;
   gap: 8px;
   overflow-x: auto;
   padding-bottom: 8px;
   scrollbar-width: thin;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  mask-image: linear-gradient(
+    to right,
+    #000 calc(100% - 28px),
+    transparent 100%
+  );
+}
+
+/* Skipper untuk pengaman: kalau gradasi tidak didukung, sisa tab tetap kelihatan. */
+@supports not (mask-image: linear-gradient(#000, transparent)) {
+  .tab {
+    mask-image: none;
+  }
 }
 
 .tab a {
@@ -905,6 +931,7 @@ textarea.isian {
   font-size: var(--text-kecil);
   font-weight: 600;
   color: var(--color-muted);
+  scroll-snap-align: start;
 }
 
 .tab a[data-aktif="ya"] {

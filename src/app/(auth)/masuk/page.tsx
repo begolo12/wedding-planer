@@ -98,7 +98,10 @@ export default function HalamanMasuk() {
       </form>
 
       <p className="auth-kaki">
-        Belum punya akun? <Link href="/daftar">Daftar</Link>
+        Belum punya akun?{" "}
+        <Link className="tautan-kalimat" href="/daftar">
+          Daftar
+        </Link>
       </p>
     </>
   );

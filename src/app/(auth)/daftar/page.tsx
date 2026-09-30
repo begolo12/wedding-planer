@@ -123,7 +123,10 @@ export default function HalamanDaftar() {
       </form>
 
       <p className="auth-kaki">
-        Sudah punya akun? <Link href="/masuk">Masuk</Link>
+        Sudah punya akun?{" "}
+        <Link className="tautan-kalimat" href="/masuk">
+          Masuk
+        </Link>
       </p>
     </>
   );

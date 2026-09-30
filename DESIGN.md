@@ -1,4 +1,4 @@
-# DESIGN.md: Aisyah & Bagas Wedding Planner
+# DESIGN.md: Hari Besar Wedding Planner
 
 Status: draft v1.0. Produk ini belum punya pemilik brand identity yang disetujui, jadi dokumen ini adalah **usulan arah desain**, bukan keputusan final.
 
@@ -22,9 +22,7 @@ DESIGN.md ini ada, jadi dokumen ini bukan "draft tanpa arah". Keputusan di bawah
 
 ### Nama produk
 
-`Aisyah & Bagas` adalah nama pasangan contoh. Nama produk sebenarnya belum ditentukan dan perlu dikonfirmasi pemilik proyek.
-
-Selama development, teks UI memakai `Aisyah & Bagas`. Setelah ada keputusan, cukup ganti di satu file konfigurasi.
+`Hari Besar` adalah nama produk. Nama pasangan yang sebenar diambil dari akun pengguna, bukan ditulis di dokumen ini atau di kode.
 
 ### Suara (voice)
 
@@ -46,7 +44,7 @@ Batas aktif: 2 core + 1 accent, sesuai R-29. Netral tidak dihitung.
 |---|---|---|
 | Base / surface | `#FBF9F6` | Warna kertas, bukan putih murni. Pasangan yang sedang scroll budget di bawah matahari akan lelah dengan `#FFFFFF`. |
 | Ink (teks utama dan border) | `#2B2622` | Coklat-hitam, bukan `#000000`, supaya nyambung dengan nuansa undangan cetak. |
-| Core 1, Sage | `#5C7A6B` | Hijau yang sudah lazim dipakai sebagai warna dekorasi wedding di Indonesia. Dipakai di tombol selesai, checklist, dan status sukses tanpa berubah warna per konteks. |
+| Core 1, Sage | `#5B796A` | Hijau yang sudah lazim dipakai sebagai warna dekorasi wedding di Indonesia. Dipakai di tombol selesai, checklist, dan status sukses tanpa berubah warna per konteks. Nilainya satu persen lebih gelap dari rancangan awal supaya teksnya mencapai kontras `4.5:1`. |
 | Core 2, Terracotta | `#B5643C` | Dipakai hanya di CTA utama dan di angka budget yang perlu perhatian. Bukan warna status. |
 | Accent, Marigold | `#E0A62B` | Sekali per layar, untuk hal yang benar-benar perlu diklik: tanggal hari-H, atau satu task yang jatuh tempo 3 hari lagi. Tidak pernah lebih dari satu per view. |
 | Netral | Ink pada 8% (`#F1EDE8`) | Latar baris tabel dan area input. |
@@ -61,7 +59,7 @@ Batas aktif: 2 core + 1 accent, sesuai R-29. Netral tidak dihitung.
 
 Mode gelap adalah feature, bukan jadual. Alasannya: banyak pasangan yang sudah punya anak kecil akan menyiapkan wedding sebagian besar di malam hari, saat anak sudah tidur.
 
-Toggle: tombol di header, state disimpan di `localStorage`, dengan key `aisyah-theme`. Saat app dibuka lagi, state dibaca sebelum render supaya tidak ada kilatan warna.
+Toggle: tombol di header, state disimpan di `localStorage`, dengan key `haribesar-tema`. Saat app dibuka lagi, state dibaca sebelum render supaya tidak ada kilatan warna.
 
 ---
 
@@ -142,10 +140,25 @@ Offline adalah state keempat karena aplikasi ini PWA dan dipakai di venue tanpa 
 Detail lengkap di `docs/08-NFR.md`. Yang mengikat ke UI:
 
 - Semua kontrol interaktif minimal `44 x 44px`. Ini wajib karena pasangan yang memakai aplikasi ini sering sambil menggendong bayi.
-- Kontras teks normal minimal `4.5:1`, teks besar minimal `3:1`. Warna sage `#5C7A6B` di atas base `#FBF9F6` sudah dihitung memenuhi standar ini.
+- Kontras teks normal minimal `4.5:1`, teks besar minimal `3:1`.
 - Setiap fokus keyboard punya indikator yang terlihat, `2px` outline marigold dengan `2px` offset.
 - Dialog bisa ditutup dengan `Escape`. Dropdown bisa ditutup dengan `Escape` dan klik di luar.
 - Tidak ada `outline: none` tanpa pengganti.
+
+### Koreksi kontras hasil pengukuran
+
+Tiga hex di bagian 3 diganti sedikit setelahwarnanya diukur di browser, bukan dikira-kira. Semua pengukuran dilakukan pada teks ukuran 14 sampai 16px, jadi yang berlaku ambang `4.5:1`, bukan `3:1`.
+
+| Warna | Hex di dokumen | Hex dipakai | Rasio sebelum | Rasio sesudah |
+|---|---|---|---|---|
+| Sage | `#5C7A6B` | `#5B796A` | 4,489 | 4,565 |
+| Teks muted | tinta 62% | tinta 64% | 4,282 | 4,569 |
+| Tombol utama | terracotta `#B5643C` | terracotta 93% + hitam | 4,327 | 4,555 |
+| Teks lencana aksen | marigold 70% + hitam | marigold 62% + hitam | 4,037 | 4,563 |
+
+Alasan setiap perubahan: nilai di dokumen terlihat benar secara mata, tapi tiga dari empat gagal `4.5:1` kalau dihitung. Selisihnya kecil, satu sampai tujuh persen, jadi identitas warna tidak berubah, hanya kebesarannya. Warna accent marigold sendiri tidak diubah karena dipakai sebagai garis dan isian tipis, bukan teks.
+
+Deskripsi versi ini berlaku untuk mode terang. Mode gelap punya palet pasangannya sendiri dan sudah diukur terpisah, hasilnya nol kegagalan.
 
 ---
 
