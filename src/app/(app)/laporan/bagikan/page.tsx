@@ -183,15 +183,7 @@ export default function HalamanBagikanLaporan() {
   return (
     <div>
       <div style={{ marginBottom: 16 }}>
-        <Link
-          href="/laporan"
-          style={{
-            color: "var(--color-primary)",
-            textDecoration: "underline",
-            fontSize: "var(--text-kecil)",
-            fontWeight: 500,
-          }}
-        >
+        <Link className="tautan-kalimat" href="/laporan">
           ← Kembali ke laporan
         </Link>
       </div>
@@ -322,7 +314,7 @@ export default function HalamanBagikanLaporan() {
                 <button
                   type="button"
                   className="tombol tombol-sekunder"
-                  style={{ minHeight: 32, padding: "0 10px", fontSize: "var(--text-kecil)" }}
+                  style={{ minHeight: 44, padding: "0 10px", fontSize: "var(--text-kecil)" }}
                   onClick={() => setLembarBuka(true)}
                 >
                   + Buat tautan baru
@@ -395,7 +387,6 @@ export default function HalamanBagikanLaporan() {
                       type="button"
                       className="tombol tombol-sekunder"
                       style={{
-                        minHeight: 28,
                         padding: "0 8px",
                         fontSize: "var(--text-kecil)",
                         color: "var(--color-bata)",

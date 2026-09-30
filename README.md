@@ -37,6 +37,7 @@ Kode aplikasi berada di direktori `src/`, dibangun dengan Next.js 15, PostgreSQL
 | [`docs/15-Glosarium.md`](docs/15-Glosarium.md) | Kamus istilah. Satu kata punya satu arti di seluruh dokumen |
 | [`docs/16-Laporan-dan-Bagikan.md`](docs/16-Laporan-dan-Bagikan.md) | Aturan laporan keadaan, bagikan ke WhatsApp, dan cetak PDF |
 | [`docs/17-Rencana-Build.md`](docs/17-Rencana-Build.md) | Rencana teknis dan langkah implementasi kode aplikasi |
+| [`docs/18-Rencana-Produksi-dan-Pemakaian-Harian.md`](docs/18-Rencana-Produksi-dan-Pemakaian-Harian.md) | Sisa pekerjaan supaya aplikasi siap dipakai setiap hari, diurutkan dari P0 sampai P3 |
 | [`AGENTS.md`](AGENTS.md) | Aturan kerja untuk AI yang menulis di repo ini, termasuk daftar periksa sebelum kirim |
 | [`CHANGELOG.md`](CHANGELOG.md) | Catatan setiap perubahan, dari sudut pandang pembaca |
 

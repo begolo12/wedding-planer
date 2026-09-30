@@ -89,7 +89,7 @@ export default function HalamanLaporan() {
             <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Ringkasan Anggaran & Keuangan</h2>
             <Link
               href="/anggaran"
-              style={{ fontSize: "var(--text-kecil)", color: "var(--color-primary)", textDecoration: "underline" }}
+              className="tautan-kalimat"
             >
               Buka rincian anggaran →
             </Link>
@@ -193,7 +193,7 @@ export default function HalamanLaporan() {
               <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Kesiapan Tugas</h2>
               <Link
                 href="/rencana"
-                style={{ fontSize: "var(--text-kecil)", color: "var(--color-primary)", textDecoration: "underline" }}
+                className="tautan-kalimat"
               >
                 Ke daftar tugas →
               </Link>
@@ -254,7 +254,7 @@ export default function HalamanLaporan() {
               <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Tamu & Undangan</h2>
               <Link
                 href="/tamu"
-                style={{ fontSize: "var(--text-kecil)", color: "var(--color-primary)", textDecoration: "underline" }}
+                className="tautan-kalimat"
               >
                 Ke daftar tamu →
               </Link>
@@ -319,7 +319,7 @@ export default function HalamanLaporan() {
               <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Rundown Acara Hari-H</h2>
               <Link
                 href="/hari-h"
-                style={{ fontSize: "var(--text-kecil)", color: "var(--color-primary)", textDecoration: "underline" }}
+                className="tautan-kalimat"
               >
                 Ke jadwal hari-H →
               </Link>
@@ -373,7 +373,7 @@ export default function HalamanLaporan() {
               <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Vendor & Seragam</h2>
               <Link
                 href="/rencana/vendor"
-                style={{ fontSize: "var(--text-kecil)", color: "var(--color-primary)", textDecoration: "underline" }}
+                className="tautan-kalimat"
               >
                 Ke daftar vendor →
               </Link>

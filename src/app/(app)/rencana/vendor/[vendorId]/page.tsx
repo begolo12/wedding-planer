@@ -266,17 +266,7 @@ export default function HalamanDetailVendor() {
   return (
     <div>
       <div style={{ marginBottom: 12 }}>
-        <Link
-          href="/rencana/vendor"
-          style={{
-            fontSize: "var(--text-kecil)",
-            color: "var(--color-primary)",
-            textDecoration: "none",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 4,
-          }}
-        >
+        <Link className="tautan-kalimat" href="/rencana/vendor">
           ← Kembali ke daftar vendor
         </Link>
       </div>
@@ -435,7 +425,7 @@ export default function HalamanDetailVendor() {
             <button
               type="button"
               className="tombol tombol-sekunder"
-              style={{ minHeight: 36, padding: "0 12px", fontSize: "var(--text-kecil)" }}
+              style={{ minHeight: 44, padding: "0 12px", fontSize: "var(--text-kecil)" }}
               onClick={() => {
                 setBayarJumlah("");
                 setBayarTanggal(new Date().toISOString().slice(0, 10));
@@ -511,7 +501,6 @@ export default function HalamanDetailVendor() {
                     type="button"
                     className="tombol tombol-sekunder"
                     style={{
-                      minHeight: 32,
                       padding: "0 8px",
                       fontSize: "var(--text-kecil)",
                       color: "var(--color-bata)",

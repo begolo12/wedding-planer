@@ -283,7 +283,6 @@ export default function HalamanHariH() {
               type="button"
               className="tombol"
               style={{
-                minHeight: 32,
                 padding: "0 10px",
                 fontSize: "var(--text-kecil)",
                 background: ukuranFont === "kecil" ? "var(--color-primary)" : "var(--color-kertas)",
@@ -297,7 +296,6 @@ export default function HalamanHariH() {
               type="button"
               className="tombol"
               style={{
-                minHeight: 32,
                 padding: "0 10px",
                 fontSize: "var(--text-dasar)",
                 background: ukuranFont === "sedang" ? "var(--color-primary)" : "var(--color-kertas)",
@@ -311,7 +309,6 @@ export default function HalamanHariH() {
               type="button"
               className="tombol"
               style={{
-                minHeight: 32,
                 padding: "0 10px",
                 fontSize: "var(--text-h3)",
                 background: ukuranFont === "besar" ? "var(--color-primary)" : "var(--color-kertas)",
@@ -435,7 +432,7 @@ export default function HalamanHariH() {
                 <button
                   type="button"
                   className="tombol tombol-sekunder"
-                  style={{ minHeight: 34, padding: "0 10px", fontSize: "var(--text-kecil)" }}
+                  style={{ minHeight: 44, padding: "0 10px", fontSize: "var(--text-kecil)" }}
                   onClick={() => bukaUbah(item)}
                 >
                   Ubah
@@ -444,7 +441,6 @@ export default function HalamanHariH() {
                   type="button"
                   className="tombol tombol-sekunder"
                   style={{
-                    minHeight: 34,
                     padding: "0 10px",
                     fontSize: "var(--text-kecil)",
                     color: "var(--color-bata)",

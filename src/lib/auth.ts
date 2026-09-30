@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/db";
 import { accounts, sessions, users, verifications } from "@/db/schema";
+import { NAMA_PRODUK } from "@/lib/konstanta";
 
 const TIGA_PULUH_HARI = 60 * 60 * 24 * 30;
 
@@ -10,7 +11,7 @@ const TIGA_PULUH_HARI = 60 * 60 * 24 * 30;
 const googleAda = Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
 
 export const auth = betterAuth({
-  appName: "Aisyah & Bagas",
+  appName: NAMA_PRODUK,
   baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
   secret: process.env.BETTER_AUTH_SECRET,
   database: drizzleAdapter(db, {
@@ -41,6 +42,12 @@ export const auth = betterAuth({
     cookieCache: { enabled: true, maxAge: 5 * 60 },
   },
   advanced: {
+    // Better Auth membuat id sendiri dengan 32 huruf. Kolom id di sini bertipe
+    // uuid, jadi insertions gagal dan tidak ada satu pun yang bisa mendaftar.
+    // "uuid" memaksa pustaka itu memakai crypto.randomUUID().
+    database: {
+      generateId: "uuid",
+    },
     useSecureCookies: process.env.NODE_ENV === "production",
     defaultCookieAttributes: {
       httpOnly: true,

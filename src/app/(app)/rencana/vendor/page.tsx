@@ -313,13 +313,8 @@ export default function HalamanVendor() {
                 <div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
                     <div>
-                      <h3 style={{ margin: 0, fontSize: "var(--text-h3)" }}>
-                        <Link
-                          href={`/rencana/vendor/${v.id}`}
-                          style={{ color: "inherit", textDecoration: "none" }}
-                        >
-                          {v.name}
-                        </Link>
+                      <h3 className="judul-tautan" style={{ margin: 0, fontSize: "var(--text-h3)" }}>
+                        <Link href={`/rencana/vendor/${v.id}`}>{v.name}</Link>
                       </h3>
                       <span
                         style={{
@@ -353,10 +348,10 @@ export default function HalamanVendor() {
                       {v.phone ? (
                         <div style={{ marginTop: 2 }}>
                           <a
+                            className="tautan-kalimat"
                             href={`https://wa.me/${v.phone.replace(/[^0-9]/g, "")}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            style={{ color: "var(--color-primary)" }}
                           >
                             WhatsApp: {v.phone}
                           </a>
@@ -415,7 +410,7 @@ export default function HalamanVendor() {
                   <Link
                     href={`/rencana/vendor/${v.id}`}
                     className="tombol tombol-sekunder"
-                    style={{ minHeight: 36, padding: "0 12px", fontSize: "var(--text-kecil)" }}
+                    style={{ minHeight: 44, padding: "0 12px", fontSize: "var(--text-kecil)" }}
                   >
                     Detail & Pembayaran
                   </Link>

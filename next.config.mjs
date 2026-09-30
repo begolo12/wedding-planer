@@ -25,6 +25,19 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  experimental: {
+    // Yang memangkas memori dev server. Webpack menahan dua salinan setiap
+    // string modul dan cache buffer ganda selama kompilasi. Setelah modul
+    // terbaca, salinan itu tidak pernah dipakai lagi tapi tetap tertahan sampai
+    // proses selesai. Opsi ini membuang keduanya.
+    webpackMemoryOptimizations: true,
+    // Opsi ini tidak kena dev server. `next dev` sudah dikunci ke satu worker
+    // di dalam Next.js, berapa pun jumlah intinya. Yang memakai `cpus` adalah
+    // `next build`, saat halaman statis dan data halaman dikumpulkan dengan
+    // beberapa worker sekaligus. Repo ini punya 25 halaman statis, jadi dua
+    // worker sudah cukup dan build tidak meledak.
+    cpus: 2,
+  },
 };
 
 export default nextConfig;

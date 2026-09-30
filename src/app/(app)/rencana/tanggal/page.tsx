@@ -277,7 +277,7 @@ export default function HalamanTanggal() {
                     <button
                       type="button"
                       className="tombol tombol-sekunder"
-                      style={{ minHeight: 36, padding: "0 12px", fontSize: "var(--text-kecil)" }}
+                      style={{ minHeight: 44, padding: "0 12px", fontSize: "var(--text-kecil)" }}
                       onClick={() => bukaUbah(m)}
                     >
                       Ubah
@@ -286,7 +286,6 @@ export default function HalamanTanggal() {
                       type="button"
                       className="tombol tombol-sekunder"
                       style={{
-                        minHeight: 36,
                         padding: "0 12px",
                         fontSize: "var(--text-kecil)",
                         color: "var(--color-bata)",

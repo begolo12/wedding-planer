@@ -113,29 +113,29 @@ export default function HalamanBeranda() {
       ) : null}
 
       <div className="rekap" style={{ marginBottom: 24 }}>
-        <div className="kartu rekap-butir">
-          <span className="rekap-angka">
+        <div className="kartu rekap-item">
+          <span className="rekap-nilai">
             {jumlahTugas.selesai}/{jumlahTugas.total}
           </span>
           <span className="rekap-label">Tugas selesai</span>
         </div>
-        <div className="kartu rekap-butir">
+        <div className="kartu rekap-item">
           <span
-            className="rekap-angka"
+            className="rekap-nilai"
             style={{ color: jumlahTugas.lewat > 0 ? "var(--color-bata)" : undefined }}
           >
             {jumlahTugas.lewat}
           </span>
           <span className="rekap-label">Tugas lewat tenggat</span>
         </div>
-        <div className="kartu rekap-butir">
-          <span className="rekap-angka">
+        <div className="kartu rekap-item">
+          <span className="rekap-nilai">
             <Rupiah nilai={uang.remaining} />
           </span>
           <span className="rekap-label">Sisa anggaran</span>
         </div>
-        <div className="kartu rekap-butir">
-          <span className="rekap-angka">{jumlahVendor}</span>
+        <div className="kartu rekap-item">
+          <span className="rekap-nilai">{jumlahVendor}</span>
           <span className="rekap-label">Vendor terdaftar</span>
         </div>
       </div>
@@ -179,10 +179,7 @@ export default function HalamanBeranda() {
               }}
             >
               <h2 style={{ margin: 0, fontSize: "var(--text-h3)" }}>Tugas terdekat</h2>
-              <Link
-                href="/rencana"
-                style={{ fontSize: "var(--text-kecil)", color: "var(--color-primary)" }}
-              >
+              <Link className="tautan-kalimat" href="/rencana">
                 Buka semua
               </Link>
             </div>

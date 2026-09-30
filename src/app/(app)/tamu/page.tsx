@@ -421,7 +421,7 @@ export default function HalamanTamu() {
                         href={`https://wa.me/${t.phone.replace(/\D/g, "")}`}
                         target="_blank"
                         rel="noreferrer"
-                        style={{ color: "var(--color-primary)", textDecoration: "underline" }}
+                        className="tautan-kalimat"
                       >
                         WA: {t.phone}
                       </a>
@@ -436,7 +436,6 @@ export default function HalamanTamu() {
                     type="button"
                     className="tombol tombol-sekunder"
                     style={{
-                      minHeight: 34,
                       padding: "0 10px",
                       fontSize: "var(--text-kecil)",
                       background: sudahDikirim ? "var(--color-netral)" : "var(--color-kertas)",
@@ -486,7 +485,7 @@ export default function HalamanTamu() {
                   <button
                     type="button"
                     className="tombol tombol-sekunder"
-                    style={{ minHeight: 34, padding: "0 10px", fontSize: "var(--text-kecil)" }}
+                    style={{ minHeight: 44, padding: "0 10px", fontSize: "var(--text-kecil)" }}
                     onClick={() => bukaUbah(t)}
                   >
                     Ubah
@@ -495,7 +494,6 @@ export default function HalamanTamu() {
                     type="button"
                     className="tombol tombol-sekunder"
                     style={{
-                      minHeight: 34,
                       padding: "0 10px",
                       fontSize: "var(--text-kecil)",
                       color: "var(--color-bata)",

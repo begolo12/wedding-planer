@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 
-const NAMA_EVENT = "aisyah-toast";
+const NAMA_EVENT = "haribesar-toast";
 
 /**
  * Toast tanpa pustaka. Dipanggil dari mana saja, termasuk dari kode non-React,

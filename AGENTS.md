@@ -223,10 +223,12 @@ wedding-planer/
 │   ├── 12d-Wireframe-Hari-H.md
 │   ├── 12e-Wireframe-Laporan.md
 │   ├── 13-Rencana-Kerja.md
+│   ├── 17-Rencana-Build.md
+│   ├── 18-Rencana-Produksi-dan-Pemakaian-Harian.md
 │   ├── 14-Naskah-Teks.md
 │   ├── 15-Glosarium.md
 │   └── 16-Laporan-dan-Bagikan.md
-└── src/                 belum ada, akan dibuat di Fase 0
+└── src/                 kode aplikasi: lib, db, components, app
 ```
 
 ---
@@ -245,6 +247,7 @@ wedding-planer/
 | Tahu teks apa yang muncul di layar | [`docs/14-Naskah-Teks.md`](docs/14-Naskah-Teks.md) |
 | Tahu arti satu istilah | [`docs/15-Glosarium.md`](docs/15-Glosarium.md) |
 | Tahu apa yang dikerjakan berikutnya | [`docs/10-Epik-dan-Story.md`](docs/10-Epik-dan-Story.md) |
+| Tahu apa yang kurang supaya siap produksi | [`docs/18-Rencana-Produksi-dan-Pemakaian-Harian.md`](docs/18-Rencana-Produksi-dan-Pemakaian-Harian.md) |
 | Tahu bentuk kasar tiap layar | [`docs/12-Wireframe.md`](docs/12-Wireframe.md) |
 | Tahu aturan laporan dan PDF | [`docs/16-Laporan-dan-Bagikan.md`](docs/16-Laporan-dan-Bagikan.md) |
 | Tahu urutan dari yang paling penting | [`docs/13-Rencana-Kerja.md`](docs/13-Rencana-Kerja.md) |

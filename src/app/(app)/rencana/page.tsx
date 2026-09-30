@@ -416,7 +416,7 @@ export default function HalamanTugas() {
                         <button
                           type="button"
                           className="tombol tombol-sekunder"
-                          style={{ minHeight: 36, padding: "0 10px", fontSize: "var(--text-kecil)" }}
+                          style={{ minHeight: 44, padding: "0 10px", fontSize: "var(--text-kecil)" }}
                           onClick={() => bukaUbah(t)}
                         >
                           Ubah
@@ -425,7 +425,6 @@ export default function HalamanTugas() {
                           type="button"
                           className="tombol tombol-sekunder"
                           style={{
-                            minHeight: 36,
                             padding: "0 10px",
                             fontSize: "var(--text-kecil)",
                             color: "var(--color-bata)",

@@ -77,7 +77,7 @@ export function LuringBanner() {
       {!luring && antrean > 0 && !mengirim ? (
         <button
           type="button"
-          className="tombol-halus"
+          className="tombol tombol-halus"
           onClick={async () => {
             setMengirim(true);
             const hasil = await kirimAntrean();

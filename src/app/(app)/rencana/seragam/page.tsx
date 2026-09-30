@@ -425,7 +425,7 @@ export default function HalamanSeragam() {
                     <button
                       type="button"
                       className="tombol tombol-sekunder"
-                      style={{ minHeight: 34, padding: "0 10px", fontSize: "var(--text-kecil)" }}
+                      style={{ minHeight: 44, padding: "0 10px", fontSize: "var(--text-kecil)" }}
                       onClick={() => bukaUbah(o)}
                     >
                       Ubah
@@ -434,7 +434,6 @@ export default function HalamanSeragam() {
                       type="button"
                       className="tombol tombol-sekunder"
                       style={{
-                        minHeight: 34,
                         padding: "0 10px",
                         fontSize: "var(--text-kecil)",
                         color: "var(--color-bata)",

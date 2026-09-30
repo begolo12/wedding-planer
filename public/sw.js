@@ -1,5 +1,5 @@
 /*
- * Service worker untuk Aisyah & Bagas.
+ * Service worker untuk Hari Besar.
  *
  * Ditulis tangan, bukan pakai Workbox. Alasannya bukan soal ukuran berkas,
  * tapi soal berapa banyak yang perlu dipahami orang berikutnya. Strategi di
@@ -12,10 +12,10 @@
  * daripada data yang tidak ada.
  */
 
-const VERSI = "v1";
-const CACHE_HALAMAN = `aisyah-halaman-${VERSI}`;
-const CACHE_ASET = `aisyah-aset-${VERSI}`;
-const CACHE_FONT = `aisyah-font-${VERSI}`;
+const VERSI = "v2";
+const CACHE_HALAMAN = `haribesar-halaman-${VERSI}`;
+const CACHE_ASET = `haribesar-aset-${VERSI}`;
+const CACHE_FONT = `haribesar-font-${VERSI}`;
 const SEMUA_CACHE = [CACHE_HALAMAN, CACHE_ASET, CACHE_FONT];
 
 const HALAMAN_LURING = "/luring";

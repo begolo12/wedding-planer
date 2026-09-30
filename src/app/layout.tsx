@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
 import { Fraunces, Public_Sans } from "next/font/google";
+import { NAMA_PRODUK, NAMA_PRODUK_PENDEK } from "@/lib/konstanta";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -15,16 +16,21 @@ const publicSans = Public_Sans({
   variable: "--font-public-sans",
 });
 
+/**
+ * Nama produk dibaca dari satu konstanta supaya tidak ada dua tempat yang
+ * menulis nama yang sama. Nama plan sebenarnya tidak dipakai di sini,
+ * karena metadata harus bisa dirender tanpa tahu orang sudah masuk atau belum.
+ */
 export const metadata = {
   title: {
-    default: "Beranda - Aisyah & Bagas",
-    template: "%s - Aisyah & Bagas",
+    default: `Beranda - ${NAMA_PRODUK}`,
+    template: `%s - ${NAMA_PRODUK}`,
   },
   description: "Perencanaan pernikahan yang tetap berguna saat sinyal hilang.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
-    title: "Aisyah",
+    title: NAMA_PRODUK_PENDEK,
     statusBarStyle: "default" as const,
   },
 };
@@ -45,8 +51,13 @@ export const viewport = {
  *
  * Tanpa pilihan tersimpan, tidak ada atribut yang dipasang: CSS
  * `prefers-color-scheme` yang menentukan, itu arti "Mengikuti Sistem".
+ *
+ * Kunci lama `aisyah-theme` masih dibaca sekali lalu dihapus. Kalau tidak,
+ * orang yang sudah pernah memilih tema gelap akan balik ke terang begitu
+ * versi baru dipasang. Memindahkan pilihan orang tidak boleh jadi alasan
+ * dia harus mengatur ulang sendiri.
  */
-const skripTema = `(function(){try{var t=localStorage.getItem("aisyah-theme");if(t==="gelap"||t==="terang"){document.documentElement.dataset.theme=t;}}catch(e){}})();`;
+const skripTema = `(function(){try{var b=localStorage,l="haribesar-tema",t=b.getItem(l);if(t!=="gelap"&&t!=="terang"){var o=b.getItem("aisyah-theme");if(o==="gelap"||o==="terang"){b.setItem(l,o);b.removeItem("aisyah-theme");t=o;}}if(t==="gelap"||t==="terang"){document.documentElement.dataset.theme=t;}}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

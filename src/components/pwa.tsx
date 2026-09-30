@@ -43,7 +43,7 @@ export function DaftarServiceWorker() {
  * menolak tidak perlu ditanya dua kali.
  */
 
-const KUNCI_TOLAK = "aisyah-install-ditolak";
+const KUNCI_TOLAK = "haribesar-install-ditolak";
 
 type PeristiwaPasang = Event & { prompt: () => Promise<void> };
 
@@ -91,13 +91,18 @@ export function InstallPrompt() {
         {ios ? (
           <>
             Biar bisa dibuka tanpa internet: ketuk Bagikan, lalu pilih Tambah ke
-            Layar Utama. <Link href="/aplikasi">Cara memasang</Link>
+            Layar Utama.{" "}
+            <Link className="tautan-kalimat" href="/aplikasi">
+              Cara memasang
+            </Link>
           </>
         ) : (
           <>
             Pasang aplikasinya biar rundown, tamu, dan catatan pembayaran tetap
             terbuka saat sinyal di venue hilang.{" "}
-            <Link href="/aplikasi">Selengkapnya</Link>
+            <Link className="tautan-kalimat" href="/aplikasi">
+              Selengkapnya
+            </Link>
           </>
         )}
       </span>
@@ -115,7 +120,7 @@ export function InstallPrompt() {
         </button>
       ) : null}
 
-      <button type="button" className="tombol-halus" onClick={tolak}>
+      <button type="button" className="tombol tombol-halus" onClick={tolak}>
         Nanti saja
       </button>
     </div>

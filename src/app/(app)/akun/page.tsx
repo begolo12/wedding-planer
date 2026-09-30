@@ -14,7 +14,7 @@ type PilihanTema = "terang" | "gelap" | "sistem";
 // Sama dengan kunci di src/app/layout.tsx dan src/components/theme-toggle.tsx.
 // Dulu layar ini memakai kunci lain, jadi pilihan gelap hilang saat halaman
 // dimuat ulang.
-const KUNCI_TEMA = "aisyah-theme";
+const KUNCI_TEMA = "haribesar-tema";
 
 /**
  * Layar Pengaturan Akun, Pilihan Rencana, Tema, dan Cadangan Data.
@@ -252,7 +252,7 @@ export default function HalamanAkun() {
                       <button
                         type="button"
                         className="tombol tombol-sekunder"
-                        style={{ minHeight: 34, padding: "0 10px", fontSize: "var(--text-kecil)" }}
+                        style={{ minHeight: 44, padding: "0 10px", fontSize: "var(--text-kecil)" }}
                         onClick={() => {
                           pilihPlan(p.id);
                           toast(`Beralih ke rencana bersama ${p.partnerName || "Pasangan"}`);
@@ -263,7 +263,7 @@ export default function HalamanAkun() {
                     ) : null}
                     <Link
                       className="tombol tombol-sekunder"
-                      style={{ minHeight: 34, padding: "0 10px", fontSize: "var(--text-kecil)" }}
+                      style={{ minHeight: 44, padding: "0 10px", fontSize: "var(--text-kecil)" }}
                       href="/rencana/plan"
                     >
                       Kelola rincian →
@@ -343,7 +343,7 @@ export default function HalamanAkun() {
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: "1px solid var(--color-garis)" }}>
               <span>Aplikasi Web Progresif (PWA):</span>
-              <Link href="/aplikasi" style={{ color: "var(--color-terracotta)" }}>
+              <Link className="tautan-kalimat" href="/aplikasi">
                 Cara memasang
               </Link>
             </div>

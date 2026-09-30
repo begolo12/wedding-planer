@@ -166,7 +166,22 @@ export const LABEL_STATUS_PLAN: Record<StatusPlan, string> = {
 };
 
 export const ZONA = "Asia/Jakarta";
-export const NAMA_PRODUK = "Aisyah & Bagas";
+
+/**
+ * Nama produk. Ini satu-satunya tempat nama ditulis.
+ *
+ * Semula isinya nama pasangan contoh. Sekarang sudah netral supaya cocok
+ * untuk semua orang, bukan cuma satu pasangan. Semua yang menampilkan nama
+ * produk (judul halaman, manifest, nama sesi) harus baca dari sini, bukan
+ * menulis ulang. Kalau nama diganti lagi, cuma baris ini yang berubah.
+ *
+ * Batas `short_name` di manifest adalah 12 karakter, jadi jangan lewat.
+ */
+export const NAMA_PRODUK = "Hari Besar";
+
+/** Nama pendek untuk layar utama HP dan nama tab browser. 10 karakter. */
+export const NAMA_PRODUK_PENDEK = "Hari Besar";
+
 export const BATAS_TAUTAN = 5;
 export const BATAS_TEKS_WA = 800;
 export const BATAS_PESAN_TAMBAHAN = 400;

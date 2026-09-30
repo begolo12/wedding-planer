@@ -293,7 +293,7 @@ export default function HalamanInfo() {
                   <button
                     type="button"
                     className="tombol tombol-sekunder"
-                    style={{ minHeight: 34, padding: "0 10px", fontSize: "var(--text-kecil)" }}
+                    style={{ minHeight: 44, padding: "0 10px", fontSize: "var(--text-kecil)" }}
                     onClick={() => bagikanWhatsApp(a)}
                   >
                     Kirim WA
@@ -302,7 +302,7 @@ export default function HalamanInfo() {
                     <button
                       type="button"
                       className="tombol tombol-sekunder"
-                      style={{ minHeight: 34, padding: "0 10px", fontSize: "var(--text-kecil)" }}
+                      style={{ minHeight: 44, padding: "0 10px", fontSize: "var(--text-kecil)" }}
                       onClick={() => salinTautan(a.shareToken!)}
                     >
                       Salin tautan
@@ -311,7 +311,7 @@ export default function HalamanInfo() {
                   <button
                     type="button"
                     className="tombol tombol-sekunder"
-                    style={{ minHeight: 34, padding: "0 10px", fontSize: "var(--text-kecil)" }}
+                    style={{ minHeight: 44, padding: "0 10px", fontSize: "var(--text-kecil)" }}
                     onClick={() => bukaUbah(a)}
                   >
                     Ubah
@@ -320,7 +320,6 @@ export default function HalamanInfo() {
                     type="button"
                     className="tombol tombol-sekunder"
                     style={{
-                      minHeight: 34,
                       padding: "0 10px",
                       fontSize: "var(--text-kecil)",
                       color: "var(--color-bata)",

@@ -113,7 +113,7 @@ export default function HalamanBagikanPublik({
           <button
             type="button"
             className="tombol tombol-sekunder"
-            style={{ minHeight: 28, padding: "0 8px", fontSize: "var(--text-kecil)" }}
+            style={{ minHeight: 44, padding: "0 8px", fontSize: "var(--text-kecil)" }}
             onClick={() => window.print()}
           >
             Cetak
@@ -183,7 +183,6 @@ export default function HalamanBagikanPublik({
               type="button"
               className="tombol tombol-sekunder"
               style={{
-                minHeight: 28,
                 padding: "0 8px",
                 fontSize: "11px",
                 fontWeight: ukuranFont === "normal" ? 700 : 400,
@@ -197,7 +196,6 @@ export default function HalamanBagikanPublik({
               type="button"
               className="tombol tombol-sekunder"
               style={{
-                minHeight: 28,
                 padding: "0 8px",
                 fontSize: "13px",
                 fontWeight: ukuranFont === "besar" ? 700 : 400,
@@ -211,7 +209,6 @@ export default function HalamanBagikanPublik({
               type="button"
               className="tombol tombol-sekunder"
               style={{
-                minHeight: 28,
                 padding: "0 8px",
                 fontSize: "15px",
                 fontWeight: ukuranFont === "sangat-besar" ? 700 : 400,
@@ -226,7 +223,7 @@ export default function HalamanBagikanPublik({
           <button
             type="button"
             className="tombol tombol-sekunder"
-            style={{ minHeight: 28, padding: "0 10px", fontSize: "var(--text-kecil)" }}
+            style={{ minHeight: 44, padding: "0 10px", fontSize: "var(--text-kecil)" }}
             onClick={() => window.print()}
           >
             Cetak / PDF

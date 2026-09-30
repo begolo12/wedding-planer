@@ -175,7 +175,7 @@ export default function HalamanPlan() {
                 key={p.id}
                 type="button"
                 className={`tombol ${p.id === planId ? "tombol-utama" : "tombol-sekunder"}`}
-                style={{ fontSize: "var(--text-kecil)", minHeight: 36 }}
+                style={{ fontSize: "var(--text-kecil)", minHeight: 44 }}
                 onClick={() => pilihPlan(p.id)}
               >
                 {p.partnerName} {p.weddingDate ? `(${p.weddingDate})` : ""}

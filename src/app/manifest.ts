@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { NAMA_PRODUK, NAMA_PRODUK_PENDEK } from "@/lib/konstanta";
 
 /**
  * Manifest PWA.
@@ -7,13 +8,14 @@ import type { MetadataRoute } from "next";
  * di globals.css. Kalau beda, memasang aplikasi ke layar utama akan
  * menampilkan kedipan warna lain sebelum halaman termuat.
  *
- * Nama di sini masih nama contoh. Nama plan yang sebenarnya diisi setelah
- * orangnya mendaftar, jadi nama produk tidak diambil dari data plan.
+ * Nama diambil dari `NAMA_PRODUK` supaya tidak ada dua tempat yang menulis
+ * nama produk. Nama plan yang sebenarnya diisi setelah orang mendaftar,
+ * jadi nama produk tidak diambil dari data plan.
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Aisyah & Bagas",
-    short_name: "Aisyah",
+    name: NAMA_PRODUK,
+    short_name: NAMA_PRODUK_PENDEK,
     description: "Catatan rencana pernikahan: tugas, anggaran, tamu, dan rundown hari-H.",
     start_url: "/",
     scope: "/",

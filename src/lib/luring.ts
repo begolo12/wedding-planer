@@ -12,7 +12,8 @@
  * yang berjalan diam-diam, karena itu memakai kuota data tanpa diminta.
  */
 
-const NAMA_DB = "aisyah-luring";
+const NAMA_DB = "haribesar-luring";
+const NAMA_DB_LAMA = "aisyah-luring";
 const VERSI_DB = 1;
 const NAMA_TABEL = "antrean";
 const BATAS_ANTREAN = 200;
@@ -27,7 +28,56 @@ export type ItemAntrean = {
   lastError: string | null;
 };
 
-function bukaDb(): Promise<IDBDatabase> {
+/**
+ * Pindahkan antrean dari nama database lama ke nama baru.
+ *
+ * Nama database ikut nama produk. Kalau cuma diganti, antrean milik orang
+ * yang sedang luring tertinggal di database lama dan tidak akan pernah dikirim
+ * lagi. Perubahan pembayaran yang tidak terkirim itu hilang tanpa jejak, dan
+ * catatan pembayaran yang hilang lebih buruk daripada aplikasi yang error.
+ *
+ * Yang lama dihapus setelah semua item tersalin, supaya kalau gagal di tengah
+ * jalan tidak ada salinan yang tidak lengkap dan antrean asli masih utuh.
+ */
+function pindahkanAntreanLama(): Promise<void> {
+  return new Promise((selesai) => {
+    let lama: IDBDatabase;
+    let permintaanLama: IDBOpenDBRequest;
+    try {
+      permintaanLama = indexedDB.open(NAMA_DB_LAMA, VERSI_DB);
+    } catch {
+      selesai();
+      return;
+    }
+    permintaanLama.onerror = () => selesai();
+    permintaanLama.onblocked = () => selesai();
+    permintaanLama.onsuccess = () => {
+      lama = permintaanLama.result;
+      if (!lama.objectStoreNames.contains(NAMA_TABEL)) {
+        lama.close();
+        selesai();
+        return;
+      }
+      const baca = lama.transaction(NAMA_TABEL, "readonly").objectStore(NAMA_TABEL);
+      const semua = baca.getAll();
+      semua.onsuccess = () => {
+        const isi = semua.result as ItemAntrean[];
+        lama.close();
+        if (isi.length === 0) {
+          selesai();
+          return;
+        }
+        salinLaluHapus(isi).then(selesai, () => selesai());
+      };
+      semua.onerror = () => {
+        lama.close();
+        selesai();
+      };
+    };
+  });
+}
+
+function salinLaluHapus(isi: ItemAntrean[]): Promise<void> {
   return new Promise((selesai, gagal) => {
     const permintaan = indexedDB.open(NAMA_DB, VERSI_DB);
     permintaan.onupgradeneeded = () => {
@@ -37,9 +87,46 @@ function bukaDb(): Promise<IDBDatabase> {
         toko.createIndex("createdAt", "createdAt");
       }
     };
-    permintaan.onsuccess = () => selesai(permintaan.result);
     permintaan.onerror = () => gagal(permintaan.error);
+    permintaan.onsuccess = () => {
+      const db = permintaan.result;
+      const trx = db.transaction(NAMA_TABEL, "readwrite");
+      const toko = trx.objectStore(NAMA_TABEL);
+      for (const item of isi) toko.put(item);
+      trx.oncomplete = () => {
+        db.close();
+        // Baru setelah selesai menulis, yang lama dihapus.
+        indexedDB.deleteDatabase(NAMA_DB_LAMA);
+        selesai();
+      };
+      trx.onerror = () => {
+        db.close();
+        gagal(trx.error);
+      };
+      trx.onabort = () => {
+        db.close();
+        gagal(trx.error);
+      };
+    };
   });
+}
+
+function bukaDb(): Promise<IDBDatabase> {
+  return pindahkanAntreanLama().then(
+    () =>
+      new Promise<IDBDatabase>((selesai, gagal) => {
+        const permintaan = indexedDB.open(NAMA_DB, VERSI_DB);
+        permintaan.onupgradeneeded = () => {
+          const db = permintaan.result;
+          if (!db.objectStoreNames.contains(NAMA_TABEL)) {
+            const toko = db.createObjectStore(NAMA_TABEL, { keyPath: "id" });
+            toko.createIndex("createdAt", "createdAt");
+          }
+        };
+        permintaan.onsuccess = () => selesai(permintaan.result);
+        permintaan.onerror = () => gagal(permintaan.error);
+      }),
+  );
 }
 
 function jalan<T>(

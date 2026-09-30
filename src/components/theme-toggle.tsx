@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-const KUNCI = "aisyah-theme";
+const KUNCI = "haribesar-tema";
 
 /**
  * Tema disimpan di localStorage, bukan di cookie, karena tidak ada server

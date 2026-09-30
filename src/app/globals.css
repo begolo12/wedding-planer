@@ -26,6 +26,34 @@
   --text-h2: clamp(1.375rem, 1.25rem + 0.625vw, 1.75rem);
   --text-h3: clamp(1.125rem, 1.0625rem + 0.3125vw, 1.375rem);
   --text-kecil: 0.875rem;
+
+  /* Skala jarak dari DESIGN.md. Dipakai supaya jarak antarbagian bisa
+    idirikan, bukan semua 16px. Jarak besar=Nanti, sedang=antarblok,
+     kecil=antarbaris di dalam satu blok. */
+  --jarak-1: 4px;
+  --jarak-2: 8px;
+  --jarak-3: 12px;
+  --jarak-4: 16px;
+  --jarak-5: 24px;
+  --jarak-6: 32px;
+  --jarak-7: 48px;
+
+  /* Token semantik yang dipakai halaman. Semula tidak ada di sini, jadi
+     103 pemakaian di 15 berkas jatuh ke warna bawaan browser tanpa peringatan.
+     Sekarang setiap nama punya satu arti dan satu warna dari palet.
+
+     primary    sage. Untuk yang sudah beres dan penekanan hal baik.
+                terracotta tidak dipakai karena DESIGN.md melarang warna CTA
+                untuk status, supaya orang tidak salah klik.
+     kertas     base. Latar, sama warnanya dengan halaman.
+     garis      line. Garis tipis pemisah.
+     tinta      ink. Warna tulisan utama.
+     text-dasar text-base. Ukuran tulisan isi. */
+  --color-primary: var(--color-sage);
+  --color-kertas: var(--color-base);
+  --color-garis: var(--color-line);
+  --color-tinta: var(--color-ink);
+  --text-dasar: var(--text-base);
 }
 
 /* Mode gelap adalah pasangan warna, bukan inversi. Nilainya dari DESIGN.md. */
@@ -39,6 +67,10 @@
   --color-bata: #d9776a;
   --color-line: color-mix(in srgb, #f5f1ec 16%, #1c1917);
   --color-muted: color-mix(in srgb, #f5f1ec 62%, #1c1917);
+  --color-primary: #8fb39c;
+  --color-kertas: #1c1917;
+  --color-garis: color-mix(in srgb, #f5f1ec 16%, #1c1917);
+  --color-tinta: #f5f1ec;
 }
 
 /* Pilihan "Mengikuti Sistem" di layar akun. Tanpa aturan ini tombolnya tidak
@@ -54,6 +86,10 @@
     --color-bata: #d9776a;
     --color-line: color-mix(in srgb, #f5f1ec 16%, #1c1917);
     --color-muted: color-mix(in srgb, #f5f1ec 62%, #1c1917);
+    --color-primary: #8fb39c;
+    --color-kertas: #1c1917;
+    --color-garis: color-mix(in srgb, #f5f1ec 16%, #1c1917);
+    --color-tinta: #f5f1ec;
   }
 }
 
@@ -246,6 +282,28 @@ a {
   color: var(--color-bata);
 }
 
+/*
+ * Tombol ringkas untuk di dalam baris: misalnya "Ubah" dan "Hapus" di satu
+ * baris tamu, atau pilihan status di baris vendor.
+ *
+ * Ramping berarti lebih sedikit padding dan tulisan lebih kecil, bukan lebih
+ * pendek. Tinggi dan lebar minimum tetap 44px karena target sentuh tidak
+ * bisa dikorbankan demi hemat ruang. Kalau baris jadi tidak muat, yang
+ * dipangkas jumlah tombolnya, bukan ukuran sentuhnya.
+ */
+.tombol-kecil {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 12px;
+  font-size: var(--text-kecil);
+}
+
+/* Baris yang padat tetap boleh rapat vertikal, tapi target sentuhnya
+   tidak boleh ikut rapat. */
+.baris-padat > * {
+  min-height: 44px;
+}
+
 .tombol-lebar {
   width: 100%;
 }
@@ -262,6 +320,30 @@ a {
 }
 
 .isian:focus-visible {
+  border-color: var(--color-marigold);
+  outline: 2px solid var(--color-marigold);
+  outline-offset: 0;
+}
+
+/*
+ * Select punya aturan dasar sendiri, bukan mengandalkan style inline di tiap
+ * tempat. Alasannya dua: tinggi minimal 44px berlaku otomatis tanpa perlu
+ * diingat tiap kali menambah pilihan baru, dan semua select di aplikasi ini
+ * punya bentuk yang sama.
+ */
+select {
+  min-height: 44px;
+  padding: 0 10px;
+  background: var(--color-base);
+  color: var(--color-ink);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-kontrol);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+select:focus-visible {
   border-color: var(--color-marigold);
   outline: 2px solid var(--color-marigold);
   outline-offset: 0;
@@ -393,18 +475,20 @@ textarea.isian {
   }
 }
 
-/* Bar tipis porsi anggaran. Bukan chart, hanya porsi terpakai. */
+/* Bar tipis porsi anggaran. Bukan chart, hanya porsi terpakai.
+   Ujung dibuat sedikit membulat (3px), bukan pil. DESIGN.md melarang pil,
+   dan pil tipis terlihat seperti komponen dari aplikasi lain. */
 .bar {
   height: 6px;
   background: var(--color-netral);
-  border-radius: 999px;
+  border-radius: 3px;
   overflow: hidden;
 }
 
 .bar-isi {
   height: 100%;
   background: var(--color-sage);
-  border-radius: 999px;
+  border-radius: 3px;
 }
 
 .bar-isi-lewat {
@@ -843,10 +927,61 @@ textarea.isian {
   min-width: 0;
 }
 
+/*
+ * Judul yang seluruhnya bisa ditekan, misalnya nama vendor di daftar.
+ * Tingginya 44px supaya jempol tidak harus tepat pada teks. Warna teks
+ * tetap diwarisi dari judulnya, jadi penanda status tidak ikut berubah.
+ */
+.judul-tautan {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.judul-tautan a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.judul-tautan a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/*
+ * Tautan di dalam kalimat. Karakter tetap seukuran teks biasa supaya tidak
+ * memutus baris, tapi kotak tekannya dibuat setinggi tombol: `inline-flex`
+ * dengan tinggi minimal 44px. Dipakai `inline-flex`, bukan `block`, supaya
+ * tautan ini masih mengalir di dalam kalimatnya.
+ */
+.tautan-kalimat {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/*
+ * Judul tugas yang bisa ditekan untuk membuka detailnya.
+ *
+ * Tingginya 44px, sama seperti tombol lain, karena ini target sentuh, bukan
+ * teks paragraf. Tulannya tetap sebesar biasa, hanya ruang tekannya yang
+ * dilebihkan. Kalau judulnya panjang dan jadi dua baris, tingginya menambah
+ * sendiri, tidak terpotong.
+ */
 .baris-judul {
-  display: block;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
   font-weight: 600;
   overflow-wrap: anywhere;
+  text-align: left;
 }
 
 .baris-meta {
@@ -920,7 +1055,16 @@ textarea.isian {
   font-variant-numeric: tabular-nums;
 }
 
-/* Baris ringkas untuk angka rekap. Dipakai Tamu dan Anggaran. */
+.mundur-label {
+  display: block;
+  font-size: var(--text-kecil);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+/* Baris ringkas untuk angka rekap. Dipakai di hampir semua layar. */
 .rekap {
   display: grid;
   gap: 12px;
@@ -933,11 +1077,11 @@ textarea.isian {
   }
 }
 
-.rekap-butir {
+.rekap-item {
   min-width: 0;
 }
 
-.rekap-angka {
+.rekap-nilai {
   display: block;
   font-family: var(--font-judul);
   font-size: var(--text-h2);

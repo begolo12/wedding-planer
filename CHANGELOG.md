@@ -1,4 +1,4 @@
-﻿# Changelog
+# Changelog
 
 Semua perubahan besar pada dokumen dan kode dicatat di sini.
 
@@ -26,6 +26,38 @@ Aturan singkat:
 | Satu baris per perubahan | Kalau butuh dua paragraf, itu dua perubahan |
 | Tulis alasan kalau tidak jelas | Pembaca versi berikutnya tidak perlu menebak |
 | Tambah entri baru di atas | Yang terbaru selalu di paling atas |
+
+---
+
+## [0.6.2] - 1 Oktober 2026
+
+Dev server dibatasi supaya pemakaian RAM-nya tidak jadi penyebab sesi tertutup sendiri. Angka di bawah diukur di mesin ini dengan memukul sepuluh route inti sebanyak tiga kali tiap route lalu menyentuh `globals.css` tiga kali untuk memaksa kompilasi ulang, bukan diperkirakan.
+
+#### Tambah
+
+- [`scripts/dev.mjs`](scripts/dev.mjs) menjalankan `next dev` lewat Node supaya batas heap bisa dipasang di Windows. Batas tidak bisa ditulis langsung di `package.json` karena sintaks `NODE_OPTIONS=... next dev` hanya jalan di shell POSIX, bukan di cmd.exe maupun PowerShell. Bisa ditimpa tanpa mengedit berkas: `BATCH_DEV_MB=1024 npm run dev`
+- `experimental.webpackMemoryOptimizations: true` di [`next.config.mjs`](next.config.mjs). Webpack menahan dua salinan setiap string modul dan cache buffer ganda selama kompilasi. Setelah modul terbaca, salinan itu tidak pernah dipakai lagi tapi tetap tertahan sampai proses selesai
+- `experimental.cpus: 2`. Opsi ini hanya kena `next build`, bukan dev server, karena `next dev` sudah dikunci ke satu worker di dalam Next.js. Dipakai dua worker karena repo ini punya 25 halaman statis dan jumlah worker yang terlalu banyak adalah salah satu sumber borosnya
+
+#### Perbaiki
+
+- Dev server memakai setengah dari total RAM mesin, yaitu 16 GB di mesin 32 GB, karena Next.js menaruh `max-old-space-size` sendiri kalau tidak ada yang menyetel. Sekarang batasnya 640 MB heap
+- Batas 512 MB dan 576 MB dicoba lebih dulu dan keduanya mati dengan `heap out of memory`. 512 MB mati saat kompilasi `/luring` di putaran pertama, 576 MB selamat putaran pertama lalu mati di putaran kedua. 640 MB menyelesaikan dua putaran penuh tanpa kehabisan memori
+- Pada 640 MB, total rantai spawn (launcher, cli Next.js, dan server) ada di 1033 MB setelah putaran pertama dan 1194 MB setelah putaran kedua. Angka itu lebih besar dari batas heap karena kode native, buffer, dan source map hidup di luar heap. Batas heap tidak sama dengan working set
+
+---
+
+## [0.6.1] - 1 Oktober 2026
+
+Audit produksi menemukan satu cacat yang menutup seluruh aplikasi. Rencana pengerjaan ada di [`docs/18-Rencana-Produksi-dan-Pemakaian-Harian.md`](docs/18-Rencana-Produksi-dan-Pemakaian-Harian.md).
+
+#### Perbaiki
+
+- Pendaftaran gagal total karena Better Auth membuat id berbentuk 32 huruf, sedangkan kolom `users.id` bertipe `uuid`. PostgreSQL menolak dengan `22P02 invalid input syntax for type uuid`, jadi `POST /api/auth/sign-up/email` selalu menjawab 422. Tidak ada yang bisa mendaftar, jadi tidak ada plan, jadi tidak ada yang bisa dicatat. Perbaikannya `advanced.database.generateId: "uuid"` di [`src/lib/auth.ts`](src/lib/auth.ts), yang memaksa pustaka itu memakai `crypto.randomUUID()`. Dipilih supaya 15 tabel tetap bertipe uuid dan tidak ada query, index, maupun parser id yang harus ditulis ulang
+
+#### Tambah
+
+- [`docs/18-Rencana-Produksi-dan-Pemakaian-Harian.md`](docs/18-Rencana-Produksi-dan-Pemakaian-Harian.md) yang mengurutkan sisa pekerjaan produksi dari P0 sampai P3, dengan syarat selesai dan alasan tiap keputusan
 
 ---
 
