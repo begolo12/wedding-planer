@@ -43,7 +43,9 @@ Dev server dibatasi supaya pemakaian RAM-nya tidak jadi penyebab sesi tertutup s
 
 - Dev server memakai setengah dari total RAM mesin, yaitu 16 GB di mesin 32 GB, karena Next.js menaruh `max-old-space-size` sendiri kalau tidak ada yang menyetel. Sekarang batasnya 640 MB heap
 - Batas 512 MB dan 576 MB dicoba lebih dulu dan keduanya mati dengan `heap out of memory`. 512 MB mati saat kompilasi `/luring` di putaran pertama, 576 MB selamat putaran pertama lalu mati di putaran kedua. 640 MB menyelesaikan dua putaran penuh tanpa kehabisan memori
-- Pada 640 MB, total rantai spawn (launcher, cli Next.js, dan server) ada di 1033 MB setelah putaran pertama dan 1194 MB setelah putaran kedua. Angka itu lebih besar dari batas heap karena kode native, buffer, dan source map hidup di luar heap. Batas heap tidak sama dengan working set
+- Pada 640 MB, proses server sendiri (`start-server.js`) ada di 935 MB working set, jadi masih di bawah 1 GB. Rantai spawnnya (launcher 53 MB, cli Next.js 74 MB, server 935 MB) berjumlah 1062 MB karena launcher dan cli tidak punya batas heap dan ikut menanggung sedikit
+- Total rantai spawn ada di 1033 MB setelah putaran pertama dan 1194 MB setelah putaran kedua. Angka itu lebih besar dari batas heap karena kode native, buffer, dan source map hidup di luar heap. Batas heap tidak sama dengan working set
+- Turun ke 576 MB tidak aman. Angka working set yang lebih rendah itu diukur pada proses yang sudah hampir mati, sedangkan batas yang terlalu rendah membuat V8 masuk mode `Ineffective mark-compacts` yang jauh lebih lambat sebelum mati
 
 ---
 
