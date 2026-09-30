@@ -29,6 +29,30 @@ Aturan singkat:
 
 ---
 
+## [0.6.4] - 1 Oktober 2026
+
+Peningkatan UX mobile 1st, kualitas interaksi isian formulir, integrasi database Neon PostgreSQL, serta batas halaman dan penanganan galat.
+
+#### Tambah
+
+- Pintasan aksi cepat di Beranda untuk navigasi cepat di HP: Anggaran, Tugas, Tamu, dan Rundown
+- Integrasi tombol 1-tap RSVP di kartu daftar tamu (Hadir, Belum, Tidak) serta tautan langsung percakapan WhatsApp
+- Tombol bagikan susunan rundown Hari-H langsung ke grup WhatsApp keluarga atau wedding organizer
+- Tombol pelunasan otomatis sisa tagihan pada lembar pembayaran vendor
+- Batas halaman P0: `src/app/error.tsx`, `src/app/global-error.tsx`, `src/app/not-found.tsx`, `src/app/(app)/loading.tsx`, dan `src/app/(app)/error.tsx`
+- Gagang tarikan visual (drag indicator) dan proteksi safe-area-inset pada lembar panel bawah di layar HP
+- Tab navigasi Rundown Hari-H di bilah tab modul Rencana
+
+#### Perbaiki
+
+- Isian nominal pos anggaran dan pembayaran vendor diubah dari input angka biasa menjadi `IsianRupiah` dengan format titik ribuan otomatis, mencegah salah ketik nominal di layar sentuh
+- Tata letak kartu rundown diubah dari grid tiga kolom kaku menjadi kartu responsif yang mengalir rapi di layar HP 360px sampai 390px
+- Koneksi database ditambahkan opsi `prepare: false` untuk mendukung transaksi pooler PgBouncer di Neon PostgreSQL
+- Skema 15 tabel dan relasinya disinkronkan langsung ke database Neon lewat `drizzle-kit push`
+- Penanganan fallback koneksi database saat fase static generation build agar build CI/Vercel tidak terhenti karena variabel belum terbaca
+
+---
+
 ## [0.6.3] - 1 Oktober 2026
 
 Audit visual di browser pada lebar 390px, mode terang dan mode gelap, atas sepuluh halaman inti. Yang diukur bukan perkiraan: kontras, geser horizontal, ukuran target sentuh, dan sudut. Semua angka di bawah hasil pengukuran, bukan perkiraan.

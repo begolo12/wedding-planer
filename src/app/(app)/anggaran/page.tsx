@@ -6,7 +6,7 @@ import { usePlan } from "@/lib/use-plan";
 import { useMuat } from "@/lib/use-muat";
 import { Kerangka, Kosong, Gagal } from "@/components/states";
 import { Lembar, DialogKonfirmasi, toast } from "@/components/toast";
-import { Isian, Pilih } from "@/components/field";
+import { Isian, Pilih, IsianRupiah } from "@/components/field";
 import { Rupiah } from "@/components/rupiah";
 import { BudgetBar } from "@/components/budget-bar";
 import { minta, pesanGalat } from "@/lib/api-client";
@@ -123,7 +123,7 @@ export default function HalamanAnggaran() {
   // Form states
   const [formNama, setFormNama] = useState("");
   const [formKategori, setFormKategori] = useState<KategoriUang>("venue");
-  const [formBatas, setFormBatas] = useState("");
+  const [formBatas, setFormBatas] = useState<number>(0);
   const [formCatatan, setFormCatatan] = useState("");
   const [formGalat, setFormGalat] = useState<string | null>(null);
 
@@ -131,7 +131,7 @@ export default function HalamanAnggaran() {
     setDiedit(null);
     setFormNama("");
     setFormKategori("venue");
-    setFormBatas("");
+    setFormBatas(0);
     setFormCatatan("");
     setFormGalat(null);
     setLembarBuka(true);
@@ -145,7 +145,7 @@ export default function HalamanAnggaran() {
         ? (p.category as KategoriUang)
         : "lainnya",
     );
-    setFormBatas(p.plannedAmount ? String(p.plannedAmount) : "");
+    setFormBatas(p.plannedAmount ?? 0);
     setFormCatatan(p.notes ?? "");
     setFormGalat(null);
     setLembarBuka(true);
@@ -160,9 +160,8 @@ export default function HalamanAnggaran() {
       return;
     }
 
-    const angkaBatas = parseInt(formBatas.replace(/\D/g, ""), 10);
-    if (isNaN(angkaBatas) || angkaBatas < 0) {
-      setFormGalat("Batas anggaran harus berupa angka rupiah positif.");
+    if (!formBatas || formBatas <= 0) {
+      setFormGalat("Batas rencana alokasi biaya harus lebih dari Rp 0.");
       return;
     }
 
@@ -173,7 +172,7 @@ export default function HalamanAnggaran() {
       const payload = {
         name: formNama.trim(),
         category: formKategori,
-        plannedAmount: angkaBatas,
+        plannedAmount: formBatas,
         notes: formCatatan.trim() || null,
         sortOrder: diedit?.sortOrder ?? 0,
       };
@@ -574,22 +573,13 @@ export default function HalamanAnggaran() {
             }))}
           />
 
-          <Isian
-            label="Batas rencana biaya (Rp)"
+          <IsianRupiah
+            label="Batas rencana biaya"
             id="formBatas"
-            bantuan="Berapa perkiraan batas maksimal dana yang dialokasikan untuk pos ini."
-          >
-            <input
-              id="formBatas"
-              className="isian"
-              type="number"
-              min={0}
-              required
-              placeholder="Contoh: 12000000"
-              value={formBatas}
-              onChange={(e) => setFormBatas(e.target.value)}
-            />
-          </Isian>
+            petunjuk="Berapa alokasi batas dana untuk pos ini."
+            nilai={formBatas}
+            onUbah={(nilai) => setFormBatas(nilai)}
+          />
 
           <Isian label="Catatan tambahan (opsional)" id="formCatatan">
             <textarea
@@ -618,7 +608,7 @@ export default function HalamanAnggaran() {
               <div>
                 <strong>Perkiraan sisa baru:</strong>{" "}
                 <Rupiah
-                  nilai={parseInt(formBatas || "0", 10) - diedit.paidAmount}
+                  nilai={(formBatas || 0) - diedit.paidAmount}
                 />
               </div>
             </div>

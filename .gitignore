@@ -11,3 +11,7 @@ next-env.d.ts
 
 # keluaran audit sekali pakai
 .audit
+.vercel
+.env*
+_bmad
+.agent

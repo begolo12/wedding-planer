@@ -240,6 +240,31 @@ export default function HalamanHariH() {
     },
   }[ukuranFont];
 
+  function bagikanRundownWa() {
+    if (!items.length) {
+      toast("Belum ada acara rundown untuk dibagikan.");
+      return;
+    }
+    const barisTeks = [
+      "*SUSUNAN ACARA / RUNDOWN HARI-H*",
+      plan?.partnerName ? `Pernikahan: Bersama ${plan.partnerName}` : "",
+      "",
+      ...items.map(
+        (it) =>
+          `• *${it.startTime}* (${it.durationMinutes ?? 0} mnt) - ${it.title}${
+            it.location ? `\n  Lokasi: ${it.location}` : ""
+          }${it.picName ? `\n  PIC: ${it.picName}` : ""}${
+            it.notes ? `\n  Catatan: ${it.notes}` : ""
+          }`,
+      ),
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+
+    const url = `https://wa.me/?text=${encodeURIComponent(barisTeks)}`;
+    window.open(url, "_blank");
+  }
+
   return (
     <div>
       <div className="kepala-halaman">
@@ -250,6 +275,15 @@ export default function HalamanHariH() {
           </p>
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+          {items.length > 0 ? (
+            <button
+              type="button"
+              className="tombol tombol-sekunder"
+              onClick={bagikanRundownWa}
+            >
+              Bagikan WhatsApp
+            </button>
+          ) : null}
           <button
             type="button"
             className="tombol tombol-sekunder"
@@ -360,38 +394,20 @@ export default function HalamanHariH() {
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {items.map((item) => (
-            <div
-              key={item.id}
-              className="kartu"
-              style={{
-                display: "grid",
-                gridTemplateColumns: "80px 1fr auto",
-                gap: 16,
-                padding: "16px",
-                alignItems: "start",
-                borderLeft: "4px solid var(--color-primary)",
-              }}
-            >
-              {/* Kolom Jam */}
+            <div key={item.id} className="rundown-kartu">
+              {/* Kolom / Bagian Jam */}
               <div>
-                <div
-                  style={{
-                    fontWeight: 700,
-                    fontSize: skalaFont.jam,
-                    color: "var(--color-primary)",
-                    lineHeight: 1.2,
-                  }}
-                >
-                  {item.startTime}
+                <div className="rundown-waktu-badge" style={{ fontSize: skalaFont.jam, lineHeight: 1.2 }}>
+                  <span>{item.startTime}</span>
+                  {item.durationMinutes ? (
+                    <span style={{ fontSize: "var(--text-kecil)", color: "var(--color-muted)", fontWeight: 500 }}>
+                      ({item.durationMinutes} mnt)
+                    </span>
+                  ) : null}
                 </div>
-                {item.durationMinutes ? (
-                  <div style={{ fontSize: "var(--text-kecil)", color: "var(--color-muted)", marginTop: 4 }}>
-                    {item.durationMinutes} mnt
-                  </div>
-                ) : null}
               </div>
 
-              {/* Kolom Detail Acara */}
+              {/* Kolom / Bagian Detail Acara */}
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 <div style={{ fontWeight: 700, fontSize: skalaFont.judul, lineHeight: 1.3 }}>
                   {item.title}
@@ -415,7 +431,7 @@ export default function HalamanHariH() {
                     style={{
                       marginTop: 4,
                       padding: "8px 12px",
-                      borderRadius: 4,
+                      borderRadius: "var(--radius-kontrol)",
                       background: "var(--color-netral)",
                       fontSize: skalaFont.catatan,
                       border: "1px dashed var(--color-garis)",
@@ -427,12 +443,12 @@ export default function HalamanHariH() {
                 ) : null}
               </div>
 
-              {/* Kolom Tindakan */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              {/* Kolom / Bagian Tindakan */}
+              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                 <button
                   type="button"
                   className="tombol tombol-sekunder"
-                  style={{ minHeight: 44, padding: "0 10px", fontSize: "var(--text-kecil)" }}
+                  style={{ minHeight: 40, padding: "0 12px", fontSize: "var(--text-kecil)" }}
                   onClick={() => bukaUbah(item)}
                 >
                   Ubah
@@ -441,7 +457,8 @@ export default function HalamanHariH() {
                   type="button"
                   className="tombol tombol-sekunder"
                   style={{
-                    padding: "0 10px",
+                    minHeight: 40,
+                    padding: "0 12px",
                     fontSize: "var(--text-kecil)",
                     color: "var(--color-bata)",
                   }}

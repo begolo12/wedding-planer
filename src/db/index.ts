@@ -7,17 +7,16 @@ const globalForDb = globalThis as unknown as {
   sql: ReturnType<typeof postgres> | undefined;
 };
 
-const connectionString = process.env.DATABASE_URL;
-
-if (!connectionString) {
-  throw new Error("DATABASE_URL belum diisi. Salin .env.example jadi .env.");
-}
+const connectionString =
+  process.env.DATABASE_URL ||
+  "postgresql://postgres:postgres@localhost:5432/wedding_planer";
 
 const sql =
   globalForDb.sql ??
   postgres(connectionString, {
     max: 5,
     idle_timeout: 20,
+    prepare: false,
   });
 
 if (process.env.NODE_ENV !== "production") {

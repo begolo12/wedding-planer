@@ -96,7 +96,7 @@ export default function HalamanBeranda() {
       </div>
 
       {hariBesar ? (
-        <div className="kartu" style={{ margin: "16px 0 24px" }}>
+        <div className="kartu" style={{ margin: "16px 0" }}>
           <div className="mundur">
             <span className="mundur-angka">
               {hariKe !== null
@@ -111,6 +111,41 @@ export default function HalamanBeranda() {
           </div>
         </div>
       ) : null}
+
+      {/* Aksi Cepat Mobile 1st */}
+      <div className="aksi-cepat-grid">
+        <Link href="/anggaran" className="aksi-cepat-item">
+          <div className="aksi-cepat-ikon">Rp</div>
+          <div className="aksi-cepat-teks">
+            <span className="aksi-cepat-judul">Anggaran</span>
+            <span className="aksi-cepat-sub">Catat & pantau pos</span>
+          </div>
+        </Link>
+
+        <Link href="/rencana" className="aksi-cepat-item">
+          <div className="aksi-cepat-ikon">{"\u2713"}</div>
+          <div className="aksi-cepat-teks">
+            <span className="aksi-cepat-judul">Tugas</span>
+            <span className="aksi-cepat-sub">Daftar persiapan</span>
+          </div>
+        </Link>
+
+        <Link href="/tamu" className="aksi-cepat-item">
+          <div className="aksi-cepat-ikon">{"\u25CB"}</div>
+          <div className="aksi-cepat-teks">
+            <span className="aksi-cepat-judul">Tamu</span>
+            <span className="aksi-cepat-sub">Undangan & kursi</span>
+          </div>
+        </Link>
+
+        <Link href="/hari-h" className="aksi-cepat-item">
+          <div className="aksi-cepat-ikon">{"\u25A3"}</div>
+          <div className="aksi-cepat-teks">
+            <span className="aksi-cepat-judul">Hari-H</span>
+            <span className="aksi-cepat-sub">Rundown lokasi</span>
+          </div>
+        </Link>
+      </div>
 
       <div className="rekap" style={{ marginBottom: 24 }}>
         <div className="kartu rekap-item">

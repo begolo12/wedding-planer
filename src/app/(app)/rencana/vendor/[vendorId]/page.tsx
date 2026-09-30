@@ -7,7 +7,7 @@ import { usePlan } from "@/lib/use-plan";
 import { useMuat } from "@/lib/use-muat";
 import { Kerangka, Kosong, Gagal } from "@/components/states";
 import { Lembar, DialogKonfirmasi, toast } from "@/components/toast";
-import { Isian, Pilih } from "@/components/field";
+import { Isian, Pilih, IsianRupiah } from "@/components/field";
 import { Rupiah } from "@/components/rupiah";
 import { minta, pesanGalat } from "@/lib/api-client";
 import {
@@ -21,7 +21,7 @@ import {
   type MetodeBayar,
   LABEL_METODE_BAYAR,
 } from "@/lib/konstanta";
-import { tanggalPanjangDari } from "@/lib/format";
+import { tanggalPanjangDari, rupiahPolos } from "@/lib/format";
 
 type VendorDetail = {
   id: string;
@@ -72,7 +72,7 @@ export default function HalamanDetailVendor() {
 
   // Lembar Catat Pembayaran
   const [bukaBayar, setBukaBayar] = useState(false);
-  const [bayarJumlah, setBayarJumlah] = useState("");
+  const [bayarJumlah, setBayarJumlah] = useState<number>(0);
   const [bayarTanggal, setBayarTanggal] = useState(
     new Date().toISOString().slice(0, 10),
   );
@@ -162,9 +162,8 @@ export default function HalamanDetailVendor() {
     e.preventDefault();
     if (!planId || !vendorId) return;
 
-    const nominal = parseInt(bayarJumlah.replace(/\D/g, ""), 10);
-    if (!nominal || nominal <= 0) {
-      setGalatBayar("Masukkan jumlah pembayaran yang valid.");
+    if (!bayarJumlah || bayarJumlah <= 0) {
+      setGalatBayar("Masukkan jumlah pembayaran lebih dari Rp 0.");
       return;
     }
     if (!bayarTanggal) {
@@ -179,7 +178,7 @@ export default function HalamanDetailVendor() {
       await minta(`/api/plans/${planId}/vendors/${vendorId}/payments`, {
         method: "POST",
         body: {
-          amount: nominal,
+          amount: bayarJumlah,
           paidAt: bayarTanggal,
           method: bayarMetode,
           isFinal: bayarLunas,
@@ -189,7 +188,7 @@ export default function HalamanDetailVendor() {
 
       toast("Pembayaran berhasil dicatat");
       setBukaBayar(false);
-      setBayarJumlah("");
+      setBayarJumlah(0);
       setBayarLunas(false);
       setBayarCatatan("");
       await muatUlang();
@@ -319,7 +318,7 @@ export default function HalamanDetailVendor() {
             type="button"
             className="tombol tombol-utama"
             onClick={() => {
-              setBayarJumlah("");
+              setBayarJumlah(0);
               setBayarTanggal(new Date().toISOString().slice(0, 10));
               setBayarMetode("transfer");
               setBayarLunas(false);
@@ -427,7 +426,7 @@ export default function HalamanDetailVendor() {
               className="tombol tombol-sekunder"
               style={{ minHeight: 44, padding: "0 12px", fontSize: "var(--text-kecil)" }}
               onClick={() => {
-                setBayarJumlah("");
+                setBayarJumlah(0);
                 setBayarTanggal(new Date().toISOString().slice(0, 10));
                 setBayarMetode("transfer");
                 setBayarLunas(false);
@@ -523,19 +522,34 @@ export default function HalamanDetailVendor() {
         onTutup={() => setBukaBayar(false)}
       >
         <form onSubmit={simpanPembayaran} noValidate style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <Isian label="Jumlah pembayaran (Rupiah)" id="bayarJumlah" galat={galatBayar ?? undefined}>
-            <input
-              id="bayarJumlah"
-              className="isian"
-              type="number"
-              min="1000"
-              step="1000"
-              required
-              placeholder="Contoh: 5000000"
-              value={bayarJumlah}
-              onChange={(e) => setBayarJumlah(e.target.value)}
-            />
-          </Isian>
+          <IsianRupiah
+            label="Jumlah pembayaran"
+            id="bayarJumlah"
+            galat={galatBayar ?? undefined}
+            nilai={bayarJumlah}
+            onUbah={(nilai) => setBayarJumlah(nilai)}
+          />
+
+          {data?.vendor && data.vendor.remaining > 0 ? (
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: -8 }}>
+              <button
+                type="button"
+                className="tombol"
+                style={{
+                  padding: "4px 10px",
+                  fontSize: "var(--text-kecil)",
+                  background: "var(--color-netral)",
+                  border: "1px solid var(--color-garis)",
+                }}
+                onClick={() => {
+                  setBayarJumlah(data.vendor.remaining);
+                  setBayarLunas(true);
+                }}
+              >
+                Isi sisa tagihan: Rp {rupiahPolos(data.vendor.remaining)}
+              </button>
+            </div>
+          ) : null}
 
           <Isian label="Tanggal pembayaran" id="bayarTanggal">
             <input

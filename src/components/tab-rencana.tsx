@@ -13,6 +13,7 @@ export function TabRencana() {
   const tabList = [
     { href: "/rencana", label: "Tugas" },
     { href: "/rencana/tanggal", label: "Tanggal penting" },
+    { href: "/hari-h", label: "Rundown Hari-H" },
     { href: "/rencana/plan", label: "Rincian acara" },
     { href: "/rencana/vendor", label: "Vendor" },
     { href: "/rencana/info", label: "Info keluarga" },

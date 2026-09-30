@@ -374,134 +374,162 @@ export default function HalamanTamu() {
             const statusRsvp = t.rsvpStatus as StatusHadir;
             const sudahDikirim = Boolean(t.invitedAt);
 
+            const nomorWaBersih = t.phone ? t.phone.replace(/\D/g, "") : "";
+            const pesanWa = encodeURIComponent(
+              `Halo ${t.name}, kami mengabarkan rencana pernikahan kami. Semoga ${t.name} dan keluarga berkenan hadir. Mohon konfirmasi kehadirannya ya!`
+            );
+
             return (
-              <div
-                key={t.id}
-                className="kartu"
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  gap: 12,
-                  flexWrap: "wrap",
-                  padding: "12px 16px",
-                }}
-              >
-                <div style={{ display: "flex", flexDirection: "column", gap: 4, minWidth: 200, flex: "1 1 auto" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                    <span style={{ fontWeight: 600, fontSize: "var(--text-dasar)" }}>
-                      {t.name}
-                    </span>
-                    <span
+              <div key={t.id} className="tamu-kartu">
+                <div className="tamu-kartu-atas">
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                      <span style={{ fontWeight: 600, fontSize: "var(--text-dasar)" }}>
+                        {t.name}
+                      </span>
+                      <span
+                        style={{
+                          padding: "2px 6px",
+                          borderRadius: "var(--radius-kontrol)",
+                          fontSize: "var(--text-kecil)",
+                          background: "var(--color-netral)",
+                          fontWeight: 600,
+                        }}
+                      >
+                        {t.guestCount} orang
+                      </span>
+                      <span
+                        style={{
+                          fontSize: "var(--text-kecil)",
+                          color: "var(--color-muted)",
+                        }}
+                      >
+                        ({LABEL_KATEGORI_TAMU[kategori] ?? t.category})
+                      </span>
+                    </div>
+
+                    <div
                       style={{
-                        padding: "2px 6px",
-                        borderRadius: 4,
-                        fontSize: "var(--text-kecil)",
-                        background: "var(--color-netral)",
-                        color: "var(--color-ink)",
-                      }}
-                    >
-                      {t.guestCount} orang
-                    </span>
-                    <span
-                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 12,
+                        flexWrap: "wrap",
                         fontSize: "var(--text-kecil)",
                         color: "var(--color-muted)",
+                        marginTop: 4,
                       }}
                     >
-                      ({LABEL_KATEGORI_TAMU[kategori] ?? t.category})
-                    </span>
+                      {t.side ? <span>Pihak: {t.side}</span> : null}
+                      {t.tableName ? <span>Meja: <strong>{t.tableName}</strong></span> : null}
+                      {t.notes ? <span style={{ fontStyle: "italic" }}>&ldquo;{t.notes}&rdquo;</span> : null}
+                    </div>
                   </div>
 
-                  <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>
-                    {t.side ? <span>Pihak: {t.side}</span> : null}
-                    {t.tableName ? <span>Meja: <strong>{t.tableName}</strong></span> : null}
-                    {t.phone ? (
-                      <a
-                        href={`https://wa.me/${t.phone.replace(/\D/g, "")}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="tautan-kalimat"
-                      >
-                        WA: {t.phone}
-                      </a>
-                    ) : null}
-                    {t.notes ? <span style={{ fontStyle: "italic" }}>&ldquo;{t.notes}&rdquo;</span> : null}
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <button
+                      type="button"
+                      className="tombol tombol-sekunder"
+                      style={{ minHeight: 38, padding: "0 10px", fontSize: "var(--text-kecil)" }}
+                      onClick={() => bukaUbah(t)}
+                    >
+                      Ubah
+                    </button>
+                    <button
+                      type="button"
+                      className="tombol tombol-sekunder"
+                      style={{
+                        minHeight: 38,
+                        padding: "0 10px",
+                        fontSize: "var(--text-kecil)",
+                        color: "var(--color-bata)",
+                      }}
+                      onClick={() => setDihapus(t)}
+                    >
+                      Hapus
+                    </button>
                   </div>
                 </div>
 
-                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                  {/* Status Undangan Kirim Button */}
-                  <button
-                    type="button"
-                    className="tombol tombol-sekunder"
-                    style={{
-                      padding: "0 10px",
-                      fontSize: "var(--text-kecil)",
-                      background: sudahDikirim ? "var(--color-netral)" : "var(--color-kertas)",
-                      color: sudahDikirim ? "var(--color-primary)" : "var(--color-muted)",
-                      borderColor: sudahDikirim ? "var(--color-primary)" : "var(--color-garis)",
-                    }}
-                    onClick={() => toggleUndangan(t)}
-                  >
-                    {sudahDikirim ? "✓ Undangan terkirim" : "Belum diundang"}
-                  </button>
+                <div className="tamu-kartu-bawah">
+                  {/* Status Undangan Kirim & WhatsApp Button */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                    <button
+                      type="button"
+                      className="tombol tombol-sekunder"
+                      style={{
+                        minHeight: 38,
+                        padding: "0 10px",
+                        fontSize: "var(--text-kecil)",
+                        background: sudahDikirim ? "var(--color-netral)" : "var(--color-kertas)",
+                        color: sudahDikirim ? "var(--color-primary)" : "var(--color-muted)",
+                        borderColor: sudahDikirim ? "var(--color-primary)" : "var(--color-garis)",
+                        fontWeight: 600,
+                      }}
+                      onClick={() => toggleUndangan(t)}
+                    >
+                      {sudahDikirim ? "✓ Undangan terkirim" : "Tandai terkirim"}
+                    </button>
 
-                  {/* Dropdown status RSVP */}
-                  <select
-                    aria-label="Ubah konfirmasi kehadiran"
-                    value={t.rsvpStatus}
-                    onChange={(e) =>
-                      ubahRsvpCepat(t, e.target.value as StatusHadir)
-                    }
-                    style={{
-                      padding: "4px 8px",
-                      borderRadius: 4,
-                      fontSize: "var(--text-kecil)",
-                      border: "1px solid var(--color-garis)",
-                      background:
-                        statusRsvp === "hadir"
-                          ? "var(--color-netral)"
-                          : statusRsvp === "tidak"
-                            ? "var(--color-kertas)"
-                            : "var(--color-kertas)",
-                      color:
-                        statusRsvp === "hadir"
-                          ? "var(--color-primary)"
-                          : statusRsvp === "tidak"
-                            ? "var(--color-bata)"
-                            : "var(--color-ink)",
-                      cursor: "pointer",
-                      fontWeight: 600,
-                    }}
-                  >
-                    {STATUS_HADIR.map((s) => (
-                      <option key={s} value={s}>
-                        {LABEL_STATUS_HADIR[s]}
-                      </option>
-                    ))}
-                  </select>
+                    {nomorWaBersih ? (
+                      <a
+                        href={`https://wa.me/${nomorWaBersih}?text=${pesanWa}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="tombol"
+                        style={{
+                          minHeight: 38,
+                          padding: "0 10px",
+                          fontSize: "var(--text-kecil)",
+                          background: "var(--color-netral)",
+                          border: "1px solid var(--color-garis)",
+                          color: "var(--color-primary)",
+                          textDecoration: "none",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 6,
+                          fontWeight: 600,
+                        }}
+                      >
+                        Chat WA
+                      </a>
+                    ) : null}
+                  </div>
 
-                  <button
-                    type="button"
-                    className="tombol tombol-sekunder"
-                    style={{ minHeight: 44, padding: "0 10px", fontSize: "var(--text-kecil)" }}
-                    onClick={() => bukaUbah(t)}
-                  >
-                    Ubah
-                  </button>
-                  <button
-                    type="button"
-                    className="tombol tombol-sekunder"
-                    style={{
-                      padding: "0 10px",
-                      fontSize: "var(--text-kecil)",
-                      color: "var(--color-bata)",
-                    }}
-                    onClick={() => setDihapus(t)}
-                  >
-                    Hapus
-                  </button>
+                  {/* 1-Tap RSVP Segmented Group */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>
+                      RSVP:
+                    </span>
+                    <div className="tamu-rsvp-grup" role="radiogroup" aria-label="Konfirmasi RSVP">
+                      <button
+                        type="button"
+                        className="tamu-rsvp-opsi"
+                        data-status="hadir"
+                        data-aktif={statusRsvp === "hadir" ? "ya" : undefined}
+                        onClick={() => ubahRsvpCepat(t, "hadir")}
+                      >
+                        Hadir
+                      </button>
+                      <button
+                        type="button"
+                        className="tamu-rsvp-opsi"
+                        data-status="belum"
+                        data-aktif={statusRsvp === "belum" ? "ya" : undefined}
+                        onClick={() => ubahRsvpCepat(t, "belum")}
+                      >
+                        Belum
+                      </button>
+                      <button
+                        type="button"
+                        className="tamu-rsvp-opsi"
+                        data-status="tidak"
+                        data-aktif={statusRsvp === "tidak" ? "ya" : undefined}
+                        onClick={() => ubahRsvpCepat(t, "tidak")}
+                      >
+                        Tidak
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             );
