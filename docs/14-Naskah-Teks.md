@@ -52,7 +52,7 @@ Nada bahasa sudah ditetapkan di [`DESIGN.md`](../DESIGN.md) bagian 2. Dokumen in
 | Info keluarga | Tambah pengumuman | Tambah info |
 | Busana | Tambah barang | Tambah |
 
-**Alasan "Tambah" selalu menyebut bendanya.** Kalau empat tombol semuanya cuma berisi "Tambah", yang differentiates hanya posisi di layar, dan itu tidak berarti apa-apa di layar dengan empat tombol yang sama.
+**Alasan "Tambah" selalu menyebut bendanya.** Kalau empat tombol semuanya cuma berisi "Tambah", satu-satunya pembeda cuma posisi di layar, dan itu tidak berarti apa-apa saat ada empat tombol yang sama.
 
 ### 3.2 Tombol di daftar
 
@@ -65,7 +65,7 @@ Nada bahasa sudah ditetapkan di [`DESIGN.md`](../DESIGN.md) bagian 2. Dokumen in
 | Lihat detail | Lihat | Buka |
 | Tutup | Tutup | Close |
 
-### 3.3 Tombol_SYSTEM yang tidak dipakai
+### 3.3 Tombol sistem yang tidak dipakai
 
 | Tidak dipakai | Dipakai gantinya | Alasan |
 |---|---|---|

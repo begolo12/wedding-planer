@@ -1,6 +1,6 @@
 ﻿# 12e. Wireframe Laporan
 
-Laporan keadaan sekarang, tombol bagikan ke WhatsApp, dan PDF. Tiga hal yang dipakai orang tua dan pasangan untuk tahu "--hari ini kondisinya bagaimana".
+Laporan keadaan sekarang, tombol bagikan ke WhatsApp, dan PDF. Tiga hal yang dipakai orang tua dan pasangan untuk tahu hari ini kondisinya bagaimana.
 
 Tanda dan aturan umum ada di [`12-Wireframe.md`](12-Wireframe.md). Aturan teknis lengkapnya ada di [`16-Laporan-dan-Bagikan.md`](16-Laporan-dan-Bagikan.md).
 
@@ -352,11 +352,11 @@ Kaki halaman ada di setiap halaman: nama pemilik laporannya dan tanggalnya. Kala
 
 | Keputusan | Alasan |
 |---|---|
-| Teks WhatsApp dibGenerate di server | Supaya angka sama dengan yang ada di layar, dan tidak perlu pustaka di client |
+| Teks WhatsApp disusun di server | Supaya angka sama dengan yang ada di layar, dan tidak perlu pustaka di client |
 | Teks boleh diubah sebelum kirim | Yang salah kirim adalah orang tua, dan mereka tidak bisa membatalkan |
 | Angka tidak boleh diubah | Kalau nominal bisa diedit, laporan ini bukan data anymore |
 | Tautan tanpa masa berlaku | Tidak ada yang ingin gagal membuka di hari yang paling penting |
 | PDF lewat dialog cetak bawaan | Tidak menambah pustaka, jalan tanpa sinyal, pilihan pengguna |
 | Halaman laporan yang sama untuk layar dan cetak | Isinya tidak mungkin berbeda, dan hanya satu yang harus dirawat |
 | Rundown dapat halaman sendiri | Yang paling sering dicetak dan dibawa |
-| Warna tidak ada di atas kertas | Laporan ini sering dicetak hitam putih diFotocopy |
+| Warna tidak ada di atas kertas | Laporan ini sering dicetak hitam putih di fotokopi |

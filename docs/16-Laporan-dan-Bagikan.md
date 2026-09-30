@@ -46,12 +46,12 @@ Alasannya pasangan akan membandingkan. Kalau angka di laporan beda dengan angka 
 
 ### Prinsip: server yang menyusun teks
 
-Teks WhatsApp dibGenerate di server, bukan di client. Alasannya tiga:
+Teks WhatsApp disusun di server, bukan di client. Alasannya tiga:
 
 | Alasan | Kenapa |
 |---|---|
 | Satu sumber angka | Client dan server tidak bisa punya formatter berbeda |
-| Bisa dipakai tanpa app | Semua orang punya WhatsApp |
+| Bisa dipakai tanpa aplikasi | Semua orang punya WhatsApp |
 | Teksnya bisa diuji | Ada satu fungsi yang bisa diuji sendiri |
 
 Formatting angka jadi satu fungsi: `formatRupiah`. Dipakai di halaman, di laporan, di teks WhatsApp, dan di PDF. Kalau ada empat tempat yang menulis nominal, cepat atau lambat satu tempat berbeda.
@@ -169,7 +169,7 @@ Yang hilang dengan cara ini adalah pilihan seperti nomor halaman otomatis dan da
 | Yang wajib | Kenapa |
 |---|---|
 | Isi halaman sama persis dengan layar | Kalau beda, orang percaya salah |
-| Warna teks minimal hitam | Sering dicetak hitam putih diFotocopy |
+| Warna teks minimal hitam | Sering dicetak hitam putih di fotokopi |
 | Tidak ada elemen yang terpotong | Kotak yang terpotong bikin orang salah baca |
 | Nomor halaman di kaki | Kertas yang tercecer masih urut |
 | Margin 20mm | Kebanyakan printer rumah punya margin itu |
