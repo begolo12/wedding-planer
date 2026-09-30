@@ -1,0 +1,77 @@
+:root {
+  --cetak-garis: #b9b2a9;
+}
+
+/* Aturan cetak dari docs/16-Laporan-dan-Bagikan.md.
+   Semua yang tidak berguna di kertas disembunyikan, bukan diperkecil. */
+@media print {
+  @page {
+    size: A4;
+    margin: 16mm 14mm;
+  }
+
+  .tanpa-cetak {
+    display: none !important;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    max-width: none;
+    overflow: visible !important;
+    font-size: 10.5pt;
+  }
+
+  .bungkus {
+    max-width: none;
+    padding: 0;
+  }
+
+  .cetak-halaman {
+    break-inside: avoid;
+  }
+
+  .cetak-pisah {
+    break-before: page;
+  }
+
+  .kartu,
+  .panel {
+    border: none;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+  }
+
+  a {
+    text-decoration: none;
+    color: #000000;
+  }
+
+  .cetak-judul {
+    font-family: var(--font-judul), Georgia, serif;
+    font-size: 20pt;
+    margin-bottom: 2mm;
+  }
+
+  .cetak-bagian {
+    border-top: 0.4pt solid var(--cetak-garis);
+    padding-top: 2mm;
+    margin-top: 4mm;
+  }
+
+  .cetak-baris {
+    display: flex;
+    justify-content: space-between;
+    gap: 8mm;
+    border-bottom: 0.3pt solid var(--cetak-garis);
+    padding: 1.4mm 0;
+  }
+
+  .bar,
+  .kerangka,
+  .pita {
+    display: none !important;
+  }
+}

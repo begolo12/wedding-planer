@@ -22,7 +22,7 @@ Modul pendukung. Semuanya P1 atau P2, tidak ada yang P0.
 
 Ukur bajunya sering dijadwalkan berbulan-bulan sebelum hari-H, dan penjahit butuh ukuran yang tepat. Kalau tanggal ukur tidak tercatat, hasilnya salah.
 
-### Minimal Version
+### Versi minimal
 
 - [ ] Daftar item seragam beserta pivot
 - [ ] Status tiap item berubah warnanya kalau sudah siap, dan warnanya berbeda dari warna tombol utama
@@ -35,7 +35,7 @@ Ukur bajunya sering dijadwalkan berbulan-bulan sebelum hari-H, dan penjahit butu
 
 Ucapan terima kasih ke keluarga, tetangga, dan rekanan setelah acara. Tidak ada di Fase 1.
 
-**Alasannya** fitur ini bagus untuk Ide, tapi tidak menyelesaikan masalah yang sedang pasangan hadapi. Pasangan yang butuh fitur ini biasanya sudah punya cara yang bekerja untuk mereka, misalnya kirim pesan di grup WhatsApp.
+**Alasannya** fitur ini bagus di atas kertas, tapi tidak menyelesaikan masalah yang sedang pasangan hadapi. Pasangan yang butuh fitur ini biasanya sudah punya cara yang bekerja untuk mereka, misalnya kirim pesan di grup WhatsApp.
 
 Yang perlu ada di Fase 1:
 
@@ -45,7 +45,7 @@ Yang perlu ada di Fase 1:
 
 ## 13. Riwayat dan pelacakan setelah acara (P2, Fase 2)
 
-Yang disimpan setelah weddings selesai, untuk referensi weddings berikutnya atau untuk acara keluarga lain.
+Yang disimpan setelah acara selesai, untuk referensi acara berikutnya atau untuk acara keluarga lain.
 
 **Alasannya** satu pasangan hanya punya satu pernikahan, jadi nilai dari data historis rendah di Fase 1. Fitur ini baru jadi tinggi nilainya kalau produk sudah dipakai banyak orang.
 
@@ -68,6 +68,8 @@ Yang perlu ada di Fase 1:
 | 05 | Daftar tamu | P0 |
 | 08 | Rundown acara | P0 |
 | 09 | Info untuk keluarga dan hari-H | P0 |
+| 14 | Laporan keadaan | P0 |
+| 15 | Bagikan ke WhatsApp dan cetak PDF | P0 |
 | 11 | Seragam dan persiapan fisik | P1 |
 | 06 | Undangan digital | P1 (Fase 2 penuh) |
 | 10 | Dokumentasi dan album | P1 (Fase 2 penuh) |
@@ -75,7 +77,7 @@ Yang perlu ada di Fase 1:
 | 12 | Ucapan terima kasih | P2 (Fase 2) |
 | 13 | Riwayat setelah acara | P2 (Fase 2) |
 
-Tujuh modul P0. Itu batas minimum agar produk ini layak disebut selesai. Sisanya enhances, bukan syarat.
+Sembilan modul P0. Itu batas minimum agar produk ini layak disebut selesai. Sisanya peningkatan, bukan syarat.
 
 ---
 

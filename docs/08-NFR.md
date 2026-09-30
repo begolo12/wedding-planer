@@ -1,4 +1,4 @@
-# 08. Non-Functional Requirements
+# 08. Syarat Non-Fungsional
 
 Dokumen ini berisi batas yang harus dipenuhi tanpa perlu user mengetahuinya. Kalau salah satu gagal, itu bug, bukan fitur yang belum selesai.
 
@@ -29,7 +29,7 @@ Field data dikirim dari browser kalau ada cukup banyak penggunanya. Kalau belum 
 
 ## Keandalan
 
-| Requirement | Target | Alasan |
+| Syarat | Target | Alasan |
 |---|---|---|
 | Ketersediaan | 99,5 persen per bulan | Pernikahannya satu kali, jadi memilih hari yang salah akan sangat merusak |
 | Waktu pemulihan | Di bawah 1 jam | Provider VPS biasa |
@@ -63,7 +63,7 @@ Target: WCAG 2.1 level AA.
 
 Kategori tamu, status pembayaran, dan status tugas punya warna, tapi juga punya label teks atau bentuk ikon yang berbeda. Alasannya, sekitar 1 dari 12 pria dan 1 dari 200 wanita punya masalah penglihatan warna, dan tidak ada dari mereka yang bisa melihat plan mereka sendiri.
 
-### Dark mode bukan afterthought
+### Mode gelap bukan tambahan belakangan
 
 Semua warna punya pasangan dark, bukan sekadar dibalik. Warna accent di dark mode dinaikkan sedikit supaya tetap terbaca di latar gelap. Hasilnya harus diuji per halaman, bukan diasumsikan.
 
@@ -122,7 +122,7 @@ Undang-Undang Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi, disingkat UU
 
 ### Data yang dikumpulkan
 
-| Data | Tujuan | Consent |
+| Data | Tujuan | Persetujuan |
 |---|---|---|
 | Nama dan email | Login | Wajib |
 | Nama pasangan, pasangan, tamu | Fungsi inti | Wajib |
@@ -172,24 +172,24 @@ Tidak ada cookie iklan, tidak ada cookie pelacak, tidak ada pihak ketiga. Kalau 
 | Samsung Internet | 15 | Banyak dipakai di Android kelas menengah |
 | Firefox Desktop | 90 | |
 
-Peramban di bawah versi minimum tetap bisa membuka aplikasi, tapi tidak dapat dipasang. Alasannya, menulis workaround untuk peramban lama yang tidak terlalu banyak dipakai, tapi membuat kode utama lebih buruk.
+Peramban di bawah versi minimum tetap bisa membuka aplikasi, tapi tidak dapat dipasang. Alasannya, menulis penyiasatan untuk peramban lama yang tidak terlalu banyak dipakai, tapi membuat kode utama lebih buruk.
 
 Fitur yang wajib punya fallback: service worker, IndexedDB, dan `clamp()`. Ketiganya punya fallback, dan fallback-nya sudah ditulis, bukan baru ada saat pengujian.
 
 ---
 
-## Observability
+## Pemantauan
 
 | Yang dipantau | Alat | Alasan |
 |---|---|---|
 | Error server | Log ke stdout, dikirim ke aggregator log | Standar di platform hosting |
-| Error client | Diterima server, disimpan di tabel `client_errors` | Tidak perlu tool pihak ketiga |
+| Error client | Diterima server, disimpan di tabel `client_errors` | Tidak perlu alat pihak ketiga |
 | Response time | Log satu baris per request | Cukup untuk melihat regresi |
 | Health check | `GET /api/health`, cek koneksi database | Dipakai platform untuk memutuskan |
 
-**Sentry dan tool serupa tidak dipakai di Fase 1.** Alasannya, satu produk dengan beberapa ribu pengguna belum butuh sistem observability kelas enterprise, dan menambah vendor berarti menambah biaya dan satu hal yang harus dipercaya.
+**Sentry dan alat serupa tidak dipakai di Fase 1.** Alasannya, satu produk dengan beberapa ribu pengguna belum butuh sistem pemantauan kelas besar, dan menambah vendor berarti menambah biaya dan satu hal yang harus dipercaya.
 
-Kalau jumlah error tidak bisa dibaca dari log biasa, itu tanda aplikasinya belum cukup jelas, bukan tanda perlu tool yang lebih besar.
+Kalau jumlah error tidak bisa dibaca dari log biasa, itu tanda aplikasinya belum cukup jelas, bukan tanda perlu alat yang lebih besar.
 
 Tabel `client_errors`:
 
@@ -232,8 +232,8 @@ Apa yang harus diukur sebelum rilis, dan apa yang boleh ditunda:
 | Uji dengan screen reader | Sebelum rilis | Belum diuji |
 | Dark mode per halaman | Sebelum rilis | Belum diuji |
 | Install PWA di iOS dan Android | Sebelum rilis | Belum diuji |
-| Uji luring di village bersinyal lemah | Sebelum rilis | Belum diuji |
-| Load test | Setelah rilis | Belum diukur |
+| Uji luring di desa bersinyal lemah | Sebelum rilis | Belum diuji |
+| Uji beban | Setelah rilis | Belum diukur |
 | Field data Core Web Vitals | Setelah rilis | Belum ada |
 
-Semua baris terakhir ditulis "belum", karena memang belum ada aplikasinya untuk diukur. Kalau table ini diisi dengan angka sebelum aplikasi ada, itu fabrikasi.
+Semua baris terakhir ditulis "belum", karena memang belum ada aplikasinya untuk diukur. Kalau tabel ini diisi dengan angka sebelum aplikasi ada, itu karangan.

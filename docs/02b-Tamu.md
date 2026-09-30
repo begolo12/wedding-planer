@@ -13,12 +13,12 @@ Tiga modul di sini, dan dua di antaranya masih masuk Fase 2. Semuanya berawal da
 | `name` | teks | Nama lengkap tamu |
 | `phone` | teks | Nomor WhatsApp, untuk kirim undangan |
 | `category` | enum | Lihat tabel di bawah |
-| `side` | enum | `pria`, `wanita`, progresiva |
+| `side` | enum | `pria`, `wanita`, `lainnya` |
 | `rsvpStatus` | enum | `belum`, `hadir`, `tidak` |
 | `guestCount` | angka | Jumlah orang yang datang, tidak selalu satu |
 | `invitedAt` | tanggal | Kapan undangan dikirim |
 | `tableId` | relasi | Meja yang dipakai, opsional |
-| `notes` | teks | Diet, ACCESS, alasan tidak hadir |
+| `notes` | teks | Diet, alergi, alasan tidak hadir |
 
 ### Kategori tamu
 
@@ -27,21 +27,21 @@ Tiga modul di sini, dan dua di antaranya masih masuk Fase 2. Semuanya berawal da
 | Keluarga pasangan | Punya aturan hadiah dan urutan sendiri, dan tidak bisa dibatalkan |
 | Keluarga besar | Sering datang rame, butuh hitungan kursi ekstra |
 | Teman | Jumlahnya tidak terduga, sering berubah di menit terakhir |
-| Kerja | Ada yang perlu-undangan formal, ada yang tidak |
+| Kerja | Ada yang perlu undangan formal, ada yang tidak |
 | Anak | Butuh kursi dan tinggi meja yang berbeda |
 | Lainnya | Tetangga, kerabat jauh, kepala dusun, kepala RT |
 
 ### Kenapa perlu
 
-Keputusan "siapa yang diundang" hampir selalu lebih sulit daripada "bisa tidak diundangkan". Yang paling sering ditanyakan pasangan adalah berapa total kursi yang perlu disewa venue, dan berapa porssi katering yang harus dipesan. Dua angka itu harus turun dari daftar tamu ini, bukan dihitung manual.
+Keputusan "siapa yang diundang" hampir selalu lebih sulit daripada "bisa tidak diundang". Yang paling sering ditanyakan pasangan adalah berapa total kursi yang perlu disewa venue, dan berapa porsi katering yang harus dipesan. Dua angka itu harus turun dari daftar tamu ini, bukan dihitung manual.
 
-### Minimal Version
+### Versi minimal
 
 - [ ] Tambah, edit, hapus tamu, satu per satu maupun sekaligus dari daftar yang ditempel
-- [ ] Filter by kategori, status kehadiran, dan sisi
-- [ ] Total kursi dan estimasi porssi katering terhitung otomatis
+- [ ] Saring berdasarkan kategori, status kehadiran, dan sisi
+- [ ] Total kursi dan estimasi porsi katering terhitung otomatis
 - [ ] Impor dari spreadsheet satu kolom, jadi pasangan tidak perlu input manual
-- [ ] Tandai Kehadiran cepat, satu tap per tamu
+- [ ] Tandai kehadiran cepat, satu tap per tamu
 - [ ] Diurutkan berdasarkan nama, dengan pencarian yang bekerja di HP
 
 ---
@@ -66,9 +66,9 @@ Peta meja tidak ada di Fase 1.
 
 **Alasannya** fitur ini hanya berguna di hari-H, sementara pasangan butuh bantuan dari fase perencanaan. Peta meja juga butuh interaksi drag-and-drop yang sulit dipakai di layar kecil, dan tidak bisa diuji dengan benar sebelum ada hari-H yang nyata.
 
-Yang perlu ada di Fase 1 sebagai tempathozher:
+Yang perlu ada di Fase 1 sebagai penampung:
 
-- [ ] Nama meja sebagai teks bebas, misalnya "Meja 1: Keluarga bride" tanpa visual drag-and-drop
+- [ ] Nama meja sebagai teks bebas, misalnya "Meja 1: Keluarga pengantin wanita" tanpa visual drag-and-drop
 - [ ] Assign tamu ke meja lewat dropdown, bukan dengan menggeser
 - [ ] Cetak daftar tamu per meja dalam bentuk teks atau PDF
 

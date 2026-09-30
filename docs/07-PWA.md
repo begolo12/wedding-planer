@@ -10,9 +10,9 @@ Aplikasi ini harus tetap berguna di tempat sinyal jelek. Di perkawinan di Indone
 
 | Field | Nilai | Alasan |
 |---|---|---|
-| `name` | `Aisyah & Bagas` | Nama plan default, diganti setelah user mengisinya |
+| `name` | `Aisyah & Bagas` | Nama plan bawaan, diganti setelah user mengisinya |
 | `short_name` | `Aisyah` | Maksimal 12 karakter agar tidak terpotong di home screen |
-| `start_url` | `/` | Mengalways ke Beranda, bukan halaman terakhir yang dibuka |
+| `start_url` | `/` | Selalu ke Beranda, bukan halaman terakhir yang dibuka |
 | `display` | `standalone` | Tanpa address bar, terasa seperti aplikasi biasa |
 | `background_color` | `#FBF9F6` | Sama dengan base palette agar tidak ada kedipan putih |
 | `theme_color` | `#FBF9F6` | Mobile browser memakai ini untuk address bar |
@@ -48,7 +48,7 @@ Kalau pembayaran dicache, user bisa melihat pembayaran sudah tercatat padahal se
 1. Coba ambil dari network, dengan timeout 3 detik
 2. Kalau berhasil, perbarui cache, kirim ke client
 3. Kalau gagal atau timeout, ambil dari cache
-4. Kalau tidak ada di cache, kirim halaman luring yang explains apa yang terjadi
+4. Kalau tidak ada di cache, kirim halaman luring yang menjelaskan apa yang terjadi
 ```
 
 Halaman luring bukan `error.html` generik. Isinya menjelaskan aplikasi masih bisa dipakai untuk apa, dan tombol ke rundown, karena itu satu-satunya layar yang benar-benar berguna tanpa koneksi.
@@ -60,14 +60,14 @@ Halaman luring bukan `error.html` generik. Isinya menjelaskan aplikasi masih bis
 | Layar | Luring? | Alasan |
 |---|---|---|
 | Rundown | Ya, wajib | Dipakai di lokasi saat sinyal hilang |
-| Info untuk keluarga | Ya, kalau sudah dibuka | Frequently dibaca oleh keluarga |
-| Daftar tugas | Ya, read-only | Langkah cepat di tempat |
-| Daftar tamu | Ya, read-only | Pengecekan jumlah di lokasi |
-| Anggaran | Ya, read-only | Mengecek perkiraan di lokasi |
+| Info untuk keluarga | Ya, kalau sudah dibuka | Sering dibaca oleh keluarga |
+| Daftar tugas | Ya, baca saja | Langkah cepat di tempat |
+| Daftar tamu | Ya, baca saja | Pengecekan jumlah di lokasi |
+| Anggaran | Ya, baca saja | Mengecek perkiraan di lokasi |
 | Tambah atau ubah data | Antrean, kirim nanti | Butuh konfirmasi user, jadi tidak boleh diam-diam |
 | Login | Tidak | Sesi harus diverifikasi server |
 
-Read-only luring berarti data tampil dari cache, tapi tombol tambah disembunyikan, bukan diklik dan gagal. Tombol yang tidak bisa bekerja lebih baik disembunyikan.
+Baca saja saat luring berarti data tampil dari cache, tapi tombol tambah disembunyikan, bukan diklik dan gagal. Tombol yang tidak bisa bekerja lebih baik disembunyikan.
 
 ---
 
@@ -155,9 +155,9 @@ Aturan:
 
 | Nama aset | Pola |
 |---|---|
-| Aset statis | Versi baru langsung replaces yang lama |
-| Navigasi | Versi baru replaces yang lama |
-| API cache | Tidak pernah replaces, selalu dibuang saat update |
+| Aset statis | Versi baru langsung mengganti yang lama |
+| Navigasi | Versi baru mengganti yang lama |
+| API cache | Tidak pernah mengganti, selalu dibuang saat update |
 
 Alur update:
 
@@ -172,11 +172,11 @@ Jangan perbarui paksa di tengah pemakaian, karena user mungkin sedang isi form.
 
 ---
 
-## Offline detection
+## Cara mendeteksi luring
 
 `navigator.onLine` tidak bisa dipercaya. Browser sering melaporkan online di Wi-Fi yang tidak punya internet.
 
-Cara yang dipakai: coba request kecil ke endpoint sendiri. Kalau gagal, anggap luring. Dicek setiap 30 detik, dan setiap kali tab regain focus.
+Cara yang dipakai: coba request kecil ke endpoint sendiri. Kalau gagal, anggap luring. Dicek setiap 30 detik, dan setiap kali tab kembali aktif.
 
 Indikator luring di UI:
 
@@ -214,11 +214,11 @@ Tidak ada proses sync periodik untuk mengisi cache. Alasannya, satu proses sync 
 | Periodic background sync | Sama, tidak konsisten antar browser |
 | Workbox atau library cache | Strategi di sini spesifik, dan menulis sendiri lebih mudah diubah |
 
-**Workbox ditolak karena menambah sekitar 20KB dan API yang harus dipelajari, untuk sesuatu yang hanya butuh lima handler.** Ini bukan soal performa, tapi soal berapa banyak yang perlu dipahami orang berikutnya.
+**Workbox ditolak karena menambah sekitar 20KB dan API yang harus dipelajari, untuk sesuatu yang hanya butuh lima penanganan.** Ini bukan soal performa, tapi soal berapa banyak yang perlu dipahami orang berikutnya.
 
 ---
 
-## Checklist sebelum dianggap selesai
+## Daftar periksa sebelum dianggap selesai
 
 | Item | Status |
 |---|---|
@@ -227,7 +227,7 @@ Tidak ada proses sync periodik untuk mengisi cache. Alasannya, satu proses sync 
 | Indikator luring muncul saat koneksi hilang | |
 | Perubahan saat luring masuk antrean, bukan hilang | |
 | Antrean terkirim setelah koneksi kembali, dengan urutan benar | |
-| Konflik menawarkan dua pilihan, bukan menimpa diam-diam |
+| Konflik menawarkan dua pilihan, bukan menimpa diam-diam | |
 | Service worker aktif hanya di produksi | Tidak di `next dev`, karena cache akan menyembunyikan perubahan terbaru |
-| Versi cache increase setiap release | |
+| Versi cache naik di setiap rilis | |
 | Hanya HTTPS | |

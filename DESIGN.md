@@ -11,10 +11,10 @@ Status: draft v1.0. Produk ini belum punya pemilik brand identity yang disetujui
 Alasan pemilihan dial:
 
 - **ENERGY 2** (bukan 3). Pasangan yang sedang menyiapkan wedding melakukan iterasi berkali-kali, tapi setiap iterasi terasa seperti tegangan. Energy 3 akan terasa seperti produk marketing dan membuat mereka merasa aplikasi ini untuk orang lain, bukan untuk mereka. Energy 2 memberi rasa tenang dan bisa dipercaya, yang dibutuhkan orang yang punya anggaran 100 juta dan sedang stres.
-- **RHYTHM 2** (bukan 3). Aplikasi ini dipakai berbulan-bulan, bukan sekali lihat. Varian layout di dalam dashboard menambah beban kognitif, bukan mengurangi. Yang varies di sini bukan seksi, tapi bentuk data: daftar, timeline, dan budget masing-masing punya komposisi berbeda secara alami.
+- **RHYTHM 2** (bukan 3). Aplikasi ini dipakai berbulan-bulan, bukan sekali lihat. Varian layout di dalam beranda menambah beban kognitif, bukan mengurangi. Yang berubah di sini bukan bagian layar, tapi bentuk data: daftar, garis waktu, dan anggaran masing-masing punya komposisi berbeda secara alami.
 - **MOTION 1** (bukan 2 atau 3). Motion dipakai hanya untuk memberi tahu perubahan state: task overdue berubah warna, tab aktif berubah. Bukan scroll-reveal, bukan parallax. Alasannya: aplikasi ini sering dibuka di perjalanan, di venue, dengan koneksi buruk. Animasi yang harus menunggu selesai untuk dibaca adalah animasi yang sia-sia.
 
-DESIGN.md ini ada, jadi output ini bukan "draft tanpa arah". Keputusan di bawah diambil dari dokumen ini, bukan dari default.
+DESIGN.md ini ada, jadi dokumen ini bukan "draft tanpa arah". Keputusan di bawah diambil dari dokumen ini, bukan dari default.
 
 ---
 
@@ -89,13 +89,13 @@ Motif ini muncul di:
 
 - Timeline task, dengan garis dan titik di kiri, isi task di kanan
 - Kalender, dengan titik di hari yang punya isinya
-- Dashboard, dengan garis yang mengarah ke hari-H
+- Beranda, dengan garis yang mengarah ke hari-H
 
 Alasan motif ini dipilih: bentuk ini benar-benar cuma ada di aplikasi wedding. Kalau logo dan nama produk ditukar, motif ini masih langsung menunjuk "ini aplikasi wedding". Motif ini yang membuat produk punya identitas sendiri, bukan hanya warna.
 
-### Aturan komposisi dashboard
+### Aturan komposisi beranda
 
-Dashboard bukan grid 4 kartu identik. Komposisinya:
+Beranda bukan grid 4 kartu identik. Komposisinya:
 
 ```
 ┌─────────────────────────────────────────────────┐

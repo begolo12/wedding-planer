@@ -34,7 +34,7 @@ Istilah teknis dari bahasa Inggris diterjemahkan, karena tidak dikenal orang awa
 |---|---|---|
 | Kehadiran | RSVP | Kebanyakan orang Indonesia menjawab lewat WhatsApp, jadi kata konfirmasi lebih sering dipakai |
 | Tamu | Guest | Sudah jadi bahasa sehari-hari |
-| Rundown acara | Run sheet | Sudah jadi bahasa sehari-hari di Among Wedding |
+| Rundown acara | Run sheet | Sudah jadi bahasa sehari-hari |
 | Kontrak | Legal docs | Orang awam lebih mudah paham kata kontrak |
 
 ---

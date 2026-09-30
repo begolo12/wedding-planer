@@ -1,8 +1,8 @@
 # Wedding Planner Indonesia
 
-Rencana produk dan spesifikasi teknis untuk aplikasi perencanaan pernikahan yang dibuat untuk pasar Indonesia.
+Rencana produk, spesifikasi teknis, dan implementasi aplikasi perencanaan pernikahan yang dibuat untuk pasar Indonesia.
 
-Kode aplikasi belum ada. Yang ada di sini adalah dokumen yang bisa diuji dan dikoreksi sebelum satu baris kode ditulis.
+Kode aplikasi berada di direktori `src/`, dibangun dengan Next.js 15, PostgreSQL 17, Drizzle ORM, Better Auth, dan PWA luring.
 
 ---
 
@@ -24,8 +24,8 @@ Kode aplikasi belum ada. Yang ada di sini adalah dokumen yang bisa diuji dan dik
 | [`docs/07-PWA.md`](docs/07-PWA.md) | Manifest, strategi cache, antrean luring, konflik, install prompt |
 | [`docs/08-NFR.md`](docs/08-NFR.md) | Performa, aksesibilitas, keamanan, privasi, kompatibilitas, observability |
 | [`docs/09-Pustaka-Prompt.md`](docs/09-Pustaka-Prompt.md) | Dua belas prompt siap pakai untuk meminta bantuan AI menulis, memeriksa, dan menelusuri kode |
-| [`docs/10-Epik-dan-Story.md`](docs/10-Epik-dan-Story.md) | Delapan epik dan empat puluh story, lengkap dengan syarat selesai dan syarat diterima |
-| [`docs/11-Delivery-Plan.md`](docs/11-Delivery-Plan.md) | Fase, sprint, risiko, definisi selesai, backlog tertunda |
+| [`docs/10-Epik-dan-Story.md`](docs/10-Epik-dan-Story.md) | Delapan epik dan empat puluh dua story, lengkap dengan syarat selesai dan syarat diterima |
+| [`docs/11-Delivery-Plan.md`](docs/11-Delivery-Plan.md) | Urutan berkas dan folder yang dibuat, fase, sprint, risiko, rencana uji, definisi selesai, backlog tertunda |
 | [`docs/12-Wireframe.md`](docs/12-Wireframe.md) | Indeks wireframe, notasi, dan aturan yang berlaku di semua layar |
 | [`docs/12a-Wireframe-Inti.md`](docs/12a-Wireframe-Inti.md) | Wireframe Beranda, Tugas, Tanggal penting, Akun, dan luring |
 | [`docs/12b-Wireframe-Uang.md`](docs/12b-Wireframe-Uang.md) | Wireframe Anggaran, Vendor, dan Pembayaran |
@@ -36,6 +36,7 @@ Kode aplikasi belum ada. Yang ada di sini adalah dokumen yang bisa diuji dan dik
 | [`docs/14-Naskah-Teks.md`](docs/14-Naskah-Teks.md) | Semua teks yang muncul di aplikasi. Nama tombol, judul layar, pesan galat, dan konfirmasi |
 | [`docs/15-Glosarium.md`](docs/15-Glosarium.md) | Kamus istilah. Satu kata punya satu arti di seluruh dokumen |
 | [`docs/16-Laporan-dan-Bagikan.md`](docs/16-Laporan-dan-Bagikan.md) | Aturan laporan keadaan, bagikan ke WhatsApp, dan cetak PDF |
+| [`docs/17-Rencana-Build.md`](docs/17-Rencana-Build.md) | Rencana teknis dan langkah implementasi kode aplikasi |
 | [`AGENTS.md`](AGENTS.md) | Aturan kerja untuk AI yang menulis di repo ini, termasuk daftar periksa sebelum kirim |
 | [`CHANGELOG.md`](CHANGELOG.md) | Catatan setiap perubahan, dari sudut pandang pembaca |
 
@@ -47,7 +48,7 @@ Aplikasi untuk pasangan yang sedang menyiapkan pernikahan, dipakai di HP dan lap
 
 **Yang fokus:** rencana yang bisa dibaca, catatan pembayaran yang tidak tercecer di WhatsApp, dan rundown yang bisa dibuka di lokasi.
 
-**Tidak ada di Fase 1:** marketplace vendor, payment gateway, AI, feed sosial, iklan, dan dashboard untuk organizer profesional.
+**Tidak ada di Fase 1:** lokapasar vendor, gerbang pembayaran, AI, arus sosial, iklan, dan beranda untuk penyelenggara profesional.
 
 ---
 
@@ -71,7 +72,7 @@ Alasannya ada di [`docs/06-Stack-dan-Batas.md`](docs/06-Stack-dan-Batas.md), ter
 
 ## Modul menurut prioritas
 
-Tujuh modul P0 adalah batas minimum yang harus selesai sebelum produk bisa disebut jadi.
+Sembilan modul P0 adalah batas minimum yang harus selesai sebelum produk bisa disebut jadi.
 
 | Prioritas | Modul | Dokumen |
 |---|---|---|

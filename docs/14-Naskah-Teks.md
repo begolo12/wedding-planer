@@ -56,7 +56,7 @@ Nada bahasa sudah ditetapkan di [`DESIGN.md`](../DESIGN.md) bagian 2. Dokumen in
 
 ### 3.2 Tombol di daftar
 
-| Aksi | Nama | convincingly |
+| Aksi | Nama | Bukan |
 |---|---|---|
 | Ubah satu item | Ubah | Edit |
 | Hapus satu item | Hapus | Remove |
@@ -69,7 +69,7 @@ Nada bahasa sudah ditetapkan di [`DESIGN.md`](../DESIGN.md) bagian 2. Dokumen in
 
 | Tidak dipakai | Dipakai gantinya | Alasan |
 |---|---|---|
-| Submit | Simpan | "Submit" terasa seperti formular kantor |
+| Submit | Simpan | "Submit" terasa seperti formulir kantor |
 | Confirm | Ya, hapus | Orang tidak tahu apa yang dikonfirmasi |
 | OK | Tutup | "OK" tidak menjelaskan tombol ini melakukan apa |
 | Cancel | Batal | "Cancel" sudah jadi bahasa sehari-hari, boleh |
@@ -278,7 +278,7 @@ Placeholder bukan label. Kalau label belum ada, placeholder tetap dipakai, tapi 
 |---|---|
 | Email verifikasi | Fitur ini tidak ada di Fase 1. Lihat `docs/01-PRD.md` bagian scope. |
 | Reset password | Email belum jadi kanal, jadi pesan error yang jujur lebih baik daripada email yang tidak sampai |
-| Onboarding banyak slide | Menu pertama langsung ke Beranda, dengan satu kartu yang menjelaskan langkah berikutnya |
+| Langkah pertama banyak slide | Menu pertama langsung ke Beranda, dengan satu kartu yang menjelaskan langkah berikutnya |
 | Tooltip panjang | Ganti dengan teks yang selalu terlihat |
 | Istilah Inggris di UI | Semua istilah ada di [`docs/15-Glosarium.md`](15-Glosarium.md) |
 
@@ -303,12 +303,12 @@ Judul bagian, bukan kalimat panjang. Laporan dibaca sambil berdiri di depan oran
 | Bagian | Judul | Keterangan di bawahnya |
 |---|---|---|
 | Judul | Aisyah & Bagas | 30 Juni 2026 |
-| Hitung mundur | 142 hari lagi | Tanggal akad 4 Oktober 2025 |
+| Hitung mundur | 371 hari lagi | Tanggal pernikahan 30 Juni 2026 |
 | Uang | Batas Rp 40.000.000 | Terpakai Rp 24.500.000, sisa Rp 15.500.000 |
 | Tugas | 28 selesai dari 63 | 4 harus minggu ini, 2 lewat tanggal |
-| Tamu | 240 orang | 180 sudah konfirmasi, 60 belum |
-| Rundown | Hari ini | 6 item, dari 08.00 sampai 21.00 |
-| Vendor | 3 belum lunas | Rp 6.200.000 belum dibayar |
+| Tamu | 312 orang | 150 kursi, 54 belum konfirmasi |
+| Rundown | Hari ini | 4 item, dari 07.00 sampai 13.00 |
+| Vendor | 2 belum lunas | Rp 17.000.000 belum dibayar |
 
 Angka di bawah judul memakai angka tabular, sama seperti halaman lain.
 
@@ -331,7 +331,7 @@ Teks yang dikirim dalam pilihan ringkas:
 ```text
 Halo mama, ini laporan rencana sampai hari ini.
 
-Hari-H: 30 Juni 2026, 142 hari lagi
+Hari-H: 30 Juni 2026, 371 hari lagi
 
 Uang
 Batas Rp 40.000.000
@@ -342,7 +342,7 @@ Tugas
 28 selesai dari 63, 4 harus minggu ini
 
 Tamu
-240 orang, 180 sudah konfirmasi
+312 orang, 150 kursi, 54 belum konfirmasi
 
 Lebih lengkap di tautan: https://aisyah.app/l/abc123XYZ
 ```

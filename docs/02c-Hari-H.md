@@ -6,7 +6,7 @@ Modul yang dipakai di hari-H itu sendiri. Semuanya P0, kecuali dokumentasi yang 
 
 ## 08. Rundown acara (P0)
 
-Ini urutan acara per menit. Pairs yang baru pertama kaliECC biasanya belum punya ini sama sekali.
+Ini urutan acara per menit. Pasangan yang baru pertama kali biasanya belum punya ini sama sekali.
 
 ### Data rundown
 
@@ -27,19 +27,19 @@ Aplikasi ini harus bisa menampung semua bentuk acara yang lazim di Indonesia, bu
 | Sistem | Isi rundown |
 |---|---|
 | Muslim | Akad nikah, sungkeman, resepsi, walimah |
-| Java | Akad, prosesi kirab, p mechanistic, siraman, balangan gantal,-respect, saweran |
-| Minang | Basi, baliong, manang, prolog |
-| Sunda | Akad, sakinah, saweran, rWl itik |
-| Bali | Mesabatan, potong jeneng, ngaben, resepsi |
-| Modern | Akad, prewedding, resepsi, party |
+| Jawa | Akad, siraman, midodareni, balangan gantal, saweran |
+| Minang | Akad, malam bainai, manjapuik marapulai, baralek |
+| Sunda | Akad, saweran, huap lingkung, ngunduh mantu |
+| Bali | Mesakapan, mewidhi widana, resepsi |
+| Modern | Akad, prewedding, resepsi, pesta |
 
 **Alasannya** banyak pasangan di Indonesia menjalankan adat tertentu, dan kalau aplikasi cuma punya satu template, separuh pengguna akan salah pakai.
 
 ### Kenapa perlu
 
-Rundown adalah dokumen yang paling sering hilang saat hari-H. Semua orang datang dengan harapan berbeda, dan tanpa urutan yang sama, acara/molor.
+Rundown adalah dokumen yang paling sering hilang saat hari-H. Semua orang datang dengan harapan berbeda, dan tanpa urutan yang sama, acara jadi molor.
 
-### Minimal Version
+### Versi minimal
 
 - [ ] Tambah, edit, hapus item rundown
 - [ ] Terurut dari jam paling awal
@@ -58,7 +58,7 @@ Keluarga besar sering tidak tahu harus datang jam berapa, harus bawa apa, dan ti
 
 | Field | Tipe | Keterangan |
 |---|---|---|
-| `title` | teks | Judul, misalnya "Tama pengantin" |
+| `title` | teks | Judul, misalnya "Tamu pengantin" |
 | `body` | teks | Isi pengumuman |
 | `audience` | enum | `semua`, `keluarga`, `crew`, `tamu` |
 | `publishedAt` | timestamp | Kapan dipublikasikan |
@@ -70,12 +70,12 @@ Keluarga besar sering tidak tahu harus datang jam berapa, harus bawa apa, dan ti
 - Alamat lengkap dan patokan lokasi
 - Dress code
 - Daftar orang yang harus diantar ke KUA
-- Nomor emergency
+- Nomor darurat
 - Briefing crew
 - Aturan mahar dan seserahan
-- undivided kaum keluarga yang perlu tahu
+- Kerabat dekat yang perlu tahu lebih dulu
 
-### Minimal Version
+### Versi minimal
 
 - [ ] Buat pengumuman singkat
 - [ ] Sematkan pengumuman yang paling penting
@@ -94,7 +94,7 @@ Album foto, galeri, dan halaman berbagi tidak ada di Fase 1.
 Yang perlu ada di Fase 1:
 
 - [ ] Kolom vendor dokumentasi di modul vendor, supaya terikat ke anggaran
-- [ ] Checklist tugas dokumentasi (konzep foto, lokasi, jamoltip)
+- [ ] Checklist tugas dokumentasi (konsep foto, lokasi, jam lokasi)
 - [ ] Upload foto bukti transfer di modul pembayaran
 
 <!--NEXT-->

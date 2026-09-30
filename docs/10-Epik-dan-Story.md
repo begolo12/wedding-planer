@@ -463,6 +463,8 @@ Alasan tujuh story ini dipilih: tanpa salah satunya, produk tidak bisa dipakai. 
 
 Angka ini berlaku untuk satu orang yang bekerja penuh waktu. Kalau bekerja setengah waktu, kalikan dua.
 
+Total di atas hanya menjumlah estimasi per story. Rencana sprint di [`11-Delivery-Plan.md`](11-Delivery-Plan.md) memakai 55 hari kerja, karena menambah pekerjaan yang tidak layak jadi story sendiri: laporan, cetak PDF, halaman luring, uji manual di perangkat sungguhan, dan jeda antar sprint.
+
 ---
 
 ## Yang sengaja tidak ada

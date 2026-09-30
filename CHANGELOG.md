@@ -4,7 +4,7 @@ Semua perubahan besar pada dokumen dan kode dicatat di sini.
 
 Formatnya mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.1.0/). Versi mengikuti [SemVer](https://semver.org/lang/id/).
 
-Belum ada rilis sungguhan. Semua entri di bawah ini masih dokumen, belum ada kode.
+Versi 0.1.0 sampai 0.4.0 masih dokumen, belum ada kode. Kode pertama masuk di 0.5.0 dan berikutnya.
 
 ---
 
@@ -29,9 +29,103 @@ Aturan singkat:
 
 ---
 
-## Belum ada rilis
+## [0.6.0] - 30 Juni 2026
 
-Rilis pertama menunggu kode aplikasi selesai.
+Audit kepatuhan terhadap `AGENTS.md` dan `docs/` menemukan enam cacat nyata pada kode 0.5.0. Semuanya diperbaiki di rilis ini.
+
+#### Tambah
+
+- Halaman `/aplikasi` berisi cara memasang di Android dan di iPhone, plus apa yang berubah setelah dipasang. Halaman ini ikut disimpan Service Worker supaya tetap bisa dibuka tanpa sinyal
+- Kolom `LURING` di `KodeGalat` dan statusnya 503, supaya balasan Service Worker saat jaringan putus punya kode yang bisa dikenali, bukan cuma kalimat
+
+#### Perbaiki
+
+- Service Worker tidak pernah didaftarkan. Berkas `public/sw.js` ada, tapi tidak ada satu baris pun di `src/` yang memanggil `navigator.serviceWorker.register`. Akibatnya seluruh rencana luring mati: halaman tidak pernah masuk cache dan rundown tidak bisa dibuka tanpa sinyal. Pendaftaran sekarang ada di `src/components/pwa.tsx` dan dipasang di `src/app/(app)/layout.tsx`
+- Tulisan saat luring hilang begitu saja. `simpanKeAntrean` di `src/lib/luring.ts` tidak punya pemanggil, jadi Service Worker membalas 503 berkode `LURING` dan API client melemparnya ke layar tanpa menyimpan apa pun. Sekarang `src/lib/api-client.ts` mengenali kode `LURING` dan mengantrekan setiap permintaan selain `GET` sebelum melempar galat. `GET` sengaja tidak diantrekan karena datanya bisa dimuat ulang
+- Ajakan memasang aplikasi tidak pernah tampil. `docs/01-PRD.md` bagian penerimaan memasang PWA, tapi `InstallPrompt` lama tidak dipasang di layar mana pun. Sekarang dipasang di kerangka layar, dan ditambah halaman penjelas `/aplikasi` untuk Android dan iPhone yang ikut disimpan di cache
+- Pita luring tidak pernah muncul. Komponen `LuringBanner` ada tapi tidak dipasang; yang dipakai cuma pita statis. Sekarang pita dipasang di atas isi halaman dan ikut menggeser konten, bukan menutupi tombol. Ini juga memenuhi `docs/05-IA-dan-Layar.md` baris 116 yang meminta pita tipis di atas
+- Kunci tema tidak cocok. Tombol tema menyimpan `pernikahan_tema` sejak sebelum diubah nama, sementara skrip di `layout.tsx` membaca `aisyah-theme`, jadi pilihan tema tidak pernah terbaca ulang setelah halaman dimuat. Kunci disatukan jadi `aisyah-theme`
+- Mode gelap mengikuti sistem tidak pernah jalan. Tidak ada aturan `@media (prefers-color-scheme: dark)`, dan "Mengikuti Sistem" hanya menghapus atribut tanpa menentukan warnanya. Sekarang ada blok `prefers-color-scheme` yang mengambil alih saat tidak ada pilihan tersimpan, dan nilai `terang` ditulis jelas supaya bisa dibedakan dari "belum memilih"
+- Nomor versi di layar akun ditulis tetap `1.0.0` sementara `package.json` berisi `0.1.0`. Sekarang dibaca dari `NEXT_PUBLIC_APP_VERSION` yang diisi `next.config.mjs` dari `package.json`, jadi tidak bisa lagi berbeda
+- Enam kode mati dibuang: `KerangkaDaftar`, `PitaLuring`, `galatPerField`, `kodeGalat`, dan aturan CSS `.baris-kerangka` serta `.jarak-antarlist` yang tidak punya pemakai. `AGENTS.md` melarang tombol mati; kode mati punya masalah yang sama, cuma lebih sunyi
+
+#### Keputusan
+
+- Permintaan `GET` tidak diantrekan saat luring. Membalas data basi dari antrean akan lebih menyesatkan daripada sekadar gagal dan menyuruh muat ulang
+- Halaman `/aplikasi` dibuat sebagai penjelas memasang, bukan dijadikan bagian layar akun. Layar akun sudah panjang dan orang yang butuh panduan memasang biasanya sedang mencari di luar aplikasi, sering dari tautan
+
+---
+
+## [0.5.0] - 30 Juni 2026
+
+#### Tambah
+
+- Implementasi penuh 17 layar aplikasi Next.js sesuai spesifikasi Wireframe 12a sampai 12e
+- Tiga puluh tiga endpoint REST API di bawah `/api/plans/:planId/*` dengan validasi Zod dan filter planId
+- Skema PostgreSQL 17 dengan 15 tabel relasional dan migrasi Drizzle ORM
+- Autentikasi email dan kata sandi menggunakan Better Auth dengan sesi aman
+- PWA luring dengan Service Worker kustom, IndexedDB untuk antrean mutasi, dan manifest
+- Lembar gaya semantik murni `globals.css` dan `cetak.css` tanpa dependensi CSS utilitas luar
+- Dukungan baca-saja publik tanpa login di `/bagikan/:token` dan `/l/:token`
+- Teks WhatsApp otomatis dengan tautan langsung `wa.me` dan pembagian tautan laporan
+- Ekspor cadangan JSON lokal di layar akun untuk keamanan data luring
+
+#### Perbaiki
+
+- Pemisahan utilitas komputasi plan dari akses database server agar tidak membocorkan modul Node.js ke browser
+- Penyesuaian konfigurasi path alias webpack dan Next.js 15
+- Kompatibilitas TypeScript 5.8 untuk kompilasi produksi tanpa peringatan
+
+---
+
+## [0.4.0] - 30 Juni 2026
+
+#### Perbaiki
+
+- Sebelas kata yang dilarang `docs/15-Glosarium.md` bagian 7 masih dipakai di luar glosarium. Semuanya diganti: "dashboard" jadi "beranda" di `DESIGN.md` dan `docs/01-PRD.md`, "output" jadi "dokumen", "payment gateway" jadi "gerbang pembayaran", "marketplace" jadi "lokapasar", "onboarding" jadi "langkah pertama" di `docs/01-PRD.md` dan `docs/14-Naskah-Teks.md`, "planner profesional" jadi "perencana profesional", dan "approval cycle" jadi "siklus persetujuan" di `docs/11-Delivery-Plan.md`
+- Pemeriksaan ulang seluruh berkas Markdown memastikan tidak ada kata lain dari daftar larangan yang tersisa. Tiga baris di `docs/14-Naskah-Teks.md` sengaja tetap memuat kata terlarang karena tugasnya memang menunjukkan penulisan yang ditolak
+- Satu kalimat rusak di `DESIGN.md` bagian 1 dirapikan: "Yang varies di sini bukan seksi" jadi "Yang berubah di sini bukan bagian layar". Ini jenis kerusakan yang sama dengan sepuluh kata rusak yang diperbaiki di rilis 0.1.0, yaitu frasa Inggris yang menyisip ke kalimat Indonesia
+- Dua puluh lima temuan kata Inggris yang menyisip diperiksa di semua berkas. Semuanya sah kecuali satu di `DESIGN.md`: nama produk seperti "Next.js", sintaks SQL seperti `IS NULL` dan `ON DELETE CASCADE`, nama strategi cache seperti "network first", dan contoh teks yang sengaja dikutip seperti `"No data"`. Yang bukan prosa tidak diterjemahkan
+
+#### Keputusan
+
+- Kosakata teknis yang tidak ada di daftar larangan glosarium dibiarkan apa adanya, termasuk "venue", "layout", "task", "endpoint", dan "offline". Glosarium adalah satu-satunya sumber yang menentukan kata mana yang diterjemahkan, dan menambah larangan di luar daftar itu berarti mengubah keputusan bahasa tanpa dasar
+
+---
+
+## [0.3.0] - 30 Juni 2026
+
+#### Tambah
+
+- Bagian "Urutan berkas yang dibuat" di `docs/11-Delivery-Plan.md`: enam berkas yang dibaca sebelum menulis kode, tujuh belas langkah pengerjaan, dan bentuk folder `src/`
+- Sprint 8 untuk Laporan dan Bagikan di `docs/11-Delivery-Plan.md`. Sebelumnya laporan tidak masuk sprint mana pun
+- Cakupan uji dan uji manual untuk Fase 3 di `docs/11-Delivery-Plan.md`
+
+#### Ubah
+
+- `docs/11-Delivery-Plan.md` naik dari 46 ke 55 hari kerja. Laporan, halaman luring, dan uji manual perangkat belum pernah dihitung sama sekali
+- Sprint 8 sekarang Laporan dan Bagikan, Sprint 9 sekarang PWA dan polish. Sebelumnya hanya ada satu Sprint 8 yang mencampur keduanya dalam tiga hari
+- Rencana uji per sprint ditambah baris untuk laporan di Sprint 8
+- Rujukan "Sprint 8" di tabel risiko diganti jadi "Sprint 1" untuk uji iOS dan "Sprint 6" untuk uji luring
+- Tahap 2 di `docs/13-Rencana-Kerja.md` naik dari 21 ke 22,5 hari supaya jumlahnya berhenti di 39 seperti tabel
+- `README.md` menyebut empat puluh dua story, bukan empat puluh. Hitungannya 42
+- Daftar prioritas di `docs/02d-Lainnya.md` dan `README.md` naik dari tujuh ke sembilan modul P0, karena laporan dan bagikan WhatsApp sudah ada di dokumen lain tapi belum dihitung di sini
+
+#### Perbaiki
+
+- Fase 2 di `docs/11-Delivery-Plan.md` tertulis 10 hari padahal isinya 19 hari. Angkanya yang diperbaiki, bukan sprintnya yang dipotong
+- Enam kata rusak di `docs/11-Delivery-Plan.md`: "Mokra" jadi "Cakupan", "Java" jadi "Jawa", "Documen" jadi "Dokumen", "sizable" jadi "besar", "delimiter" jadi "pembatas", "Una" jadi "Sebuah"
+- Judul "Test plan per sprint" diganti jadi "Rencana uji per sprint", dan "R rundown" jadi "Rundown"
+- `docs/15-Glosarium.md` kehilangan rujukan ke nama yang tidak pernah ada di dokumen lain
+- `docs/04-API-Contract.md` judul kolom "Cupo" jadi "Kegunaan"
+- Baris backlog "Ekspor ke PDF" diganti jadi "Ekspor ke Excel", karena PDF justru fitur Fase 1 dan tidak mungkin ditunda
+- Label "Barcode undangan" diganti jadi "Kode undangan", karena barcode di dokumen ini tidak pernah didefinisikan
+
+#### Keputusan
+
+- Dokumen yang lengkap dianggap selesai, dan penambahan berikutnya hanya boleh dari temuan saat kode ditulis
+- Urutan berkas ditulis di `docs/11-Delivery-Plan.md`, bukan di berkas baru, supaya tidak ada dokumen ketiga yang mengulang rencana yang sama
+- Angka hari kerja dibiarkan beda antara dokumen epik dan dokumen sprint, dan bedanya dijelaskan di ketiganya. Menyamakan angkanya berarti salah satu dokumen harus mengarang pekerjaan yang tidak ada
 
 ---
 

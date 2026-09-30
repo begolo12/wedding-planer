@@ -13,33 +13,22 @@ Tanda dan aturan umum ada di [`12-Wireframe.md`](12-Wireframe.md).
 ```text
 +--------------------------------+
 | < Tamu                         |
-+--------------------------------+
 | 312 orang  |  150 kursi        |
-|                                |
-| [Cari tamu.................]  |
-|                                |
-| [ Semua ] [ Belum ] [ Sudah ] |
-| [ ] Semua Undangan dikirim       |
-+--------------------------------+
-| Keluarga pengantin     45 org |
-| │ Bpk Budi, Ibu Sartika        |
-| │ ( ) Undangan belum dikirim   |
+| [Cari tamu.................]   |
+| [ Semua ] [ Belum ] [ Sudah ]  |
+| [ ] Semua undangan dikirim     |
+| Keluarga pengantin     45 org  |
+| | Bpk Budi, Ibu Sartika        |
+| | ( ) Undangan belum dikirim   |
 | >                              |
-|                                |
 | Keluarga pihak lain     62 org |
-| │ Bpk Budi, 3 orang             |
-| │ Ibu Sari, 2 orang             |
-| >                              |
-|                                |
+| | Bpk Danu, 3 orang            |
+| | Ibu Sari, 2 orang            |
 | Teman                  120 org |
-| │ Saoedi                        |
-| │ (o) Undangan dikirim         |
-| >                              |
-|                                |
-| 245 dari 312 ditampilkan      |
-|        [ Muat lebih ]           |
-+--------------------------------+
-|                            (+) |
+| | Ahmad Fauzi, 4 orang         |
+| | (o) Undangan dikirim         |
+| 245 dari 312 ditampilkan       |
+| [ Muat lebih ]                 |
 +--------------------------------+
 ```
 
@@ -51,20 +40,16 @@ Setiap tamu punya satu baris status undangan, dan statusnya punya tanda centang,
 
 ```text
 +----------------------------------------------------------------------+
-| Tamu                                             [ Unduh ]  [ Impor ]|
-+----------------------------------------------------------------------+
-| 312 orang  |  150 kursi  |  67 belum kena undangan                  |
+| Tamu   [ Unduh ]  [ Impor ]                                          |
+| 312 orang  |  150 kursi  |  67 belum kena undangan                   |
 +----------------------------------------------------------------------+
 | [Cari tamu..................] [ Semua ] [ Belum ] [ Sudah ]          |
-+----------------------------------------------------------------------+
-| Nama              Kategori       Org   Kursi  Undangan      HP     |
+| Nama   Kategori   Org   Kursi   Undangan      HP                     |
 |------------------+--------------+------+-------+-------------+-------|
-| Bpk Budi          Keluarga P     1    |       (o) dikirim   08...  |
-| Ibu Sartika       Keluarga P     1    |       ( ) belum     08...  |
-| Bpk Danu          Keluarga lain  3    |       ( ) belum     -      |
-|                  |              |      |                      |      |
-|                  |              |      |                      |      |
-| 1 dari 312                                                     < 1 > |
+| Bpk Budi   Keluarga pengantin   1   1   (o) dikirim   08...          |
+| Ibu Sartika   Keluarga pengantin   1   1   ( ) belum   08...         |
+| Bpk Danu   Keluarga besar   3   3   ( ) belum   -                    |
+| 1 dari 312   < 1 >                                                   |
 +----------------------------------------------------------------------+
 ```
 
@@ -91,7 +76,7 @@ Di laptop semua kolom tampil, karena yang perlu dilihat memang perbandingannya. 
 | [ 0812 3456 7890            ]  |
 |                                |
 | Sisi keluarga                  |
-| ( ) Pria                        |
+| ( ) Pria                       |
 | (o) Wanita                     |
 |                                |
 +--------------------------------+
@@ -111,7 +96,7 @@ Nomor HP opsional. Banyak tamu tidak punya nomor, dan memaksa mengisinya membuat
 
 ```text
 +--------------------------------+
-| < Tempel daftar tamu     1 / 2|
+| < Tempel daftar tamu     1 / 2 |
 +--------------------------------+
 | Tempel dari WhatsApp atau      |
 | Excel, satu tamu per baris     |
@@ -132,9 +117,9 @@ Nomor HP opsional. Banyak tamu tidak punya nomor, dan memaksa mengisinya membuat
 
 ```text
 +--------------------------------+
-| < Tempel daftar tamu     2 / 2|
+| < Tempel daftar tamu     2 / 2 |
 +--------------------------------+
-| Akan ditambah ke              |
+| Akan ditambah ke               |
 | [ Keluarga pihak lain      v ] |
 |                                |
 | (o) Ahmad, 3 orang             |
@@ -142,7 +127,7 @@ Nomor HP opsional. Banyak tamu tidak punya nomor, dan memaksa mengisinya membuat
 | ( ) Bpk Danu, 3 orang          |
 |                                |
 +--------------------------------+
-| (o) Ibu Tini                  |
+| (o) Ibu Tini                   |
 | │ Nama sudah ada, jumlah belum |
 +--------------------------------+
 |                                |
@@ -150,7 +135,7 @@ Nomor HP opsional. Banyak tamu tidak punya nomor, dan memaksa mengisinya membuat
 +--------------------------------+
 ```
 
-Ada dua langkah, bukan satu. Kalau langsung disimpan, baris yang salah ikut masuk dan baru ketahuan setelah tamu membalas").
+Ada dua langkah, bukan satu. Kalau langsung disimpan, baris yang salah ikut masuk dan baru ketahuan setelah tamu membalas.
 
 Dua baris yang perlu diperbaiki diberi tanda dan kalimatnya, bukan cuma warna kuning supaya tidak bisa diabaikan.
 
@@ -175,11 +160,11 @@ Dua baris yang perlu diperbaiki diberi tanda dan kalimatnya, bukan cuma warna ku
 |                                |
 | Hadir?                         |
 | ( ) Belum ditanya              |
-| (o) Datang                    |
+| (o) Datang                     |
 | ( ) Tidak datang               |
 |                                |
-| Kado atau angpau                |
-| [ Rp 500.000               ]  |
+| Kado atau angpau               |
+| [ Rp 500.000               ]   |
 |                                |
 +--------------------------------+
 | [ Hapus tamu ]                 |
@@ -199,8 +184,7 @@ Angpau ada di detail tamu, bukan di catatan terpisah. Kado dan angpau datang ber
 | < Meja                         |
 +--------------------------------+
 | 150 kursi  |  312 tamu masuk   |
-+                                |
-+ [ Gambar denah ]  [ Daftar ]   |
+| [ Gambar denah ]  [ Daftar ]   |
 +--------------------------------+
 |                                |
 |        MEJA 1                  |
@@ -248,14 +232,14 @@ Ada dua tampilan: gambar dan daftar. Di lokasi, daftar lebih berguna karena lebi
 | < Tamu                         |
 +--------------------------------+
 |                                |
-|     Belum ada tamu              |
+|     Belum ada tamu             |
 |                                |
-|   Tempel dari WhatsApp supaya   |
+|   Tempel dari WhatsApp supaya  |
 |   tidak perlu menulis satu     |
 |   per satu.                    |
 |                                |
-|   [ Tempel daftar ]             |
-|   [ Tambah satu tamu ]          |
+|   [ Tempel daftar ]            |
+|   [ Tambah satu tamu ]         |
 +--------------------------------+
 ```
 
@@ -277,11 +261,11 @@ Ada dua tampilan: gambar dan daftar. Di lokasi, daftar lebih berguna karena lebi
 
 ```text
 +--------------------------------+
-| [G] Tanpa sinyal                |
+| [G] Tanpa sinyal               |
 +--------------------------------+
 | 312 orang  |  150 kursi        |
 |                                |
-| Keluarga pengantin     45 org |
+| Keluarga pengantin     45 org  |
 | │ Bpk Budi, Ibu Sartika        |
 | │ ( ) Undangan belum dikirim   |
 +--------------------------------+

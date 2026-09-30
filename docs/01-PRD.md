@@ -18,7 +18,7 @@ Persiapan pernikahan di Indonesia tersebar di banyak tempat: WhatsApp dengan org
 
 - **Tidak tahu sudah bayar apa dan belum bayar apa.** Riwayat pembayaran vendor tersebar di beberapa chat, sering terlupa.
 - **Budget meleset.** Tidak ada angka total di satu tempat, sehingga baru sadar berlebihan saat DP vendor ketiga jatuh tempo.
-- **Tanggal penting terlewat.** Kadundung, fitting, akad, dan hari-H tidak ada satu daftar yang jelas.
+- **Tanggal penting terlewat.** Undangan, fitting, akad, dan hari-H tidak ada satu daftar yang jelas.
 - **Data tamu berantakan.** Satu pihak mencatat daftar tamu, pihak keluarga besar mencatat daftar sendiri, akhirnya tidak tahu berapa jumlah final.
 - **Informasi hari-H tidak sampai ke semua orang.** Banyak yang baru tahu tanggal akad saat hari itu.
 
@@ -27,8 +27,8 @@ Persiapan pernikahan di Indonesia tersebar di banyak tempat: WhatsApp dengan org
 | Solusi yang ada | Kekurangan yang sering muncul |
 |---|---|
 | Spreadsheet dan notes | Tidak ada pengingat tanggal, tidak ada daftar tamu, mudah hilang |
-| Aplikasi internasional | Tidak mengenal istilah nikah dan akad, fitur tidak lokal, tampilan terlalu umum |
-| Aplikasi prematahan lokal | Kadang terlalu banyak fitur, alur terlalu panjang untuk orang yang hanya butuh 4 bulan |
+| Aplikasi internasional | Tidak tahu istilah nikah dan akad, tidak ada fitur lokal, tampilan terlalu umum |
+| Aplikasi lokal | Kadang terlalu banyak fitur, alur terlalu panjang untuk orang yang hanya butuh 4 bulan |
 | Grup WhatsApp | Riwayat pesan penting hilang, tidak ada yang bisa ditanya "sudah bayar atau belum" |
 
 ### 2.2 Posisi produk
@@ -72,7 +72,7 @@ Tiga hal ini saja. Kalau harus memotong, potong yang lain, bukan ketiga hal ini.
 
 1. **Timeline tugas** dengan tanggal jatuh tempo dan pengingat
 2. **Anggaran dan pembayaran vendor** dengan total yang selalu terlihat
-3. **Daftar tamu** dengan data lokal Indonesia dan export ke PDF
+3. **Daftar tamu** dengan data lokal Indonesia dan ekspor ke PDF
 
 Pendukung yang wajib ada karena tidak bisa dipisah dari tiga hal di atas:
 
@@ -89,7 +89,7 @@ Bagian ini sama pentingnya dengan scope. Setiap item di sini ada alasannya.
 |---|---|
 | Marketplace vendor | Butuh dua sisi pasar, verifikasi vendor, ulasan, dan pembayaran. Itu bisnis tersendiri. Pasangan bisa tetap mencatat vendor secara manual. |
 | Payment gateway | Pembayaran vendor di Indonesia masih banyak lewat transfer manual dan tunai. Memaksa pembayaran di dalam aplikasi akan memperlambat hal yang sudah berjalan. |
-| Aplikasi untuk WO / planner profesional | Butuh role dan izin terpisah, plus dashboard yang dipakai orang yang bukan pemilik pernikahan. Tidak ada di Fase 1. |
+| Aplikasi untuk WO / perencana profesional | Butuh role dan izin terpisah, plus beranda yang dipakai orang yang bukan pemilik pernikahan. Tidak ada di Fase 1. |
 | Scanner undangan digital dengan AI | Butuh infra computer vision dan biayanya tidak sebanding dengan nilainya di Fase 1. |
 | Aplikasi tamu untuk RSVP online | Banyak pasangan di Indonesia lebih suka RSVP lewat WhatsApp. Fitur ini bisa ditambahkan di Fase 2 kalau ada data yang menunjukkan kebutuhan. |
 | Multi-event | Satu akun untuk satu pernikahan sudah memenuhi kebutuhan. |
@@ -182,7 +182,7 @@ Detail di `docs/08-NFR.md`. Ringkasnya:
 
 | Tanda | Arti | Tindakan |
 |---|---|---|
-| Banyak pengguna membuat satu tugas lalu berhenti | Alur awal terlalu rumit | Perbaiki onboarding, bukan tambah fitur |
+| Banyak pengguna membuat satu tugas lalu berhenti | Alur awal terlalu rumit | Perbaiki langkah pertama, bukan tambah fitur |
 | Budget diisi tapi tidak pernah dibuka lagi | Fitur budget tidak menyelesaikan masalah nyata | Wawancara pengguna, jangan tambah fitur baru |
 | Banyak pengguna melepas aplikasi | Target pasar lokal perlu dicari ulang | Bicara dengan pasangan di luar kota tier 1 |
 | Time to first task lebih dari 10 menit | Alur pendaftaran terlalu panjang | Pangkas langkah |
@@ -197,7 +197,7 @@ Bagian ini sengaja ada. Setiap item di sini butuh keputusan pemilik proyek sebel
 |---|---|---|---|
 | Nama produk | Belum ada | Nama ada di URL, di title, di ikon PWA | Sebelum mulai coding |
 | Harga langganan | Gratis dulu, atau ada paket berbayar | Menentukan apakah ada Features-fitur yang perlu paywall | Sebelum mulai coding |
-| Hari-H Detail | Tanggal, jam, alamat venue | Semua reminder bergantung pada ini | Saat onboarding pertama |
+| Detail Hari-H | Tanggal, jam, alamat lokasi | Semua reminder bergantung pada ini | Saat langkah pertama |
 | Sumber data untuk kalender | Milik sendiri, atau pustaka pihak ketiga | Pustaka pihak ketiga menambah dependensi | Saat implementasi kalender |
 | Metode pembayaran yang didukung | Transfer manual saja, atau plus e-wallet | Tidak ada payment gateway di Fase 1 | Saat implementasi budget |
 

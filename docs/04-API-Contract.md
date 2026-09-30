@@ -51,7 +51,7 @@ Semua endpoint mengikuti aturan yang sama. Kalau ada endpoint yang melanggar sal
 
 ## Konvensi nama
 
-| Verb | Cupo | Contoh |
+| Verb | Kegunaan | Contoh |
 |---|---|---|
 | `GET` | Daftar dengan query parameter | `GET /api/plans/:planId/tasks` |
 | `GET` dengan ID | Satu data | `GET /api/plans/:planId/tasks/:taskId` |
@@ -232,5 +232,6 @@ Tamu bisa lebih dari lima ratus orang, jadi cursor wajib di sana. Rundown hari-H
 | Endpoint pencarian global | Tidak perlu di Fase 1, tiap daftar punya filter sendiri |
 | Bulk update | Butuh endpoint khusus per entitas, dan tidak ada kasus yang cukup sering |
 | WebSocket | Data plan tidak berubah dari luar, jadi polling sudah cukup |
-| Endpoint publik tanpa token | Aside dari share link yang read-only || Endpoint PDF | PDF dibuat di client lewat dialog cetak, jadi tidak ada endpoint yang membangun file |
+| Endpoint publik tanpa token | Selain dari share link yang read-only |
+| Endpoint PDF | PDF dibuat di client lewat dialog cetak, jadi tidak ada endpoint yang membangun file |
 | Endpoint kirim WhatsApp | Aplikasi tidak mengirim pesan, WhatsApp yang mengirim. Yang dikirim ke server cuma teksnya |

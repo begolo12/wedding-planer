@@ -6,11 +6,82 @@ Kalau mau versi yang lebih singkat dan lebih mudah dibaca, lihat [`13-Rencana-Ke
 
 ---
 
-## Mokra kerja ini
+## Cakupan dokumen ini
 
 Satu orang, waktu tidak dibatasi penuh. Kalau ada tim, urutan di dokumen ini masih bisa dipakai, tapi ukuran sprint berubah.
 
 Estimasi di bawah dalam hari kerja untuk satu orang. Kalau ada yang terlihat ambisius, saya tulis alasannya.
+
+---
+
+## Urutan berkas yang dibuat
+
+Fase dan sprint di bawah menjawab berapa lama. Bagian ini menjawab pertanyaan lain: apa yang dibuka dan dibuat lebih dulu saat mulai bekerja.
+
+Urutannya bukan pilihan gaya. Data dulu, tampilan belakangan. Layar yang dibuat sebelum datanya ada hampir selalu diubah dua kali.
+
+### Dibaca dulu, sebelum satu baris kode
+
+| Urutan | Berkas | Untuk apa |
+|---|---|---|
+| 1 | `AGENTS.md` | Aturan kerja dan daftar periksa sebelum kirim |
+| 2 | `DESIGN.md` | Warna, bentuk, dan jarak |
+| 3 | [`03-Data-Model.md`](03-Data-Model.md) | Nama tabel dan kolom, jangan ditebak |
+| 4 | [`04-API-Contract.md`](04-API-Contract.md) | Bentuk request, response, dan error |
+| 5 | [`05-IA-dan-Layar.md`](05-IA-dan-Layar.md) | Layar mana memakai data mana |
+| 6 | [`14-Naskah-Teks.md`](14-Naskah-Teks.md) | Teks yang muncul di layar, jangan dikarang |
+
+### Urutan pengerjaan
+
+| Langkah | Yang dibuat | Bagian |
+|---|---|---|
+| 1 | Proyek Next.js, TypeScript, Tailwind, satu perintah dev dan build | Fase 0 |
+| 2 | Token warna dan font dari `DESIGN.md`, tema tanpa kedipan | Fase 0 |
+| 3 | Layout dasar, navigasi bawah dan samping, skip link | Fase 0 |
+| 4 | Drizzle, koneksi Postgres, sebelas tabel, migrasi pertama | Fase 0 |
+| 5 | Better Auth, daftar, masuk, keluar, sesi 30 hari | Fase 0 |
+| 6 | Plan pertama dan halaman akun | Sprint 1 |
+| 7 | Tanggal penting, `reminderDays`, dan hitung mundur di server | Sprint 1 |
+| 8 | Tugas, template bawaan, saring, urutan manual, tombol selesai | Sprint 2 |
+| 9 | Anggaran, total dihitung di server, penanda lewat batas | Sprint 3 |
+| 10 | Vendor, pembayaran, riwayat, unggah bukti transfer | Sprint 4 |
+| 11 | Tamu, tempel dari teks dengan pratinjau, porsi dan kursi | Sprint 5 |
+| 12 | Rundown, enam template adat, ganti template tanpa kehilangan suntingan | Sprint 6 |
+| 13 | Info untuk keluarga dan tautan baca-saja | Sprint 7 |
+| 14 | Laporan, teks WhatsApp, cetak PDF, tautan laporan yang bisa dimatikan | Sprint 8 |
+| 15 | Service worker tahap pertama untuk rundown, lalu antrean luring, dialog konflik, halaman luring | Sprint 6, lalu Sprint 9 |
+| 16 | Manifest, ikon, prompt install, peringatan versi baru | Sprint 9 |
+| 17 | Seragam, sisa penyaring, unduh data JSON, hapus akun | Fase 3 |
+
+Service worker dibagi dua tahap. Di Sprint 6 dibuat secukupnya supaya rundown terbuka tanpa sinyal, karena itu satu-satunya layar yang wajib luring. Di Sprint 9 baru dilengkapi empat strategi, antrean, dan penanda luring.
+
+Alasannya ada di tabel risiko di bawah: lokasi service worker dan App Router Next.js paling sering bentrok, dan masalah itu jauh lebih murah ditemukan saat rundown baru selesai daripada saat semua layar sudah dibangun.
+
+### Bentuk folder
+
+```text
+src/
+├── app/
+│   ├── (auth)/            masuk dan daftar
+│   ├── (app)/             beranda, rencana, anggaran, tamu, laporan, akun
+│   ├── l/                 halaman baca penerima tautan, tanpa navigasi aplikasi
+│   ├── api/plans/         semua endpoint plan, selalu ada :planId
+│   ├── manifest.ts
+│   └── luring/            halaman saat tanpa sinyal
+├── components/            komponen yang dipakai lebih dari satu layar
+├── db/
+│   ├── schema.ts          sebelas tabel
+│   └── migrations/
+├── lib/
+│   ├── auth.ts            Better Auth
+│   ├── format.ts          formatRupiah dan format tanggal
+│   └── teks-wa.ts         penyusun teks WhatsApp, satu fungsi
+└── public/
+    ├── sw.js              service worker, ditulis tangan
+    └── ikon/
+```
+
+Bentuk folder bukan peraturan produk. Kalau ada susunan yang lebih jelas, susunan itu yang dipakai. Yang tidak boleh berubah: setiap kueri menyaring `planId`, dan setiap path endpoint memuat `:planId`.
 
 ---
 
@@ -50,7 +121,7 @@ Estimasi: 25 hari
 |---|
 | Tabel tasks |
 | CRUD tugas |
-| Filter status, kategori, penerima tugas |
+| Saring berdasarkan status, kategori, dan penerima tugas |
 | Urutan manual dalam kategori |
 | Endpoint toggle |
 | Template tugas bawaan, 7 kategori |
@@ -92,7 +163,7 @@ Estimasi: 25 hari
 
 ## Fase 2. Hari-H dan keluarga
 
-Estimasi: 10 hari
+Estimasi: 19 hari
 
 ### Sprint 6. Rundown (4 hari)
 
@@ -100,7 +171,7 @@ Estimasi: 10 hari
 |---|
 | Tabel rundown_items |
 | CRUD item rundown |
-| Template rundown per adat: Muslim, Java, Minang, Sunda, Bali, Modern |
+| Template rundown per adat: Muslim, Jawa, Minang, Sunda, Bali, Modern |
 | Layar Rundown |
 | Service worker untuk rundown |
 | Uji luring di perangkat sungguhan |
@@ -113,18 +184,36 @@ Estimasi: 10 hari
 | CRUD pengumuman |
 | Share link baca-saja |
 | Layar baca untuk penerima link, tanpa navigasi aplikasi |
-| Kontrol who bisa melihat pengumuman mana |
+| Kontrol siapa yang bisa melihat pengumuman mana |
 
-### Sprint 8. PWA dan polish (3 hari)
+### Sprint 8. Laporan dan bagikan (6 hari)
+
+| Item |
+|---|
+| Endpoint `/report`, semua angka dihitung ulang dari data |
+| Layar Laporan, satu halaman baca |
+| Penyusun teks WhatsApp di server, tiga pilihan isi |
+| Tombol bagikan lewat tautan `wa.me`, tanpa pustaka |
+| Tautan laporan, maksimal lima per plan, bisa dimatikan sendiri |
+| Cetak PDF dengan CSS `@media print`, tanpa pustaka |
+| Uji cetak di HP dan laptop sungguhan |
+
+### Sprint 9. PWA dan polish (6 hari)
 
 | Item |
 |---|
 | Service worker lengkap dengan 4 strategi |
 | Manifest dan ikon |
-| Indikator luring |
-| Antrean IndexedDB |
+| Penanda luring |
+| Antrean IndexedDB, urut, batas 200 item |
 | Dialog konflik |
-| Install prompt |
+| Halaman luring, bukan halaman galat generik |
+| Prompt install, tombol di Android dan petunjuk jujur di iOS |
+| Peringatan versi baru |
+
+Laporan dikerjakan sebelum PWA karena laporan tidak butuh luring. Kalau laporan dan service worker dikerjakan bersamaan, masalah cache dan masalah angka tercampur, dan salah satu selalu dituduh sebagai penyebabnya.
+
+Service worker tahap pertama sudah ada sejak Sprint 6 karena rundown harus terbuka tanpa sinyal. Yang dikerjakan di Sprint 9 adalah sisanya, bukan dari nol.
 
 ---
 
@@ -135,10 +224,13 @@ Estimasi: 6 hari
 | Item |
 |---|
 | Seragam, tabel outfits dan CRUD |
-| Filter undangan terkirim dan belum |
+| Saring undangan terkirim dan belum |
 | Unduh data sebagai JSON |
 | Hapus akun |
 | Dark mode per halaman |
+| Cakupan uji untuk jalur kritis, Vitest dan Playwright |
+| Uji aksesibilitas: kontras 4,5:1 dan seluruh alur dengan keyboard |
+| Uji performa Lighthouse di HP kelas menengah |
 
 ---
 
@@ -148,11 +240,15 @@ Estimasi: 6 hari
 |---|---|
 | Fase 0 | 5 |
 | Fase 1 | 25 |
-| Fase 2 | 10 |
+| Fase 2 | 19 |
 | Fase 3 | 6 |
-| **Total** | **46 hari kerja** |
+| **Total** | **55 hari kerja** |
 
-Enam sampai sepuluh minggu. Itu asumsi satu orang full time. Kalau ada pekerjaan lain, kalikan.
+Sebelas sampai empat belas minggu. Itu asumsi satu orang penuh waktu. Kalau ada pekerjaan lain, kalikan.
+
+Angka ini sudah termasuk pengujian, jeda antar sprint, dan waktu untuk pekerjaan yang tidak layak jadi story sendiri.
+
+Kalau hanya menjumlah estimasi per story di [`10-Epik-dan-Story.md`](10-Epik-dan-Story.md), hasilnya 39 hari. Selisih 16 hari itu bukan karangan. Isinya: laporan dan cetak PDF yang belum pernah masuk sprint mana pun, halaman luring, uji cetak dan uji luring di perangkat sungguhan, evaluasi Lighthouse di HP kelas menengah, cakupan uji Vitest dan Playwright, serta jeda antar sprint.
 
 ---
 
@@ -160,12 +256,12 @@ Enam sampai sepuluh minggu. Itu asumsi satu orang full time. Kalau ada pekerjaan
 
 | Tidak ada | Alasan |
 |---|---|
-| Fork ke produksi per fitur | Satu orang, tidak butuh branch management |
-| Staging environment | Satu server, dev dan production cukup. Kalau butuh staging, itu tanda sudah perlu environment sendiri |
-| Review dan approval cycle | Tidak ada tim untuk me-review |
+| Fork ke produksi per fitur | Satu orang, tidak butuh kelola cabang |
+| Staging environment | Satu server, dev dan produksi cukup. Kalau butuh staging, itu tanda sudah perlu lingkungan sendiri |
+| Tinjau dan siklus persetujuan | Tidak ada tim untuk meninjau |
 | Tim desain terpisah | Semua dari `DESIGN.md` |
 | Dokumentasi API terpisah | Ada di `04-API-Contract.md`, tidak perlu Swagger |
-| Load test | NFR-nya masih belum diukur. Test load dengan 5 orang itu tidak berarti apa-apa |
+| Uji beban | NFR-nya masih belum diukur. Uji beban dengan 5 orang itu tidak berarti apa-apa |
 
 ---
 
@@ -173,16 +269,16 @@ Enam sampai sepuluh minggu. Itu asumsi satu orang full time. Kalau ada pekerjaan
 
 | Risiko | Dampak | Mitigasi |
 |---|---|---|
-| Lokasi service worker dan App Router Next.js bentrok | PWA tidak jalan | Uji di perangkat sungguhan sejak Sprint 6, bukan Sprint 8 |
+| Lokasi service worker dan App Router Next.js bentrok | PWA tidak jalan | Uji di perangkat sungguhan sejak Sprint 6, bukan Sprint 9 |
 | Impor tamu dari teks tidak akurat | Data kacau | Selalu tampilkan pratinjau, jangan langsung simpan |
-| Men franklydiagrpa pembayaran salah | Kepercayaan user hilang | INTEGER bukan float, tanpa rounding. Hitung ulang total selalu dari database |
+| Mencatat pembayaran salah | Kepercayaan user hilang | INTEGER bukan float, tanpa pembulatan. Hitung ulang total selalu dari database |
 | Uji luring gagal di lokasi nyata | Hari-H kacau | Uji di lokasi dengan sinyal lemah sebelum rilis, bukan di kantor |
-| Cookie sesi tidak jalan di iOS Safari | Login gagal di sebagian besar pengguna iOS | Uji di iOS sejak awal, jangan menunggu Sprint 8 |
+| Cookie sesi tidak jalan di iOS Safari | Login gagal di sebagian besar pengguna iOS | Uji di iOS sejak Sprint 1, jangan menunggu Sprint 9 |
 | Scope bertambah | Tidak selesai | Semua permintaan baru masuk daftar tertunda, bukan langsung dikerjakan |
 
 ---
 
-## Test plan per sprint
+## Rencana uji per sprint
 
 | Sprint | Yang harus diuji |
 |---|---|
@@ -193,7 +289,8 @@ Enam sampai sepuluh minggu. Itu asumsi satu orang full time. Kalau ada pekerjaan
 | Sprint 5 | Impor 50 nama sekaligus tidak memotong salah satunya |
 | Sprint 6 | Rundown terbuka dengan airplane mode aktif |
 | Sprint 7 | Share link tidak bisa ditulis, hanya dibaca |
-| Sprint 8 | Antrean terkirim dengan urutan benar setelah luring |
+| Sprint 8 | Angka di laporan sama dengan angka di halaman anggaran dan halaman tamu |
+| Sprint 9 | Antrean terkirim dengan urutan benar setelah luring |
 
 ---
 
@@ -204,7 +301,7 @@ Enam sampai sepuluh minggu. Itu asumsi satu orang full time. Kalau ada pekerjaan
 | Pasang di iOS | Butuh perangkat sungguhan |
 | Layar terbaca enak di matahari | Butuh mata manusia |
 | Tombol cukup besar untuk jempol | Butuh tangan manusia |
-| R rundown terbaca dari lima meter | Butuh jarak nyata |
+| Rundown terbaca dari lima meter | Butuh jarak nyata |
 | Unduhan tidak tersendat di jaringan lambat | Butuh kondisi jaringan nyata |
 
 Ini bukan karena tidak mau diuji otomatis. Hal-hal seperti ini memang tidak bisa diukur dengan kode, dan mencobanya dengan kode hanya memberikan rasa aman yang salah.
@@ -213,7 +310,7 @@ Ini bukan karena tidak mau diuji otomatis. Hal-hal seperti ini memang tidak bisa
 
 ## Definisi Selesai
 
-Una fitur selesai kalau semua ini benar:
+Sebuah fitur selesai kalau semua ini benar:
 
 | Item |
 |---|
@@ -236,15 +333,15 @@ Kalau satu saja belum, fitur itu belum selesai meskipun kelihatannya jalan.
 
 Semua keputusan di dokumen ini diambil sendiri karena belum ada jawaban. Berikut yang paling berpengaruh dan perlu dikonfirmasi sebelum kode ditulis banyak:
 
-| Keputusan | Documen | Kalau berubah |
+| Keputusan | Dokumen | Kalau berubah |
 |---|---|---|
 | Nama produk "Aisyah & Bagas" | `DESIGN.md` | Ganti di satu tempat, palette dan font tidak berubah |
 | Tidak ada marketplace vendor | `01-PRD.md` | Menambah beberapa bulan |
 | Tidak ada payment gateway | `01-PRD.md` | Menambah pembayaran sungguhan, bukan catatan |
 | Monolit Next.js | `06-Stack-dan-Batas.md` | Mengubah seluruh rencana kerja |
-| Drag-and-drop meja ditolak | `02b-Tamu.md` | Beda delimiter dan elegan, tapi lebih lambat |
+| Drag-and-drop meja ditolak | `02b-Tamu.md` | Beda pembatas dan lebih sederhana, tapi lebih lambat |
 | Drag-and-drop rundown ditolak | `05-IA-dan-Layar.md` | Menambah pustaka dan banyak kerjaan |
-| Target 46 hari kerja | dokumen ini | Semua tanggal berubah |
+| Target 55 hari kerja | dokumen ini | Semua tanggal berubah |
 
 Kalau keputusan di atas berubah, yang perlu dihitung ulang hanya rencana kerja. Data model dan API tidak terpengaruh untuk sebagian besar dari perubahan itu.
 
@@ -260,11 +357,11 @@ Permintaan yang sengaja tidak masuk Fase 1, dicatat di sini supaya tidak hilang:
 | Payment gateway | Pembayaran ke vendor lewat aplikasi berarti aplikasi memegang uang orang, dan itu tanggung jawab yang berbeda |
 | Multi-user dengan hak akses berbeda | Sekarang hanya ada pemilik plan |
 | Kalender bulanan penuh | Daftar tugas sudah menutup kebutuhan utama |
-| Galeri foto | Butuh storage besar, dan foto ê²°í˜¼ sudah ada di album HP |
-| Ekspor ke PDF | Bagus untuk dicetak, tapi belum ada yang minta |
-| Tema selain dua | Butuh desain ulang yang sizable |
+| Galeri foto | Butuh penyimpanan besar, dan foto sudah ada di album HP |
+| Ekspor ke Excel | Bagus untuk dibuka di komputer, tapi teks biasa sudah cukup |
+| Tema selain dua | Butuh desain ulang yang besar |
 | Import dari Excel | Teks biasa sudah cukup untuk sebagian besar kasus |
-| Barcode undangan | Butuh hubungan dengan modul undangan yang ditunda |
+| Kode undangan | Butuh hubungan dengan modul undangan yang ditunda |
 | Notifikasi pengingat lewat push | Butuh server yang selalu hidup |
 
 Semuanya masuk Fase 2 atau lebih. Tidak ada yang mustahil, semuanya cuma belum waktunya.

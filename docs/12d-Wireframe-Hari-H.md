@@ -1,4 +1,4 @@
-# 12d. Wireframe Hari-H
+﻿# 12d. Wireframe Hari-H
 
 Rundown, info untuk keluarga, dan seragam. Bagian yang dibuka di lokasi, jadi semua aturan di sini berakar pada satu hal: dibaca dari jarak dan dibaca tanpa sinyal.
 
@@ -14,32 +14,32 @@ Layar yang paling sering dibuka di lokasi. Wajib jalan tanpa sinyal, dan harus t
 
 ```text
 +--------------------------------+
-| < Rundown                      |
-| [G] Tanpa sinyal                |
+|< Rundown                       |
+|[G] Tanpa sinyal                |
 +--------------------------------+
-| [ Muslim v ]                   |
+|[ Muslim v ]                    |
 +--------------------------------+
-| 07.00                          |
-| │ Akad nikah                    |
-| │ Kantor Urusan Agama           |
-| │ Ustaz dan saksi              |
-| │                               |
-| 08.30                           |
-| │ Sungkeman                     |
-| │ Rumah kedua orang tua        |
-| │ Bawa keris dan pusaka         |
-| │                               |
-| 10.00                           |
-| │ Resepsi                       |
-| │ Rama-rama                     |
-| │ Sedia di aula                 |
-| │                               |
-| 13.00                           |
-| │ Makan siang                   |
-| │ Aula utama                    |
-| │                               |
+|07.00                           |
+|│ Akad nikah                    |
+|│ Kantor Urusan Agama           |
+|│ Ustaz dan saksi               |
+|│                               |
+|08.30                           |
+|│ Sungkeman                     |
+|│ Rumah kedua orang tua         |
+|│ Bawa keris dan pusaka         |
+|│                               |
+|10.00                           |
+|│ Resepsi                       |
+|│ Grand Borneo                  |
+|│ Sedia di aula                 |
+|│                               |
+|13.00                           |
+|│ Makan siang                   |
+|│ Aula utama                    |
+|│                               |
 +--------------------------------+
-|  Font  [ A- ]  [ A+ ]          |
+|Font  [ A- ]  [ A+ ]            |
 +--------------------------------+
 ```
 
@@ -63,25 +63,25 @@ Tidak ada tombol reset, karena font yang sudah pas tidak perlu dikembalikan.
 
 ```text
 +--------------------------------+
-| <  Tambah item rundown         |
+|<  Tambah item rundown          |
 +--------------------------------+
-| Nama                           |
-| [ Akad nikah               ]  |
+|Nama                            |
+|[ Akad nikah               ]    |
 |                                |
-| Jam                            |
-| [ 07.00                   v ]  |
+|Jam                             |
+|[ 07.00                   v ]   |
 |                                |
-| Lokasi                         |
-| [ Kantor Urusan Agama       ]  |
+|Lokasi                          |
+|[ Kantor Urusan Agama       ]   |
 |                                |
-| Catatan untuk crew             |
-| [ Ustaz dan saksi sudah datang ]  |
+|Catatan untuk crew              |
+|[ Ustaz dan saksi sudah datang ]|
 |                                |
-| Versi                          |
-| [ Muslim                   v ] |
+|Versi                           |
+|[ Muslim                   v ]  |
 |                                |
 +--------------------------------+
-| [ Batal ]       [ Simpan ]     |
+|[ Batal ]       [ Simpan ]      |
 +--------------------------------+
 ```
 
@@ -96,45 +96,45 @@ Halaman yang dibuka oleh orang tua dan saudara. Tidak ada login, tidak ada tombo
 ```text
 +--------------------------------+
 |                                |
-|        Aisyah & Bagas           |
-|        30 Juni 2026            |
+|Aisyah & Bagas                  |
+|30 Juni 2026                    |
 |                                |
 +--------------------------------+
-| JADWAL                         |
+|JADWAL                          |
 |                                |
-| 07.00   Akad nikah             |
-|         Kantor Urusan Agama     |
-| 08.30   Sungkeman              |
-|         Rumah kedua orang tua  |
-| 10.00   Resepsi                |
-|         Rama-rama              |
-|                                |
-+--------------------------------+
-| LOKASI                         |
-|                                |
-| Akad nikah                     |
-| Alamat lengkap                 |
-| [ Buka di peta ]                |
-|                                |
-| Resepsi                        |
-| Alamat lengkap                 |
-| [ Buka di peta ]                |
+|07.00   Akad nikah              |
+|Kantor Urusan Agama             |
+|08.30   Sungkeman               |
+|Rumah kedua orang tua           |
+|10.00   Resepsi                 |
+|Grand Borneo                    |
 |                                |
 +--------------------------------+
-| DRESS CODE                     |
+|LOKASI                          |
 |                                |
-| Priama                         |
-| [ gambar ]                     |
-| Baju adat, warna               |
+|Akad nikah                      |
+|Alamat lengkap                  |
+|[ Buka di peta ]                |
 |                                |
-| Wanita                         |
-| [ gambar ]                     |
-| [ gambar ]                     |
+|Resepsi                         |
+|Alamat lengkap                  |
+|[ Buka di peta ]                |
+|                                |
++--------------------------------+
+|DRESS CODE                      |
+|                                |
+|Priama                          |
+|[ gambar ]                      |
+|Baju adat, warna                |
+|                                |
+|Wanita                          |
+|[ gambar ]                      |
+|[ gambar ]                      |
 |                                |
 +--------------------------------+
 |                                |
-|  Halaman ini hanya untuk       |
-|  dibaca.                       |
+|Halaman ini hanya untuk         |
+|dibaca.                         |
 |                                |
 +--------------------------------+
 ```
@@ -151,22 +151,22 @@ Tautan punya kunci yang panjangnya cukup supaya tidak ditebak, dan tidak punya k
 
 ```text
 +--------------------------------+
-| < Seragam                      |
+|< Seragam                       |
 +--------------------------------+
-| TAMU                           |
+|TAMU                            |
 |                                |
-| Priama  [ gambar ]             |
-| Baju adat, warna               |
+|Priama  [ gambar ]              |
+|Baju adat, warna                |
 |                                |
-| Wanita  [ gambar ]             |
-| Baju adat, warna               |
+|Wanita  [ gambar ]              |
+|Baju adat, warna                |
 |                                |
-| PENGANTIN                      |
+|PENGANTIN                       |
 |                                |
-| Pengantin  [ gambar ]          |
-| Baju adat, warna               |
+|Pengantin  [ gambar ]           |
+|Baju adat, warna                |
 |                                |
-| [ Bagikan ke keluarga ]        |
+|[ Bagikan ke keluarga ]         |
 +--------------------------------+
 ```
 
@@ -182,13 +182,13 @@ Ada satu tombol bagikan, dan tombol itu memakai tautan yang sudah ada di bagian 
 
 ```text
 +--------------------------------+
-| < Rundown                      |
+|< Rundown                       |
 +--------------------------------+
-| - - - - - - - - - - - - - - -  |
-| 07.00                          |
-| - - - - - - - - - - - - - - -  |
-| 08.30                           |
-| - - - - - - - - - - - - - - -  |
+|- - - - - - - - - - - - - - -   |
+|07.00                           |
+|- - - - - - - - - - - - - - -   |
+|08.30                           |
+|- - - - - - - - - - - - - - -   |
 +--------------------------------+
 ```
 
@@ -198,13 +198,13 @@ Jam tetap terlihat walau isinya belum dimuat. Jam adalah bagian paling penting d
 
 ```text
 +--------------------------------+
-| < Rundown                      |
+|< Rundown                       |
 +--------------------------------+
 |                                |
-|  Rundown gagal dimuat.         |
-|  Bukan salahmu, coba lagi.     |
+|Rundown gagal dimuat.           |
+|Bukan salahmu, coba lagi.       |
 |                                |
-|  [ Coba lagi ]                 |
+|[ Coba lagi ]                   |
 +--------------------------------+
 ```
 
@@ -214,12 +214,12 @@ Ini tampilan yang paling sering dipakai, dan tampilannya sama dengan tampilan is
 
 ```text
 +--------------------------------+
-| < Rundown                      |
-| [G] Tanpa sinyal                |
+|< Rundown                       |
+|[G] Tanpa sinyal                |
 +--------------------------------+
-| 07.00                          |
-| │ Akad nikah                    |
-| │ Kantor Urusan Agama           |
+|07.00                           |
+|│ Akad nikah                    |
+|│ Kantor Urusan Agama           |
 +--------------------------------+
 ```
 

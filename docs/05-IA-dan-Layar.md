@@ -98,7 +98,7 @@ Setiap layar di bawah menyebut empat state yang wajib ada: memuat, kosong, salah
 
 | Bagian | Isi | Sumber |
 |---|---|---|
-| Hitung mundur | "142 hari lagi" atau "Hari ini" | Tanggal penting dengan `isDayOf` |
+| Hitung mundur | "371 hari lagi" atau "Hari ini" | Tanggal penting dengan `isDayOf` |
 | Tugas terdekat | Maksimal 5 tugas dengan tenggat terdekat yang belum selesai | Daftar tugas |
 | Sisa anggaran | Total anggaran dikurangi total terbayar | Anggaran dan pembayaran |
 | Tanggal berikutnya | Tanggal penting yang paling dekat | Tanggal penting |
@@ -184,15 +184,15 @@ Tampilan detail vendor berisi daftar pembayaran, terurut dari yang terbaru. Di `
 
 ## 10. Layar Daftar Tamu
 
-**Tujuan**: tahu siapa yang hadir dan berapa porssi katering.
+**Tujuan**: tahu siapa yang hadir dan berapa porsi katering.
 
 Angka rekap di atas, lalu daftar tamu.
 
 ```
-Total tamu        240 orang
-Sudah konfirmasi   180
-Belum konfirmasi    60
-Perkiraan porssi   240
+Total tamu        312 orang
+Sudah konfirmasi  258
+Belum konfirmasi   54
+Perkiraan porsi   312
 ```
 
 Daftar tamu dikelompokkan per kategori, dengan pencarian di atas yang selalu terlihat. Di `compact`, pencarian tidak ikut scroll, menempel di bawah bar filter.

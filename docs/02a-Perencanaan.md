@@ -20,17 +20,17 @@ Tanggal yang jadi patokan semua rencana lain. Kalau tanggal ini salah, semua pen
 | `notes` | teks, opsional | Catatan singkat, misalnya "rumah orang tua pasangan" |
 | `reminderDays` | array angka | Kalau pengingat, berapa hari sebelumnya |
 
-### Why perlu
+### Kenapa perlu
 
-Kadundung, siraman, akad, dan resepsi sering jatuh di tanggal berbeda. Kalau semuanya dianggap satu hari, pasangan akan salah Ingatkan orang.
+Undangan, siraman, akad, dan resepsi sering jatuh di tanggal berbeda. Kalau semuanya dianggap satu hari, pasangan akan salah mengatur pengingat.
 
-### Minimal Version
+### Versi minimal
 
 - [ ] Tambah, edit, hapus tanggal penting
 - [ ] Daftar tanggal penting diurutkan dari yang paling dekat
 - [ ] Hari-H ditandai dengan jelas, dan warnanya berbeda dari tanggal lain
 - [ ] Hitung mundur "berapa hari lagi" otomatis, dan hitungannya benar setelah hari-H lewat
-- [ ] Pengingat locally di HP, dengan pengaturan waktu
+- [ ] Pengingat lokal di HP, dengan pengaturan waktu
 
 ---
 
@@ -57,22 +57,22 @@ Kategori bukan sekadar label. Setiap kategori punya daftar tugas bawaan yang sud
 
 | Kategori | Contoh isi |
 |---|---|
-| Administrasi | Surat pengantar RT/RW,KK, akta nikah, OFFSET, N1-N4, cek data orang tua |
+| Administrasi | Surat pengantar RT/RW, KK, akta nikah, N1-N4, cek data orang tua |
 | Pencarian venue | Listrik, air, toilet, akses mobil besar, arah untuk tamu |
 | Vendor | Makeup, dekorasi, catering, dokumentasi, MC, organ tunggal, tenda |
 | Sandang | Baju pengantin, baju adat, jas, kemeja, sepatu, aksesoris |
 | Pelengkap | KUA, akad nikah, upacara adat, siraman, sesi foto, resepsi, pesta setelah resepsi |
 | Tamu | Menentukan jumlah tamu, menghitung undangan, konfirmasi kehadiran, kado dan angpau |
-`Hari-H` | Gladi, MC, briefing crew, recepti, persiapan venue |
+| Hari-H | Gladi, MC, briefing crew, resepsi, persiapan venue |
 
-### Why perlu
+### Kenapa perlu
 
 Pasangan tidak butuh aplikasi checklist generik. Mereka butuh checklist yang tahu bahwa di Indonesia ada KUA, ada siraman, ada mahar, ada angpau. Template bawaan inilah yang membuat produk ini beda dari aplikasi checklist luar negeri.
 
-### Minimal Version
+### Versi minimal
 
 - [ ] Tambah, edit, hapus, tandai selesai
-- [ ] Filter by kategori dan status
+- [ ] Saring berdasarkan kategori dan status
 - [ ] Tugas tanpa tenggat dipisahkan dari tugas bertenggat, karena keduanya perilaku berbeda
 - [ ] Tugas lewat ditandai berbeda secara visual, dengan warna status yang berbeda dari warna CTA
 - [ ] Checklist bawaan per kategori bisa dimuat sekali, lalu diedit
@@ -97,25 +97,25 @@ Pasangan tidak butuh aplikasi checklist generik. Mereka butuh checklist yang tah
 | Kategori | Isi tipikal |
 |---|---|
 | Venue | Sewa lokasi, uang muka, biaya tambahan |
-| Catering | Katering, snack, drink, konsumsi tamu, gubuk |
+| Catering | Katering, snack, minuman, konsumsi tamu, gubuk |
 | Dekorasi | Pelaminan, dekor pelaminan, dekor meja tamu, photobooth |
-| Busana | Baju pengantin, beuty, aksesoris, makeup |
+| Busana | Baju pengantin, beauty, aksesoris, makeup |
 | Dokumentasi | Fotografer, videografer, album |
-| Adat dan sjaran | Sinyal, sesaji, seserahan, pngg |
+| Adat | Sinyal, sesaji, seserahan |
 | Transport | Kendaraan, akomodasi keluarga jauh |
-| Admisiones | KUA, admin,Checker\| lain |
+| Administrasi | KUA, admin, lain-lain |
 
-### Why perlu
+### Kenapa perlu
 
-Ini fitur yang paling sering dipinta pasangan. Yang paling sering dikeluhkan adalah spreadsheet tidak tahu sudah bayar berapa.
+Ini fitur yang paling sering diminta pasangan. Yang paling sering dikeluhkan adalah spreadsheet tidak tahu sudah bayar berapa.
 
-### Minimal Version
+### Versi minimal
 
 - [ ] Tambah pos anggaran dengan nominal rencana
 - [ ] Total anggaran, total terbayar, dan sisa terhitung otomatis dan terlihat di satu layar
 - [ ] Sisa negatif ditandai jelas kalau anggaran terlampaui, dengan warna status yang berbeda dari CTA
 - [ ] Persentase terpotong per kategori, dengan bar tipis tanpa chart yang berat
-- [ ] Bisa export daftar anggaran ke PDF
+- [ ] Bisa ekspor daftar anggaran ke PDF
 
 ---
 
@@ -127,12 +127,12 @@ Modul yang paling sering jadi sumber pertanyaan "sudah bayar belum".
 
 | Field | Tipe | Keterangan |
 |---|---|---|
-| `name` | teks | Nama vendor atauiex nama usaha |
+| `name` | teks | Nama vendor atau nama usaha |
 | `category` | enum | Sama dengan kategori anggaran |
 | `contactName` | teks | Nama orang yang dihubungi |
 | `phone` | teks | Nomor WhatsApp |
 | `address` | teks | Alamat, untuk yang punya |
-| `status` | enum | `calon`, `dibOOKED`, `selesai` |
+| `status` | enum | `calon`, `dipesan`, `selesai` |
 | `notes` | teks | Catatan hasil negosiasi, termin, garansi |
 
 ### Data pembayaran
@@ -147,11 +147,11 @@ Modul yang paling sering jadi sumber pertanyaan "sudah bayar belum".
 | `proofUrl` | teks, opsional | Foto bukti transfer |
 | `notes` | teks, opsional | Nomor invoice, termin |
 
-### Why perlu
+### Kenapa perlu
 
-Riwayat pembayaran vendor adalah hal yang paling sering hilang di WhatsApp. Pairing pembayaran ke vendor membuat angka di modul anggaran selalu benar tanpa input manual dua kali.
+Riwayat pembayaran vendor adalah hal yang paling sering hilang di WhatsApp. Menautkan pembayaran ke vendor membuat angka di modul anggaran selalu benar tanpa input manual dua kali.
 
-### Minimal Version
+### Versi minimal
 
 - [ ] Tambah, edit, hapus vendor
 - [ ] Catat pembayaran dengan vendor, nominal, tanggal, dan metode

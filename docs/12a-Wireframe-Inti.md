@@ -14,44 +14,44 @@ Bukan empat kartu angka. Beranda adalah satu susunan: garis waktu di kiri, angga
 
 ```text
 +--------------------------------+
-|  Aisyah & Bagas                |
-|  30 Juni 2026       371 hari  |
+|Aisyah & Bagas                  |
+|30 Juni 2026       371 hari     |
 +--------------------------------+
-| RUNDOWN HARI INI                |
+|RUNDOWN HARI INI                |
 |                                |
-| 07.00  Akad nikah              |
-|        Kantor Urusan Agama      |
-| 08.30  Sungkeman               |
-|        Rumah kedua orang tua   |
-| 10.00  Resepsi                 |
-| 13.00  Makan siang             |
+|07.00  Akad nikah               |
+|Kantor Urusan Agama             |
+|08.30  Sungkeman                |
+|Rumah kedua orang tua           |
+|10.00  Resepsi                  |
+|13.00  Makan siang              |
 |                                |
-| [ Lihat rundown ]              |
+|[ Lihat rundown ]               |
 +--------------------------------+
-| UANG SISA                      |
+|UANG SISA                       |
 |                                |
-| Sisa anggaran     Rp 15.500.000|
+|Sisa anggaran     Rp 15.500.000 |
 |                                |
-| Terpakai 62 persen dari          |
-| Rp 40.000.000                   |
-| [bar]###############.....      |
+|Terpakai 62 persen dari         |
+|Rp 40.000.000                   |
+|[bar]###############.....       |
 |                                |
-| Lewat jatah        1 pos       |
-| Belum ada pembayaran  1 vendor |
+|Lewat jatah        1 pos        |
+|Belum ada pembayaran  1 vendor  |
 |                                |
-| [ Lihat anggaran ]             |
+|[ Lihat anggaran ]              |
 +--------------------------------+
-| MINGGU INI                     |
+|MINGGU INI                      |
 |                                |
-| ( ) Sewa venue          20 Mei |
-| ( ) Pesan dekorasi      22 Mei |
-| (o) Daftar KUA          18 Mei |
-| ( ) Minta countright    22 Mei |
+|( ) Sewa venue          20 Mei  |
+|( ) Pesan dekorasi      22 Mei  |
+|(o) Daftar KUA          18 Mei  |
+|( ) Minta fotografer    22 Mei  |
 |                                |
-| [ Lihat semua tugas ]           |
+|[ Lihat semua tugas ]           |
 +--------------------------------+
-| Beranda  Rencana  Anggaran  ^  |
-|           Tamu              Tamu|
+|Beranda  Rencana  Anggaran  ^   |
+|Tamu              Tamu          |
 +--------------------------------+
 ```
 
@@ -61,25 +61,21 @@ Alasan urutannya: rundown dulu karena itu yang dipakai di hari-H, uang kedua kar
 
 ```text
 +----------------------------------------------------------------------+
-| Aisyah & Bagas                        [ Muat checklist ] [ Bagikan ]|
-| 30 Juni 2026                                        Tema  [Terang] |
+| Aisyah & Bagas  [ Muat checklist ] [ Bagikan ]                       |
+| 30 Juni 2026  Tema [ Terang ]                                        |
 +----------------------------------------------------------------------+
-| RUNDOWN HARI INI          | UANG SISA                 | MINGGU INI   |
-|                           |                           |             |
-| 07.00  Akad nikah         | Sisa     Rp 15.500.000    | ( )         |
-|        Kantor Urusan      | Terpakai 62 persen       |   Sewa      |
-|        Agama             | [bar]#############        |   venue     |
-| 08.30  Sungkeman          | Lewat jatah      1 pos    |   20 Mei    |
-|        Rumah kedua        | Belum bayar      1 vendor | (o)         |
-|        orang tua          |                           |   Daftar    |
-| 10.00  Resepsi            | [ Lihat anggaran ]        |   KUA       |
-| 13.00  Makan siang       |                           |   18 Mei    |
-|                           |                           | ( )         |
-| [ Lihat rundown ]        |                           |   Minta     |
-|                           |                           |   countright|
-|                           |                           |   22 Mei    |
+| RUNDOWN HARI INI        | UANG SISA                | MINGGU INI      |
+| 07.00  Akad nikah       | Sisa  Rp 15.500.000      | ( )             |
+|        KUA              | Terpakai 62 persen       |   Sewa venue    |
+| 08.30  Sungkeman        | [bar]##############      |   20 Mei        |
+|        Rumah orang tua  | Lewat jatah  1 pos       | (o) Daftar KUA  |
+| 10.00  Resepsi          | Belum bayar  1 vendor    |     18 Mei      |
+| 13.00  Makan siang      | [ Lihat anggaran ]       | ( )             |
+| [ Lihat rundown ]       |                          |   Minta         |
+|                         |                          |   fotografer    |
+|                         |                          |     22 Mei      |
 +----------------------------------------------------------------------+
-| Beranda    Rencana    Anggaran    Tamu    Vendor    Tanggal    Lapor  |
+| Beranda  Rencana  Anggaran  Tamu  Vendor  Tanggal  Lapor             |
 +----------------------------------------------------------------------+
 ```
 
@@ -93,32 +89,32 @@ Kolom tengah ada karena anggaran adalah pertanyaan yang paling sering muncul. Ka
 
 ```text
 +--------------------------------+
-|  Rencana               [Cari] |
+|Rencana               [Cari]    |
 +--------------------------------+
-| [ Semua ] [ Minggu ini ]        |
-| [ Belum ] [ Selesai ]           |
+|[ Semua ] [ Minggu ini ]        |
+|[ Belum ] [ Selesai ]           |
 +--------------------------------+
-| MINGGU INI                     |
+|MINGGU INI                      |
 |                                |
-| (o) Daftar KUA          18 Mei |
-|    _sortir berkas dan fotokopi |
-|     Bpk Budi                  |
-| ( ) Sewa venue          20 Mei |
-|     Rp 14.500.000              |
-| ( ) Pesan dekorasi      22 Mei |
-|     Buana Dekorasi             |
-| ( ) Minta countright    22 Mei |
+|(o) Daftar KUA          18 Mei  |
+|_sortir berkas dan fotokopi     |
+|Bpk Budi                        |
+|( ) Sewa venue          20 Mei  |
+|Rp 14.500.000                   |
+|( ) Pesan dekorasi      22 Mei  |
+|Buana Dekorasi                  |
+|( ) Minta fotografer    22 Mei  |
 |                                |
-| BULAN INI                      |
+|BULAN INI                       |
 |                                |
-| ( ) Fitting dress       10 Jun |
-| ...                            |
+|( ) Fitting dress       10 Jun  |
+|...                             |
 |                                |
-|        [ Muat lebih ]           |
+|[ Muat lebih ]                  |
 +--------------------------------+
 |                                |
-| Beranda  Rencana  Anggaran  ^  |
-|           Tamu              Tamu|
+|Beranda  Rencana  Anggaran  ^   |
+|Tamu              Tamu          |
 +--------------------------------+
 ```
 
@@ -132,16 +128,16 @@ Baris yang punya catatan vendor menampilkan nama vendor, supaya tidak perlu buka
 
 ```text
 +--------------------------------+
-|  Rencana                       |
+|Rencana                         |
 +--------------------------------+
-|        Belum ada tugas          |
+|Belum ada tugas                 |
 |                                |
-|   Mulai dari checklist bawaan  |
-|   supaya tidak perlu menulis   |
-|   semuanya dari nol.           |
+|Mulai dari checklist bawaan     |
+|supaya tidak perlu menulis      |
+|semuanya dari nol.              |
 |                                |
-|   [ Muat checklist ]           |
-|   [ Tulis sendiri ]            |
+|[ Muat checklist ]              |
+|[ Tulis sendiri ]               |
 +--------------------------------+
 ```
 
@@ -153,34 +149,34 @@ Layar penuh, bukan modal. Di HP, layar penuh lebih enak daripada pop up kecil.
 
 ```text
 +--------------------------------+
-| <  Tambah tugas                |
+|<  Tambah tugas                 |
 +--------------------------------+
-| Apa yang harus dikerjakan      |
-| [ Bayar DP dekorasi         ]  |
+|Apa yang harus dikerjakan       |
+|[ Bayar DP dekorasi         ]   |
 |                                |
-| Kapan                          |
-| [ 22 Mei 2026              v ] |
+|Kapan                           |
+|[ 22 Mei 2026              v ]  |
 |                                |
-| Untuk siapa                    |
-| [ Saya                   v ]   |
-| [ Saya ] [ Pasangan ] [Keluarga|
+|Untuk siapa                     |
+|[ Saya                   v ]    |
+|[ Saya ] [ Pasangan ] [Keluarga |
 |                                |
-| Prioritas                      |
-| ( ) Rendah                     |
-| (o) Sedang                     |
-| ( ) Tinggi                     |
+|Prioritas                       |
+|( ) Rendah                      |
+|(o) Sedang                      |
+|( ) Tinggi                      |
 |                                |
-| Kategori                       |
-| [ Vendor                    v ] |
+|Kategori                        |
+|[ Vendor                    v ] |
 |                                |
-| Nominal                        |
-| [ Rp 4.000.000             ]   |
+|Nominal                         |
+|[ Rp 4.000.000             ]    |
 |                                |
-| Catatan                        |
-| [ Bawa BPKB, cek warna tema  ]  |
+|Catatan                         |
+|[ Bawa BPKB, cek warna tema  ]  |
 |                                |
 +--------------------------------+
-| [ Batal ]      [ Simpan tugas ]|
+|[ Batal ]      [ Simpan tugas ] |
 +--------------------------------+
 ```
 
@@ -190,16 +186,16 @@ Nominal ada di form tugas karena tugas dan uang tidak bisa dipisah. Kalau tugas 
 
 ```text
 +--------------------------------+
-|  Rencana                       |
+|Rencana                         |
 +--------------------------------+
-| MINGGU INI                     |
+|MINGGU INI                      |
 |                                |
-| (o) Daftar KUA          18 Mei |
-| (o) Sewa venue          20 Mei |
-| ( ) Bayar DP dekorasi   22 Mei |
-|     Rp 4.000.000               |
-|     Buana Dekorasi             |
-| ( ) Minta countright    22 Mei |
+|(o) Daftar KUA          18 Mei  |
+|(o) Sewa venue          20 Mei  |
+|( ) Bayar DP dekorasi   22 Mei  |
+|Rp 4.000.000                    |
+|Buana Dekorasi                  |
+|( ) Minta fotografer    22 Mei  |
 +--------------------------------+
 ```
 
@@ -215,26 +211,26 @@ Tugas lain yang punya nominal juga menampilkan nominalnya, jadi pasangan bisa me
 
 ```text
 +--------------------------------+
-| < Tanggal penting         [+] |
+|< Tanggal penting         [+]   |
 +--------------------------------+
-| [Cari.......................]  |
+|[Cari.......................]   |
 +--------------------------------+
-| BULAN INI                      |
+|BULAN INI                       |
 |                                |
-| [titik] Akad nikah        210 h |
-|        30 Juni 2026            |
+|[titik] Akad nikah        210 h |
+|30 Juni 2026                    |
 |                                |
-| [titik] Fitting dress    45 h  |
-|        10 Juni 2026            |
+|[titik] Fitting dress    45 h   |
+|10 Juni 2026                    |
 |                                |
-| SUDAH LEWAT                     |
+|SUDAH LEWAT                     |
 |                                |
-| [titik] Daftar KUA        lewat |
-|        12 Mei 2026             |
+|[titik] Daftar KUA        lewat |
+|12 Mei 2026                     |
 |                                |
-| BELUM ADA TANGGAL              |
+|BELUM ADA TANGGAL               |
 |                                |
-| [titik] Resepsi          belum |
+|[titik] Resepsi          belum  |
 |                                |
 +--------------------------------+
 ```
@@ -243,31 +239,31 @@ Tugas lain yang punya nominal juga menampilkan nominalnya, jadi pasangan bisa me
 
 ```text
 +--------------------------------+
-| <  Tambah tanggal              |
+|<  Tambah tanggal               |
 +--------------------------------+
-| Nama acara                     |
-| [ Akad nikah               ]   |
+|Nama acara                      |
+|[ Akad nikah               ]    |
 |                                |
-| Tanggal                        |
-| [ 30 Juni 2026            v ] |
+|Tanggal                         |
+|[ 30 Juni 2026            v ]   |
 |                                |
-| Jam (boleh kosong)             |
-| [ 07.00                  v ]   |
+|Jam (boleh kosong)              |
+|[ 07.00                  v ]    |
 |                                |
-| Jenis                          |
-| [ Akad nikah               v ] |
+|Jenis                           |
+|[ Akad nikah               v ]  |
 |                                |
-| ( ) Ini hari-H                 |
+|( ) Ini hari-H                  |
 |                                |
-| Ingatkan berapa hari           |
-| (o) 30 hari  ( ) 14 hari       |
-| ( ) 7 hari    ( ) 1 hari      |
+|Ingatkan berapa hari            |
+|(o) 30 hari  ( ) 14 hari        |
+|( ) 7 hari    ( ) 1 hari        |
 |                                |
-| Catatan                        |
-| [ Rumah kedua orang tua     ]  |
+|Catatan                         |
+|[ Rumah kedua orang tua     ]   |
 |                                |
 +--------------------------------+
-| [ Batal ]       [ Simpan ]     |
+|[ Batal ]       [ Simpan ]      |
 +--------------------------------+
 ```
 
@@ -282,20 +278,20 @@ Tanggal langsung masuk ke grup "Bulan ini", dengan hitung mundur yang dihitung u
 ```text
 +--------------------------------+
 |                                |
-|      Buat akun                  |
-|      Mulai rencana pernikahan   |
-|      kamu                      |
+|Buat akun                       |
+|Mulai rencana pernikahan        |
+|kamu                            |
 |                                |
 +--------------------------------+
-| Nama               [_________] |
-| Email              [_________] |
+|Nama               [_________]  |
+|Email              [_________]  |
 |                                |
-| Kata sandi         [_________] |
-|                    [lihat ]   |
+|Kata sandi         [_________]  |
+|[lihat ]                        |
 |                                |
-| [ Lanjut ]                      |
+|[ Lanjut ]                      |
 |                                |
-| Sudah punya akun? Masuk        |
+|Sudah punya akun? Masuk         |
 +--------------------------------+
 ```
 
@@ -305,20 +301,20 @@ Tanggal langsung masuk ke grup "Bulan ini", dengan hitung mundur yang dihitung u
 
 ```text
 +--------------------------------+
-| [G] Tanpa sinyal                |
+|[G] Tanpa sinyal                |
 +--------------------------------+
-|   Yang masih bisa dibuka:       |
+|Yang masih bisa dibuka:         |
 |                                |
-|   [ Rundown ]                   |
-|   [ Daftar tugas, baca saja ]  |
-|   [ Daftar tamu, baca saja ]   |
-|   [ Anggaran, baca saja ]      |
+|[ Rundown ]                     |
+|[ Daftar tugas, baca saja ]     |
+|[ Daftar tamu, baca saja ]      |
+|[ Anggaran, baca saja ]         |
 |                                |
-|   Perubahan yang kamu buat akan  |
-|   terkirim begitu sinyal        |
-|   kembali.                      |
+|Perubahan yang kamu buat akan   |
+|terkirim begitu sinyal          |
+|kembali.                        |
 |                                |
-|   [ Coba lagi ]                 |
+|[ Coba lagi ]                   |
 +--------------------------------+
 ```
 
@@ -332,12 +328,12 @@ Tidak ada tombol tambah di sini. Tombol yang kalau diklik pasti gagal lebih buru
 
 ```text
 +--------------------------------+
-|  Rencana                       |
+|Rencana                         |
 +--------------------------------+
-| - - - - - - - - - - - - - - -  |
-| - - - - - - - - - - - - - - -  |
-| - - - - - - - - - - - - - - -  |
-| - - - - - - - - - - - - - - -  |
+|- - - - - - - - - - - - - - -   |
+|- - - - - - - - - - - - - - -   |
+|- - - - - - - - - - - - - - -   |
+|- - - - - - - - - - - - - - -   |
 +--------------------------------+
 ```
 
@@ -347,13 +343,13 @@ Baris abu, bukan spinner. Spinner di daftar panjang bikin orang mengira daftarny
 
 ```text
 +--------------------------------+
-|  Rencana                       |
+|Rencana                         |
 +--------------------------------+
 |                                |
-|   Daftar tugas gagal dimuat.   |
-|   Bukan salahmu, coba lagi.    |
+|Daftar tugas gagal dimuat.      |
+|Bukan salahmu, coba lagi.       |
 |                                |
-|   [ Coba lagi ]                 |
+|[ Coba lagi ]                   |
 +--------------------------------+
 ```
 
@@ -363,13 +359,13 @@ Kalimatnya menyalahkan server, bukan orang yang sedang panik menunggu.
 
 ```text
 +--------------------------------+
-| [G] Tanpa sinyal                |
+|[G] Tanpa sinyal                |
 +--------------------------------+
-| MINGGU INI                     |
+|MINGGU INI                      |
 |                                |
-| (o) Daftar KUA          18 Mei |
-| ( ) Sewa venue          20 Mei |
-| ...                            |
+|(o) Daftar KUA          18 Mei  |
+|( ) Sewa venue          20 Mei  |
+|...                             |
 +--------------------------------+
 ```
 

@@ -25,15 +25,17 @@ Tahap 1: Pondasi       4,5 hari
   aplikasi jalan, tema jalan, database jalan, daftar akun jalan
         |
         v
-Tahap 2: Isi          21 hari
-  tanggal, tugas, anggaran, vendor, pembayaran, tamu, rundown
+Tahap 2: Isi         22,5 hari
+  tanggal, tugas, anggaran, vendor, pembayaran, tamu, rundown, laporan
         |
         v
-Tahap 3: Kualitas     12 hari
+Tahap 3: Kualitas      12 hari
   offline, install, performa, aksesibilitas, keamanan, backup
 ```
 
-Total 39 hari kerja. Kalau bekerja separuh waktu, jadi sekitar empat bulan.
+Total 39 hari kerja. Angka tahap dua dan tiga sudah dijumlahkan dari daftar story di [`docs/10-Epik-dan-Story.md`](10-Epik-dan-Story.md), jadi tidak ada story yang terlewat di hitungan.
+
+Rencana sprint di [`docs/11-Delivery-Plan.md`](11-Delivery-Plan.md) memakai 55 hari kerja. Selisih 16 hari itu bukan karangan. Isinya laporan dan cetak PDF yang belum pernah masuk sprint mana pun, halaman luring, uji cetak dan uji luring di perangkat sungguhan, evaluasi Lighthouse, cakupan uji otomatis, dan jeda antar sprint.
 
 ---
 
@@ -75,6 +77,9 @@ Yang paling sering lupa di tahap ini: jangan tambah fitur apa pun. Bug layout ja
 | 12 | Template rundown | Enam adat |
 | 13 | Edit rundown | Item bisa ditambah dan diurutkan |
 | 14 | Info untuk keluarga | Tautan tanpa login, baca saja |
+| 15 | Halaman laporan | Semua angka dihitung ulang di server |
+| 16 | Bagikan ke WhatsApp | Teks disusun di server, angka tidak bisa diubah dari HP |
+| 17 | Cetak PDF | Rapi di kertas, tanpa pustaka tambahan |
 
 Urutan ini bukan kebetulan. Data lebih dulu, tampilan belakangan. Kalau tampilan dulu, nanti harus diubah dua kali.
 

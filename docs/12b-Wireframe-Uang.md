@@ -12,37 +12,37 @@ Tanda dan aturan umum ada di [`12-Wireframe.md`](12-Wireframe.md).
 
 ```text
 +--------------------------------+
-| < Anggaran                     |
+|< Anggaran                      |
 +--------------------------------+
-| Total anggaran    Rp 40.000.000|
+|Total anggaran    Rp 40.000.000 |
 |                                |
-| Terpakai         Rp 24.500.000|
-| Sisa             Rp 15.500.000|
+|Terpakai         Rp 24.500.000  |
+|Sisa             Rp 15.500.000  |
 |                                |
-| [bar]###############.....      |
+|[bar]###############.....       |
 |                                |
-| [Cari pos....................] |
+|[Cari pos....................]  |
 +--------------------------------+
-| B Catering        8.000.000   |
-| [bar]####################     |
-| │ Terpakai 8.000.000          |
-| │ Sisa     0                  |
-| │ lunas                       |
-| >                              |
+|B Catering        8.000.000     |
+|[bar]####################       |
+|│ Terpakai 8.000.000            |
+|│ Sisa     0                    |
+|│ lunas                         |
+|>                               |
 |                                |
-| D Dekorasi      12.000.000     |
-| [bar]##############....       |
-| │ Terpakai 9.500.000          |
-| │ Sisa     2.500.000          |
-| │ lewat batas                 |
-| >                              |
+|D Dekorasi      12.000.000      |
+|[bar]##############....         |
+|│ Terpakai 9.500.000            |
+|│ Sisa     2.500.000            |
+|│ lewat batas                   |
+|>                               |
 |                                |
-| V Venue        14.500.000     |
-| [bar]######................    |
-| │ Belum ada pembayaran         |
-| >                              |
+|V Venue        14.500.000       |
+|[bar]######................     |
+|│ Belum ada pembayaran          |
+|>                               |
 |                                |
-|                            (+) |
+|(+)                             |
 +--------------------------------+
 ```
 
@@ -54,17 +54,17 @@ Bar memakai warna pos, bukan warna status. Kalau warnanya=status, bar jadi sulit
 
 ```text
 +--------------------------------+
-| < Anggaran                     |
+|< Anggaran                      |
 +--------------------------------+
 |                                |
-|     Belum ada pos anggaran      |
+|Belum ada pos anggaran          |
 |                                |
-|   Mulai dari daftar bawaan     |
-|   Catering, dekorasi, venue,   |
-|   dokumentasi, dan lain-lain.  |
+|Mulai dari daftar bawaan        |
+|Catering, dekorasi, venue,      |
+|dokumentasi, dan lain-lain.     |
 |                                |
-|   [ Muat daftar bawaan ]       |
-|   [ Tulis pos sendiri ]        |
+|[ Muat daftar bawaan ]          |
+|[ Tulis pos sendiri ]           |
 +--------------------------------+
 ```
 
@@ -74,20 +74,20 @@ Bar memakai warna pos, bukan warna status. Kalau warnanya=status, bar jadi sulit
 
 ```text
 +--------------------------------+
-| <  Tambah pos anggaran         |
+|<  Tambah pos anggaran          |
 +--------------------------------+
-| Untuk apa                      |
-| [ Dekorasi                  ]  |
+|Untuk apa                       |
+|[ Dekorasi                  ]   |
 |                                |
-| Batas                          |
-| [ Rp 12.000.000             ]  |
+|Batas                           |
+|[ Rp 12.000.000             ]   |
 |                                |
-| sudah terpakai  Rp 9.500.000   |
-| sisa            Rp 2.500.000   |
+|sudah terpakai  Rp 9.500.000    |
+|sisa            Rp 2.500.000    |
 |                                |
-| [bar]##############....       |
+|[bar]##############....         |
 |                                |
-| [ Simpan pos ]                 |
+|[ Simpan pos ]                  |
 +--------------------------------+
 ```
 
@@ -103,31 +103,31 @@ Sisa yang sudah dihitung sebelum menyimpan membuat orang tahu pos ini hampir hab
 
 ```text
 +--------------------------------+
-| < Vendor                   [+]|
+|< Vendor                   [+]  |
 +--------------------------------+
-| [Cari vendor.................] |
+|[Cari vendor.................]  |
 +--------------------------------+
-| D Dekorasi                     |
-| │ Buana Dekorasi                |
-| │ Tagihan   12.000.000         |
-| │ Terbayar   9.500.000         |
-| │ Sisa       2.500.000         |
-| │ lewat batas                 |
-| >                              |
+|D Dekorasi                      |
+|│ Buana Dekorasi                |
+|│ Tagihan   12.000.000          |
+|│ Terbayar   9.500.000          |
+|│ Sisa       2.500.000          |
+|│ lewat batas                   |
+|>                               |
 |                                |
-| C Catering                     |
-| │ Rasa Ibu                     |
-| │ Tagihan   8.000.000          |
-| │ Terbayar   8.000.000         |
-| │ Sisa       0                 |
-| │ lunas                        |
-| >                              |
+|C Catering                      |
+|│ Rasa Ibu                      |
+|│ Tagihan   8.000.000           |
+|│ Terbayar   8.000.000          |
+|│ Sisa       0                  |
+|│ lunas                         |
+|>                               |
 |                                |
-| V Venue                        |
-| │ Grand Borneo                 |
-| │ Tagihan  14.500.000          |
-| │ Belum ada pembayaran         |
-| >                              |
+|V Venue                         |
+|│ Grand Borneo                  |
+|│ Tagihan  14.500.000           |
+|│ Belum ada pembayaran          |
+|>                               |
 +--------------------------------+
 ```
 
@@ -141,28 +141,28 @@ Inisial di depan adalah huruf pertama kategori, jadi yang muncul satu huruf saja
 
 ```text
 +--------------------------------+
-| < Dekorasi                     |
+|< Dekorasi                      |
 +--------------------------------+
-| Buana Dekorasi                  |
+|Buana Dekorasi                  |
 |                                |
-| Tagihan     Rp 12.000.000      |
-| Terbayar    Rp  9.500.000      |
-| Sisa        Rp  2.500.000      |
+|Tagihan     Rp 12.000.000       |
+|Terbayar    Rp  9.500.000       |
+|Sisa        Rp  2.500.000       |
 |                                |
 +--------------------------------+
-| Pembayaran                     |
+|Pembayaran                      |
 |                                |
-| 20 Jun  DP     Rp 4.000.000    |
-| 28 Jun  DP     Rp 5.500.000    |
-| 02 Jul  sisa   Rp 2.500.000    |
+|20 Jun  DP     Rp 4.000.000     |
+|28 Jun  DP     Rp 5.500.000     |
+|02 Jul  sisa   Rp 2.500.000     |
 |                                |
-|                            (+) |
+|(+)                             |
 +--------------------------------+
-| Catatan                        |
-| [ Biru, pelangi, gerobak       ]|
-| [                              ]|
+|Catatan                         |
+|[ Biru, pelangi, gerobak       ]|
+|[                              ]|
 +--------------------------------+
-| [ Bagikan ]  [ Hapus vendor ]  |
+|[ Bagikan ]  [ Hapus vendor ]   |
 +--------------------------------+
 ```
 
@@ -174,25 +174,25 @@ Baris pembayaran menampilkan tanggal dan tahap, bukan cuma nominal. "Kapan bayar
 
 ```text
 +--------------------------------+
-| <  Tambah pembayaran           |
+|<  Tambah pembayaran            |
 +--------------------------------+
-| Untuk Buana Dekorasi           |
+|Untuk Buana Dekorasi            |
 |                                |
-| Sisa tagihan     Rp 2.500.000  |
+|Sisa tagihan     Rp 2.500.000   |
 |                                |
-| Tanggal                        |
-| [ 02 Juli 2026             v ] |
+|Tanggal                         |
+|[ 02 Juli 2026             v ]  |
 |                                |
-| Jumlah                         |
-| [ Rp 2.500.000              ]  |
+|Jumlah                          |
+|[ Rp 2.500.000              ]   |
 |                                |
-| Tahap                          |
-| [ Sisa                    v ]  |
+|Tahap                           |
+|[ Sisa                    v ]   |
 |                                |
-| Bukti transfer                 |
-| [ Pilih foto                ]  |
+|Bukti transfer                  |
+|[ Pilih foto                ]   |
 |                                |
-| [ Batal ]        [ Simpan ]    |
+|[ Batal ]        [ Simpan ]     |
 +--------------------------------+
 ```
 
@@ -206,21 +206,21 @@ Bukti transfer opsional, karena sering bayar lewat transfer manual dan tidak sel
 
 ```text
 +--------------------------------+
-| < Pembayaran                   |
+|< Pembayaran                    |
 +--------------------------------+
-| Buana Dekorasi                  |
+|Buana Dekorasi                  |
 |                                |
-| Rp 2.500.000                   |
-| 02 Juli 2026                   |
-| Tahap  sisa                    |
+|Rp 2.500.000                    |
+|02 Juli 2026                    |
+|Tahap  sisa                     |
 |                                |
 +--------------------------------+
-| Bukti transfer                 |
-| [ Lihat foto               ]   |
-| [ Ganti foto               ]   |
-| [ Hapus bukti              ]   |
+|Bukti transfer                  |
+|[ Lihat foto               ]    |
+|[ Ganti foto               ]    |
+|[ Hapus bukti              ]    |
 +--------------------------------+
-| [ Hapus pembayaran ]            |
+|[ Hapus pembayaran ]            |
 +--------------------------------+
 ```
 
@@ -232,11 +232,11 @@ Bukti transfer opsional, karena sering bayar lewat transfer manual dan tidak sel
 
 ```text
 +--------------------------------+
-| < Anggaran                     |
+|< Anggaran                      |
 +--------------------------------+
-| - - - - - - - - - - - - - - -  |
-| - - - - - - - - - - - - - - -  |
-| - - - - - - - - - - - - - - -  |
+|- - - - - - - - - - - - - - -   |
+|- - - - - - - - - - - - - - -   |
+|- - - - - - - - - - - - - - -   |
 +--------------------------------+
 ```
 
@@ -244,13 +244,13 @@ Bukti transfer opsional, karena sering bayar lewat transfer manual dan tidak sel
 
 ```text
 +--------------------------------+
-| < Anggaran                     |
+|< Anggaran                      |
 +--------------------------------+
 |                                |
-|  Anggaran gagal dimuat.        |
-|  Bukan salahmu, coba lagi.     |
+|Anggaran gagal dimuat.          |
+|Bukan salahmu, coba lagi.       |
 |                                |
-|  [ Coba lagi ]                 |
+|[ Coba lagi ]                   |
 +--------------------------------+
 ```
 
@@ -258,15 +258,15 @@ Bukti transfer opsional, karena sering bayar lewat transfer manual dan tidak sel
 
 ```text
 +--------------------------------+
-| [G] Tanpa sinyal                |
+|[G] Tanpa sinyal                |
 +--------------------------------+
-| B Dekorasi      12.000.000     |
-| [bar]##############....       |
-| │ Terpakai 9.500.000          |
-| │ Sisa     2.500.000          |
+|B Dekorasi      12.000.000      |
+|[bar]##############....         |
+|│ Terpakai 9.500.000            |
+|│ Sisa     2.500.000            |
 +--------------------------------+
-| Perubahan yang kamu buat akan    |
-| terkirim begitu sinyal kembali. |
+|Perubahan yang kamu buat akan   |
+|terkirim begitu sinyal kembali. |
 +--------------------------------+
 ```
 
