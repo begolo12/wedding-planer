@@ -1129,14 +1129,6 @@ textarea.isian {
   flex-direction: column;
 }
 
-.auth-merek-label {
-  font-size: 0.75rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--color-muted);
-  font-weight: 600;
-}
-
 .auth-merek-judul {
   font-family: var(--font-judul);
   font-size: var(--text-h3);
@@ -1155,13 +1147,6 @@ textarea.isian {
   font-weight: 600;
   line-height: 1.2;
   margin: 0;
-}
-
-.auth-subjudul {
-  margin: 6px 0 0;
-  font-size: var(--text-kecil);
-  color: var(--color-muted);
-  line-height: 1.45;
 }
 
 .auth-form {
@@ -1246,20 +1231,6 @@ textarea.isian {
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;
-}
-
-.auth-keterangan-bawah {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-size: 0.8125rem;
-  color: var(--color-muted);
-  padding: 4px 0;
-}
-
-.titik-pemisah {
-  opacity: 0.6;
 }
 
 /* Hitung mundur. Angka paling besar di seluruh aplikasi, karena ini yang

@@ -27,6 +27,19 @@ Aturan singkat:
 | Tulis alasan kalau tidak jelas | Pembaca versi berikutnya tidak perlu menebak |
 | Tambah entri baru di atas | Yang terbaru selalu di paling atas |
 
+## [0.6.7] - 1 Oktober 2026
+
+Layar masuk dan daftar dibersihkan dari tulisan yang tidak perlu.
+
+### Ubah
+
+- Semua kata "surel" diganti "email" di label, pesan galat, dan nama variabel
+- Judul layar disederhanakan jadi "Masuk" dan "Daftar", subjudul dihapus
+- Placeholder "nama@contoh.com", "Contoh: Budi", dan "Minimal 8 huruf" dihapus karena label sudah cukup jelas
+- Label "Nama panggilan" jadi "Nama", teks tombol "Daftar Sekarang" jadi "Daftar"
+- Label brand "Buku Rencana Pernikahan" dan footer "Tersimpan aman / Siap luring di venue" dihapus dari layout auth
+- Aturan CSS `.auth-subjudul`, `.auth-merek-label`, `.auth-keterangan-bawah`, dan `.titik-pemisah` dihapus karena tidak lagi dipakai
+
 ## [0.6.6] - 1 Oktober 2026
 
 Refaktor kode bersih dan pembersihan komentar anti-slop sesuai best practice.

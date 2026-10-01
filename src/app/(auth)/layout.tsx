@@ -34,19 +34,12 @@ export default function LayoutAuth({ children }: { children: ReactNode }) {
                 </svg>
               </span>
               <span className="auth-merek-teks">
-                <span className="auth-merek-label">Buku Rencana Pernikahan</span>
                 <span className="auth-merek-judul">Hari Besar</span>
               </span>
             </Link>
           </div>
           {children}
         </div>
-
-        <footer className="auth-keterangan-bawah">
-          <span>Tersimpan aman</span>
-          <span className="titik-pemisah" aria-hidden="true">•</span>
-          <span>Siap luring di venue</span>
-        </footer>
       </div>
     </main>
   );

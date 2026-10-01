@@ -14,7 +14,7 @@ import { IsianSandi } from "@/components/field";
 export default function HalamanDaftar() {
   const router = useRouter();
   const [nama, setNama] = useState("");
-  const [surel, setSurel] = useState("");
+  const [email, setEmail] = useState("");
   const [sandi, setSandi] = useState("");
   const [galat, setGalat] = useState<string | null>(null);
   const [sedangJalan, setSedangJalan] = useState(false);
@@ -32,7 +32,7 @@ export default function HalamanDaftar() {
 
     const { error } = await signUp.email({
       name: nama.trim(),
-      email: surel.trim(),
+      email: email.trim(),
       password: sandi,
     });
 
@@ -40,7 +40,7 @@ export default function HalamanDaftar() {
       setSedangJalan(false);
       const kode = (error as { code?: string }).code;
       if (kode === "USER_ALREADY_EXISTS") {
-        setGalat("Surel ini sudah dipakai. Masuk saja dengan surel yang sama.");
+        setGalat("Email ini sudah dipakai. Masuk saja.");
         return;
       }
       setGalat("Pendaftaran belum berhasil. Coba lagi sebentar.");
@@ -54,21 +54,17 @@ export default function HalamanDaftar() {
   return (
     <>
       <div className="auth-judul-blok">
-        <h1 className="auth-judul">Buat Akun Baru</h1>
-        <p className="auth-subjudul">
-          Mulai dan rancang rencana pernikahan kamu berdua.
-        </p>
+        <h1 className="auth-judul">Daftar</h1>
       </div>
 
       <form onSubmit={kirim} noValidate className="auth-form">
         <div className="isian-grup">
-          <label htmlFor="nama">Nama panggilan</label>
+          <label htmlFor="nama">Nama</label>
           <input
             id="nama"
             className="isian"
             type="text"
             autoComplete="name"
-            placeholder="Contoh: Budi"
             required
             value={nama}
             onChange={(e) => setNama(e.target.value)}
@@ -76,9 +72,9 @@ export default function HalamanDaftar() {
         </div>
 
         <div className="isian-grup">
-          <label htmlFor="surel">Surel</label>
+          <label htmlFor="email">Email</label>
           <input
-            id="surel"
+            id="email"
             className="isian"
             type="email"
             inputMode="email"
@@ -86,10 +82,9 @@ export default function HalamanDaftar() {
             autoCorrect="off"
             spellCheck={false}
             autoComplete="email"
-            placeholder="nama@contoh.com"
             required
-            value={surel}
-            onChange={(e) => setSurel(e.target.value)}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
 
@@ -97,7 +92,7 @@ export default function HalamanDaftar() {
           nilai={sandi}
           onUbah={setSandi}
           autoComplete="new-password"
-          placeholder="Minimal 8 huruf"
+          placeholder=""
           minLength={8}
           petunjuk="Minimal 8 karakter."
         />
@@ -115,7 +110,7 @@ export default function HalamanDaftar() {
               Sedang membuat akun...
             </span>
           ) : (
-            "Daftar Sekarang"
+            "Daftar"
           )}
         </button>
       </form>
@@ -123,7 +118,7 @@ export default function HalamanDaftar() {
       <p className="auth-kaki">
         Sudah punya akun?{" "}
         <Link className="tautan-kalimat" href="/masuk">
-          Masuk di sini
+          Masuk
         </Link>
       </p>
     </>

@@ -8,13 +8,13 @@ import { PesanGalat } from "@/components/states";
 import { IsianSandi } from "@/components/field";
 
 /**
- * Masuk pakai surel dan kata sandi. Tidak ada tombol "lupa kata sandi",
- * karena belum ada pengiriman surel di tahap ini dan tombol yang tidak
+ * Masuk pakai email dan kata sandi. Tidak ada tombol "lupa kata sandi",
+ * karena belum ada pengiriman email di tahap ini dan tombol yang tidak
  * berfungsi lebih buruk daripada tidak ada tombol.
  */
 export default function HalamanMasuk() {
   const router = useRouter();
-  const [surel, setSurel] = useState("");
+  const [email, setEmail] = useState("");
   const [sandi, setSandi] = useState("");
   const [galat, setGalat] = useState<string | null>(null);
   const [sedangJalan, setSedangJalan] = useState(false);
@@ -23,8 +23,8 @@ export default function HalamanMasuk() {
     e.preventDefault();
     if (sedangJalan) return;
 
-    if (!surel.trim() || !sandi) {
-      setGalat("Isi surel dan kata sandi untuk masuk.");
+    if (!email.trim() || !sandi) {
+      setGalat("Isi email dan kata sandi.");
       return;
     }
 
@@ -33,15 +33,15 @@ export default function HalamanMasuk() {
 
     try {
       const { error } = await signIn.email({
-        email: surel.trim(),
+        email: email.trim(),
         password: sandi,
       });
 
       if (error) {
         setSedangJalan(false);
-        // Surel yang belum terdaftar dan sandi yang salah dibalas sama,
+        // Email yang belum terdaftar dan sandi yang salah dibalas sama,
         // supaya layar ini tidak bisa dipakai menebak siapa yang punya akun.
-        setGalat("Surel atau kata sandi belum cocok. Coba periksa lagi.");
+        setGalat("Email atau kata sandi belum cocok.");
         return;
       }
 
@@ -49,24 +49,21 @@ export default function HalamanMasuk() {
       router.refresh();
     } catch {
       setSedangJalan(false);
-      setGalat("Gagal menghubungkan ke server. Periksa koneksi internet.");
+      setGalat("Gagal menghubungi server. Periksa koneksi internet.");
     }
   }
 
   return (
     <>
       <div className="auth-judul-blok">
-        <h1 className="auth-judul">Masuk ke Akun</h1>
-        <p className="auth-subjudul">
-          Lanjutkan rencana pernikahan yang sedang kamu susun.
-        </p>
+        <h1 className="auth-judul">Masuk</h1>
       </div>
 
       <form onSubmit={kirim} noValidate className="auth-form">
         <div className="isian-grup">
-          <label htmlFor="surel">Surel</label>
+          <label htmlFor="email">Email</label>
           <input
-            id="surel"
+            id="email"
             className="isian"
             type="email"
             inputMode="email"
@@ -74,14 +71,13 @@ export default function HalamanMasuk() {
             autoCorrect="off"
             spellCheck={false}
             autoComplete="email"
-            placeholder="nama@contoh.com"
             required
-            value={surel}
-            onChange={(e) => setSurel(e.target.value)}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
 
-        <IsianSandi nilai={sandi} onUbah={setSandi} />
+        <IsianSandi nilai={sandi} onUbah={setSandi} placeholder="" />
 
         {galat ? <PesanGalat teks={galat} /> : null}
 
@@ -104,7 +100,7 @@ export default function HalamanMasuk() {
       <p className="auth-kaki">
         Belum punya akun?{" "}
         <Link className="tautan-kalimat" href="/daftar">
-          Daftar sekarang
+          Daftar
         </Link>
       </p>
     </>
