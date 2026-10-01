@@ -71,35 +71,40 @@ export default function HalamanHariH() {
   const [sedangHapus, setSedangHapus] = useState(false);
   const [sedangPasangTemplate, setSedangPasangTemplate] = useState(false);
 
-  // Form inputs
-  const [formJudul, setFormJudul] = useState("");
-  const [formJam, setFormJam] = useState("08:00");
-  const [formDurasi, setFormDurasi] = useState<string>("60");
-  const [formLokasi, setFormLokasi] = useState("");
-  const [formPic, setFormPic] = useState("");
-  const [formCatatan, setFormCatatan] = useState("");
+  // Form state
+  const FORM_KOSONG = {
+    judul: "",
+    jam: "08:00",
+    durasi: "60",
+    lokasi: "",
+    pic: "",
+    catatan: "",
+  };
+
+  const [form, setForm] = useState(FORM_KOSONG);
   const [formGalat, setFormGalat] = useState<string | null>(null);
+
+  function aturField<K extends keyof typeof FORM_KOSONG>(k: K, v: string) {
+    setForm((prev) => ({ ...prev, [k]: v }));
+  }
 
   function bukaTambah() {
     setDiedit(null);
-    setFormJudul("");
-    setFormJam("08:00");
-    setFormDurasi("60");
-    setFormLokasi("");
-    setFormPic("");
-    setFormCatatan("");
+    setForm(FORM_KOSONG);
     setFormGalat(null);
     setLembarBuka(true);
   }
 
   function bukaUbah(item: RundownItem) {
     setDiedit(item);
-    setFormJudul(item.title);
-    setFormJam(item.startTime);
-    setFormDurasi(item.durationMinutes ? String(item.durationMinutes) : "");
-    setFormLokasi(item.location ?? "");
-    setFormPic(item.picName ?? "");
-    setFormCatatan(item.notes ?? "");
+    setForm({
+      judul: item.title,
+      jam: item.startTime,
+      durasi: item.durationMinutes ? String(item.durationMinutes) : "",
+      lokasi: item.location ?? "",
+      pic: item.picName ?? "",
+      catatan: item.notes ?? "",
+    });
     setFormGalat(null);
     setLembarBuka(true);
   }
@@ -108,12 +113,12 @@ export default function HalamanHariH() {
     e.preventDefault();
     if (!planId) return;
 
-    if (!formJudul.trim()) {
+    if (!form.judul.trim()) {
       setFormGalat("Nama susunan acara wajib diisi.");
       return;
     }
 
-    if (!formJam.trim()) {
+    if (!form.jam.trim()) {
       setFormGalat("Jam mulai wajib diisi (misal 08:00).");
       return;
     }
@@ -123,12 +128,12 @@ export default function HalamanHariH() {
 
     try {
       const payload = {
-        title: formJudul.trim(),
-        startTime: formJam.trim(),
-        durationMinutes: formDurasi ? parseInt(formDurasi, 10) : undefined,
-        location: formLokasi.trim() || undefined,
-        picName: formPic.trim() || undefined,
-        notes: formCatatan.trim() || undefined,
+        title: form.judul.trim(),
+        startTime: form.jam.trim(),
+        durationMinutes: form.durasi ? parseInt(form.durasi, 10) : undefined,
+        location: form.lokasi.trim() || undefined,
+        picName: form.pic.trim() || undefined,
+        notes: form.catatan.trim() || undefined,
         sortOrder: diedit?.sortOrder ?? 0,
       };
 
@@ -486,8 +491,8 @@ export default function HalamanHariH() {
               type="text"
               required
               placeholder="Contoh: Akad Nikah / Ijab Kabul"
-              value={formJudul}
-              onChange={(e) => setFormJudul(e.target.value)}
+              value={form.judul}
+              onChange={(e) => aturField("judul", e.target.value)}
             />
           </Isian>
 
@@ -499,8 +504,8 @@ export default function HalamanHariH() {
                 type="text"
                 required
                 placeholder="07:30"
-                value={formJam}
-                onChange={(e) => setFormJam(e.target.value)}
+                value={form.jam}
+                onChange={(e) => aturField("jam", e.target.value)}
               />
             </Isian>
 
@@ -511,8 +516,8 @@ export default function HalamanHariH() {
                 type="number"
                 min={0}
                 placeholder="60"
-                value={formDurasi}
-                onChange={(e) => setFormDurasi(e.target.value)}
+                value={form.durasi}
+                onChange={(e) => aturField("durasi", e.target.value)}
               />
             </Isian>
           </div>
@@ -523,8 +528,8 @@ export default function HalamanHariH() {
               className="isian"
               type="text"
               placeholder="Contoh: Masjid Al-Falah / Aula Utama"
-              value={formLokasi}
-              onChange={(e) => setFormLokasi(e.target.value)}
+              value={form.lokasi}
+              onChange={(e) => aturField("lokasi", e.target.value)}
             />
           </Isian>
 
@@ -534,8 +539,8 @@ export default function HalamanHariH() {
               className="isian"
               type="text"
               placeholder="Contoh: Pakde Hadi & Tim WO"
-              value={formPic}
-              onChange={(e) => setFormPic(e.target.value)}
+              value={form.pic}
+              onChange={(e) => aturField("pic", e.target.value)}
             />
           </Isian>
 
@@ -549,8 +554,8 @@ export default function HalamanHariH() {
               className="isian"
               rows={3}
               placeholder="Contoh: Buku nikah disiapkan saksi, mikrofon mimbar dicek sebelum penghulu mulai."
-              value={formCatatan}
-              onChange={(e) => setFormCatatan(e.target.value)}
+              value={form.catatan}
+              onChange={(e) => aturField("catatan", e.target.value)}
             />
           </Isian>
 

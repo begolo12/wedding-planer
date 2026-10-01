@@ -27,6 +27,19 @@ Aturan singkat:
 | Tulis alasan kalau tidak jelas | Pembaca versi berikutnya tidak perlu menebak |
 | Tambah entri baru di atas | Yang terbaru selalu di paling atas |
 
+## [0.6.6] - 1 Oktober 2026
+
+Refaktor kode bersih dan pembersihan komentar anti-slop sesuai best practice.
+
+#### Ubah
+
+- Ekstraksi komponen terpadu `IsianSandi` di `src/components/field.tsx`, mengurangi duplikasi kode SVG dan logika toggle di halaman auth
+- Konsolidasi status formulir terpecah di `src/app/(app)/hari-h/page.tsx` menjadi satu objek status terstruktur
+- Pembersihan komentar dekoratif garis putus-putus pada `src/lib/laporan.ts` sesuai pedoman anti-slop
+- Pengurangan ukuran bundel halaman masuk dan daftar berkat penggunaan komponen terpadu
+
+---
+
 ## [0.6.5] - 1 Oktober 2026
 
 Peningkatan visual dan pengalaman layar masuk (login) dan daftar akun dengan fokus mobile 1st.

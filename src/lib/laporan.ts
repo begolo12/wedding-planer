@@ -135,7 +135,7 @@ export async function susunLaporan(planId: string): Promise<Laporan> {
       db.select().from(outfits).where(eq(outfits.planId, planId)),
     ]);
 
-  // ---- Uang ------------------------------------------------------------
+  // Perhitungan pos anggaran dan pembayaran
   const paidPerVendor = new Map<string, number>();
   for (const p of semuaPembayaran) {
     paidPerVendor.set(p.vendorId, (paidPerVendor.get(p.vendorId) ?? 0) + p.amount);
@@ -164,11 +164,11 @@ export async function susunLaporan(planId: string): Promise<Laporan> {
     };
   });
 
-  // ---- Tugas -----------------------------------------------------------
+  // Rekapitulasi tugas
   const belum = semuaTugas.filter((t) => t.status !== "selesai");
   const hitungKelompok = (k: string) => belum.filter((t) => kelompokkan(t.dueDate, t.status) === k).length;
 
-  // ---- Tamu ------------------------------------------------------------
+  // Rekapitulasi tamu dan RSVP
   const perKategoriPeta = new Map<string, { orang: number; baris: number }>();
   for (const g of semuaTamu) {
     const k = perKategoriPeta.get(g.category) ?? { orang: 0, baris: 0 };
@@ -181,11 +181,11 @@ export async function susunLaporan(planId: string): Promise<Laporan> {
     .filter((g) => g.rsvpStatus === "hadir")
     .reduce((n, g) => n + g.guestCount, 0);
 
-  // ---- Vendor ----------------------------------------------------------
+  // Status pembayaran vendor
   const totalTagihanVendor = pos.reduce((n, p) => n + p.plannedAmount, 0);
   const belumLunas = semuaVendor.filter((v) => (paidPerVendor.get(v.id) ?? 0) < 1).length;
 
-  // ---- Rundown ---------------------------------------------------------
+  // Jadwal akhir acara
   const akhirRundown = semuaRundown.length
     ? tambahMenit(
         semuaRundown[semuaRundown.length - 1]!.startTime,

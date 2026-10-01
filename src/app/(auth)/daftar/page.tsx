@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signUp } from "@/lib/auth-client";
 import { PesanGalat } from "@/components/states";
+import { IsianSandi } from "@/components/field";
 
 /**
  * Daftar akun. Nama dipakai di kepala aplikasi, jadi diminta di sini
@@ -15,7 +16,6 @@ export default function HalamanDaftar() {
   const [nama, setNama] = useState("");
   const [surel, setSurel] = useState("");
   const [sandi, setSandi] = useState("");
-  const [lihat, setLihat] = useState(false);
   const [galat, setGalat] = useState<string | null>(null);
   const [sedangJalan, setSedangJalan] = useState(false);
 
@@ -93,45 +93,14 @@ export default function HalamanDaftar() {
           />
         </div>
 
-        <div className="isian-grup">
-          <label htmlFor="sandi">Kata sandi</label>
-          <div className="auth-sandi-bungkus">
-            <input
-              id="sandi"
-              className="isian"
-              type={lihat ? "text" : "password"}
-              autoComplete="new-password"
-              placeholder="Minimal 8 huruf"
-              required
-              minLength={8}
-              value={sandi}
-              onChange={(e) => setSandi(e.target.value)}
-            />
-            <button
-              type="button"
-              className="auth-tombol-mata"
-              onClick={() => setLihat((v) => !v)}
-              aria-pressed={lihat}
-              aria-label={lihat ? "Sembunyikan kata sandi" : "Lihat kata sandi"}
-              title={lihat ? "Sembunyikan kata sandi" : "Lihat kata sandi"}
-            >
-              {lihat ? (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
-                  <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
-                  <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
-                  <line x1="2" y1="2" x2="22" y2="22" />
-                </svg>
-              ) : (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
-              )}
-            </button>
-          </div>
-          <span className="petunjuk">Minimal 8 karakter.</span>
-        </div>
+        <IsianSandi
+          nilai={sandi}
+          onUbah={setSandi}
+          autoComplete="new-password"
+          placeholder="Minimal 8 huruf"
+          minLength={8}
+          petunjuk="Minimal 8 karakter."
+        />
 
         {galat ? <PesanGalat teks={galat} /> : null}
 
