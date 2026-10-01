@@ -1,11 +1,23 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { Merek } from "@/components/merek";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AuthHero } from "@/components/auth-hero";
 
 /**
- * Kerangka layar masuk dan daftar.
- * Dilengkapi navigasi atas minimalis untuk kembali dan beralih tema (terang/gelap),
- * serta kartu terpusat yang ramah sentuhan mobile.
+ * Kerangka layar masuk dan daftar. Susunannya mengikuti layar Stitch: kepala
+ * berisi chip merek, satu badge kecil, lambang bulat dengan kabut di
+ * belakangnya, lalu sapaan. Isi form ada di kartu putih.
+ *
+ * Kepala (badge, lambang, sapaan) ada di komponen `AuthHero`, karena layar
+ * "Masuk" dan "Daftar" di Stitch punya kepala yang berbeda. Chip merek dan
+ * kartu form tetap di sini karena kedua layar memakainya sama.
+ *
+ * Lambang merek diambil dari logo Stitch lewat komponen `Merek`, jadi kepala
+ * dan lambang besar memakai gambar yang sama persis dengan desain aslinya.
+ *
+ * Badge di Stitch dipakai untuk CTA. Di sini badge tidak bisa diklik, karena
+ * tombol yang tidak berfungsi lebih buruk daripada tidak ada tombol.
  */
 export default function LayoutAuth({ children }: { children: ReactNode }) {
   return (
@@ -13,32 +25,49 @@ export default function LayoutAuth({ children }: { children: ReactNode }) {
       <a className="lompat" href="#konten">
         Lompat ke isi
       </a>
+
       <div className="auth-kontainer">
-        <header className="auth-navigasi-atas">
-          <Link href="/" className="auth-tautan-balik">
-            <span aria-hidden="true">←</span> Beranda
-          </Link>
-          <div className="auth-alat">
+        <div className="auth-kepala">
+          <header className="auth-navigasi-atas">
+            <Link href="/" className="auth-merek-chip" aria-label="Beranda Hari Besar">
+              <span className="auth-merek-ikon" aria-hidden="true">
+                <Merek ukuran={32} />
+              </span>
+              <span className="auth-merek-nama">Hari Besar</span>
+            </Link>
             <ThemeToggle />
-          </div>
-        </header>
+          </header>
+
+          <AuthHero />
+        </div>
 
         <div className="auth-kartu">
-          <div className="auth-kepala">
-            <Link href="/" className="auth-logo" aria-label="Beranda Hari Besar">
-              <span className="auth-emblem" aria-hidden="true">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" strokeWidth="2">
-                  <circle cx="9" cy="12" r="5" stroke="var(--color-sage)" />
-                  <circle cx="15" cy="12" r="5" stroke="var(--color-terracotta)" />
-                  <path d="M12 9v6" stroke="var(--color-marigold)" strokeLinecap="round" />
-                </svg>
-              </span>
-              <span className="auth-merek-teks">
-                <span className="auth-merek-judul">Hari Besar</span>
-              </span>
-            </Link>
-          </div>
+          <span className="auth-kabut auth-kabut-atas" aria-hidden="true" />
+          <span className="auth-kabut auth-kabut-bawah" aria-hidden="true" />
           {children}
+        </div>
+
+        <div className="auth-aman">
+          <span className="auth-aman-ikon" aria-hidden="true">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z" />
+            </svg>
+          </span>
+          <span className="auth-aman-teks">
+            <span className="auth-aman-judul">Catatan kalian tersimpan rapi</span>
+            <span className="auth-aman-sub">
+              Data rencana hanya bisa dibuka oleh akun yang kamu daftarkan.
+            </span>
+          </span>
         </div>
       </div>
     </main>

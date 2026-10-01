@@ -1,19 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePlan } from "@/lib/use-plan";
 import { useMuat } from "@/lib/use-muat";
 import { Kerangka, Kosong, Gagal } from "@/components/states";
 import { Lembar, DialogKonfirmasi, toast } from "@/components/toast";
-import { Isian, Pilih, IsianRupiah } from "@/components/field";
-import { Rupiah } from "@/components/rupiah";
+import { Isian, Pilih } from "@/components/field";
+import { rupiah, selisihHari, tanggalPendekDari } from "@/lib/format";
 import { BudgetBar } from "@/components/budget-bar";
 import { minta, pesanGalat } from "@/lib/api-client";
 import {
   KATEGORI_UANG,
   type KategoriUang,
   LABEL_KATEGORI_UANG,
+  type MetodeBayar,
+  LABEL_METODE_BAYAR,
 } from "@/lib/konstanta";
 import type { budgetItems } from "@/db/schema";
 
@@ -30,6 +32,42 @@ type VendorRingkas = {
   status: string;
   budgetItemId: string | null;
 };
+
+type Pembayaran = {
+  id: string;
+  vendorId: string;
+  vendorName: string;
+  budgetItemId: string | null;
+  amount: number;
+  paidAt: string;
+  method: string;
+  isFinal: boolean;
+  notes: string | null;
+};
+
+type IsiAnggaran = {
+  items: BudgetItem[];
+  totals: { planned: number; paid: number; remaining: number };
+  sebaranKategori: Record<string, number>;
+  vendors: VendorRingkas[];
+  payments: Pembayaran[];
+};
+
+// Warna bagian bilah sebaran, urut mengikuti KATEGORI_UANG. Bagian bilah cuma
+// pemanis proporsi; angka dan labelnya ditulis di legenda bawahnya, jadi warna
+// bukan satu-satunya penanda.
+const WARNA_SEBARAN = [
+  "var(--color-marigold)",
+  "var(--color-terracotta)",
+  "var(--color-badge-latar)",
+  "var(--color-aksen-gelap)",
+  "var(--color-sage)",
+  "var(--color-line)",
+  "var(--color-kotak-abu)",
+  "var(--color-netral)",
+];
+
+type TabAnggaran = "pos" | "pengeluaran";
 
 const POS_BAWAAN_INDONESIA: Array<{
   name: string;
@@ -91,6 +129,14 @@ const POS_BAWAAN_INDONESIA: Array<{
  * Layar Anggaran & Pengeluaran.
  * Menghitung batas uang per pos serta perbandingan dengan pembayaran nyata.
  * Tidak ada angka karangan; "terpakai" dihitung dari pembayaran yang sudah keluar.
+ *
+ * Susunan mengikuti `docs/stitch_cute_wedding_planner/budget_vendor_tracker`.
+ * Tiga hal dari rancangan itu sengaja tidak dipakai:
+ * - Gambar vendor tidak ada. Belum ada fitur unggah gambar vendor.
+ * - Status hiasan seperti "Lunas" atau "DP 50%" tidak disalin. Status nyata
+ *   diambil dari pos anggaran dan pembayaran yang tercatat.
+ * - Angka contoh di rancangan tidak dipakai. Semua angka di sini dihitung dari
+ *   rencana yang sedang dibuka.
  */
 export default function HalamanAnggaran() {
   const { plan, planId, memuat: memuatPlan, galat: galatPlan, muatUlang: muatPlan } = usePlan();
@@ -100,16 +146,13 @@ export default function HalamanAnggaran() {
     memuat: memuatAnggaran,
     galat: galatAnggaran,
     muatUlang: muatAnggaran,
-  } = useMuat<{
-    items: BudgetItem[];
-    totals: { planned: number; paid: number; remaining: number };
-    vendors: VendorRingkas[];
-  }>(planId ? `/api/plans/${planId}/budget-items` : null, {
+  } = useMuat<IsiAnggaran>(planId ? `/api/plans/${planId}/budget-items` : null, {
     aktif: Boolean(planId),
   });
 
   const [cari, setCari] = useState("");
   const [filterKategori, setFilterKategori] = useState<string>("semua");
+  const [tab, setTab] = useState<TabAnggaran>("pos");
 
   const [lembarBuka, setLembarBuka] = useState(false);
   const [diedit, setDiedit] = useState<BudgetItem | null>(null);
@@ -123,7 +166,7 @@ export default function HalamanAnggaran() {
   // Form states
   const [formNama, setFormNama] = useState("");
   const [formKategori, setFormKategori] = useState<KategoriUang>("venue");
-  const [formBatas, setFormBatas] = useState<number>(0);
+  const [formBatas, setFormBatas] = useState("");
   const [formCatatan, setFormCatatan] = useState("");
   const [formGalat, setFormGalat] = useState<string | null>(null);
 
@@ -131,7 +174,7 @@ export default function HalamanAnggaran() {
     setDiedit(null);
     setFormNama("");
     setFormKategori("venue");
-    setFormBatas(0);
+    setFormBatas("");
     setFormCatatan("");
     setFormGalat(null);
     setLembarBuka(true);
@@ -145,7 +188,7 @@ export default function HalamanAnggaran() {
         ? (p.category as KategoriUang)
         : "lainnya",
     );
-    setFormBatas(p.plannedAmount ?? 0);
+    setFormBatas(p.plannedAmount ? String(p.plannedAmount) : "");
     setFormCatatan(p.notes ?? "");
     setFormGalat(null);
     setLembarBuka(true);
@@ -160,8 +203,9 @@ export default function HalamanAnggaran() {
       return;
     }
 
-    if (!formBatas || formBatas <= 0) {
-      setFormGalat("Batas rencana alokasi biaya harus lebih dari Rp 0.");
+    const angkaBatas = parseInt(formBatas.replace(/\D/g, ""), 10);
+    if (isNaN(angkaBatas) || angkaBatas < 0) {
+      setFormGalat("Batas anggaran harus berupa angka rupiah positif.");
       return;
     }
 
@@ -172,7 +216,7 @@ export default function HalamanAnggaran() {
       const payload = {
         name: formNama.trim(),
         category: formKategori,
-        plannedAmount: formBatas,
+        plannedAmount: angkaBatas,
         notes: formCatatan.trim() || null,
         sortOrder: diedit?.sortOrder ?? 0,
       };
@@ -239,6 +283,8 @@ export default function HalamanAnggaran() {
   const rawItems = data?.items ?? [];
   const totals = data?.totals ?? { planned: 0, paid: 0, remaining: 0 };
   const vendorList = data?.vendors ?? [];
+  const bayarList = data?.payments ?? [];
+  const sebaran = data?.sebaranKategori ?? {};
 
   const items = rawItems.filter((item) => {
     if (filterKategori !== "semua" && item.category !== filterKategori) return false;
@@ -250,6 +296,33 @@ export default function HalamanAnggaran() {
     }
     return true;
   });
+
+  const persenTerpakai =
+    totals.planned > 0 ? Math.round((totals.paid / totals.planned) * 100) : 0;
+  const persenSisa = totals.planned > 0 ? 100 - persenTerpakai : 0;
+  const lewatBatas = totals.paid > totals.planned;
+
+  // Sebaran rencana biaya per kategori. Yang bernilai nol tidak ditampilkan
+  // supaya legenda tidak penuh pos yang belum diisi.
+  const bagian = useMemo(() => {
+    if (totals.planned <= 0) return [];
+    return KATEGORI_UANG.map((k, i) => ({
+      kategori: k,
+      label: LABEL_KATEGORI_UANG[k],
+      nilai: sebaran[k] ?? 0,
+      persen: Math.round(((sebaran[k] ?? 0) / totals.planned) * 100),
+      warna: WARNA_SEBARAN[i] ?? "var(--color-netral)",
+    })).filter((b) => b.nilai > 0);
+  }, [sebaran, totals.planned]);
+
+  const jumlahKategori = useMemo(
+    () => new Set(rawItems.map((i) => i.category)).size,
+    [rawItems],
+  );
+
+  const hari = plan ? selisihHari(plan.weddingDate) : null;
+  const teksHari =
+    hari === null ? null : hari > 0 ? `H-${hari} Hari` : hari === 0 ? "Hari ini" : "Sudah lewat";
 
   if (memuatPlan || (planId && memuatAnggaran && !data)) {
     return <Kerangka baris={6} />;
@@ -277,271 +350,333 @@ export default function HalamanAnggaran() {
   }
 
   return (
-    <div>
-      <div className="kepala-halaman">
-        <div>
-          <h1 style={{ margin: 0, fontSize: "var(--text-h1)" }}>Anggaran</h1>
-          <p>Batas biaya per pos dan pantauan pembayaran vendor secara terpusat.</p>
-        </div>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          {rawItems.length === 0 ? (
-            <button
-              type="button"
-              className="tombol tombol-sekunder"
-              disabled={sedangMuatBawaan}
-              onClick={pasangPosBawaan}
-            >
-              {sedangMuatBawaan ? "Memasang..." : "Muat pos bawaan"}
-            </button>
-          ) : null}
-          <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
-            + Tambah pos
-          </button>
-        </div>
+    <div className="anggaran">
+      {/* Sapa dan hitung mundur */}
+      <div className="anggaran-sapa">
+        <span className="anggaran-sapa-ikon" aria-hidden="true">
+          <IkonKilau size={16} />
+        </span>
+        <span className="anggaran-sapa-teks">Semua pos anggaranmu tersusun rapi di sini!</span>
+        {teksHari ? <span className="anggaran-hitung">{teksHari}</span> : null}
       </div>
 
-      {/* Ringkasan Keseluruhan Anggaran */}
-      <div className="kartu" style={{ marginBottom: 20 }}>
-        <div className="rekap" style={{ border: "none", padding: 0, marginBottom: 16 }}>
-          <div className="rekap-item">
-            <span className="rekap-nilai">
-              <Rupiah nilai={totals.planned} />
-            </span>
-            <span className="rekap-label">Total rencana</span>
-          </div>
-          <div className="rekap-item">
-            <span className="rekap-nilai" style={{ color: "var(--color-primary)" }}>
-              <Rupiah nilai={totals.paid} />
-            </span>
-            <span className="rekap-label">Sudah terbayar</span>
-          </div>
-          <div className="rekap-item">
-            <span
-              className="rekap-nilai"
-              style={{
-                color: totals.remaining < 0 ? "var(--color-bata)" : "var(--color-ink)",
-              }}
-            >
-              <Rupiah nilai={totals.remaining} />
-            </span>
-            <span className="rekap-label">
-              {totals.remaining < 0 ? "Defisit anggaran" : "Sisa anggaran"}
-            </span>
-          </div>
+      {/* Kartu besar: total rencana anggaran */}
+      <section className="anggaran-hero">
+        <span className="anggaran-hias anggaran-hias-kanan" aria-hidden="true">
+          <IkonKilau size={72} />
+        </span>
+        <span className="anggaran-hias anggaran-hias-kiri" aria-hidden="true">
+          <IkonKilau size={52} />
+        </span>
+
+        <div className="anggaran-hero-kepala">
+          <span className="anggaran-ikon-bulat" aria-hidden="true">
+            <IkonDompet size={18} />
+          </span>
+          <span className="anggaran-hero-label">Total Anggaran Menikah</span>
         </div>
 
-        <BudgetBar
-          terpakai={totals.paid}
-          batas={totals.planned}
-          label="Pengeluaran keseluruhan rencana"
-        />
-      </div>
-
-      {/* Kontrol Pencarian & Filter Kategori */}
-      <div
-        style={{
-          display: "flex",
-          gap: 12,
-          flexWrap: "wrap",
-          marginBottom: 16,
-          background: "var(--color-kertas)",
-          padding: "12px 16px",
-          borderRadius: 8,
-          border: "1px solid var(--color-garis)",
-          alignItems: "center",
-        }}
-      >
-        <div style={{ flex: "1 1 240px" }}>
-          <input
-            type="search"
-            className="isian"
-            placeholder="Cari pos anggaran..."
-            value={cari}
-            onChange={(e) => setCari(e.target.value)}
-          />
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 8, flex: "0 1 220px" }}>
-          <label htmlFor="filterKategori" style={{ fontSize: "var(--text-kecil)", fontWeight: 600 }}>
-            Kategori:
-          </label>
-          <select
-            id="filterKategori"
-            className="isian"
-            style={{ padding: "6px 10px", fontSize: "var(--text-kecil)" }}
-            value={filterKategori}
-            onChange={(e) => setFilterKategori(e.target.value)}
-          >
-            <option value="semua">Semua kategori</option>
-            {KATEGORI_UANG.map((k) => (
-              <option key={k} value={k}>
-                {LABEL_KATEGORI_UANG[k]}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* Daftar Pos Anggaran */}
-      {rawItems.length === 0 ? (
-        <Kosong
-          keadaan="Belum ada pos anggaran."
-          jalanKeluar="Pasang pos bawaan pernikahan Indonesia atau buat pos sendiri."
-        >
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
-            <button
-              type="button"
-              className="tombol tombol-utama"
-              disabled={sedangMuatBawaan}
-              onClick={pasangPosBawaan}
-            >
-              {sedangMuatBawaan ? "Memasang..." : "Muat pos bawaan"}
-            </button>
-            <button type="button" className="tombol tombol-sekunder" onClick={bukaTambah}>
-              Tulis pos sendiri
-            </button>
+        <div className="anggaran-hero-isi">
+          <div className="anggaran-hero-baris">
+            <span className="anggaran-hero-angka">{rupiah(totals.planned)}</span>
+            <span className="anggaran-pil-status" data-lewat={lewatBatas ? "ya" : "tidak"}>
+              {lewatBatas ? "Lewat batas 💔" : "Aman! 💖"}
+            </span>
           </div>
-        </Kosong>
-      ) : items.length === 0 ? (
-        <Kosong
-          keadaan="Tidak ada pos yang cocok dengan pencarian."
-          jalanKeluar="Coba periksa kata kunci atau ubah filter kategori."
-        />
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {items.map((item) => {
-            const kategori = item.category as KategoriUang;
-            const vendorTertaut = vendorList.filter((v) => v.budgetItemId === item.id);
 
-            return (
+          {bagian.length > 0 ? (
+            <>
               <div
-                key={item.id}
-                className="kartu"
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 12,
-                  borderColor: item.overBudget ? "var(--color-bata)" : undefined,
-                }}
+                className="anggaran-sebar"
+                role="img"
+                aria-label={`Sebaran rencana biaya untuk ${bagian.length} kategori`}
               >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    gap: 12,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                      <h2 style={{ margin: 0, fontSize: "var(--text-h3)" }}>{item.name}</h2>
-                      <span
-                        style={{
-                          padding: "2px 8px",
-                          borderRadius: 4,
-                          fontSize: "var(--text-kecil)",
-                          background: "var(--color-netral)",
-                          color: "var(--color-ink)",
-                        }}
-                      >
-                        {LABEL_KATEGORI_UANG[kategori] ?? item.category}
-                      </span>
-                      {item.overBudget ? (
-                        <span
-                          style={{
-                            padding: "2px 8px",
-                            borderRadius: 4,
-                            fontSize: "var(--text-kecil)",
-                            fontWeight: 600,
-                            background: "var(--color-netral)",
-                            color: "var(--color-bata)",
-                            border: "1px solid var(--color-bata)",
-                          }}
+                {bagian.map((b) => (
+                  <span
+                    key={b.kategori}
+                    className="anggaran-sebar-bagian"
+                    style={{ width: `${b.persen}%`, background: b.warna }}
+                  />
+                ))}
+              </div>
+
+              <ul className="anggaran-legenda">
+                {bagian.map((b) => (
+                  <li key={b.kategori} className="anggaran-legenda-item">
+                    <span
+                      className="anggaran-legenda-titik"
+                      style={{ background: b.warna }}
+                      aria-hidden="true"
+                    />
+                    {b.label}
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p className="anggaran-catatan">
+              Belum ada pos anggaran. Pasang pos bawaan atau tulis pos sendiri dulu.
+            </p>
+          )}
+
+          <div className="anggaran-realisasi">
+            <div>
+              <span className="anggaran-realisasi-label">Realisasi Dana ({persenTerpakai}%)</span>
+              <span className="anggaran-realisasi-nilai">{rupiah(totals.paid)}</span>
+            </div>
+            <span className="anggaran-realisasi-ket">dari {jumlahKategori} kategori terisi</span>
+          </div>
+
+          <div className="anggaran-stat-grid">
+            <div className="anggaran-stat-kotak">
+              <span className="anggaran-stat-label">Terpakai Saat Ini</span>
+              <span className="anggaran-stat-nilai">{rupiah(totals.paid)}</span>
+              <span className="anggaran-stat-ket">{persenTerpakai}% dari rencana</span>
+            </div>
+            <div className="anggaran-stat-kotak">
+              <span className="anggaran-stat-label">
+                {lewatBatas ? "Defisit Anggaran" : "Sisa Anggaran Aman"}
+              </span>
+              <span className="anggaran-stat-nilai" data-lewat={lewatBatas ? "ya" : "tidak"}>
+                {rupiah(totals.remaining)}
+              </span>
+              <span className="anggaran-stat-ket">
+                {lewatBatas ? "Perlu ditambah atau ditekan" : `${persenSisa}% cadangan`}
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Aksi cepat */}
+      <div className="anggaran-aksi">
+        <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
+          <IkonTambah size={18} />
+          Tambah pos
+        </button>
+        {rawItems.length === 0 ? (
+          <button
+            type="button"
+            className="tombol tombol-sekunder"
+            disabled={sedangMuatBawaan}
+            onClick={pasangPosBawaan}
+          >
+            {sedangMuatBawaan ? "Memasang..." : "Muat pos bawaan"}
+          </button>
+        ) : null}
+      </div>
+
+      {/* Tab daftar pos dan rincian pengeluaran */}
+      <div className="anggaran-tab" role="tablist" aria-label="Bagian anggaran">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === "pos"}
+          className="anggaran-tab-pil"
+          data-aktif={tab === "pos" ? "ya" : "tidak"}
+          onClick={() => setTab("pos")}
+        >
+          <IkonKedai size={16} />
+          Daftar Pos
+          <span className="anggaran-pil-angka">{rawItems.length}</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === "pengeluaran"}
+          className="anggaran-tab-pil"
+          data-aktif={tab === "pengeluaran" ? "ya" : "tidak"}
+          onClick={() => setTab("pengeluaran")}
+        >
+          <IkonStruk size={16} />
+          Rincian Pengeluaran
+          <span className="anggaran-pil-angka">{bayarList.length}</span>
+        </button>
+      </div>
+
+      {tab === "pos" ? (
+        <>
+          {/* Saringan */}
+          <div className="anggaran-saring">
+            <input
+              type="search"
+              className="isian anggaran-cari"
+              placeholder="Cari pos anggaran..."
+              aria-label="Cari pos anggaran"
+              value={cari}
+              onChange={(e) => setCari(e.target.value)}
+            />
+            <label htmlFor="filterKategori" className="sr-only">
+              Saring kategori
+            </label>
+            <select
+              id="filterKategori"
+              className="isian anggaran-pilih"
+              value={filterKategori}
+              onChange={(e) => setFilterKategori(e.target.value)}
+            >
+              <option value="semua">Semua kategori</option>
+              {KATEGORI_UANG.map((k) => (
+                <option key={k} value={k}>
+                  {LABEL_KATEGORI_UANG[k]}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {rawItems.length === 0 ? (
+            <Kosong
+              keadaan="Belum ada pos anggaran."
+              jalanKeluar="Pasang pos bawaan pernikahan Indonesia atau buat pos sendiri."
+            >
+              <button
+                type="button"
+                className="tombol tombol-utama"
+                disabled={sedangMuatBawaan}
+                onClick={pasangPosBawaan}
+              >
+                {sedangMuatBawaan ? "Memasang..." : "Muat pos bawaan"}
+              </button>
+              <button type="button" className="tombol tombol-sekunder" onClick={bukaTambah}>
+                Tulis pos sendiri
+              </button>
+            </Kosong>
+          ) : items.length === 0 ? (
+            <Kosong
+              keadaan="Tidak ada pos yang cocok dengan pencarian."
+              jalanKeluar="Coba periksa kata kunci atau ubah filter kategori."
+            />
+          ) : (
+            <div className="anggaran-daftar">
+              {items.map((item) => {
+                const kategori = item.category as KategoriUang;
+                const vendorTertaut = vendorList.filter((v) => v.budgetItemId === item.id);
+
+                return (
+                  <article
+                    key={item.id}
+                    className="anggaran-kartu"
+                    data-lewat={item.overBudget ? "ya" : "tidak"}
+                  >
+                    <div className="anggaran-kartu-kepala">
+                      <div className="anggaran-kartu-teks">
+                        <div className="anggaran-kartu-baris">
+                          <h2 className="anggaran-kartu-judul">{item.name}</h2>
+                          <span className="anggaran-chip">
+                            {LABEL_KATEGORI_UANG[kategori] ?? item.category}
+                          </span>
+                          {item.overBudget ? (
+                            <span className="anggaran-chip anggaran-chip-bata">Lewat batas</span>
+                          ) : null}
+                        </div>
+                        {item.notes ? <p className="anggaran-kartu-catatan">{item.notes}</p> : null}
+                      </div>
+
+                      <div className="anggaran-kartu-aksi">
+                        <button
+                          type="button"
+                          className="tombol tombol-sekunder anggaran-tombol-kecil"
+                          onClick={() => bukaUbah(item)}
                         >
-                          Lewat batas
-                        </span>
-                      ) : null}
+                          Ubah
+                        </button>
+                        <button
+                          type="button"
+                          className="tombol tombol-sekunder anggaran-tombol-kecil anggaran-tombol-hapus"
+                          onClick={() => setDihapus(item)}
+                        >
+                          Hapus
+                        </button>
+                      </div>
                     </div>
 
-                    {item.notes ? (
-                      <p
-                        style={{
-                          margin: "4px 0 0",
-                          fontSize: "var(--text-kecil)",
-                          color: "var(--color-muted)",
-                        }}
-                      >
-                        {item.notes}
-                      </p>
+                    <div className="anggaran-kartu-angka">
+                      <span>
+                        Rencana <strong>{rupiah(item.plannedAmount)}</strong>
+                      </span>
+                      <span>
+                        Terpakai <strong>{rupiah(item.paidAmount)}</strong>
+                      </span>
+                    </div>
+
+                    <BudgetBar terpakai={item.paidAmount} batas={item.plannedAmount} ringkas />
+
+                    {vendorTertaut.length > 0 ? (
+                      <div className="anggaran-vendor">
+                        <span className="anggaran-vendor-label">Vendor tertaut:</span>
+                        {vendorTertaut.map((v) => (
+                          <Link key={v.id} className="tautan-kalimat" href={`/rencana/vendor/${v.id}`}>
+                            {v.name}
+                          </Link>
+                        ))}
+                      </div>
                     ) : null}
-                  </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          {/* Rincian pengeluaran: baris pembayaran yang benar-benar tercatat */}
+          <div className="anggaran-bayar-kepala">
+            <h2 className="anggaran-bayar-judul">Riwayat Pembayaran Terakhir</h2>
+            <span className="anggaran-bayar-jumlah">{bayarList.length} pembayaran tercatat</span>
+          </div>
 
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <button
-                      type="button"
-                      className="tombol tombol-sekunder"
-                      style={{ minHeight: 44, padding: "0 10px", fontSize: "var(--text-kecil)" }}
-                      onClick={() => bukaUbah(item)}
-                    >
-                      Ubah
-                    </button>
-                    <button
-                      type="button"
-                      className="tombol tombol-sekunder"
-                      style={{
-                        padding: "0 10px",
-                        fontSize: "var(--text-kecil)",
-                        color: "var(--color-bata)",
-                      }}
-                      onClick={() => setDihapus(item)}
-                    >
-                      Hapus
-                    </button>
+          {bayarList.length === 0 ? (
+            <Kosong
+              keadaan="Belum ada pembayaran tercatat."
+              jalanKeluar="Catat pembayaran dari halaman vendor supaya rinciannya muncul di sini."
+            >
+              <Link className="tombol tombol-utama" href="/rencana/vendor">
+                Buka daftar vendor
+              </Link>
+            </Kosong>
+          ) : (
+            <div className="anggaran-bayar-daftar">
+              {bayarList.map((p) => (
+                <div key={p.id} className="anggaran-bayar">
+                  <span className="anggaran-bayar-ikon" aria-hidden="true">
+                    <IkonDompet size={16} />
+                  </span>
+                  <div className="anggaran-bayar-teks">
+                    <span className="anggaran-bayar-nama">{p.vendorName}</span>
+                    <span className="anggaran-bayar-ket">
+                      {tanggalPendekDari(p.paidAt)} •{" "}
+                      {LABEL_METODE_BAYAR[p.method as MetodeBayar] ?? p.method}
+                      {p.isFinal ? " • Pelunasan" : ""}
+                    </span>
+                    {p.notes ? <span className="anggaran-bayar-catatan">{p.notes}</span> : null}
                   </div>
+                  <span className="anggaran-bayar-nilai">{rupiah(-p.amount)}</span>
                 </div>
+              ))}
+            </div>
+          )}
 
-                {/* Progress bar pos */}
-                <BudgetBar
-                  terpakai={item.paidAmount}
-                  batas={item.plannedAmount}
-                  ringkas
-                />
-
-                {/* Vendor tertaut */}
-                {vendorTertaut.length > 0 && (
-                  <div
-                    style={{
-                      fontSize: "var(--text-kecil)",
-                      borderTop: "1px solid var(--color-garis)",
-                      paddingTop: 8,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <span style={{ color: "var(--color-muted)" }}>Vendor tertaut:</span>
-                    {vendorTertaut.map((v) => (
-                      <Link
-                        key={v.id}
-                        href={`/rencana/vendor/${v.id}`}
-                        style={{
-                          textDecoration: "underline",
-                          color: "var(--color-primary)",
-                          fontWeight: 500,
-                        }}
-                      >
-                        {v.name}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+          <div className="anggaran-bayar-total">
+            <span>Total pengeluaran</span>
+            <strong>{rupiah(totals.paid)}</strong>
+          </div>
+        </>
       )}
+
+      {/* Catatan penutup, isinya dihitung dari data nyata */}
+      <div className="anggaran-tips">
+        <span className="anggaran-tips-ikon" aria-hidden="true">
+          <IkonKilau size={20} />
+        </span>
+        <div>
+          <span className="anggaran-tips-judul">Catatan Anggaran</span>
+          <p className="anggaran-tips-teks">
+            {lewatBatas
+              ? `Pengeluaran sudah ${rupiah(Math.abs(totals.remaining))} melebihi rencana. Tinjau pos yang paling besar dulu.`
+              : `Sisa ${rupiah(totals.remaining)} masih tersedia untuk pos yang belum berjalan.`}
+          </p>
+        </div>
+      </div>
 
       {/* Lembar Tambah / Ubah */}
       <Lembar
@@ -549,7 +684,7 @@ export default function HalamanAnggaran() {
         judul={diedit ? "Ubah pos anggaran" : "Tambah pos anggaran"}
         onTutup={() => setLembarBuka(false)}
       >
-        <form onSubmit={simpan} noValidate style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <form onSubmit={simpan} noValidate className="tumpuk-sedang">
           <Isian label="Nama pos anggaran" id="formNama" galat={formGalat ?? undefined}>
             <input
               id="formNama"
@@ -573,13 +708,22 @@ export default function HalamanAnggaran() {
             }))}
           />
 
-          <IsianRupiah
-            label="Batas rencana biaya"
+          <Isian
+            label="Batas rencana biaya (Rp)"
             id="formBatas"
-            petunjuk="Berapa alokasi batas dana untuk pos ini."
-            nilai={formBatas}
-            onUbah={(nilai) => setFormBatas(nilai)}
-          />
+            bantuan="Berapa perkiraan batas maksimal dana yang dialokasikan untuk pos ini."
+          >
+            <input
+              id="formBatas"
+              className="isian"
+              type="number"
+              min={0}
+              required
+              placeholder="Contoh: 12000000"
+              value={formBatas}
+              onChange={(e) => setFormBatas(e.target.value)}
+            />
+          </Isian>
 
           <Isian label="Catatan tambahan (opsional)" id="formCatatan">
             <textarea
@@ -594,27 +738,18 @@ export default function HalamanAnggaran() {
 
           {/* Sisa preview jika mengubah pos yang sudah ada pembayarannya */}
           {diedit && diedit.paidAmount > 0 && formBatas && (
-            <div
-              style={{
-                background: "var(--color-netral)",
-                padding: "10px 14px",
-                borderRadius: 6,
-                fontSize: "var(--text-kecil)",
-              }}
-            >
+            <div className="kotak-catatan">
               <div>
-                <strong>Sudah terpakai dari vendor:</strong> <Rupiah nilai={diedit.paidAmount} />
+                <strong>Sudah terpakai dari vendor:</strong> {rupiah(diedit.paidAmount)}
               </div>
               <div>
                 <strong>Perkiraan sisa baru:</strong>{" "}
-                <Rupiah
-                  nilai={(formBatas || 0) - diedit.paidAmount}
-                />
+                {rupiah(parseInt(formBatas || "0", 10) - diedit.paidAmount)}
               </div>
             </div>
           )}
 
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
+          <div className="dialog-tombol">
             <button
               type="button"
               className="tombol tombol-sekunder"
@@ -622,11 +757,7 @@ export default function HalamanAnggaran() {
             >
               Batal
             </button>
-            <button
-              type="submit"
-              className="tombol tombol-utama"
-              disabled={sedangSimpan}
-            >
+            <button type="submit" className="tombol tombol-utama" disabled={sedangSimpan}>
               {sedangSimpan ? "Menyimpan..." : "Simpan pos"}
             </button>
           </div>
@@ -643,6 +774,103 @@ export default function HalamanAnggaran() {
         onTutup={() => setDihapus(null)}
         onYa={konfirmasiHapus}
       />
+
+      <button
+        type="button"
+        className="anggaran-fab tanpa-cetak"
+        aria-label="Tambah pos anggaran baru"
+        onClick={bukaTambah}
+      >
+        <IkonTambah size={18} />
+        Tambah Pos Baru
+      </button>
     </div>
+  );
+}
+
+function IkonKilau({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 2.4l1.9 5.3 5.3 1.9-5.3 1.9L12 16.8l-1.9-5.3L4.8 9.6l5.3-1.9L12 2.4z" />
+      <path d="M18.6 15.4l.9 2.4 2.4.9-2.4.9-.9 2.4-.9-2.4-2.4-.9 2.4-.9.9-2.4z" />
+    </svg>
+  );
+}
+
+function IkonDompet({ size = 18 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M3 7.5A2.5 2.5 0 015.5 5h11A2.5 2.5 0 0119 7.5v1" />
+      <rect x="3" y="7.5" width="18" height="11.5" rx="2.5" />
+      <circle cx="16" cy="13.2" r="1.2" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function IkonKedai({ size = 18 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M4 4h16l-1.2 6.5A4 4 0 0115 14H9a4 4 0 01-3.8-3.5L4 4z" />
+      <path d="M6 18h12" />
+      <path d="M9 21h6" />
+    </svg>
+  );
+}
+
+function IkonStruk({ size = 18 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M6 3h12v18l-3-1.6L12 21l-3-1.6L6 21V3z" />
+      <path d="M9.5 8h5" />
+      <path d="M9.5 11.5h5" />
+      <path d="M9.5 15h3" />
+    </svg>
+  );
+}
+
+function IkonTambah({ size = 18 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <path d="M12 5v14M5 12h14" />
+    </svg>
   );
 }

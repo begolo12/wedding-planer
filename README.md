@@ -57,15 +57,15 @@ Aplikasi untuk pasangan yang sedang menyiapkan pernikahan, dipakai di HP dan lap
 
 | Bagian | Pilihan |
 |---|---|
-| Framework | Next.js 15, App Router, TypeScript |
-| Database | PostgreSQL |
+| Framework | Next.js 15, App Router, React 19, TypeScript |
+| Database | PostgreSQL 17 |
 | ORM | Drizzle ORM |
 | Auth | Better Auth |
 | Validasi | Zod |
-| Styling | Tailwind |
+| Styling | Tailwind v4 |
 | PWA | Service worker tulis tangan |
 | PDF | Dialog cetak bawaan dengan CSS `@media print` |
-| Deployment | Satu aplikasi, satu database, satu proses |
+| Deployment | Vercel, region `sin1`. Satu aplikasi, satu database |
 
 Alasannya ada di [`docs/06-Stack-dan-Batas.md`](docs/06-Stack-dan-Batas.md), termasuk enam belas teknologi yang ditolak dan alasannya, dan satu keputusan bahwa PDF tidak butuh pustaka.
 
@@ -116,9 +116,8 @@ Kalau mau langsung ke implementasi, urutannya lain: `AGENTS.md`, `DESIGN.md`, `0
 
 | Belum ada | Kenapa |
 |---|---|
-| Kode aplikasi | Dokumen dulu, supaya yang dibangun bisa diuji sebelum ditulis |
-| Angka hasil pengukuran | Belum ada aplikasi untuk diukur. Lihat tabel di `08-NFR.md` |
+| Angka hasil pengukuran | Aplikasi sudah ada, tapi belum dipakai pengguna sungguhan. Lihat tabel di `08-NFR.md` |
 | Nama produk final | "Aisyah & Bagas" masih placeholder |
 | Harga dan model bisnis | Fase 1 gratis. Monetisasi dibahas setelah ada pengguna sungguhan |
 
-Tiga baris terakhir disengaja. Menulis angka hasil pengukuran sebelum aplikasi ada berarti mengarang data, dan itu tidak dilakukan di dokumen ini.
+Tiga baris terakhir disengaja. Menulis angka hasil pengukuran sebelum ada pengguna sungguhan berarti mengarang data, dan itu tidak dilakukan di dokumen ini.

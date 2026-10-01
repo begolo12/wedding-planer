@@ -115,7 +115,6 @@ export function Lembar({
         aria-label={judul}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="lembar-gagang" aria-hidden="true" />
         <div className="lembar-kepala">
           <h2>{judul}</h2>
           <button type="button" className="ikon-tombol" onClick={onTutup} aria-label="Tutup">

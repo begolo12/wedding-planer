@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { asc, eq, sql } from "drizzle-orm";
+import { asc, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { budgetItems, payments, vendors } from "@/db/schema";
 import { bacaJson, bungkus } from "@/lib/galat";
@@ -30,9 +30,21 @@ export const GET = bungkus(async (_req: Request, { params }: Params) => {
       .where(eq(budgetItems.planId, planId))
       .orderBy(asc(budgetItems.sortOrder), asc(budgetItems.createdAt)),
     db
-      .select({ amount: payments.amount })
+      .select({
+        id: payments.id,
+        vendorId: payments.vendorId,
+        vendorName: vendors.name,
+        budgetItemId: vendors.budgetItemId,
+        amount: payments.amount,
+        paidAt: payments.paidAt,
+        method: payments.method,
+        isFinal: payments.isFinal,
+        notes: payments.notes,
+      })
       .from(payments)
-      .where(eq(payments.planId, planId)),
+      .innerJoin(vendors, eq(payments.vendorId, vendors.id))
+      .where(eq(payments.planId, planId))
+      .orderBy(desc(payments.paidAt), desc(payments.createdAt)),
     db
       .select({
         id: vendors.id,
@@ -63,6 +75,12 @@ export const GET = bungkus(async (_req: Request, { params }: Params) => {
 
   const rencana = pos.reduce((n, p) => n + p.plannedAmount, 0);
   const terpakai = semuaPembayaran.reduce((n, p) => n + p.amount, 0);
+  // Sebaran rencana biaya per kategori, dipakai untuk bilah bertingkat di
+  // layar anggaran. Dihitung di server supaya layar tidak menjumlah ulang.
+  const sebaranKategori = pos.reduce<Record<string, number>>((n, p) => {
+    n[p.category] = (n[p.category] ?? 0) + p.plannedAmount;
+    return n;
+  }, {});
 
   return NextResponse.json({
     items: pos.map((p) => {
@@ -77,7 +95,11 @@ export const GET = bungkus(async (_req: Request, { params }: Params) => {
       };
     }),
     totals: { planned: rencana, paid: terpakai, remaining: rencana - terpakai },
+    sebaranKategori,
     vendors: semuaVendor,
+    // Riwayat pembayaran ikut dikirim supaya layar anggaran bisa menampilkan
+    // rincian pengeluaran tanpa memanggil endpoint kedua.
+    payments: semuaPembayaran,
   });
 });
 

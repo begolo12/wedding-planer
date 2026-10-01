@@ -21,21 +21,38 @@ import {
   LABEL_PENUGASAN,
 } from "@/lib/konstanta";
 import { kelompokkan, LABEL_KELOMPOK, URUTAN_KELOMPOK, type KelompokWaktu } from "@/lib/plan";
+import { selisihHari, hitungMundur } from "@/lib/format";
 
 type TugasLengkap = TugasBaris & {
   budgetItemId?: string | null;
   sortOrder?: number;
 };
 
+/** Saringan cepat di atas daftar tugas. "semua" berarti tanpa saringan. */
+type SaringTugas = "semua" | "mendesak" | "belumTenggat" | "selesai";
+
+/** Deretan pil saringan. Urutan disengaja: dari yang paling mendesak. */
+const SARINGAN: { id: SaringTugas; label: string }[] = [
+  { id: "semua", label: "Semua" },
+  { id: "mendesak", label: "Perlu Segera" },
+  { id: "belumTenggat", label: "Belum Ada Tenggat" },
+  { id: "selesai", label: "Selesai" },
+];
+
 /**
  * Layar Daftar Tugas pernikahan.
  *
- * Mengelompokkan tugas berdasarkan waktu:
- * - Lewat jatuh tempo
- * - Hari ini
- * - Minggu ini
- * - Belum ada tenggat
- * - Sudah selesai (bisa disembunyikan)
+ * Susunan mengikuti `docs/stitch_cute_wedding_planner/checklist_timeline_pernikahan`:
+ * kartu ringkasan progres bergradasi dengan hiasan bunga, deretan pil saringan,
+ * lalu daftar tugas per kelompok waktu, dan tombol tambah melayang di kanan bawah.
+ *
+ * Tiga hal yang sengaja berbeda dari Stitch:
+ * - Papan moodboard ("Inspirasi Tema & Palet Warna") tidak dipakai karena aplikasi
+ *   ini belum punya fitur unggah gambar. Menampilkan gambar contoh berarti tombol mati.
+ * - Tombol centang di Stitch berukuran 28px, di bawah batas 44px, jadi daftar tetap
+ *   memakai `TaskItem`.
+ * - Pencarian dan saringan kategori tetap ada karena Stitch hanya punya saringan fase,
+ *   sedangkan pengguna dengan puluhan tugas butuh mencari.
  */
 export default function HalamanTugas() {
   const { plan, planId, memuat: memuatPlan, galat: galatPlan, muatUlang: muatPlan } = usePlan();
@@ -52,6 +69,7 @@ export default function HalamanTugas() {
   const [kategoriPilihan, setKategoriPilihan] = useState<string>("semua");
   const [tampilkanSelesai, setTampilkanSelesai] = useState<boolean>(false);
   const [kataKunci, setKataKunci] = useState<string>("");
+  const [saring, setSaring] = useState<SaringTugas>("semua");
 
   // Lembar tambah / ubah tugas
   const [lembarBuka, setLembarBuka] = useState(false);
@@ -197,13 +215,46 @@ export default function HalamanTugas() {
 
   const semuaTugas = dataTugas?.tasks ?? [];
 
+  // Angka ringkasan progres. Dihitung dari data yang sudah dimuat, sama seperti
+  // yang dipakai Beranda, supaya dua layar tidak pernah berbeda.
+  const totalTugas = semuaTugas.length;
+  const tugasSelesai = semuaTugas.filter((t) => t.status === "selesai").length;
+  const persenProgres = totalTugas ? Math.round((tugasSelesai / totalTugas) * 100) : 0;
+  const tugasMendesak = semuaTugas.filter(
+    (t) => t.status !== "selesai" && (() => {
+      const s = selisihHari(t.dueDate);
+      return s !== null && s <= 0;
+    })(),
+  ).length;
+  const tugasTanpaTenggat = semuaTugas.filter(
+    (t) => t.status !== "selesai" && !t.dueDate,
+  ).length;
+
+  // Hitung mundur ke hari besar. Kosong kalau tanggalnya belum diisi.
+  const teksMundur = plan?.weddingDate ? hitungMundur(plan.weddingDate) : null;
+
+  // Jumlah tugas per pil saringan, biar angkanya kelihatan sebelum diklik.
+  function hitungSaring(id: SaringTugas) {
+    if (id === "semua") return totalTugas;
+    if (id === "mendesak") return tugasMendesak;
+    if (id === "belumTenggat") return tugasTanpaTenggat;
+    return tugasSelesai;
+  }
+
   // Filter tugas
   const tugasTersaring = useMemo(() => {
     return semuaTugas.filter((t) => {
+      if (saring === "mendesak") {
+        const s = selisihHari(t.dueDate);
+        if (t.status === "selesai" || s === null || s > 0) return false;
+      }
+      if (saring === "belumTenggat" && (t.status === "selesai" || t.dueDate)) return false;
+      if (saring === "selesai" && t.status !== "selesai") return false;
+
       if (kategoriPilihan !== "semua" && t.category !== kategoriPilihan) {
         return false;
       }
-      if (!tampilkanSelesai && t.status === "selesai") {
+      if (!tampilkanSelesai && saring !== "selesai" && t.status === "selesai") {
         return false;
       }
       if (kataKunci.trim()) {
@@ -215,7 +266,7 @@ export default function HalamanTugas() {
       }
       return true;
     });
-  }, [semuaTugas, kategoriPilihan, tampilkanSelesai, kataKunci]);
+  }, [semuaTugas, saring, kategoriPilihan, tampilkanSelesai, kataKunci]);
 
   // Kelompokkan per waktu
   const kelompokTugas = useMemo(() => {
@@ -260,53 +311,101 @@ export default function HalamanTugas() {
   }
 
   return (
-    <div>
-      <div className="kepala-halaman">
-        <div>
-          <h1 style={{ margin: 0, fontSize: "var(--text-h1)" }}>Rencana</h1>
-          <p>Kelola seluruh rincian persiapan pernikahan kamu.</p>
+    <div className="rencana">
+      <section className="rencana-hero">
+        <span className="rencana-hias rencana-hias-kanan" aria-hidden="true">
+          <IkonBunga size={96} />
+        </span>
+        <span className="rencana-hias rencana-hias-kiri" aria-hidden="true">
+          <IkonBungaKecil size={80} />
+        </span>
+
+        <div className="rencana-hero-kepala">
+          <span className="rencana-hero-label">
+            <span className="rencana-ikon-bulat">
+              <IkonBunga size={18} />
+            </span>
+            Langkah Menuju Hari Bahagia
+          </span>
+          {teksMundur ? (
+            <span className="rencana-pil-kilau">
+              <span aria-hidden="true">✨</span> {teksMundur}
+            </span>
+          ) : null}
         </div>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-          <button
-            type="button"
-            className="tombol tombol-sekunder"
-            onClick={() => setLembarTemplate(true)}
-          >
-            Muat template
-          </button>
-          <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
-            Tambah tugas
-          </button>
+
+        <div className="rencana-hero-isi">
+          <div className="rencana-hero-baris">
+            <h1 className="rencana-hero-angka">
+              Progres Persiapan: <span>{persenProgres}%</span>
+            </h1>
+            <span className="rencana-hero-lencana">
+              {tugasSelesai} dari {totalTugas} Selesai 🌸
+            </span>
+          </div>
+          <div className="rencana-bar">
+            <div className="rencana-bar-isi" style={{ width: `${persenProgres}%` }} />
+          </div>
+          <p className="rencana-hero-catatan">
+            <IkonHati size={16} />
+            Pelan tapi pasti, langkah menuju hari bahagiamu makin dekat!
+          </p>
         </div>
+      </section>
+
+      <div className="rencana-aksi">
+        <button
+          type="button"
+          className="tombol tombol-sekunder"
+          onClick={() => setLembarTemplate(true)}
+        >
+          Muat template
+        </button>
+        <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
+          Tambah tugas
+        </button>
       </div>
 
       <TabRencana />
 
-      {/* Saringan dan pencarian */}
-      <div
-        className="panel"
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 12,
-          marginBottom: 20,
-        }}
-      >
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+      {/* Saringan cepat dan pencarian */}
+      <section className="rencana-saring" aria-label="Saringan tugas">
+        <div className="rencana-saring-pil" role="group">
+          {SARINGAN.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              className="rencana-pil"
+              data-aktif={saring === p.id ? "ya" : undefined}
+              aria-pressed={saring === p.id}
+              onClick={() => {
+                setSaring(p.id);
+                if (p.id === "selesai") setTampilkanSelesai(true);
+              }}
+            >
+              {p.label}
+              {hitungSaring(p.id) > 0 ? (
+                <span className="rencana-pil-angka">{hitungSaring(p.id)}</span>
+              ) : null}
+            </button>
+          ))}
+        </div>
+
+        <div className="rencana-cari">
           <input
             className="isian"
             type="search"
             placeholder="Cari tugas..."
+            aria-label="Cari tugas"
             value={kataKunci}
             onChange={(e) => setKataKunci(e.target.value)}
-            style={{ flex: "1 1 200px" }}
           />
 
           <select
             className="isian"
+            aria-label="Saring kategori"
             value={kategoriPilihan}
             onChange={(e) => setKategoriPilihan(e.target.value)}
-            style={{ flex: "0 0 auto", width: "auto" }}
           >
             <option value="semua">Semua Kategori</option>
             {KATEGORI_TUGAS.map((k) => (
@@ -325,7 +424,7 @@ export default function HalamanTugas() {
             {tampilkanSelesai ? "Sembunyikan selesai" : "Tampilkan selesai"}
           </button>
         </div>
-      </div>
+      </section>
 
       {semuaTugas.length === 0 ? (
         <Kosong
@@ -361,50 +460,29 @@ export default function HalamanTugas() {
           </button>
         </Kosong>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+        <div className="tumpuk">
           {URUTAN_KELOMPOK.map((kel) => {
             const daftarKel = kelompokTugas[kel];
             if (daftarKel.length === 0) return null;
 
             return (
-              <section key={kel} aria-labelledby={`judul-kelompok-${kel}`}>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "baseline",
-                    marginBottom: 8,
-                    paddingBottom: 4,
-                    borderBottom: "1px solid var(--color-line)",
-                  }}
-                >
-                  <h2
-                    id={`judul-kelompok-${kel}`}
-                    style={{
-                      margin: 0,
-                      fontSize: "var(--text-h3)",
-                      color: kel === "lewat" ? "var(--color-bata)" : "var(--color-ink)",
-                    }}
-                  >
+              <section key={kel} aria-labelledby={`judul-kelompok-${kel}`} className="rencana-kelompok">
+                <div className="rencana-kelompok-kepala">
+                  <h2 id={`judul-kelompok-${kel}`} className="rencana-kelompok-judul">
+                    <span
+                      className="rencana-titik"
+                      data-jenis={kel}
+                      aria-hidden="true"
+                    />
                     {LABEL_KELOMPOK[kel]}
                   </h2>
-                  <span style={{ fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>
-                    {daftarKel.length} tugas
-                  </span>
+                  <span className="rencana-kelompok-lencana">{daftarKel.length} tugas</span>
                 </div>
 
-                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <div className="rencana-daftar">
                   {daftarKel.map((t) => (
-                    <div
-                      key={t.id}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <div style={{ flex: "1 1 auto", minWidth: 0 }}>
+                    <article key={t.id} className="rencana-kartu" data-selesai={t.status === "selesai" ? "ya" : undefined}>
+                      <div className="rencana-kartu-isi">
                         <TaskItem
                           tugas={t}
                           planId={plan.id}
@@ -412,29 +490,24 @@ export default function HalamanTugas() {
                           onBuka={() => bukaUbah(t)}
                         />
                       </div>
-                      <div style={{ display: "flex", gap: 4, flex: "0 0 auto" }}>
+                      <div className="rencana-kartu-sisi">
+                        <LencanaStatus tugas={t} kelompok={kel} />
                         <button
                           type="button"
-                          className="tombol tombol-sekunder"
-                          style={{ minHeight: 44, padding: "0 10px", fontSize: "var(--text-kecil)" }}
+                          className="tombol tombol-sekunder tombol-kecil"
                           onClick={() => bukaUbah(t)}
                         >
                           Ubah
                         </button>
                         <button
                           type="button"
-                          className="tombol tombol-sekunder"
-                          style={{
-                            padding: "0 10px",
-                            fontSize: "var(--text-kecil)",
-                            color: "var(--color-bata)",
-                          }}
+                          className="tombol tombol-bahaya tombol-kecil"
                           onClick={() => setTugasDihapus(t)}
                         >
                           Hapus
                         </button>
                       </div>
-                    </div>
+                    </article>
                   ))}
                 </div>
               </section>
@@ -449,7 +522,7 @@ export default function HalamanTugas() {
         judul={tugasDiedit ? "Ubah tugas" : "Tambah tugas"}
         onTutup={() => setLembarBuka(false)}
       >
-        <form onSubmit={simpanTugas} noValidate style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <form onSubmit={simpanTugas} noValidate className="tumpuk-sedang">
           <Isian label="Judul tugas" id="formJudul" galat={formGalat ?? undefined}>
             <input
               id="formJudul"
@@ -507,7 +580,7 @@ export default function HalamanTugas() {
             />
           </Isian>
 
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
+          <div className="dialog-tombol">
             <button
               type="button"
               className="tombol tombol-sekunder"
@@ -532,8 +605,8 @@ export default function HalamanTugas() {
         judul="Muat checklist bawaan"
         onTutup={() => setLembarTemplate(false)}
       >
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <p style={{ margin: 0 }}>
+        <div className="tumpuk-sedang">
+          <p className="keterangan">
             Pilih kategori untuk memuat daftar tugas standar pernikahan. Tugas yang sudah pernah
             kamu buat tidak akan diduplikasi.
           </p>
@@ -546,7 +619,7 @@ export default function HalamanTugas() {
             opsi={KATEGORI_TUGAS.map((k) => ({ nilai: k, label: k }))}
           />
 
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
+          <div className="dialog-tombol">
             <button
               type="button"
               className="tombol tombol-sekunder"
@@ -576,6 +649,113 @@ export default function HalamanTugas() {
         onTutup={() => setTugasDihapus(null)}
         onYa={konfirmasiHapus}
       />
+
+      <button
+        type="button"
+        className="rencana-fab tanpa-cetak"
+        aria-label="Tambah tugas baru"
+        onClick={bukaTambah}
+      >
+        <IkonTambah size={18} />
+        Tambah Tugas Baru
+      </button>
     </div>
+  );
+}
+
+/** Lencana status di kanan kartu tugas. Diambil dari data, bukan dari contoh. */
+function LencanaStatus({ tugas, kelompok }: { tugas: TugasLengkap; kelompok: KelompokWaktu }) {
+  if (tugas.status === "selesai") {
+    return <span className="rencana-status" data-jenis="selesai">Selesai ✨</span>;
+  }
+  if (kelompok === "lewat") {
+    return <span className="rencana-status" data-jenis="lewat">Lewat tenggat</span>;
+  }
+  if (tugas.priority === "tinggi") {
+    return <span className="rencana-status" data-jenis="tinggi">Tinggi 💕</span>;
+  }
+  if (!tugas.dueDate) {
+    return <span className="rencana-status" data-jenis="redup">Belum ada tenggat</span>;
+  }
+  return <span className="rencana-status" data-jenis="sedang">Sedang 🌸</span>;
+}
+
+/** Ikon bunga bergaya, dipakai sebagai hiasan kartu progres. */
+function IkonBunga({ size = 20 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <circle cx="12" cy="7" r="3" />
+      <circle cx="17.5" cy="11" r="3" />
+      <circle cx="15.4" cy="17.4" r="3" />
+      <circle cx="8.6" cy="17.4" r="3" />
+      <circle cx="6.5" cy="11" r="3" />
+    </svg>
+  );
+}
+
+/** Hiasan bunga kecil lima lingkaran untuk sudut kartu. */
+function IkonBungaKecil({ size = 20 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <circle cx="12" cy="4.5" r="3.2" />
+      <circle cx="19" cy="9.5" r="3.2" />
+      <circle cx="16.5" cy="17.8" r="3.2" />
+      <circle cx="7.5" cy="17.8" r="3.2" />
+      <circle cx="5" cy="9.5" r="3.2" />
+      <circle cx="12" cy="12" r="2.4" />
+    </svg>
+  );
+}
+
+/** Hati kecil untuk baris penyemangat di kartu progres. */
+function IkonHati({ size = 16 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M12 20.5S3.5 14.6 3.5 9.2A4.7 4.7 0 0 1 12 6a4.7 4.7 0 0 1 8.5 3.2c0 5.4-8.5 11.3-8.5 11.3z" />
+    </svg>
+  );
+}
+
+/** Ikon plus untuk tombol tambah tugas. */
+function IkonTambah({ size = 18 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M12 5v14M5 12h14" />
+    </svg>
   );
 }

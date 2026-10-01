@@ -179,10 +179,10 @@ export default function HalamanInfo() {
   }
 
   return (
-    <div>
+    <div className="tumpuk-sedang">
       <div className="kepala-halaman">
         <div>
-          <h1 style={{ margin: 0, fontSize: "var(--text-h1)" }}>Briefing & Informasi</h1>
+          <h1>Briefing &amp; Informasi</h1>
           <p>Catatan penting untuk keluarga besar, panitia acara, dan vendor hari-H.</p>
         </div>
         <div>
@@ -195,13 +195,13 @@ export default function HalamanInfo() {
       <TabRencana />
 
       {summary && summary.total > 0 ? (
-        <div className="rekap" style={{ marginBottom: 16 }}>
+        <div className="rekap rekap-tiga">
           <div className="rekap-item">
             <span className="rekap-nilai">{summary.total}</span>
             <span className="rekap-label">Total catatan</span>
           </div>
           <div className="rekap-item">
-            <span className="rekap-nilai" style={{ color: "var(--color-primary)" }}>
+            <span className="rekap-nilai teks-aksen">
               {summary.terbit}
             </span>
             <span className="rekap-label">Sudah terbit</span>
@@ -223,77 +223,31 @@ export default function HalamanInfo() {
           </button>
         </Kosong>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <div className="tumpuk-rapat">
           {daftar.map((a) => (
-            <div
+            <article
               key={a.id}
-              className="kartu"
-              style={{
-                borderColor: a.isPinned ? "var(--color-primary)" : undefined,
-                display: "flex",
-                flexDirection: "column",
-                gap: 12,
-              }}
+              className="kartu tumpuk-rapat"
+              data-sorot={a.isPinned ? "ya" : undefined}
             >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                  gap: 12,
-                  flexWrap: "wrap",
-                }}
-              >
-                <div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                    <h2 style={{ margin: 0, fontSize: "var(--text-h3)" }}>{a.title}</h2>
+              <div className="bagian-kepala">
+                <div className="tumpuk-rapat isi-lentur">
+                  <div className="aksi-baris">
+                    <h2>{a.title}</h2>
                     {a.isPinned ? (
-                      <span
-                        style={{
-                          padding: "2px 8px",
-                          borderRadius: 4,
-                          fontSize: "var(--text-kecil)",
-                          fontWeight: 600,
-                          background: "var(--color-netral)",
-                          color: "var(--color-primary)",
-                        }}
-                      >
-                        📌 Disematkan
-                      </span>
+                      <span className="lencana lencana-aksen">📌 Disematkan</span>
                     ) : null}
-                    <span
-                      style={{
-                        padding: "2px 8px",
-                        borderRadius: 4,
-                        fontSize: "var(--text-kecil)",
-                        background: "var(--color-netral)",
-                        color: "var(--color-ink)",
-                      }}
-                    >
+                    <span className="lencana">
                       Audien: {LABEL_AUDIEN[a.audience as Audien] ?? a.audience}
                     </span>
-                    {!a.publishedAt ? (
-                      <span
-                        style={{
-                          padding: "2px 8px",
-                          borderRadius: 4,
-                          fontSize: "var(--text-kecil)",
-                          background: "var(--color-kertas)",
-                          color: "var(--color-muted)",
-                          border: "1px solid var(--color-garis)",
-                        }}
-                      >
-                        Draf (Belum terbit)
-                      </span>
-                    ) : null}
+                    {!a.publishedAt ? <span className="lencana">Draf</span> : null}
                   </div>
                 </div>
 
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <div className="aksi-baris">
                   <button
                     type="button"
-                    className="tombol tombol-sekunder"
-                    style={{ minHeight: 44, padding: "0 10px", fontSize: "var(--text-kecil)" }}
+                    className="tombol tombol-sekunder tombol-kecil"
                     onClick={() => bagikanWhatsApp(a)}
                   >
                     Kirim WA
@@ -301,8 +255,7 @@ export default function HalamanInfo() {
                   {a.shareToken ? (
                     <button
                       type="button"
-                      className="tombol tombol-sekunder"
-                      style={{ minHeight: 44, padding: "0 10px", fontSize: "var(--text-kecil)" }}
+                      className="tombol tombol-sekunder tombol-kecil"
                       onClick={() => salinTautan(a.shareToken!)}
                     >
                       Salin tautan
@@ -310,20 +263,14 @@ export default function HalamanInfo() {
                   ) : null}
                   <button
                     type="button"
-                    className="tombol tombol-sekunder"
-                    style={{ minHeight: 44, padding: "0 10px", fontSize: "var(--text-kecil)" }}
+                    className="tombol tombol-sekunder tombol-kecil"
                     onClick={() => bukaUbah(a)}
                   >
                     Ubah
                   </button>
                   <button
                     type="button"
-                    className="tombol tombol-sekunder"
-                    style={{
-                      padding: "0 10px",
-                      fontSize: "var(--text-kecil)",
-                      color: "var(--color-bata)",
-                    }}
+                    className="tombol tombol-bahaya tombol-kecil"
                     onClick={() => setDihapus(a)}
                   >
                     Hapus
@@ -331,17 +278,8 @@ export default function HalamanInfo() {
                 </div>
               </div>
 
-              <div
-                style={{
-                  whiteSpace: "pre-line",
-                  fontSize: "var(--text-dasar)",
-                  lineHeight: 1.6,
-                  color: "var(--color-ink)",
-                }}
-              >
-                {a.body}
-              </div>
-            </div>
+              <p className="blok-teks">{a.body}</p>
+            </article>
           ))}
         </div>
       )}
@@ -352,7 +290,7 @@ export default function HalamanInfo() {
         judul={diedit ? "Ubah pengumuman" : "Buat pengumuman baru"}
         onTutup={() => setLembarBuka(false)}
       >
-        <form onSubmit={simpan} noValidate style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <form onSubmit={simpan} noValidate className="tumpuk-sedang">
           <Isian label="Judul pengumuman" id="formJudul" galat={formGalat ?? undefined}>
             <input
               id="formJudul"
@@ -385,29 +323,33 @@ export default function HalamanInfo() {
             />
           </Isian>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+          <div className="tumpuk-rapat">
+            <label className="pilih-kartu pilih-kartu-tengah" data-aktif="tidak">
               <input
                 type="checkbox"
                 checked={formSemat}
                 onChange={(e) => setFormSemat(e.target.checked)}
-                style={{ width: 18, height: 18 }}
               />
-              <span>Sematkan di atas (Pengumuman penting)</span>
+              <div className="pilih-kartu-isi">
+                <div className="pilih-kartu-judul">Sematkan di atas</div>
+                <div className="pilih-kartu-ket">Tandai sebagai pengumuman penting.</div>
+              </div>
             </label>
 
-            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+            <label className="pilih-kartu pilih-kartu-tengah" data-aktif="tidak">
               <input
                 type="checkbox"
                 checked={formTerbit}
                 onChange={(e) => setFormTerbit(e.target.checked)}
-                style={{ width: 18, height: 18 }}
               />
-              <span>Langsung terbitkan sekarang</span>
+              <div className="pilih-kartu-isi">
+                <div className="pilih-kartu-judul">Langsung terbitkan sekarang</div>
+                <div className="pilih-kartu-ket">Kalau tidak dicentang, catatan disimpan sebagai draf.</div>
+              </div>
             </label>
           </div>
 
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
+          <div className="dialog-tombol">
             <button
               type="button"
               className="tombol tombol-sekunder"

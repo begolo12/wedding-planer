@@ -7,7 +7,7 @@ import { usePlan } from "@/lib/use-plan";
 import { useMuat } from "@/lib/use-muat";
 import { Kerangka, Kosong, Gagal } from "@/components/states";
 import { Lembar, DialogKonfirmasi, toast } from "@/components/toast";
-import { Isian, Pilih, IsianRupiah } from "@/components/field";
+import { Isian, Pilih } from "@/components/field";
 import { Rupiah } from "@/components/rupiah";
 import { minta, pesanGalat } from "@/lib/api-client";
 import {
@@ -21,7 +21,7 @@ import {
   type MetodeBayar,
   LABEL_METODE_BAYAR,
 } from "@/lib/konstanta";
-import { tanggalPanjangDari, rupiahPolos } from "@/lib/format";
+import { tanggalPanjangDari } from "@/lib/format";
 
 type VendorDetail = {
   id: string;
@@ -72,7 +72,7 @@ export default function HalamanDetailVendor() {
 
   // Lembar Catat Pembayaran
   const [bukaBayar, setBukaBayar] = useState(false);
-  const [bayarJumlah, setBayarJumlah] = useState<number>(0);
+  const [bayarJumlah, setBayarJumlah] = useState("");
   const [bayarTanggal, setBayarTanggal] = useState(
     new Date().toISOString().slice(0, 10),
   );
@@ -162,8 +162,9 @@ export default function HalamanDetailVendor() {
     e.preventDefault();
     if (!planId || !vendorId) return;
 
-    if (!bayarJumlah || bayarJumlah <= 0) {
-      setGalatBayar("Masukkan jumlah pembayaran lebih dari Rp 0.");
+    const nominal = parseInt(bayarJumlah.replace(/\D/g, ""), 10);
+    if (!nominal || nominal <= 0) {
+      setGalatBayar("Masukkan jumlah pembayaran yang valid.");
       return;
     }
     if (!bayarTanggal) {
@@ -178,7 +179,7 @@ export default function HalamanDetailVendor() {
       await minta(`/api/plans/${planId}/vendors/${vendorId}/payments`, {
         method: "POST",
         body: {
-          amount: bayarJumlah,
+          amount: nominal,
           paidAt: bayarTanggal,
           method: bayarMetode,
           isFinal: bayarLunas,
@@ -188,7 +189,7 @@ export default function HalamanDetailVendor() {
 
       toast("Pembayaran berhasil dicatat");
       setBukaBayar(false);
-      setBayarJumlah(0);
+      setBayarJumlah("");
       setBayarLunas(false);
       setBayarCatatan("");
       await muatUlang();
@@ -263,50 +264,26 @@ export default function HalamanDetailVendor() {
     (vendor.plannedAmount > 0 && vendor.remaining <= 0);
 
   return (
-    <div>
-      <div style={{ marginBottom: 12 }}>
-        <Link className="tautan-kalimat" href="/rencana/vendor">
-          ← Kembali ke daftar vendor
-        </Link>
-      </div>
+    <div className="tumpuk-sedang">
+      <Link className="tautan-kalimat" href="/rencana/vendor">
+        ← Kembali ke daftar vendor
+      </Link>
 
       <div className="kepala-halaman">
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-            <h1 style={{ margin: 0, fontSize: "var(--text-h1)" }}>{vendor.name}</h1>
-            <span
-              style={{
-                padding: "2px 8px",
-                borderRadius: 4,
-                fontSize: "var(--text-kecil)",
-                fontWeight: 600,
-                background: "var(--color-netral)",
-                color: "var(--color-ink)",
-              }}
-            >
+          <div className="aksi-baris">
+            <h1>{vendor.name}</h1>
+            <span className="lencana">
               {LABEL_STATUS_VENDOR[vendor.status as StatusVendor] ?? vendor.status}
             </span>
-            {sudahLunas ? (
-              <span
-                style={{
-                  padding: "2px 8px",
-                  borderRadius: 4,
-                  fontSize: "var(--text-kecil)",
-                  fontWeight: 600,
-                  background: "var(--color-netral)",
-                  color: "var(--color-primary)",
-                }}
-              >
-                Lunas
-              </span>
-            ) : null}
+            {sudahLunas ? <span className="lencana lencana-aksen">Lunas</span> : null}
           </div>
-          <p style={{ margin: "4px 0 0" }}>
+          <p>
             Kategori: {LABEL_KATEGORI_UANG[vendor.category as KategoriUang] ?? vendor.category}
           </p>
         </div>
 
-        <div style={{ display: "flex", gap: 8 }}>
+        <div className="aksi-baris">
           <button
             type="button"
             className="tombol tombol-sekunder"
@@ -318,7 +295,7 @@ export default function HalamanDetailVendor() {
             type="button"
             className="tombol tombol-utama"
             onClick={() => {
-              setBayarJumlah(0);
+              setBayarJumlah("");
               setBayarTanggal(new Date().toISOString().slice(0, 10));
               setBayarMetode("transfer");
               setBayarLunas(false);
@@ -333,9 +310,9 @@ export default function HalamanDetailVendor() {
       </div>
 
       {/* Ringkasan Finansial Vendor */}
-      <div className="rekap" style={{ marginBottom: 16 }}>
+      <div className="rekap">
         <div className="rekap-item">
-          <span className="rekap-nilai">
+          <span className="rekap-nilai rekap-nilai-kecil">
             <Rupiah nilai={vendor.plannedAmount} />
           </span>
           <span className="rekap-label">
@@ -343,15 +320,15 @@ export default function HalamanDetailVendor() {
           </span>
         </div>
         <div className="rekap-item">
-          <span className="rekap-nilai" style={{ color: "var(--color-primary)" }}>
+          <span className="rekap-nilai rekap-nilai-kecil teks-aksen">
             <Rupiah nilai={vendor.paidAmount} />
           </span>
           <span className="rekap-label">Sudah terbayar</span>
         </div>
         <div className="rekap-item">
           <span
-            className="rekap-nilai"
-            style={{ color: vendor.remaining > 0 ? "var(--color-bata)" : undefined }}
+            className="rekap-nilai rekap-nilai-kecil"
+            data-nada={vendor.remaining > 0 ? "bahaya" : undefined}
           >
             <Rupiah nilai={vendor.remaining} />
           </span>
@@ -359,57 +336,56 @@ export default function HalamanDetailVendor() {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 16, alignItems: "start" }}>
+      <div className="kolom-detail">
         {/* Kolom Kiri: Info Kontak & Catatan */}
-        <div className="kartu" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <h2 style={{ margin: 0, fontSize: "var(--text-h3)" }}>Informasi Kontak</h2>
+        <div className="kartu tumpuk-sedang">
+          <h2>Informasi Kontak</h2>
 
-          <div>
-            <div style={{ fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>
+          <div className="tumpuk-rapat">
+            <span className="keterangan keterangan-rapat">
               Narahubung (PIC)
-            </div>
-            <div>{vendor.contactName || "Belum ada narahubung"}</div>
+            </span>
+            <span>{vendor.contactName || "Belum ada narahubung"}</span>
           </div>
 
-          <div>
-            <div style={{ fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>
+          <div className="tumpuk-rapat">
+            <span className="keterangan keterangan-rapat">
               Nomor WhatsApp / Telepon
-            </div>
+            </span>
             {vendor.phone ? (
-              <div>
-                <a
-                  href={`https://wa.me/${vendor.phone.replace(/[^0-9]/g, "")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: "var(--color-primary)", fontWeight: 600 }}
-                >
-                  {vendor.phone} (Buka WhatsApp)
-                </a>
-              </div>
+              <a
+                className="tautan-kalimat"
+                href={`https://wa.me/${vendor.phone.replace(/[^0-9]/g, "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {vendor.phone} (Buka WhatsApp)
+              </a>
             ) : (
-              <div>Belum ada nomor telepon</div>
+              <span>Belum ada nomor telepon</span>
             )}
           </div>
 
-          <div>
-            <div style={{ fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>Alamat</div>
-            <div>{vendor.address || "Belum ada alamat"}</div>
+          <div className="tumpuk-rapat">
+            <span className="keterangan keterangan-rapat">
+              Alamat
+            </span>
+            <span>{vendor.address || "Belum ada alamat"}</span>
           </div>
 
           {vendor.notes ? (
-            <div>
-              <div style={{ fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>Catatan</div>
-              <div style={{ whiteSpace: "pre-line", fontSize: "var(--text-kecil)" }}>
-                {vendor.notes}
-              </div>
+            <div className="tumpuk-rapat">
+              <span className="keterangan keterangan-rapat">
+                Catatan
+              </span>
+              <p className="blok-teks">{vendor.notes}</p>
             </div>
           ) : null}
 
-          <div style={{ marginTop: 8, paddingTop: 12, borderTop: "1px solid var(--color-garis)" }}>
+          <div className="kartu-kaki">
             <button
               type="button"
-              className="tombol tombol-sekunder"
-              style={{ color: "var(--color-bata)", width: "100%" }}
+              className="tombol tombol-bahaya tombol-lebar"
               onClick={() => setBukaHapusVendor(true)}
             >
               Hapus vendor ini
@@ -418,15 +394,14 @@ export default function HalamanDetailVendor() {
         </div>
 
         {/* Kolom Kanan: Riwayat Pembayaran */}
-        <div className="kartu" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <h2 style={{ margin: 0, fontSize: "var(--text-h3)" }}>Riwayat Pembayaran</h2>
+        <div className="kartu tumpuk-sedang">
+          <div className="bagian-kepala">
+            <h2>Riwayat Pembayaran</h2>
             <button
               type="button"
-              className="tombol tombol-sekunder"
-              style={{ minHeight: 44, padding: "0 12px", fontSize: "var(--text-kecil)" }}
+              className="tombol tombol-sekunder tombol-kecil"
               onClick={() => {
-                setBayarJumlah(0);
+                setBayarJumlah("");
                 setBayarTanggal(new Date().toISOString().slice(0, 10));
                 setBayarMetode("transfer");
                 setBayarLunas(false);
@@ -445,65 +420,33 @@ export default function HalamanDetailVendor() {
               jalanKeluar="Catat uang muka (DP) atau cicilan pertama untuk vendor ini."
             />
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <div className="tumpuk-rapat">
               {payments.map((p, idx) => (
-                <div
-                  key={p.id}
-                  style={{
-                    padding: 12,
-                    borderRadius: 4,
-                    border: "1px solid var(--color-garis)",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: 12,
-                  }}
-                >
-                  <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ fontWeight: 600, fontSize: "var(--text-h3)" }}>
+                <div key={p.id} className="baris-kotak">
+                  <div className="tumpuk-rapat">
+                    <div className="aksi-baris">
+                      <span className="rekap-nilai rekap-nilai-kecil">
                         <Rupiah nilai={p.amount} />
                       </span>
                       {p.isFinal ? (
-                        <span
-                          style={{
-                            padding: "2px 6px",
-                            borderRadius: 4,
-                            fontSize: "var(--text-kecil)",
-                            fontWeight: 600,
-                            background: "var(--color-netral)",
-                            color: "var(--color-primary)",
-                          }}
-                        >
-                          Pelunasan
-                        </span>
+                        <span className="lencana lencana-aksen">Pelunasan</span>
                       ) : (
-                        <span
-                          style={{
-                            fontSize: "var(--text-kecil)",
-                            color: "var(--color-muted)",
-                          }}
-                        >
+                        <span className="keterangan keterangan-rapat">
                           Termin {idx + 1}
                         </span>
                       )}
                     </div>
 
-                    <div style={{ fontSize: "var(--text-kecil)", color: "var(--color-muted)", marginTop: 2 }}>
+                    <span className="keterangan keterangan-rapat">
                       {tanggalPanjangDari(p.paidAt)} • Melalui{" "}
                       {LABEL_METODE_BAYAR[p.method as MetodeBayar] ?? p.method}
                       {p.notes ? ` • ${p.notes}` : ""}
-                    </div>
+                    </span>
                   </div>
 
                   <button
                     type="button"
-                    className="tombol tombol-sekunder"
-                    style={{
-                      padding: "0 8px",
-                      fontSize: "var(--text-kecil)",
-                      color: "var(--color-bata)",
-                    }}
+                    className="tombol tombol-bahaya tombol-kecil"
                     onClick={() => setHapusBayarId(p.id)}
                   >
                     Hapus
@@ -521,35 +464,20 @@ export default function HalamanDetailVendor() {
         judul="Catat pembayaran vendor"
         onTutup={() => setBukaBayar(false)}
       >
-        <form onSubmit={simpanPembayaran} noValidate style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <IsianRupiah
-            label="Jumlah pembayaran"
-            id="bayarJumlah"
-            galat={galatBayar ?? undefined}
-            nilai={bayarJumlah}
-            onUbah={(nilai) => setBayarJumlah(nilai)}
-          />
-
-          {data?.vendor && data.vendor.remaining > 0 ? (
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: -8 }}>
-              <button
-                type="button"
-                className="tombol"
-                style={{
-                  padding: "4px 10px",
-                  fontSize: "var(--text-kecil)",
-                  background: "var(--color-netral)",
-                  border: "1px solid var(--color-garis)",
-                }}
-                onClick={() => {
-                  setBayarJumlah(data.vendor.remaining);
-                  setBayarLunas(true);
-                }}
-              >
-                Isi sisa tagihan: Rp {rupiahPolos(data.vendor.remaining)}
-              </button>
-            </div>
-          ) : null}
+        <form onSubmit={simpanPembayaran} noValidate className="tumpuk-sedang">
+          <Isian label="Jumlah pembayaran (Rupiah)" id="bayarJumlah" galat={galatBayar ?? undefined}>
+            <input
+              id="bayarJumlah"
+              className="isian"
+              type="number"
+              min="1000"
+              step="1000"
+              required
+              placeholder="Contoh: 5000000"
+              value={bayarJumlah}
+              onChange={(e) => setBayarJumlah(e.target.value)}
+            />
+          </Isian>
 
           <Isian label="Tanggal pembayaran" id="bayarTanggal">
             <input
@@ -571,14 +499,18 @@ export default function HalamanDetailVendor() {
           />
 
           <div className="isian-grup">
-            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+            <label className="pilih-kartu">
               <input
                 type="checkbox"
                 checked={bayarLunas}
                 onChange={(e) => setBayarLunas(e.target.checked)}
-                style={{ width: 18, height: 18 }}
               />
-              <span>Tandai sebagai pelunasan akhir</span>
+              <span className="pilih-kartu-isi">
+                <span className="pilih-kartu-judul">Tandai sebagai pelunasan akhir</span>
+                <span className="pilih-kartu-ket">
+                  Sisa tagihan akan dihitung nol dan vendor ditandai lunas.
+                </span>
+              </span>
             </label>
           </div>
 
@@ -593,7 +525,7 @@ export default function HalamanDetailVendor() {
             />
           </Isian>
 
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
+          <div className="dialog-tombol">
             <button
               type="button"
               className="tombol tombol-sekunder"
@@ -618,7 +550,7 @@ export default function HalamanDetailVendor() {
         judul="Ubah data vendor"
         onTutup={() => setBukaUbahVendor(false)}
       >
-        <form onSubmit={simpanPerubahanVendor} noValidate style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <form onSubmit={simpanPerubahanVendor} noValidate className="tumpuk-sedang">
           <Isian label="Nama vendor" id="editNama" galat={galatUbahVendor ?? undefined}>
             <input
               id="editNama"
@@ -686,7 +618,7 @@ export default function HalamanDetailVendor() {
             />
           </Isian>
 
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
+          <div className="dialog-tombol">
             <button
               type="button"
               className="tombol tombol-sekunder"

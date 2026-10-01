@@ -14,8 +14,8 @@ Aplikasi ini harus tetap berguna di tempat sinyal jelek. Di perkawinan di Indone
 | `short_name` | `Aisyah` | Maksimal 12 karakter agar tidak terpotong di home screen |
 | `start_url` | `/` | Selalu ke Beranda, bukan halaman terakhir yang dibuka |
 | `display` | `standalone` | Tanpa address bar, terasa seperti aplikasi biasa |
-| `background_color` | `#FBF9F6` | Sama dengan base palette agar tidak ada kedipan putih |
-| `theme_color` | `#FBF9F6` | Mobile browser memakai ini untuk address bar |
+| `background_color` | `#FFFDF9` | Sama dengan base palette agar tidak ada kedipan putih |
+| `theme_color` | `#FFFDF9` | Mobile browser memakai ini untuk address bar |
 | `orientation` | `portrait-primary` | Mobile adalah target utama |
 | `lang` | `id-ID` | Mematikan terjemahan otomatis browser |
 | `categories` | `lifestyle`, `productivity` | Untuk penempatan di home screen Android |

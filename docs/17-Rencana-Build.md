@@ -52,7 +52,7 @@ Sepuluh langkah. Tiap langkah berakhir dengan aplikasi yang masih jalan, karena 
 | | |
 |---|---|
 | Berkas | `package.json`, `tsconfig.json`, `next.config.ts`, `postcss.config.mjs`, `src/app/globals.css`, `src/app/layout.tsx`, `src/app/page.tsx` |
-| Selesai kalau | `npm run dev` jalan, `npm run build` jalan, warna di layar sama persis dengan `DESIGN.md` bagian 3, font Fraunces dan Public Sans termuat |
+| Selesai kalau | `npm run dev` jalan, `npm run build` jalan, warna di layar sama persis dengan `DESIGN.md` bagian 3, font Plus Jakarta Sans dan Be Vietnam Pro termuat |
 
 ### Langkah 2. Database
 

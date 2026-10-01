@@ -13,46 +13,47 @@ export const metadata: Metadata = {
  */
 export default function HalamanAplikasi() {
   return (
-    <main className="halaman-baca">
-      <p className="label-bagian">Aplikasi</p>
-      <h1>Pasang di layar utama</h1>
+    <main className="halaman-baca tumpuk">
+      <div className="kepala-halaman">
+        <p className="label-bagian">Aplikasi</p>
+        <h1>Pasang di layar utama</h1>
+        <p>
+          Dipasang atau tidak, aplikasinya tetap jalan. Bedanya tiga hal: bisa dibuka tanpa internet,
+          tidak perlu mencari alamatnya lagi, dan tampilannya penuh tanpa bilah peramban.
+        </p>
+      </div>
 
-      <p>
-        Dipasang atau tidak, aplikasinya tetap jalan. Bedanya tiga hal: bisa dibuka tanpa internet,
-        tidak perlu mencari alamatnya lagi, dan tampilannya penuh tanpa bilah peramban.
-      </p>
-
-      <div className="panel" style={{ marginTop: 24 }}>
+      <div className="kartu tumpuk-rapat">
         <p className="label-bagian">Android, lewat Chrome</p>
-        <ol style={{ margin: "8px 0 0", paddingLeft: 20 }}>
+        <ol className="daftar-angka">
           <li>Buka menu tiga titik di kanan atas</li>
           <li>Pilih &ldquo;Pasang aplikasi&rdquo; atau &ldquo;Tambahkan ke Layar utama&rdquo;</li>
           <li>Konfirmasi</li>
         </ol>
       </div>
 
-      <div className="panel" style={{ marginTop: 16 }}>
+      <div className="kartu tumpuk-rapat">
         <p className="label-bagian">iPhone, lewat Safari</p>
-        <ol style={{ margin: "8px 0 0", paddingLeft: 20 }}>
+        <ol className="daftar-angka">
           <li>Ketuk tombol Bagikan di bawah layar</li>
           <li>Pilih &ldquo;Tambah ke Layar Utama&rdquo;</li>
           <li>Ketuk Tambah</li>
         </ol>
-        <p style={{ marginTop: 8, fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>
+        <p className="keterangan keterangan-rapat">
           Safari tidak memberi tombol pasang otomatis, jadi langkahnya memang harus dilakukan sendiri.
         </p>
       </div>
 
-      <div className="panel" style={{ marginTop: 16 }}>
+      <div className="kartu tumpuk-rapat">
         <p className="label-bagian">Setelah dipasang</p>
-        <ul style={{ margin: "8px 0 0", paddingLeft: 20 }}>
+        <ul className="daftar-butir">
           <li>Rundown tetap terbuka saat sinyal di venue hilang</li>
           <li>Tamu, anggaran, dan pembayaran bisa dibaca dari salinan di perangkat</li>
           <li>Perubahan yang dibuat saat luring disimpan dan dikirim sendiri setelah ada koneksi</li>
         </ul>
       </div>
 
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 24 }}>
+      <div className="aksi-baris">
         <Link className="tombol tombol-utama" href="/beranda">
           Kembali ke beranda
         </Link>

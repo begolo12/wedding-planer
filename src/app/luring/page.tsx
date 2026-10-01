@@ -19,18 +19,19 @@ export const metadata: Metadata = {
  */
 export default function HalamanLuring() {
   return (
-    <main className="halaman-baca">
-      <p className="label-bagian">Tanpa koneksi</p>
-      <h1>Tidak ada internet</h1>
+    <main className="halaman-baca tumpuk">
+      <div className="kepala-halaman">
+        <p className="label-bagian">Tanpa koneksi</p>
+        <h1>Tidak ada internet</h1>
+        <p>
+          Aplikasinya tetap bisa dibuka, tapi hanya layar yang sudah pernah kamu buka sebelumnya.
+          Halaman yang belum pernah dibuka tidak punya salinan di perangkat ini.
+        </p>
+      </div>
 
-      <p>
-        Aplikasinya tetap bisa dibuka, tapi hanya layar yang sudah pernah kamu buka sebelumnya.
-        Halaman yang belum pernah dibuka tidak punya salinan di perangkat ini.
-      </p>
-
-      <div className="panel" style={{ marginTop: 24 }}>
+      <div className="kartu tumpuk-rapat">
         <p className="label-bagian">Yang biasanya masih bisa dibuka</p>
-        <ul style={{ margin: "8px 0 0", paddingLeft: 20 }}>
+        <ul className="daftar-butir">
           <li>Rundown hari-H, ini yang paling sering dibutuhkan di lokasi</li>
           <li>Daftar tugas, untuk dibaca saja</li>
           <li>Daftar tamu, untuk dibaca saja</li>
@@ -39,12 +40,12 @@ export default function HalamanLuring() {
         </ul>
       </div>
 
-      <p style={{ marginTop: 24 }}>
+      <p>
         Menambah atau mengubah data saat luring tetap bisa. Perubahannya disimpan di perangkat dan
         dikirim sendiri setelah ada koneksi lagi.
       </p>
 
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 24 }}>
+      <div className="aksi-baris">
         <Link className="tombol tombol-utama" href="/hari-h">
           Buka rundown
         </Link>
@@ -53,7 +54,7 @@ export default function HalamanLuring() {
         </Link>
       </div>
 
-      <p style={{ marginTop: 32, fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>
+      <p className="keterangan">
         Kalau layarnya kosong, itu berarti halamannya memang belum pernah dibuka di perangkat ini.
         Bukan datanya yang hilang.
       </p>

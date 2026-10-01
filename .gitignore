@@ -11,7 +11,25 @@ next-env.d.ts
 
 # keluaran audit sekali pakai
 .audit
-.vercel
-.env*
-_bmad
+.neon
+
+# aset Stitch hasil tarik, sekali pakai
+.stitch
+docs/stitch_cute_wedding_planner
+
+# log build sekali pakai
+dev-audit.log
+
+# perkakas agen, tidak ikut produk
 .agent
+.agents
+_bmad
+_bmad-output
+skills-lock.json
+
+# keluaran alat lokal
+.playwright-mcp
+.vercel
+
+# hasil audit sekali pakai
+anti-slop

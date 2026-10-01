@@ -141,10 +141,10 @@ export default function HalamanPlan() {
   }
 
   return (
-    <div>
+    <div className="tumpuk-sedang">
       <div className="kepala-halaman">
         <div>
-          <h1 style={{ margin: 0, fontSize: "var(--text-h1)" }}>Rencana Pernikahan</h1>
+          <h1>Rencana Pernikahan</h1>
           <p>Kelola data nama pasangan, tanggal utama, dan status persiapan.</p>
         </div>
         <div>
@@ -165,24 +165,21 @@ export default function HalamanPlan() {
 
       {/* Switcher jika ada lebih dari 1 rencana */}
       {daftarPlan.length > 1 ? (
-        <div className="kartu" style={{ marginBottom: 16 }}>
-          <label style={{ display: "block", fontWeight: 600, marginBottom: 8 }}>
-            Pilih rencana aktif:
-          </label>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <section className="kartu tumpuk-rapat">
+          <span className="label-bagian">Pilih rencana aktif</span>
+          <div className="aksi-baris">
             {daftarPlan.map((p) => (
               <button
                 key={p.id}
                 type="button"
-                className={`tombol ${p.id === planId ? "tombol-utama" : "tombol-sekunder"}`}
-                style={{ fontSize: "var(--text-kecil)", minHeight: 44 }}
+                className={`tombol tombol-kecil ${p.id === planId ? "tombol-utama" : "tombol-sekunder"}`}
                 onClick={() => pilihPlan(p.id)}
               >
                 {p.partnerName} {p.weddingDate ? `(${p.weddingDate})` : ""}
               </button>
             ))}
           </div>
-        </div>
+        </section>
       ) : null}
 
       {!plan ? (
@@ -199,28 +196,12 @@ export default function HalamanPlan() {
           </button>
         </Kosong>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16, maxWidth: 640 }}>
-          <form
-            onSubmit={handleSimpan}
-            noValidate
-            className="kartu"
-            style={{ display: "flex", flexDirection: "column", gap: 16 }}
-          >
-            <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Detail Rencana</h2>
+        <div className="rencana-plan">
+          <form onSubmit={handleSimpan} noValidate className="kartu tumpuk-sedang">
+            <h2>Detail Rencana</h2>
 
             {formGalat ? (
-              <div
-                style={{
-                  padding: "10px 12px",
-                  borderRadius: 4,
-                  background: "var(--color-kertas)",
-                  color: "var(--color-bata)",
-                  border: "1px solid var(--color-bata)",
-                  fontSize: "var(--text-kecil)",
-                }}
-              >
-                {formGalat}
-              </div>
+              <p className="peringatan peringatan-bahaya">{formGalat}</p>
             ) : null}
 
             <Isian
@@ -271,11 +252,10 @@ export default function HalamanPlan() {
               />
             </Isian>
 
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+            <div className="bagian-kepala">
               <button
                 type="button"
-                className="tombol tombol-sekunder"
-                style={{ color: "var(--color-bata)" }}
+                className="tombol tombol-bahaya"
                 onClick={() => setBukaHapus(true)}
               >
                 Hapus rencana
@@ -298,20 +278,9 @@ export default function HalamanPlan() {
         judul="Buat rencana pernikahan baru"
         onTutup={() => setBukaBaru(false)}
       >
-        <form onSubmit={handleBuatBaru} noValidate style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <form onSubmit={handleBuatBaru} noValidate className="tumpuk-sedang">
           {galatBaru ? (
-            <div
-              style={{
-                padding: "10px 12px",
-                borderRadius: 4,
-                background: "var(--color-kertas)",
-                color: "var(--color-bata)",
-                border: "1px solid var(--color-bata)",
-                fontSize: "var(--text-kecil)",
-              }}
-            >
-              {galatBaru}
-            </div>
+            <p className="peringatan peringatan-bahaya">{galatBaru}</p>
           ) : null}
 
           <Isian label="Nama pasangan" id="baruPartner" petunjuk="Contoh: Budi & Siti">
@@ -347,7 +316,7 @@ export default function HalamanPlan() {
             />
           </Isian>
 
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
+          <div className="dialog-tombol">
             <button
               type="button"
               className="tombol tombol-sekunder"

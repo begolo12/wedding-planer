@@ -8,6 +8,8 @@ import { usePlan, type Plan } from "@/lib/use-plan";
 import { Kerangka, Gagal } from "@/components/states";
 import { toast } from "@/components/toast";
 import { minta, pesanGalat } from "@/lib/api-client";
+import { tanggalPanjangDari, selisihHari } from "@/lib/format";
+import { LABEL_STATUS_PLAN, STATUS_PLAN, type StatusPlan } from "@/lib/konstanta";
 
 type PilihanTema = "terang" | "gelap" | "sistem";
 
@@ -17,7 +19,19 @@ type PilihanTema = "terang" | "gelap" | "sistem";
 const KUNCI_TEMA = "haribesar-tema";
 
 /**
- * Layar Pengaturan Akun, Pilihan Rencana, Tema, dan Cadangan Data.
+ * Layar Akun dan Pengaturan.
+ *
+ * Susunannya mengikuti rancangan Stitch
+ * docs/stitch_cute_wedding_planner/atur_rencana_profil_calon_pengantin:
+ * kartu identitas, kartu konfigurasi, banner bantuan, lalu aksi utama.
+ *
+ * Yang sengaja tidak diambil dari rancangan itu, karena di sini tidak ada
+ * datanya atau tidak ada tujuannya:
+ * - unggah foto pasangan, belum ada penyimpanan berkas untuk avatar
+ * - langkah 1 dari 3 dan persentase kesiapan, tidak ada alur bertahap
+ * - penggeser estimasi tamu dan pilihan gaya pernikahan, tabel plans tidak
+ *   punya kolomnya
+ * - tombol "lanjut" dan "atur nanti saja", tidak ada tujuan yang bisa dibuka
  */
 export default function HalamanAkun() {
   const router = useRouter();
@@ -36,6 +50,22 @@ export default function HalamanAkun() {
   const [online, setOnline] = useState(true);
   const [sedangKeluar, setSedangKeluar] = useState(false);
   const [sedangUnduh, setSedangUnduh] = useState(false);
+
+  // Data dasar rencana. Disunting di sini lewat PATCH /api/plans/{id},
+  // endpoint yang sama dengan layar /rencana/plan.
+  const [namaPasangan, setNamaPasangan] = useState("");
+  const [tanggalNikah, setTanggalNikah] = useState("");
+  const [statusPilihan, setStatusPilihan] = useState<StatusPlan>("perencanaan");
+  const [sedangSimpan, setSedangSimpan] = useState(false);
+  const [formGalat, setFormGalat] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!plan) return;
+    setNamaPasangan(plan.partnerName ?? "");
+    setTanggalNikah(plan.weddingDate ?? "");
+    const kode = (plan.status ?? "perencanaan") as StatusPlan;
+    setStatusPilihan(STATUS_PLAN.includes(kode) ? kode : "perencanaan");
+  }, [plan]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -71,6 +101,36 @@ export default function HalamanAkun() {
       // di globals.css yang memutuskan, termasuk saat pengguna mengganti tema
       // perangkat tanpa membuka layar ini lagi.
       document.documentElement.removeAttribute("data-theme");
+    }
+  }
+
+  async function simpanDasar(e: React.FormEvent) {
+    e.preventDefault();
+    if (!planId || sedangSimpan) return;
+
+    if (!namaPasangan.trim()) {
+      setFormGalat("Nama pasangan wajib diisi.");
+      return;
+    }
+
+    setSedangSimpan(true);
+    setFormGalat(null);
+
+    try {
+      await minta(`/api/plans/${planId}`, {
+        method: "PATCH",
+        body: {
+          partnerName: namaPasangan.trim(),
+          weddingDate: tanggalNikah || null,
+          status: statusPilihan,
+        },
+      });
+      toast("Data dasar rencana tersimpan");
+      await muatPlan();
+    } catch (err) {
+      setFormGalat(pesanGalat(err));
+    } finally {
+      setSedangSimpan(false);
     }
   }
 
@@ -136,226 +196,431 @@ export default function HalamanAkun() {
   }
 
   const pengguna = sesi?.user;
+  const inisial =
+    pengguna?.name?.charAt(0) || pengguna?.email?.charAt(0) || "U";
+
+  // Hitung mundur ditulis dari tanggal yang benar benar tersimpan, bukan dari
+  // angka yang dipatok di markup. Tanpa tanggal, pilnya tidak ditampilkan.
+  const hari = selisihHari(plan?.weddingDate);
+  const teksMundur =
+    hari === null
+      ? null
+      : hari > 0
+        ? `${hari} hari lagi menuju hari bahagia`
+        : hari === 0
+          ? "Hari ini hari bahagiamu!"
+          : "Hari bahagia sudah lewat";
+
 
   return (
-    <div>
-      <div className="kepala-halaman">
-        <div>
-          <h1 style={{ margin: 0, fontSize: "var(--text-h1)" }}>Akun & Pengaturan</h1>
-          <p>Kelola profil masuk, daftar rencana pernikahan, tema, dan cadangan data.</p>
-        </div>
+    <div className="akun">
+      <h1 className="sr-only">Akun dan Pengaturan</h1>
+
+      {/* Sapa singkat. Nadanya sama dengan layar lain, isinya dari data nyata. */}
+      <div className="akun-sapa">
+        <span className="akun-sapa-ikon">
+          <IkonKilau />
+        </span>
+        <p className="akun-sapa-teks">
+          Semua pengaturan akun dan rencana ada di satu tempat.
+        </p>
+        {plan?.weddingDate ? (
+          <span className="akun-sapa-lencana">{hari !== null && hari > 0 ? `H-${hari}` : hari === 0 ? "Hari ini" : "Sudah lewat"}</span>
+        ) : null}
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-        {/* Bagian 1: Profil Pengguna */}
-        <section className="kartu" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Profil Pengguna</h2>
+      <section className="akun-kartu akun-profil">
+        <div className="akun-avatar" aria-hidden="true">
+          {inisial}
+        </div>
+        <div className="akun-profil-teks">
+          <strong>{pengguna?.name || "Pengguna"}</strong>
+          <span>{pengguna?.email || "-"}</span>
+        </div>
+        <button
+          type="button"
+          className="akun-tombol akun-tombol-sekunder"
+          disabled={sedangKeluar}
+          onClick={tanganiKeluar}
+        >
+          {sedangKeluar ? "Keluar..." : "Keluar akun"}
+        </button>
+      </section>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <div
-              style={{
-                width: 52,
-                height: 52,
-                borderRadius: "50%",
-                background: "var(--color-primary)",
-                color: "#ffffff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "1.25rem",
-                fontWeight: 700,
-                textTransform: "uppercase",
-              }}
-            >
-              {pengguna?.name?.charAt(0) || pengguna?.email?.charAt(0) || "U"}
-            </div>
-
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 600, fontSize: "var(--text-dasar)" }}>
-                {pengguna?.name || "Pengguna"}
-              </div>
-              <div style={{ fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>
-                {pengguna?.email || "-"}
-              </div>
-            </div>
-
-            <button
-              type="button"
-              className="tombol tombol-sekunder"
-              disabled={sedangKeluar}
-              onClick={tanganiKeluar}
-            >
-              {sedangKeluar ? "Keluar..." : "Keluar akun"}
-            </button>
-          </div>
+      {!plan ? (
+        <section className="akun-kartu akun-kosong">
+          <h2>Belum ada rencana pernikahan</h2>
+          <p>
+            Buat rencana pernikahan pertamamu supaya data dasar, anggaran, dan
+            daftar tamu bisa diisi.
+          </p>
+          <Link className="akun-tombol akun-tombol-utama" href="/rencana/plan">
+            Buat rencana sekarang
+          </Link>
         </section>
-
-        {/* Bagian 2: Daftar Rencana Pernikahan */}
-        <section className="kartu" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-            <div>
-              <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Rencana Pernikahan</h2>
-              <div style={{ fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>
-                Pilih rencana aktif yang sedang kamu kerjakan atau tambah rencana baru.
+      ) : (
+        <>
+          <form id="formAkun" className="akun-kartu akun-konfig" onSubmit={simpanDasar}>
+            <div className="akun-konfig-kepala">
+              <span className="akun-konfig-ikon">
+                <IkonHati />
+              </span>
+              <div>
+                <h2>Data Dasar Rencana</h2>
+                <p>Nama pasangan, tanggal, dan status persiapan.</p>
               </div>
             </div>
-            <Link className="tombol tombol-sekunder" href="/rencana/plan">
-              + Buat rencana baru
-            </Link>
-          </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {daftarPlan.map((p: Plan) => {
-              const aktif = p.id === planId;
-              return (
-                <div
-                  key={p.id}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "12px 14px",
-                    borderRadius: 6,
-                    border: aktif ? "2px solid var(--color-primary)" : "1px solid var(--color-garis)",
-                    background: aktif ? "var(--color-netral)" : "var(--color-kertas)",
-                    gap: 12,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <strong style={{ fontSize: "var(--text-dasar)" }}>
-                        {p.partnerName ? `Bersama ${p.partnerName}` : "Rencana Pernikahan"}
-                      </strong>
-                      {aktif ? (
-                        <span
-                          style={{
-                            padding: "2px 8px",
-                            borderRadius: 4,
-                            background: "var(--color-primary)",
-                            color: "#ffffff",
-                            fontSize: "11px",
-                            fontWeight: 600,
-                          }}
-                        >
-                          Aktif
-                        </span>
-                      ) : null}
-                    </div>
-                    <div style={{ fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>
-                      Tanggal: {p.weddingDate ? p.weddingDate : "Belum ditentukan"} • Status: {p.status || "perencanaan"}
-                    </div>
-                  </div>
+            <div className="akun-isian-grup">
+              <label htmlFor="akun-nama">Panggilan pasangan</label>
+              <input
+                id="akun-nama"
+                className="akun-isian"
+                type="text"
+                maxLength={80}
+                autoComplete="off"
+                placeholder="Contoh: Rangga"
+                value={namaPasangan}
+                onChange={(e) => setNamaPasangan(e.target.value)}
+              />
+            </div>
 
-                  <div style={{ display: "flex", gap: 8 }}>
-                    {!aktif ? (
-                      <button
-                        type="button"
-                        className="tombol tombol-sekunder"
-                        style={{ minHeight: 44, padding: "0 10px", fontSize: "var(--text-kecil)" }}
-                        onClick={() => {
-                          pilihPlan(p.id);
-                          toast(`Beralih ke rencana bersama ${p.partnerName || "Pasangan"}`);
-                        }}
-                      >
-                        Jadikan aktif
-                      </button>
-                    ) : null}
-                    <Link
-                      className="tombol tombol-sekunder"
-                      style={{ minHeight: 44, padding: "0 10px", fontSize: "var(--text-kecil)" }}
-                      href="/rencana/plan"
-                    >
-                      Kelola rincian →
-                    </Link>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
+            <div className="akun-isian-grup">
+              <label htmlFor="akun-tanggal">Rencana tanggal hari bahagia</label>
+              <input
+                id="akun-tanggal"
+                className="akun-isian akun-isian-tanggal"
+                type="date"
+                value={tanggalNikah}
+                onChange={(e) => setTanggalNikah(e.target.value)}
+              />
+            </div>
 
-        {/* Bagian 3: Pengaturan Tema Tampilan */}
-        <section className="kartu" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Tema Tampilan</h2>
-          <div style={{ fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>
-            Mode gelap dirancang dengan pasangan warna kontras tinggi, bukan sekadar pembalikan warna layar.
-          </div>
+            {teksMundur ? (
+              <div className="akun-mundur">
+                <span className="akun-mundur-kiri">
+                  <IkonJamPasir />
+                  Hitung mundur
+                </span>
+                <span className="akun-mundur-pil">{teksMundur}</span>
+              </div>
+            ) : null}
 
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <button
-              type="button"
-              className={`tombol ${tema === "terang" ? "tombol-utama" : "tombol-sekunder"}`}
-              style={{ flex: 1, minWidth: 120 }}
-              onClick={() => gantiTema("terang")}
-            >
-              Mode Terang
-            </button>
-            <button
-              type="button"
-              className={`tombol ${tema === "gelap" ? "tombol-utama" : "tombol-sekunder"}`}
-              style={{ flex: 1, minWidth: 120 }}
-              onClick={() => gantiTema("gelap")}
-            >
-              Mode Gelap
-            </button>
-            <button
-              type="button"
-              className={`tombol ${tema === "sistem" ? "tombol-utama" : "tombol-sekunder"}`}
-              style={{ flex: 1, minWidth: 120 }}
-              onClick={() => gantiTema("sistem")}
-            >
-              Mengikuti Sistem
-            </button>
-          </div>
-        </section>
-
-        {/* Bagian 4: Cadangan & Keamanan Data */}
-        <section className="kartu" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-            <div>
-              <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Cadangan Data Mandiri</h2>
-              <div style={{ fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>
-                Unduh seluruh data rencana kamu ke format file JSON agar kamu selalu memegang salinan data.
+            <div className="akun-isian-grup">
+              <span className="akun-label-teks" id="akun-status-label">
+                Status persiapan
+              </span>
+              <div className="akun-status" role="group" aria-labelledby="akun-status-label">
+                {STATUS_PLAN.map((kode) => (
+                  <button
+                    key={kode}
+                    type="button"
+                    className="akun-status-pil"
+                    data-aktif={statusPilihan === kode ? "ya" : undefined}
+                    onClick={() => setStatusPilihan(kode)}
+                  >
+                    {LABEL_STATUS_PLAN[kode]}
+                  </button>
+                ))}
               </div>
             </div>
-            <button
-              type="button"
-              className="tombol tombol-sekunder"
-              disabled={sedangUnduh || !planId}
-              onClick={unduhCadanganJson}
-            >
-              {sedangUnduh ? "Mengunduh..." : "Unduh Cadangan JSON"}
-            </button>
-          </div>
-        </section>
 
-        {/* Bagian 5: Status Aplikasi & PWA */}
-        <section className="kartu" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Informasi Aplikasi & Luring</h2>
+            {formGalat ? (
+              <p className="akun-galat" role="alert">
+                {formGalat}
+              </p>
+            ) : null}
+          </form>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: "var(--text-kecil)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: "1px solid var(--color-garis)" }}>
-              <span>Status Koneksi:</span>
-              <strong style={{ color: online ? "var(--color-primary)" : "var(--color-bata)" }}>
-                {online ? "Terhubung (Online)" : "Luring (Offline)"}
-              </strong>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: "1px solid var(--color-garis)" }}>
-              <span>Aplikasi Web Progresif (PWA):</span>
-              <Link className="tautan-kalimat" href="/aplikasi">
-                Cara memasang
+          <section className="akun-kartu">
+            <div className="akun-kepala">
+              <div>
+                <h2>Rencana Pernikahan</h2>
+                <p>Pilih rencana aktif atau tambah rencana baru.</p>
+              </div>
+              <Link className="akun-tombol akun-tombol-sekunder" href="/rencana/plan">
+                + Rencana baru
               </Link>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0" }}>
-              <span>Versi Sistem:</span>
-              <span style={{ color: "var(--color-muted)" }}>
-                {process.env.NEXT_PUBLIC_APP_VERSION} (Next.js 15 + PostgreSQL)
-              </span>
+
+            <div className="akun-rencana-daftar">
+              {daftarPlan.map((p: Plan) => {
+                const aktif = p.id === planId;
+                return (
+                  <div
+                    key={p.id}
+                    className="akun-rencana-baris"
+                    data-aktif={aktif ? "ya" : undefined}
+                  >
+                    <div className="akun-rencana-teks">
+                      <div className="akun-rencana-nama">
+                        <strong>
+                          {p.partnerName ? `Bersama ${p.partnerName}` : "Rencana Pernikahan"}
+                        </strong>
+                        {aktif ? <span className="akun-lencana">Aktif</span> : null}
+                      </div>
+                      <span className="akun-rencana-ket">
+                        {tanggalPanjangDari(p.weddingDate)} ·{" "}
+                        {p.status ? LABEL_STATUS_PLAN[p.status as StatusPlan] ?? p.status : "Perencanaan"}
+                      </span>
+                    </div>
+                    <div className="akun-rencana-aksi">
+                      {!aktif ? (
+                        <button
+                          type="button"
+                          className="akun-tombol akun-tombol-sekunder"
+                          onClick={() => {
+                            pilihPlan(p.id);
+                            toast(`Beralih ke rencana bersama ${p.partnerName || "Pasangan"}`);
+                          }}
+                        >
+                          Jadikan aktif
+                        </button>
+                      ) : null}
+                      <Link className="akun-tombol akun-tombol-sekunder" href="/rencana/plan">
+                        Kelola rincian
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
+          </section>
+        </>
+      )}
+
+      <section className="akun-kartu">
+        <div className="akun-kepala">
+          <div>
+            <h2>Tema Tampilan</h2>
+            <p>Mode gelap dirancang dengan pasangan warna kontras tinggi, bukan pembalikan warna.</p>
           </div>
-        </section>
+        </div>
+
+        <div className="akun-tema-pilih">
+          <button
+            type="button"
+            className="akun-tema-chip"
+            data-aktif={tema === "terang" ? "ya" : undefined}
+            onClick={() => gantiTema("terang")}
+          >
+            <span aria-hidden="true">{"\u2600\uFE0F"}</span>
+            <span className="akun-tema-teks">
+              <strong>Mode Terang</strong>
+              <small>Selalu cerah</small>
+            </span>
+          </button>
+          <button
+            type="button"
+            className="akun-tema-chip"
+            data-aktif={tema === "gelap" ? "ya" : undefined}
+            onClick={() => gantiTema("gelap")}
+          >
+            <span aria-hidden="true">{"\u{1F319}"}</span>
+            <span className="akun-tema-teks">
+              <strong>Mode Gelap</strong>
+              <small>Nyaman saat malam</small>
+            </span>
+          </button>
+          <button
+            type="button"
+            className="akun-tema-chip"
+            data-aktif={tema === "sistem" ? "ya" : undefined}
+            onClick={() => gantiTema("sistem")}
+          >
+            <span aria-hidden="true">{"\u{1F4F1}"}</span>
+            <span className="akun-tema-teks">
+              <strong>Mengikuti Sistem</strong>
+              <small>Ikut pengaturan perangkat</small>
+            </span>
+          </button>
+        </div>
+      </section>
+
+      <section className="akun-kartu">
+        <div className="akun-kepala">
+          <div>
+            <h2>Cadangan Data Mandiri</h2>
+            <p>Unduh seluruh data rencana ke berkas JSON supaya kamu selalu punya salinannya.</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          className="akun-tombol akun-tombol-sekunder akun-cadangan-tombol"
+          disabled={sedangUnduh || !planId}
+          onClick={unduhCadanganJson}
+        >
+          <IkonUnduh />
+          {sedangUnduh ? "Mengunduh..." : "Unduh Cadangan JSON"}
+        </button>
+      </section>
+
+      <section className="akun-kartu akun-info">
+        <h2>Informasi Aplikasi dan Luring</h2>
+        <div className="akun-info-daftar">
+          <div className="akun-info-baris">
+            <span>Status koneksi</span>
+            <strong data-online={online ? "ya" : "tidak"}>
+              {online ? "Terhubung" : "Luring"}
+            </strong>
+          </div>
+          <div className="akun-info-baris">
+            <span>Aplikasi web progresif</span>
+            <Link className="tautan-kalimat" href="/aplikasi">
+              Cara memasang
+            </Link>
+          </div>
+          <div className="akun-info-baris">
+            <span>Versi sistem</span>
+            <span className="akun-info-versi">
+              {process.env.NEXT_PUBLIC_APP_VERSION} (Next.js 15 + PostgreSQL)
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <div className="akun-tips">
+        <span className="akun-tips-ikon">
+          <IkonTips />
+        </span>
+        <p>
+          <strong>Catatan tenang:</strong> semua data ini bisa kamu ubah kapan
+          saja. Kalau sinyal hilang, catatan baru masuk antrean dan terkirim
+          sendiri begitu online.
+        </p>
+      </div>
+
+      <div className="akun-aksi">
+        {plan ? (
+          <button
+            type="submit"
+            form="formAkun"
+            className="akun-tombol akun-tombol-utama akun-aksi-utama"
+            disabled={sedangSimpan}
+          >
+            {sedangSimpan ? "Menyimpan..." : "Simpan data dasar"}
+            <IkonPanah />
+          </button>
+        ) : null}
+        <Link className="akun-aksi-halus" href="/rencana/plan">
+          Atur rincian lengkap di Rencana
+        </Link>
       </div>
     </div>
+  );
+}
+
+function IkonKilau({ size = 18 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 3.5 13.7 9l5.5 1.7-5.5 1.7L12 18l-1.7-5.6L4.8 10.7 10.3 9Z" />
+      <path d="M19 4v3M17.5 5.5h3" />
+    </svg>
+  );
+}
+
+function IkonHati({ size = 20 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 20s-7.5-4.7-7.5-9.6A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8C19.5 15.3 12 20 12 20Z" />
+    </svg>
+  );
+}
+
+function IkonJamPasir({ size = 16 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M7 3h10M7 21h10" />
+      <path d="M8 3v3.5c0 2.2 4 3.8 4 5.5s-4 3.3-4 5.5V21" />
+      <path d="M16 3v3.5c0 2.2-4 3.8-4 5.5s4 3.3 4 5.5V21" />
+    </svg>
+  );
+}
+
+function IkonUnduh({ size = 18 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 3.5v11" />
+      <path d="m7.5 10.5 4.5 4.5 4.5-4.5" />
+      <path d="M4.5 19.5h15" />
+    </svg>
+  );
+}
+
+function IkonTips({ size = 20 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 20s-7-4.4-7-9a4.2 4.2 0 0 1 7-3.1A4.2 4.2 0 0 1 19 11c0 4.6-7 9-7 9Z" />
+      <path d="M9.5 11.5h5" />
+    </svg>
+  );
+}
+
+function IkonPanah({ size = 18 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.1"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M4.5 12h15" />
+      <path d="m13.5 6 6 6-6 6" />
+    </svg>
   );
 }

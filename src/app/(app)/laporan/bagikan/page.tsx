@@ -181,8 +181,8 @@ export default function HalamanBagikanLaporan() {
   const sisaJatah = dataLinks?.sisa ?? 0;
 
   return (
-    <div>
-      <div style={{ marginBottom: 16 }}>
+    <div className="tumpuk-sedang">
+      <div>
         <Link className="tautan-kalimat" href="/laporan">
           ← Kembali ke laporan
         </Link>
@@ -190,105 +190,69 @@ export default function HalamanBagikanLaporan() {
 
       <div className="kepala-halaman">
         <div>
-          <h1 style={{ margin: 0, fontSize: "var(--text-h1)" }}>Bagikan ke WhatsApp</h1>
+          <h1>Bagikan ke WhatsApp</h1>
           <p>
             Kirim laporan keadaan sekarang langsung ke kontak atau grup WhatsApp keluarga.
           </p>
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 20 }}>
+      <div className="kisi-kartu">
         {/* Kolom Kiri: Pilihan Konten */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div className="kartu" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Pilihan Format Teks</h2>
+        <div className="tumpuk-sedang">
+          <section className="kartu tumpuk-rapat">
+            <h2>Pilihan Format Teks</h2>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: 10,
-                  cursor: "pointer",
-                  padding: "10px",
-                  borderRadius: 6,
-                  border: "1px solid var(--color-garis)",
-                  background: varian === "ringkas" ? "var(--color-netral)" : "transparent",
-                }}
-              >
+            <div className="tumpuk-rapat">
+              <label className="pilih-kartu" data-aktif={varian === "ringkas" ? "ya" : "tidak"}>
                 <input
                   type="radio"
                   name="varian"
                   checked={varian === "ringkas"}
                   onChange={() => setVarian("ringkas")}
-                  style={{ marginTop: 3 }}
                 />
-                <div>
-                  <div style={{ fontWeight: 600 }}>Ringkasan singkat</div>
-                  <div style={{ fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>
+                <div className="pilih-kartu-isi">
+                  <div className="pilih-kartu-judul">Ringkasan singkat</div>
+                  <div className="pilih-kartu-ket">
                     Sekitar 12 baris: uang, tugas, dan tamu. Cocok untuk dikirim ke orang tua.
                   </div>
                 </div>
               </label>
 
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: 10,
-                  cursor: "pointer",
-                  padding: "10px",
-                  borderRadius: 6,
-                  border: "1px solid var(--color-garis)",
-                  background: varian === "lengkap" ? "var(--color-netral)" : "transparent",
-                }}
-              >
+              <label className="pilih-kartu" data-aktif={varian === "lengkap" ? "ya" : "tidak"}>
                 <input
                   type="radio"
                   name="varian"
                   checked={varian === "lengkap"}
                   onChange={() => setVarian("lengkap")}
-                  style={{ marginTop: 3 }}
                 />
-                <div>
-                  <div style={{ fontWeight: 600 }}>Laporan lengkap</div>
-                  <div style={{ fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>
+                <div className="pilih-kartu-isi">
+                  <div className="pilih-kartu-judul">Laporan lengkap</div>
+                  <div className="pilih-kartu-ket">
                     Termasuk rincian pos anggaran dan jadwal rundown. Cocok untuk pasangan dan panitia inti.
                   </div>
                 </div>
               </label>
 
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: 10,
-                  cursor: "pointer",
-                  padding: "10px",
-                  borderRadius: 6,
-                  border: "1px solid var(--color-garis)",
-                  background: varian === "tautan" ? "var(--color-netral)" : "transparent",
-                }}
-              >
+              <label className="pilih-kartu" data-aktif={varian === "tautan" ? "ya" : "tidak"}>
                 <input
                   type="radio"
                   name="varian"
                   checked={varian === "tautan"}
                   onChange={() => setVarian("tautan")}
-                  style={{ marginTop: 3 }}
                 />
-                <div>
-                  <div style={{ fontWeight: 600 }}>Tautan saja</div>
-                  <div style={{ fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>
+                <div className="pilih-kartu-isi">
+                  <div className="pilih-kartu-judul">Tautan saja</div>
+                  <div className="pilih-kartu-ket">
                     Paling ringkas, hanya pesan pembuka dan tautan baca-saja.
                   </div>
                 </div>
               </label>
             </div>
-          </div>
+          </section>
 
-          <div className="kartu" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Pesan Pembuka (Opsional)</h2>
+          <section className="kartu tumpuk-rapat">
+            <h2>Pesan Pembuka (Opsional)</h2>
             <Isian
               label="Kalimat sapaan sebelum ringkasan angka"
               id="pesanSapaan"
@@ -304,17 +268,16 @@ export default function HalamanBagikanLaporan() {
                 onChange={(e) => setPesan(e.target.value)}
               />
             </Isian>
-          </div>
+          </section>
 
           {/* Sertakan Tautan Baca-Saja */}
-          <div className="kartu" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Sertakan Tautan Web</h2>
+          <section className="kartu tumpuk-rapat">
+            <div className="bagian-kepala">
+              <h2>Sertakan Tautan Web</h2>
               {sisaJatah > 0 ? (
                 <button
                   type="button"
-                  className="tombol tombol-sekunder"
-                  style={{ minHeight: 44, padding: "0 10px", fontSize: "var(--text-kecil)" }}
+                  className="tombol tombol-sekunder tombol-kecil"
                   onClick={() => setLembarBuka(true)}
                 >
                   + Buat tautan baru
@@ -322,62 +285,40 @@ export default function HalamanBagikanLaporan() {
               ) : null}
             </div>
 
-            <p style={{ margin: 0, fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>
+            <p className="keterangan">
               Penerima tautan bisa melihat laporan atau jadwal rundown langsung di browser tanpa perlu login.
             </p>
 
             {links.length > 0 ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <label
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    fontSize: "var(--text-kecil)",
-                    cursor: "pointer",
-                  }}
-                >
+              <div className="tumpuk-rapat">
+                <label className="pilih-kartu" data-aktif={tautanIdDipilih === "" ? "ya" : "tidak"}>
                   <input
                     type="radio"
                     name="tautanDipilih"
                     checked={tautanIdDipilih === ""}
                     onChange={() => setTautanIdDipilih("")}
                   />
-                  <span>Tanpa tautan web</span>
+                  <div className="pilih-kartu-isi">
+                    <div className="pilih-kartu-judul">Tanpa tautan web</div>
+                  </div>
                 </label>
 
                 {links.map((link) => (
                   <div
                     key={link.id}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      padding: "8px 10px",
-                      borderRadius: 4,
-                      background: tautanIdDipilih === link.id ? "var(--color-netral)" : "var(--color-kertas)",
-                      border: "1px solid var(--color-garis)",
-                    }}
+                    className="pilih-kartu"
+                    data-aktif={tautanIdDipilih === link.id ? "ya" : "tidak"}
                   >
-                    <label
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                        fontSize: "var(--text-kecil)",
-                        cursor: "pointer",
-                        flex: 1,
-                      }}
-                    >
+                    <label className="pilih-kartu-label">
                       <input
                         type="radio"
                         name="tautanDipilih"
                         checked={tautanIdDipilih === link.id}
                         onChange={() => setTautanIdDipilih(link.id)}
                       />
-                      <div>
-                        <strong>{link.label}</strong>
-                        <div style={{ color: "var(--color-muted)" }}>
+                      <div className="pilih-kartu-isi">
+                        <div className="pilih-kartu-judul">{link.label}</div>
+                        <div className="pilih-kartu-ket">
                           {link.url}
                         </div>
                       </div>
@@ -385,12 +326,7 @@ export default function HalamanBagikanLaporan() {
 
                     <button
                       type="button"
-                      className="tombol tombol-sekunder"
-                      style={{
-                        padding: "0 8px",
-                        fontSize: "var(--text-kecil)",
-                        color: "var(--color-bata)",
-                      }}
+                      className="tombol tombol-bahaya tombol-kecil"
                       onClick={() => cabutTautan(link.id)}
                     >
                       Cabut
@@ -399,67 +335,40 @@ export default function HalamanBagikanLaporan() {
                 ))}
               </div>
             ) : (
-              <div style={{ fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>
+              <p className="keterangan">
                 Belum ada tautan publik. Buat satu untuk menyertakan link baca-saja.
-              </div>
+              </p>
             )}
-          </div>
+          </section>
         </div>
 
         {/* Kolom Kanan: Pratinjau Teks WhatsApp */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div className="kartu" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Pratinjau Teks WhatsApp</h2>
+        <div className="tumpuk-sedang">
+          <section className="kartu tumpuk-rapat">
+            <div className="bagian-kepala">
+              <h2>Pratinjau Teks WhatsApp</h2>
               <span
-                style={{
-                  fontSize: "var(--text-kecil)",
-                  color: panjangTeks > batasTeks ? "var(--color-bata)" : "var(--color-muted)",
-                  fontWeight: 600,
-                }}
+                className="angka penghitung"
+                data-nada={panjangTeks > batasTeks ? "bahaya" : undefined}
               >
                 {panjangTeks} / {batasTeks} karakter
               </span>
             </div>
 
             {terpotong ? (
-              <div
-                style={{
-                  padding: "6px 10px",
-                  borderRadius: 4,
-                  background: "var(--color-kertas)",
-                  border: "1px solid var(--color-bata)",
-                  color: "var(--color-bata)",
-                  fontSize: "var(--text-kecil)",
-                }}
-              >
-                Peringatan: Teks melebihi 800 karakter batas WhatsApp dan telah dipersingkat.
-              </div>
+              <p className="peringatan peringatan-bahaya">
+                Teks melebihi 800 karakter batas WhatsApp dan telah dipersingkat.
+              </p>
             ) : null}
 
-            <div
-              style={{
-                fontFamily: "monospace",
-                fontSize: "13px",
-                lineHeight: "1.5",
-                whiteSpace: "pre-wrap",
-                background: "var(--color-netral)",
-                padding: "16px",
-                borderRadius: 6,
-                border: "1px solid var(--color-garis)",
-                maxHeight: "440px",
-                overflowY: "auto",
-                color: "var(--color-ink)",
-              }}
-            >
+            <div className="kotak-mono">
               {sedangMenyusun ? "Menyusun teks terbaru..." : teksHasil}
             </div>
 
-            <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+            <div className="aksi-baris" data-bagi="ya">
               <button
                 type="button"
                 className="tombol tombol-sekunder"
-                style={{ flex: 1 }}
                 onClick={salinTeks}
               >
                 Salin Teks
@@ -467,13 +376,6 @@ export default function HalamanBagikanLaporan() {
 
               <a
                 className="tombol tombol-utama"
-                style={{
-                  flex: 1,
-                  display: "inline-flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  textDecoration: "none",
-                }}
                 href={urlWa || `https://wa.me/?text=${encodeURIComponent(teksHasil)}`}
                 target="_blank"
                 rel="noreferrer"
@@ -481,7 +383,7 @@ export default function HalamanBagikanLaporan() {
                 Buka WhatsApp →
               </a>
             </div>
-          </div>
+          </section>
         </div>
       </div>
 
@@ -491,7 +393,7 @@ export default function HalamanBagikanLaporan() {
         judul="Buat Tautan Baca-Saja"
         onTutup={() => setLembarBuka(false)}
       >
-        <form onSubmit={buatTautanBaru} noValidate style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <form onSubmit={buatTautanBaru} noValidate className="tumpuk-sedang">
           <Isian
             label="Label / Nama penerima tautan"
             id="labelTautan"
@@ -508,7 +410,7 @@ export default function HalamanBagikanLaporan() {
             />
           </Isian>
 
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
+          <div className="dialog-tombol">
             <button
               type="button"
               className="tombol tombol-sekunder"

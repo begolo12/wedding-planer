@@ -3,7 +3,7 @@ import { Kosong } from "@/components/states";
 
 export default function NotFound() {
   return (
-    <main style={{ padding: "48px 16px", maxWidth: 600, margin: "0 auto" }}>
+    <main className="halaman-baca">
       <Kosong
         keadaan="Halaman tidak ditemukan (404)."
         jalanKeluar="Alamat yang kamu tuju mungkin salah ketik atau tautan sudah dipindahkan."

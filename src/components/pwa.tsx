@@ -87,7 +87,7 @@ export function InstallPrompt() {
 
   return (
     <div className="pita tanpa-cetak">
-      <span style={{ flex: 1 }}>
+      <span className="pita-isi">
         {ios ? (
           <>
             Biar bisa dibuka tanpa internet: ketuk Bagikan, lalu pilih Tambah ke

@@ -157,24 +157,14 @@ export default function HalamanImporTamu() {
   }
 
   return (
-    <div>
-      <div style={{ marginBottom: 16 }}>
-        <Link
-          href="/tamu"
-          style={{
-            color: "var(--color-primary)",
-            textDecoration: "underline",
-            fontSize: "var(--text-kecil)",
-            fontWeight: 500,
-          }}
-        >
-          ← Kembali ke daftar tamu
-        </Link>
-      </div>
+    <div className="tumpuk-sedang">
+      <Link className="tautan-kalimat" href="/tamu">
+        ← Kembali ke daftar tamu
+      </Link>
 
       <div className="kepala-halaman">
         <div>
-          <h1 style={{ margin: 0, fontSize: "var(--text-h1)" }}>Tempel Daftar Tamu</h1>
+          <h1>Tempel Daftar Tamu</h1>
           <p>
             {langkah === 1
               ? "Langkah 1 dari 2: Tempel teks nama tamu dari WhatsApp, catatan HP, atau Excel."
@@ -184,7 +174,7 @@ export default function HalamanImporTamu() {
       </div>
 
       {langkah === 1 ? (
-        <form onSubmit={periksaDaftar} noValidate className="kartu" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <form onSubmit={periksaDaftar} noValidate className="kartu tumpuk-sedang">
           <Pilih
             label="Kategori untuk tamu yang diimpor"
             id="kategoriImpor"
@@ -213,7 +203,7 @@ export default function HalamanImporTamu() {
             />
           </Isian>
 
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+          <div className="dialog-tombol">
             <Link className="tombol tombol-sekunder" href="/tamu">
               Batal
             </Link>
@@ -227,120 +217,76 @@ export default function HalamanImporTamu() {
           </div>
         </form>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <div className="tumpuk-sedang">
           <div className="rekap">
             <div className="rekap-item">
               <span className="rekap-nilai">{preview.length}</span>
               <span className="rekap-label">Baris terbaca</span>
             </div>
             <div className="rekap-item">
-              <span className="rekap-nilai" style={{ color: "var(--color-primary)" }}>
+              <span className="rekap-nilai teks-aksen">
                 {dipilih.size}
               </span>
               <span className="rekap-label">Dipilih untuk disimpan</span>
             </div>
             <div className="rekap-item">
-              <span className="rekap-nilai" style={{ color: "var(--color-bata)" }}>
+              <span className="rekap-nilai teks-bahaya">
                 {preview.filter((p) => p.kembar).length}
               </span>
               <span className="rekap-label">Nama kembar (dilewati)</span>
             </div>
           </div>
 
-          <div
-            className="kartu"
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "12px 16px",
-            }}
-          >
-            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontWeight: 600 }}>
-              <input
-                type="checkbox"
-                checked={
-                  dipilih.size === preview.filter((p) => !p.kembar).length &&
-                  dipilih.size > 0
-                }
-                onChange={toggleSemua}
-                style={{ width: 18, height: 18 }}
-              />
-              <span>Pilih semua yang aman ({preview.filter((p) => !p.kembar).length} nama)</span>
-            </label>
-
-            <span style={{ fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>
-              Kategori: <strong>{LABEL_KATEGORI_TAMU[kategori]}</strong>
+          <label className="pilih-kartu">
+            <input
+              type="checkbox"
+              checked={
+                dipilih.size === preview.filter((p) => !p.kembar).length &&
+                dipilih.size > 0
+              }
+              onChange={toggleSemua}
+            />
+            <span className="pilih-kartu-isi">
+              <span className="pilih-kartu-judul">
+                Pilih semua yang aman ({preview.filter((p) => !p.kembar).length} nama)
+              </span>
+              <span className="pilih-kartu-ket">
+                Kategori: {LABEL_KATEGORI_TAMU[kategori]}
+              </span>
             </span>
-          </div>
+          </label>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div className="tumpuk-rapat">
             {preview.map((item, idx) => (
-              <div
+              <label
                 key={idx}
-                className="kartu"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 12,
-                  padding: "10px 14px",
-                  background: item.kembar ? "var(--color-netral)" : "var(--color-kertas)",
-                  opacity: item.kembar ? 0.75 : 1,
-                }}
+                className="pilih-kartu"
+                data-aktif={dipilih.has(item.name) ? "ya" : undefined}
+                data-kembar={item.kembar ? "ya" : undefined}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: 12, flex: "1 1 auto" }}>
-                  <input
-                    type="checkbox"
-                    disabled={item.kembar}
-                    checked={dipilih.has(item.name)}
-                    onChange={() => togglePilih(item.name)}
-                    style={{ width: 18, height: 18 }}
-                  />
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: "var(--text-dasar)" }}>
-                      {item.name}
-                    </div>
-                    {item.catatan ? (
-                      <div style={{ fontSize: "var(--text-kecil)", color: "var(--color-bata)" }}>
-                        {item.catatan}
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span
-                    style={{
-                      padding: "2px 8px",
-                      borderRadius: 4,
-                      fontSize: "var(--text-kecil)",
-                      background: "var(--color-netral)",
-                    }}
-                  >
-                    {item.guestCount} orang
-                  </span>
-                  {item.kembar ? (
-                    <span
-                      style={{
-                        padding: "2px 8px",
-                        borderRadius: 4,
-                        fontSize: "var(--text-kecil)",
-                        fontWeight: 600,
-                        background: "var(--color-kertas)",
-                        color: "var(--color-bata)",
-                        border: "1px solid var(--color-bata)",
-                      }}
-                    >
-                      Sudah ada
+                <input
+                  type="checkbox"
+                  disabled={item.kembar}
+                  checked={dipilih.has(item.name)}
+                  onChange={() => togglePilih(item.name)}
+                />
+                <span className="pilih-kartu-isi">
+                  <span className="pilih-kartu-judul">{item.name}</span>
+                  {item.catatan ? (
+                    <span className="pilih-kartu-ket teks-bahaya">
+                      {item.catatan}
                     </span>
                   ) : null}
-                </div>
-              </div>
+                </span>
+                <span className="aksi-baris">
+                  <span className="lencana">{item.guestCount} orang</span>
+                  {item.kembar ? <span className="lencana lencana-terlambat">Sudah ada</span> : null}
+                </span>
+              </label>
             ))}
           </div>
 
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+          <div className="aksi-baris" data-ratakan="antara">
             <button
               type="button"
               className="tombol tombol-sekunder"

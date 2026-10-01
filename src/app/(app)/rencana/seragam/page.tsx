@@ -217,10 +217,10 @@ export default function HalamanSeragam() {
   }
 
   return (
-    <div>
+    <div className="tumpuk-sedang">
       <div className="kepala-halaman">
         <div>
-          <h1 style={{ margin: 0, fontSize: "var(--text-h1)" }}>Busana & Seragam</h1>
+          <h1>Busana &amp; Seragam</h1>
           <p>Catatan ukuran, tenggat jahit, dan jadwal ambil baju pengantin serta keluarga.</p>
         </div>
         <div>
@@ -233,25 +233,25 @@ export default function HalamanSeragam() {
       <TabRencana />
 
       {summary && summary.total > 0 ? (
-        <div className="rekap" style={{ marginBottom: 16 }}>
+        <div className="rekap">
           <div className="rekap-item">
             <span className="rekap-nilai">{summary.total}</span>
             <span className="rekap-label">Total busana</span>
           </div>
           <div className="rekap-item">
-            <span className="rekap-nilai" style={{ color: "var(--color-primary)" }}>
+            <span className="rekap-nilai teks-aksen">
               {summary.siap}
             </span>
             <span className="rekap-label">Sudah siap</span>
           </div>
           <div className="rekap-item">
-            <span className="rekap-nilai" style={{ color: "var(--color-bata)" }}>
+            <span className="rekap-nilai teks-bahaya">
               {summary.belumSiap}
             </span>
             <span className="rekap-label">Belum siap</span>
           </div>
           <div className="rekap-item">
-            <span className="rekap-nilai" style={{ fontSize: "var(--text-h3)" }}>
+            <span className="rekap-nilai rekap-nilai-kecil">
               <Rupiah nilai={summary.estimatedCost} />
             </span>
             <span className="rekap-label">Perkiraan biaya</span>
@@ -260,27 +260,12 @@ export default function HalamanSeragam() {
       ) : null}
 
       {/* Filter Bar */}
-      <div
-        style={{
-          display: "flex",
-          gap: 12,
-          flexWrap: "wrap",
-          marginBottom: 16,
-          background: "var(--color-kertas)",
-          padding: "12px 16px",
-          borderRadius: 8,
-          border: "1px solid var(--color-garis)",
-          alignItems: "center",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 8, flex: "1 1 200px" }}>
-          <label htmlFor="filterPemilik" style={{ fontSize: "var(--text-kecil)", fontWeight: 600 }}>
-            Pemilik:
-          </label>
+      <div className="filter-baris">
+        <div className="filter-grup">
+          <label htmlFor="filterPemilik">Pemilik</label>
           <select
             id="filterPemilik"
             className="isian"
-            style={{ padding: "6px 10px", fontSize: "var(--text-kecil)" }}
             value={filterPemilik}
             onChange={(e) => setFilterPemilik(e.target.value)}
           >
@@ -296,14 +281,11 @@ export default function HalamanSeragam() {
           </select>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 8, flex: "1 1 200px" }}>
-          <label htmlFor="filterStatus" style={{ fontSize: "var(--text-kecil)", fontWeight: 600 }}>
-            Status:
-          </label>
+        <div className="filter-grup">
+          <label htmlFor="filterStatus">Status</label>
           <select
             id="filterStatus"
             className="isian"
-            style={{ padding: "6px 10px", fontSize: "var(--text-kecil)" }}
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
           >
@@ -332,73 +314,35 @@ export default function HalamanSeragam() {
           jalanKeluar="Coba ubah pilihan pemilik atau status di atas."
         />
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <div className="tumpuk-rapat">
           {daftar.map((o) => {
             const statusBusana = o.status as StatusBusana;
             const pemilikBusana = o.owner as PemilikBusana;
 
             return (
-              <div
+              <article
                 key={o.id}
-                className="kartu"
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 12,
-                  borderColor:
-                    statusBusana === "siap" ? "var(--color-primary)" : undefined,
-                }}
+                className="kartu tumpuk-rapat"
+                data-sorot={statusBusana === "siap" ? "ya" : undefined}
               >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    gap: 12,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <div>
-                    <h2 style={{ margin: "0 0 6px 0", fontSize: "var(--text-h3)" }}>
-                      {o.itemName}
-                    </h2>
-                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-                      <span
-                        style={{
-                          padding: "2px 8px",
-                          borderRadius: 4,
-                          fontSize: "var(--text-kecil)",
-                          background: "var(--color-netral)",
-                          color: "var(--color-ink)",
-                          fontWeight: 500,
-                        }}
-                      >
+                <div className="bagian-kepala">
+                  <div className="tumpuk-rapat isi-lentur">
+                    <h2>{o.itemName}</h2>
+                    <div className="aksi-baris">
+                      <span className="lencana">
                         {LABEL_PEMILIK_BUSANA[pemilikBusana] ?? o.owner}
                       </span>
 
                       {/* Dropdown status cepat */}
+                      <label className="sr-only" htmlFor={`status-${o.id}`}>
+                        Ubah status busana
+                      </label>
                       <select
-                        aria-label="Ubah status busana"
+                        id={`status-${o.id}`}
+                        className="isian isian-mini"
+                        data-siap={statusBusana === "siap" ? "ya" : "tidak"}
                         value={o.status}
-                        onChange={(e) =>
-                          ubahStatusCepat(o, e.target.value as StatusBusana)
-                        }
-                        style={{
-                          padding: "2px 6px",
-                          borderRadius: 4,
-                          fontSize: "var(--text-kecil)",
-                          fontWeight: 600,
-                          border: "1px solid var(--color-garis)",
-                          background:
-                            statusBusana === "siap"
-                              ? "var(--color-netral)"
-                              : "var(--color-kertas)",
-                          color:
-                            statusBusana === "siap"
-                              ? "var(--color-primary)"
-                              : "var(--color-ink)",
-                          cursor: "pointer",
-                        }}
+                        onChange={(e) => ubahStatusCepat(o, e.target.value as StatusBusana)}
                       >
                         {STATUS_BUSANA.map((s) => (
                           <option key={s} value={s}>
@@ -408,36 +352,24 @@ export default function HalamanSeragam() {
                       </select>
 
                       {o.estimatedCost ? (
-                        <span
-                          style={{
-                            fontSize: "var(--text-kecil)",
-                            fontWeight: 600,
-                            color: "var(--color-primary)",
-                          }}
-                        >
+                        <span className="lencana lencana-aksen">
                           <Rupiah nilai={o.estimatedCost} />
                         </span>
                       ) : null}
                     </div>
                   </div>
 
-                  <div style={{ display: "flex", gap: 8 }}>
+                  <div className="aksi-baris">
                     <button
                       type="button"
-                      className="tombol tombol-sekunder"
-                      style={{ minHeight: 44, padding: "0 10px", fontSize: "var(--text-kecil)" }}
+                      className="tombol tombol-sekunder tombol-kecil"
                       onClick={() => bukaUbah(o)}
                     >
                       Ubah
                     </button>
                     <button
                       type="button"
-                      className="tombol tombol-sekunder"
-                      style={{
-                        padding: "0 10px",
-                        fontSize: "var(--text-kecil)",
-                        color: "var(--color-bata)",
-                      }}
+                      className="tombol tombol-bahaya tombol-kecil"
                       onClick={() => setDihapus(o)}
                     >
                       Hapus
@@ -447,41 +379,31 @@ export default function HalamanSeragam() {
 
                 {/* Info Tanggal Ukur & Ambil */}
                 {(o.measureDate || o.pickupDate || o.notes) && (
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 6,
-                      fontSize: "var(--text-kecil)",
-                      color: "var(--color-muted)",
-                      borderTop: "1px solid var(--color-garis)",
-                      paddingTop: 8,
-                    }}
-                  >
-                    <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+                  <div className="kartu-kaki">
+                    <div className="aksi-baris">
                       {o.measureDate ? (
-                        <div>
+                        <span className="keterangan keterangan-rapat">
                           <strong>Ukur:</strong> {formatTanggalId(o.measureDate)}
-                        </div>
+                        </span>
                       ) : null}
                       {o.pickupDate ? (
-                        <div>
-                          <strong style={{ color: "var(--color-ink)" }}>Jadwal ambil:</strong>{" "}
-                          <span style={{ color: "var(--color-primary)", fontWeight: 600 }}>
+                        <span className="keterangan keterangan-rapat">
+                          <strong>Jadwal ambil:</strong>{" "}
+                          <span className="teks-aksen-tegas">
                             {formatTanggalId(o.pickupDate)}
                           </span>
-                        </div>
+                        </span>
                       ) : null}
                     </div>
 
                     {o.notes ? (
-                      <div style={{ color: "var(--color-ink)", fontStyle: "italic" }}>
+                      <p className="keterangan keterangan-miring">
                         &ldquo;{o.notes}&rdquo;
-                      </div>
+                      </p>
                     ) : null}
                   </div>
                 )}
-              </div>
+              </article>
             );
           })}
         </div>
@@ -493,7 +415,7 @@ export default function HalamanSeragam() {
         judul={diedit ? "Ubah data busana" : "Tambah busana baru"}
         onTutup={() => setLembarBuka(false)}
       >
-        <form onSubmit={simpan} noValidate style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <form onSubmit={simpan} noValidate className="tumpuk-sedang">
           <Isian label="Nama busana / seragam" id="formNama" galat={formGalat ?? undefined}>
             <input
               id="formNama"
@@ -528,7 +450,7 @@ export default function HalamanSeragam() {
             }))}
           />
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div className="isian-baris-2">
             <Isian label="Tanggal ukur badan" id="formUkur">
               <input
                 id="formUkur"
@@ -573,7 +495,7 @@ export default function HalamanSeragam() {
             />
           </Isian>
 
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
+          <div className="dialog-tombol">
             <button
               type="button"
               className="tombol tombol-sekunder"

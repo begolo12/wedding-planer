@@ -8,9 +8,5 @@ export default function AppError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  return (
-    <div style={{ padding: "32px 0" }}>
-      <Gagal apa="Data modul ini" onCoba={reset} />
-    </div>
-  );
+  return <Gagal apa="Data modul ini" onCoba={reset} />;
 }

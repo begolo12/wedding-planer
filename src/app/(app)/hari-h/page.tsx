@@ -8,6 +8,7 @@ import { Kerangka, Kosong, Gagal } from "@/components/states";
 import { Lembar, DialogKonfirmasi, toast } from "@/components/toast";
 import { Isian } from "@/components/field";
 import { minta, pesanGalat } from "@/lib/api-client";
+import { hitungMundur, jamSelesai, hariIni } from "@/lib/format";
 import type { rundownItems } from "@/db/schema";
 
 type RundownItem = typeof rundownItems.$inferSelect;
@@ -23,10 +24,77 @@ const TEMPLATE_RUNDOWN_INDONESIA = [
   { startTime: "13:00", durationMinutes: 60, title: "Penutupan & Beres-Beres", location: "Venue Acara", picName: "Keluarga & Vendor", notes: "Cek barang bawaan keluarga, mahar, dan titipan kado sebelum pulang." },
 ];
 
+/** Tiga tingkat ukuran huruf rundown. Dipakai juga sebagai tombol pengatur. */
+const UKURAN_FONT: { id: UkuranFont; label: string; tampil: string }[] = [
+  { id: "kecil", label: "A-", tampil: "var(--text-kecil)" },
+  { id: "sedang", label: "A", tampil: "var(--text-dasar)" },
+  { id: "besar", label: "A+", tampil: "var(--text-h3)" },
+];
+
+/**
+ * Ubah jam "08:30" jadi jumlah menit sejak tengah malam.
+ * Mengembalikan null kalau jamnya bukan bentuk yang bisa dibaca, supaya jam
+ * yang salah tulis tidak diam-diam dianggap tengah malam.
+ */
+function menitDari(jam: string): number | null {
+  const cocok = /^(\d{1,2}):(\d{2})/.exec(jam.trim());
+  if (!cocok) return null;
+  const j = Number(cocok[1]);
+  const m = Number(cocok[2]);
+  if (j > 23 || m > 59) return null;
+  return j * 60 + m;
+}
+
+/** Jam sekarang di zona Asia/Jakarta, "HH:MM". */
+function jamSekarangWib(): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Jakarta",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(new Date());
+}
+
+/**
+ * Acara yang sedang berjalan pada jam tertentu. Kalau tidak ada acara yang
+ * sedang jalan (misalnya di sela dua acara), yang dipilih acara terakhir yang
+ * sudah mulai, supaya daftar tetap punya satu titik fokus.
+ */
+function idAcaraSekarang(items: RundownItem[], jam: string): string | null {
+  const sekarang = menitDari(jam);
+  if (sekarang === null) return null;
+
+  const sedangJalan = items.find((it) => {
+    const mulai = menitDari(it.startTime);
+    if (mulai === null) return false;
+    return sekarang >= mulai && sekarang < mulai + (it.durationMinutes ?? 0);
+  });
+  if (sedangJalan) return sedangJalan.id;
+
+  let terakhir: RundownItem | null = null;
+  for (const it of items) {
+    const mulai = menitDari(it.startTime);
+    if (mulai === null || mulai > sekarang) continue;
+    if (!terakhir || mulai >= (menitDari(terakhir.startTime) ?? 0)) terakhir = it;
+  }
+  return terakhir?.id ?? null;
+}
+
 /**
  * Layar Hari-H: Rundown & Jadwal Acara.
- * Layar yang paling sering dibuka di lokasi acara, bisa diatur ukuran fontnya
- * agar terbaca dari jarak jauh, dan tetap informatif saat sinyal lemah.
+ *
+ * Susunan mengikuti `docs/stitch_cute_wedding_planner/checklist_timeline_web_app`:
+ * kartu ringkasan bergradasi dengan angka besar, bar kemajuan, deretan pil
+ * ukuran huruf, dan daftar acara berurut waktu dengan penanda acara berjalan.
+ *
+ * Empat hal yang sengaja berbeda dari Stitch, karena di sini tidak ada datanya:
+ * - kalender mini dan papan moodboard, aplikasi ini belum punya jadwal harian
+ *   maupun unggah gambar, jadi papan itu akan jadi gambar contoh atau tombol mati
+ * - saringan PIC bertingkat, jumlah tugas per PIC belum dihitung di API
+ * - angka contoh Stitch (142 hari, 64%, 16 dari 25 tugas) tidak dipakai, semua
+ *   angka di sini dihitung dari rundown yang benar-benar tersimpan
+ * - tombol centang 28px di Stitch terlalu kecil untuk jempol, daftar tetap
+ *   memakai baris setinggi 44px ke atas
  */
 export default function HalamanHariH() {
   const { plan, planId, memuat: memuatPlan, galat: galatPlan, muatUlang: muatPlan } = usePlan();
@@ -196,6 +264,17 @@ export default function HalamanHariH() {
     }
   }
 
+  const hariIniTanggal = hariIni();
+  // Mulai dari "00:00" supaya render pertama di server dan di klien sama,
+  // lalu jam aslinya dipasang setelah halaman jalan.
+  const [jamSekarang, setJamSekarang] = useState("00:00");
+
+  useEffect(() => {
+    setJamSekarang(jamSekarangWib());
+    const tik = window.setInterval(() => setJamSekarang(jamSekarangWib()), 60_000);
+    return () => window.clearInterval(tik);
+  }, []);
+
   const items = data?.rundown ?? [];
 
   if (memuatPlan || (planId && memuatRundown && !data)) {
@@ -270,111 +349,112 @@ export default function HalamanHariH() {
     window.open(url, "_blank");
   }
 
+  // Acara yang sedang berjalan hanya disorot di hari acara. Di hari lain
+  // penanda itu cuma menyesatkan, karena jam sekarang tidak ada hubungannya
+  // dengan jam acara.
+  const hariIniAcara = plan.weddingDate === hariIniTanggal;
+
+  // Sengaja bukan useMemo: nilainya cuma dipakai sekali per render, dan
+  // hook tidak boleh dipasang setelah baris pengembalian awal di atas.
+  const idSekarang = hariIniAcara ? idAcaraSekarang(items, jamSekarang) : null;
+
+  const jumlahAcaraPokok = TEMPLATE_RUNDOWN_INDONESIA.length;
+  const persenPokok = Math.min(
+    100,
+    Math.round((items.length / jumlahAcaraPokok) * 100),
+  );
+
   return (
-    <div>
-      <div className="kepala-halaman">
-        <div>
-          <h1 style={{ margin: 0, fontSize: "var(--text-h1)" }}>Rundown Hari-H</h1>
-          <p>
-            Susunan acara di lokasi pernikahan. Tetap bisa dibuka dan dibaca saat sinyal hilang.
-          </p>
+    <div className="hari-h">
+      <h1 className="sr-only">Rundown Hari-H</h1>
+
+      <section className="hari-h-ringkas">
+        <div className="hari-h-ringkas-atas">
+          <div className="hari-h-ringkas-kiri">
+            <span className="hari-h-ringkas-ikon" aria-hidden="true">
+              <IkonKalender />
+            </span>
+            <div className="hari-h-ringkas-teks">
+              <span className="hari-h-ringkas-lencana">
+                {plan.weddingDate ? hitungMundur(plan.weddingDate) : "Tanggal belum diatur"}
+              </span>
+              <h2 className="hari-h-ringkas-judul">Susunan Acara Hari-H</h2>
+              <p className="hari-h-ringkas-ket">
+                {items.length === 0
+                  ? "Belum ada acara tersusun. Pasang template atau susun satu per satu."
+                  : `${items.length} acara tersusun, dari jam ${items[0].startTime} sampai jam ${items[items.length - 1].startTime}.`}
+              </p>
+            </div>
+          </div>
+          <div className="hari-h-ringkas-angka">
+            <strong className="hari-h-ringkas-persen">{persenPokok}%</strong>
+            <span className="hari-h-ringkas-label">
+              {items.length} dari {jumlahAcaraPokok} langkah pokok
+            </span>
+          </div>
         </div>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+        <div className="hari-h-bar">
+          <div className="hari-h-bar-isi" style={{ width: `${persenPokok}%` }} />
+        </div>
+      </section>
+
+      <p className="hari-h-catatan-luring">
+        <strong>Siap dibuka tanpa sinyal.</strong> Susunan ini tersimpan di perangkat, jadi
+        tetap terbaca di lokasi acara meski jaringan hilang.
+      </p>
+
+      <section className="hari-h-alat tanpa-cetak">
+        <div className="hari-h-skala">
+          <span className="hari-h-skala-label" id="hari-h-skala-label">
+            Ukuran huruf
+          </span>
+          <div className="hari-h-skala-pil" role="group" aria-labelledby="hari-h-skala-label">
+            {UKURAN_FONT.map((u) => (
+              <button
+                key={u.id}
+                type="button"
+                className="hari-h-skala-tombol"
+                style={{ fontSize: u.tampil }}
+                data-aktif={ukuranFont === u.id ? "ya" : "tidak"}
+                aria-pressed={ukuranFont === u.id}
+                onClick={() => gantiUkuran(u.id)}
+              >
+                {u.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="hari-h-alat-aksi">
           {items.length > 0 ? (
-            <button
-              type="button"
-              className="tombol tombol-sekunder"
-              onClick={bagikanRundownWa}
-            >
-              Bagikan WhatsApp
-            </button>
+            <>
+              <button
+                type="button"
+                className="hari-h-tombol hari-h-tombol-halus"
+                onClick={bagikanRundownWa}
+              >
+                <IkonBagikan />
+                Bagikan
+              </button>
+              <button
+                type="button"
+                className="hari-h-tombol hari-h-tombol-halus"
+                onClick={() => window.print()}
+              >
+                <IkonCetak />
+                Cetak
+              </button>
+            </>
           ) : null}
           <button
             type="button"
-            className="tombol tombol-sekunder"
-            onClick={() => window.print()}
+            className="hari-h-tombol hari-h-tombol-utama"
+            onClick={bukaTambah}
           >
-            Cetak rundown
-          </button>
-          <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
-            + Tambah acara
+            <IkonTambah />
+            Tambah acara
           </button>
         </div>
-      </div>
-
-      {/* Pengatur Ukuran Font & Indikator Luring */}
-      <div
-        className="kartu"
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 12,
-          padding: "10px 16px",
-          marginBottom: 16,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: "var(--text-kecil)", fontWeight: 600 }}>Ukuran font baca:</span>
-          <div style={{ display: "inline-flex", gap: 4 }}>
-            <button
-              type="button"
-              className="tombol"
-              style={{
-                padding: "0 10px",
-                fontSize: "var(--text-kecil)",
-                background: ukuranFont === "kecil" ? "var(--color-primary)" : "var(--color-kertas)",
-                color: ukuranFont === "kecil" ? "var(--color-kertas)" : "var(--color-ink)",
-              }}
-              onClick={() => gantiUkuran("kecil")}
-            >
-              A-
-            </button>
-            <button
-              type="button"
-              className="tombol"
-              style={{
-                padding: "0 10px",
-                fontSize: "var(--text-dasar)",
-                background: ukuranFont === "sedang" ? "var(--color-primary)" : "var(--color-kertas)",
-                color: ukuranFont === "sedang" ? "var(--color-kertas)" : "var(--color-ink)",
-              }}
-              onClick={() => gantiUkuran("sedang")}
-            >
-              A
-            </button>
-            <button
-              type="button"
-              className="tombol"
-              style={{
-                padding: "0 10px",
-                fontSize: "var(--text-h3)",
-                background: ukuranFont === "besar" ? "var(--color-primary)" : "var(--color-kertas)",
-                color: ukuranFont === "besar" ? "var(--color-kertas)" : "var(--color-ink)",
-              }}
-              onClick={() => gantiUkuran("besar")}
-            >
-              A+
-            </button>
-          </div>
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span
-            style={{
-              padding: "2px 8px",
-              borderRadius: 4,
-              fontSize: "var(--text-kecil)",
-              background: "var(--color-netral)",
-              color: "var(--color-primary)",
-              fontWeight: 600,
-            }}
-          >
-            Siap luring (bisa dibuka tanpa sinyal)
-          </span>
-        </div>
-      </div>
+      </section>
 
       {/* Daftar Acara Rundown */}
       {items.length === 0 ? (
@@ -382,99 +462,122 @@ export default function HalamanHariH() {
           keadaan="Susunan rundown masih kosong."
           jalanKeluar="Susun urutan acara satu per satu, atau pasang paket template acara pernikahan Indonesia standar."
         >
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
+          <div className="hari-h-kosong-aksi">
             <button
               type="button"
-              className="tombol tombol-utama"
+              className="hari-h-tombol hari-h-tombol-utama"
               disabled={sedangPasangTemplate}
               onClick={pasangTemplateStandar}
             >
               {sedangPasangTemplate ? "Memasang..." : "Pakai template rundown Indonesia"}
             </button>
-            <button type="button" className="tombol tombol-sekunder" onClick={bukaTambah}>
+            <button
+              type="button"
+              className="hari-h-tombol hari-h-tombol-halus"
+              onClick={bukaTambah}
+            >
               Buat manual dari awal
             </button>
           </div>
         </Kosong>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {items.map((item) => (
-            <div key={item.id} className="rundown-kartu">
-              {/* Kolom / Bagian Jam */}
-              <div>
-                <div className="rundown-waktu-badge" style={{ fontSize: skalaFont.jam, lineHeight: 1.2 }}>
-                  <span>{item.startTime}</span>
-                  {item.durationMinutes ? (
-                    <span style={{ fontSize: "var(--text-kecil)", color: "var(--color-muted)", fontWeight: 500 }}>
-                      ({item.durationMinutes} mnt)
-                    </span>
-                  ) : null}
-                </div>
-              </div>
-
-              {/* Kolom / Bagian Detail Acara */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                <div style={{ fontWeight: 700, fontSize: skalaFont.judul, lineHeight: 1.3 }}>
-                  {item.title}
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 12,
-                    flexWrap: "wrap",
-                    fontSize: skalaFont.sub,
-                    color: "var(--color-muted)",
-                  }}
+        <>
+          <nav className="hari-h-lompat tanpa-cetak" aria-label="Lompat ke acara">
+            <span className="hari-h-lompat-label">Lompat ke jam</span>
+            <div className="hari-h-lompat-pil-daftar">
+              {items.map((it) => (
+                <a
+                  key={it.id}
+                  className="hari-h-lompat-pil"
+                  data-aktif={it.id === idSekarang ? "ya" : "tidak"}
+                  href={`#acara-${it.id}`}
                 >
-                  {item.location ? <span>Lokasi: <strong>{item.location}</strong></span> : null}
-                  {item.picName ? <span>PIC: <strong>{item.picName}</strong></span> : null}
-                </div>
-
-                {item.notes ? (
-                  <div
-                    style={{
-                      marginTop: 4,
-                      padding: "8px 12px",
-                      borderRadius: "var(--radius-kontrol)",
-                      background: "var(--color-netral)",
-                      fontSize: skalaFont.catatan,
-                      border: "1px dashed var(--color-garis)",
-                      lineHeight: 1.4,
-                    }}
-                  >
-                    <strong>Catatan:</strong> {item.notes}
-                  </div>
-                ) : null}
-              </div>
-
-              {/* Kolom / Bagian Tindakan */}
-              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                <button
-                  type="button"
-                  className="tombol tombol-sekunder"
-                  style={{ minHeight: 40, padding: "0 12px", fontSize: "var(--text-kecil)" }}
-                  onClick={() => bukaUbah(item)}
-                >
-                  Ubah
-                </button>
-                <button
-                  type="button"
-                  className="tombol tombol-sekunder"
-                  style={{
-                    minHeight: 40,
-                    padding: "0 12px",
-                    fontSize: "var(--text-kecil)",
-                    color: "var(--color-bata)",
-                  }}
-                  onClick={() => setDihapus(item)}
-                >
-                  Hapus
-                </button>
-              </div>
+                  {it.startTime}
+                </a>
+              ))}
             </div>
-          ))}
-        </div>
+          </nav>
+
+          <ol className="hari-h-daftar">
+            {items.map((item) => {
+              const kini = item.id === idSekarang;
+              const selesai = item.durationMinutes
+                ? jamSelesai(item.startTime, item.durationMinutes)
+                : null;
+
+              return (
+                <li
+                  key={item.id}
+                  id={`acara-${item.id}`}
+                  className="hari-h-acara"
+                  data-sekarang={kini ? "ya" : "tidak"}
+                >
+                  <div className="hari-h-acara-tanda" aria-hidden="true">
+                    {kini ? <span className="hari-h-acara-denyut" /> : null}
+                  </div>
+
+                  <div className="hari-h-acara-jam">
+                    <strong style={{ fontSize: skalaFont.jam }}>{item.startTime}</strong>
+                    {item.durationMinutes ? <span>{item.durationMinutes} menit</span> : null}
+                    {selesai ? <span>sampai {selesai}</span> : null}
+                  </div>
+
+                  <div className="hari-h-acara-isi">
+                    <div className="hari-h-acara-kepala">
+                      <h3 className="hari-h-acara-judul" style={{ fontSize: skalaFont.judul }}>
+                        {item.title}
+                      </h3>
+                      {kini ? (
+                        <span className="hari-h-lencana-sekarang">Sedang berlangsung</span>
+                      ) : null}
+                    </div>
+
+                    {item.location || item.picName ? (
+                      <p className="hari-h-acara-meta" style={{ fontSize: skalaFont.sub }}>
+                        {item.location ? (
+                          <span>
+                            Lokasi: <strong>{item.location}</strong>
+                          </span>
+                        ) : null}
+                        {item.picName ? (
+                          <span>
+                            PIC: <strong>{item.picName}</strong>
+                          </span>
+                        ) : null}
+                      </p>
+                    ) : null}
+
+                    {item.notes ? (
+                      <p
+                        className="hari-h-acara-catatan"
+                        style={{ fontSize: skalaFont.catatan }}
+                      >
+                        {item.notes}
+                      </p>
+                    ) : null}
+                  </div>
+
+                  <div className="hari-h-acara-aksi">
+                    <button
+                      type="button"
+                      className="hari-h-tombol hari-h-tombol-halus"
+                      onClick={() => bukaUbah(item)}
+                    >
+                      Ubah
+                    </button>
+                    <button
+                      type="button"
+                      className="hari-h-tombol hari-h-tombol-halus hari-h-tombol-bahaya"
+                      onClick={() => setDihapus(item)}
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </>
       )}
 
       {/* Lembar Tambah / Ubah Acara */}
@@ -483,7 +586,7 @@ export default function HalamanHariH() {
         judul={diedit ? "Ubah acara rundown" : "Tambah acara ke rundown"}
         onTutup={() => setLembarBuka(false)}
       >
-        <form onSubmit={simpan} noValidate style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <form onSubmit={simpan} noValidate className="tumpuk-sedang">
           <Isian label="Nama susunan acara" id="formJudul" galat={formGalat ?? undefined}>
             <input
               id="formJudul"
@@ -496,7 +599,7 @@ export default function HalamanHariH() {
             />
           </Isian>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div className="isian-baris isian-baris-2">
             <Isian label="Jam mulai (WIB/WITA/WIT)" id="formJam">
               <input
                 id="formJam"
@@ -559,7 +662,7 @@ export default function HalamanHariH() {
             />
           </Isian>
 
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
+          <div className="dialog-tombol">
             <button
               type="button"
               className="tombol tombol-sekunder"
@@ -589,5 +692,68 @@ export default function HalamanHariH() {
         onYa={konfirmasiHapus}
       />
     </div>
+  );
+}
+
+// Ikon digambar sendiri sebagai SVG, bukan webfont, supaya halaman tetap utuh
+// saat dibuka tanpa sinyal.
+type PropertiIkon = { size?: number };
+
+function IkonDasar({
+  size = 18,
+  children,
+}: PropertiIkon & { children: React.ReactNode }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {children}
+    </svg>
+  );
+}
+
+function IkonKalender({ size = 26 }: PropertiIkon) {
+  return (
+    <IkonDasar size={size}>
+      <rect x="3" y="5" width="18" height="16" rx="3" />
+      <path d="M3 10h18M8 3v4M16 3v4" />
+      <path d="M8 14h3M8 17.5h6" />
+    </IkonDasar>
+  );
+}
+
+function IkonBagikan({ size = 17 }: PropertiIkon) {
+  return (
+    <IkonDasar size={size}>
+      <path d="M12 15V4" />
+      <path d="M8.5 7.5 12 4l3.5 3.5" />
+      <path d="M5 13v5.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V13" />
+    </IkonDasar>
+  );
+}
+
+function IkonCetak({ size = 17 }: PropertiIkon) {
+  return (
+    <IkonDasar size={size}>
+      <path d="M7 9V4h10v5" />
+      <rect x="4" y="9" width="16" height="7" rx="2" />
+      <path d="M7 14h10v6H7z" />
+    </IkonDasar>
+  );
+}
+
+function IkonTambah({ size = 17 }: PropertiIkon) {
+  return (
+    <IkonDasar size={size} >
+      <path d="M12 5v14M5 12h14" />
+    </IkonDasar>
   );
 }

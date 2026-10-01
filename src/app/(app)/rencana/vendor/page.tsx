@@ -177,10 +177,10 @@ export default function HalamanVendor() {
   }
 
   return (
-    <div>
+    <div className="tumpuk-sedang">
       <div className="kepala-halaman">
         <div>
-          <h1 style={{ margin: 0, fontSize: "var(--text-h1)" }}>Vendor Pernikahan</h1>
+          <h1>Vendor Pernikahan</h1>
           <p>Daftar rekanan vendor, status kesepakatan, dan pencatatan pembayaran.</p>
         </div>
         <div>
@@ -194,25 +194,28 @@ export default function HalamanVendor() {
 
       {/* Ringkasan Keuangan Vendor */}
       {vendors.length > 0 ? (
-        <div className="rekap" style={{ marginBottom: 16 }}>
+        <div className="rekap">
           <div className="rekap-item">
             <span className="rekap-nilai">{vendors.length}</span>
             <span className="rekap-label">Total vendor</span>
           </div>
           <div className="rekap-item">
-            <span className="rekap-nilai">
+            <span className="rekap-nilai rekap-nilai-kecil">
               <Rupiah nilai={rekap.totalDibook} />
             </span>
             <span className="rekap-label">Total kontrak</span>
           </div>
           <div className="rekap-item">
-            <span className="rekap-nilai" style={{ color: "var(--color-primary)" }}>
+            <span className="rekap-nilai rekap-nilai-kecil teks-aksen">
               <Rupiah nilai={rekap.totalTerbayar} />
             </span>
             <span className="rekap-label">Sudah terbayar</span>
           </div>
           <div className="rekap-item">
-            <span className="rekap-nilai" style={{ color: rekap.totalSisa > 0 ? "var(--color-bata)" : undefined }}>
+            <span
+              className="rekap-nilai rekap-nilai-kecil"
+              data-nada={rekap.totalSisa > 0 ? "bahaya" : undefined}
+            >
               <Rupiah nilai={rekap.totalSisa} />
             </span>
             <span className="rekap-label">Sisa tagihan</span>
@@ -221,55 +224,50 @@ export default function HalamanVendor() {
       ) : null}
 
       {/* Filter Bar */}
-      <div
-        className="kartu"
-        style={{
-          display: "flex",
-          gap: 12,
-          flexWrap: "wrap",
-          alignItems: "center",
-          marginBottom: 16,
-          padding: "12px 16px",
-        }}
-      >
-        <div style={{ flex: "1 1 200px" }}>
-          <input
-            type="search"
-            className="isian"
-            placeholder="Cari nama vendor atau kontak..."
-            value={kataKunci}
-            onChange={(e) => setKataKunci(e.target.value)}
-          />
-        </div>
+      <div className="kartu tumpuk-rapat">
+        <input
+          type="search"
+          className="isian"
+          placeholder="Cari nama vendor atau kontak..."
+          aria-label="Cari vendor"
+          value={kataKunci}
+          onChange={(e) => setKataKunci(e.target.value)}
+        />
 
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <select
-            className="isian"
-            style={{ width: "auto" }}
-            value={tabStatus}
-            onChange={(e) => setTabStatus(e.target.value)}
-          >
-            <option value="semua">Semua status</option>
-            {STATUS_VENDOR.map((s) => (
-              <option key={s} value={s}>
-                {LABEL_STATUS_VENDOR[s]}
-              </option>
-            ))}
-          </select>
+        <div className="filter-baris">
+          <div className="filter-grup">
+            <label htmlFor="filterStatusVendor">Status</label>
+            <select
+              id="filterStatusVendor"
+              className="isian isian-mini"
+              value={tabStatus}
+              onChange={(e) => setTabStatus(e.target.value)}
+            >
+              <option value="semua">Semua status</option>
+              {STATUS_VENDOR.map((s) => (
+                <option key={s} value={s}>
+                  {LABEL_STATUS_VENDOR[s]}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <select
-            className="isian"
-            style={{ width: "auto" }}
-            value={filterKategori}
-            onChange={(e) => setFilterKategori(e.target.value)}
-          >
-            <option value="semua">Semua kategori</option>
-            {KATEGORI_UANG.map((k) => (
-              <option key={k} value={k}>
-                {LABEL_KATEGORI_UANG[k]}
-              </option>
-            ))}
-          </select>
+          <div className="filter-grup">
+            <label htmlFor="filterKategoriVendor">Kategori</label>
+            <select
+              id="filterKategoriVendor"
+              className="isian isian-mini"
+              value={filterKategori}
+              onChange={(e) => setFilterKategori(e.target.value)}
+            >
+              <option value="semua">Semua kategori</option>
+              {KATEGORI_UANG.map((k) => (
+                <option key={k} value={k}>
+                  {LABEL_KATEGORI_UANG[k]}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -290,132 +288,87 @@ export default function HalamanVendor() {
           ) : null}
         </Kosong>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 16 }}>
+        <div className="kisi-kartu">
           {daftarTersaring.map((v) => {
-            const statusColor =
-              v.status === "selesai"
-                ? "var(--color-primary)"
-                : v.status === "dibook"
-                  ? "var(--color-ink)"
-                  : "var(--color-muted)";
+            const statusNada =
+              v.status === "selesai" ? "aksen" : v.status === "dibook" ? undefined : "redup";
 
             return (
-              <div
-                key={v.id}
-                className="kartu"
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                  gap: 12,
-                }}
-              >
-                <div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
-                    <div>
-                      <h3 className="judul-tautan" style={{ margin: 0, fontSize: "var(--text-h3)" }}>
-                        <Link href={`/rencana/vendor/${v.id}`}>{v.name}</Link>
-                      </h3>
-                      <span
-                        style={{
-                          fontSize: "var(--text-kecil)",
-                          color: "var(--color-muted)",
-                          display: "inline-block",
-                          marginTop: 2,
-                        }}
-                      >
-                        {LABEL_KATEGORI_UANG[v.category as KategoriUang] ?? v.category}
-                      </span>
-                    </div>
-
-                    <span
-                      style={{
-                        padding: "2px 8px",
-                        borderRadius: 4,
-                        fontSize: "var(--text-kecil)",
-                        fontWeight: 600,
-                        background: "var(--color-netral)",
-                        color: statusColor,
-                      }}
-                    >
-                      {LABEL_STATUS_VENDOR[v.status as StatusVendor] ?? v.status}
+              <article key={v.id} className="kartu tumpuk-rapat">
+                <div className="bagian-kepala">
+                  <div className="tumpuk-rapat isi-lentur-sempit">
+                    <h2 className="judul-tautan">
+                      <Link href={`/rencana/vendor/${v.id}`}>{v.name}</Link>
+                    </h2>
+                    <span className="keterangan keterangan-rapat">
+                      {LABEL_KATEGORI_UANG[v.category as KategoriUang] ?? v.category}
                     </span>
                   </div>
 
-                  {v.contactName || v.phone ? (
-                    <div style={{ marginTop: 8, fontSize: "var(--text-kecil)" }}>
-                      {v.contactName ? <div>Kontak: {v.contactName}</div> : null}
-                      {v.phone ? (
-                        <div style={{ marginTop: 2 }}>
-                          <a
-                            className="tautan-kalimat"
-                            href={`https://wa.me/${v.phone.replace(/[^0-9]/g, "")}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            WhatsApp: {v.phone}
-                          </a>
-                        </div>
-                      ) : null}
-                    </div>
-                  ) : null}
+                  <span className="lencana" data-nada={statusNada}>
+                    {LABEL_STATUS_VENDOR[v.status as StatusVendor] ?? v.status}
+                  </span>
+                </div>
 
-                  {v.plannedAmount > 0 ? (
-                    <div
-                      style={{
-                        marginTop: 12,
-                        paddingTop: 12,
-                        borderTop: "1px solid var(--color-garis)",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        fontSize: "var(--text-kecil)",
-                      }}
-                    >
+                {v.contactName || v.phone ? (
+                  <div className="tumpuk-rapat">
+                    {v.contactName ? (
+                      <span className="keterangan keterangan-rapat">
+                        Kontak: {v.contactName}
+                      </span>
+                    ) : null}
+                    {v.phone ? (
+                      <a
+                        className="tautan-kalimat"
+                        href={`https://wa.me/${v.phone.replace(/[^0-9]/g, "")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        WhatsApp: {v.phone}
+                      </a>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                {v.plannedAmount > 0 ? (
+                  <div className="kartu-kaki">
+                    <div className="kaki-angka">
                       <div>
-                        <div style={{ color: "var(--color-muted)" }}>Kontrak</div>
-                        <div style={{ fontWeight: 600 }}>
+                        <div className="kaki-angka-label">Kontrak</div>
+                        <div className="kaki-angka-nilai">
                           <Rupiah nilai={v.plannedAmount} />
                         </div>
                       </div>
                       <div>
-                        <div style={{ color: "var(--color-muted)" }}>Terbayar</div>
-                        <div style={{ fontWeight: 600, color: "var(--color-primary)" }}>
+                        <div className="kaki-angka-label">Terbayar</div>
+                        <div className="kaki-angka-nilai teks-aksen">
                           <Rupiah nilai={v.paidAmount} />
                         </div>
                       </div>
                       <div>
-                        <div style={{ color: "var(--color-muted)" }}>Sisa</div>
+                        <div className="kaki-angka-label">Sisa</div>
                         <div
-                          style={{
-                            fontWeight: 600,
-                            color: v.remaining > 0 ? "var(--color-bata)" : "var(--color-ink)",
-                          }}
+                          className="kaki-angka-nilai"
+                          data-nada={v.remaining > 0 ? "bahaya" : undefined}
                         >
                           <Rupiah nilai={v.remaining} />
                         </div>
                       </div>
                     </div>
-                  ) : null}
-                </div>
+                  </div>
+                ) : null}
 
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    gap: 8,
-                    paddingTop: 8,
-                    borderTop: "1px solid var(--color-garis)",
-                  }}
-                >
-                  <Link
-                    href={`/rencana/vendor/${v.id}`}
-                    className="tombol tombol-sekunder"
-                    style={{ minHeight: 44, padding: "0 12px", fontSize: "var(--text-kecil)" }}
-                  >
-                    Detail & Pembayaran
-                  </Link>
+                <div className="kartu-kaki">
+                  <div className="aksi-baris" data-ratakan="akhir">
+                    <Link
+                      href={`/rencana/vendor/${v.id}`}
+                      className="tombol tombol-sekunder tombol-kecil"
+                    >
+                      Detail &amp; Pembayaran
+                    </Link>
+                  </div>
                 </div>
-              </div>
+              </article>
             );
           })}
         </div>
@@ -427,7 +380,7 @@ export default function HalamanVendor() {
         judul="Tambah vendor baru"
         onTutup={() => setLembarBuka(false)}
       >
-        <form onSubmit={simpanVendor} noValidate style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <form onSubmit={simpanVendor} noValidate className="tumpuk-sedang">
           <Isian label="Nama vendor" id="formNama" galat={formGalat ?? undefined}>
             <input
               id="formNama"
@@ -500,7 +453,7 @@ export default function HalamanVendor() {
             />
           </Isian>
 
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
+          <div className="dialog-tombol">
             <button
               type="button"
               className="tombol tombol-sekunder"

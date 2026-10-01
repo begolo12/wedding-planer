@@ -27,6 +27,182 @@ Aturan singkat:
 | Tulis alasan kalau tidak jelas | Pembaca versi berikutnya tidak perlu menebak |
 | Tambah entri baru di atas | Yang terbaru selalu di paling atas |
 
+## [0.12.0] - 1 Oktober 2026
+
+Ini rilis pertama yang membawa ke Git seluruh pekerjaan yang selama ini hanya ada di komputer. Entri 0.7.0 sampai 0.11.1 sudah ditulis di berkas ini tapi belum pernah dikirim ke Git, jadi versi terakhir di Git masih 0.6.7. Selain mengejar ketertinggalan itu, rilis ini menutup sisa pekerjaan yang belum tercatat: judul tab layar masuk dan daftar, kepala layar auth yang lengkap, dua kartu baru di beranda, dan pembersihan berkas perkakas.
+
+### Tambah
+
+- `src/app/(auth)/daftar/layout.tsx` dan `src/app/(auth)/masuk/layout.tsx` menitipkan judul tab "Daftar" dan "Masuk". Halaman di folder itu komponen klien, dan komponen klien tidak boleh mengekspor `metadata`, jadi tanpa berkas ini judul tab jatuh ke "Beranda - Hari Besar"
+- `src/app/(auth)/layout.tsx` blok `.auth-aman`: lambang hati dan pesan "Catatan kalian tersimpan rapi" di bawah kartu form, plus dua elemen hiasan `.auth-kabut` di belakang kartu
+- `src/lib/ringkasan.ts` menambah tipe `VendorRingkas` dan dua data baru di `RingkasanPlan`: `vendorUtama` berisi tiga vendor teratas dengan nama, kategori, dan status, serta `tamu` berisi jumlah orang, kursi, tidak hadir, belum konfirmasi, dan belum diundang
+- Beranda memakai data baru itu untuk kartu "Vendor Utama" dan kartu "Konfirmasi Tamu" dengan cincin persentase kehadiran
+- `public/merek/merek-192.png`, `merek-512.png`, dan `merek-1024.png` sebagai lambang merek ukuran kecil, sedang, dan besar
+- Skrip perkakas: `scripts/buat-merek.ps1`, `periksa-logo.ps1`, `periksa-merek.ps1`, `potong-logo.ps1`, `buat-ikon.ps1`, `stitch-tarik.mjs`, `tinjau-png.mjs`, dan lima skrip `probe-*.mjs` untuk memeriksa keluaran produksi
+- `neon.ts` di akar proyek
+
+### Ubah
+
+- `scripts/buat-ikon.mjs` diganti `scripts/buat-ikon.ps1`. Ikon PWA dibuat ulang dari lambang baru
+- `src/db/index.ts` mewajibkan `DATABASE_URL`. Sebelumnya ada nilai cadangan yang ditulis langsung di kode, jadi koneksi bisa jalan ke basis data yang salah tanpa ketahuan. Sekarang gagal cepat dengan pesan "Salin .env.example jadi .env"
+- `.gitignore` dirapikan: folder Stitch, folder perkakas agen, dan berkas audit sekali pakai tidak ikut Git. `dev-audit.log` juga dikeluarkan dari Git
+- Versi naik dari 0.11.1 ke 0.12.0
+
+### Catatan keputusan
+
+- Entri 0.7.0 sampai 0.11.1 sebelumnya sudah ada di berkas ini tapi belum pernah dikirim ke Git. Rilis ini yang pertama membawanya, jadi riwayat Git sekarang sejalan dengan changelog
+
+## [0.11.1] - 1 Oktober 2026
+
+Tombol masuk di produksi mengembalikan `403 INVALID_ORIGIN` dan tidak ada satu pun pengguna yang bisa masuk. Better Auth menolak setiap permintaan yang header Origin-nya tidak ada di daftar alamat tepercaya, dan daftar itu hanya berisi satu nilai dari `BETTER_AUTH_URL`. Nilai variabel itu di Vercel tersimpan sebagai rahasia sehingga tidak bisa dibaca lagi, jadi alamat tetap yang dipakai orang tidak pernah ada di daftar.
+
+### Perbaiki
+
+- `src/lib/auth.ts` merakit daftar alamat tepercaya dari beberapa sumber sekaligus: `BETTER_AUTH_URL`, `BETTER_AUTH_TRUSTED_ORIGINS` (dipisah koma), `VERCEL_URL`, `VERCEL_BRANCH_URL`, `VERCEL_PROJECT_PRODUCTION_URL`, alamat tetap `https://wedding-planer-self.vercel.app`, dan pola `https://wedding-planer-*.vercel.app` untuk preview per-cabang. Tiap nilai dinormalkan jadi origin bersih dan duplikatnya dibuang, sehingga masuk kembali jalan tanpa bergantung pada satu variabel yang tidak bisa dibaca
+- Daftar lama yang cuma berisi satu alamat dihapus
+
+## [0.11.0] - 1 Oktober 2026
+
+Tampilan dan pengalaman layar-layar yang belum tersentuh ditingkatkan, lalu gaya sebaris yang ditulis ulang di banyak berkas dipindah ke kelas bersama. Setelah 0.10.0 menutup layar Hari-H, sisa layar masih memakai kelas umum dan warna sebaris, sehingga mode gelapnya rapuh dan tiap perbaikan harus diulang di banyak tempat.
+
+### Tambah
+
+- `src/app/globals.css` blok "Utilitas bersama": `.teks-aksen`, `.teks-bahaya`, `.teks-redup`, `.teks-aksen-tegas`, `.paragraf-rapat`, `.penghitung`, `.keterangan-rapat`, `.keterangan-mini`, `.keterangan-tengah`, `.keterangan-miring`, `.bar-catatan`, `.bar-kepala`, `.pita-isi`, `.tab-berjarak`, `.kotak-catatan`, `.tombol-polos`, `.kartu-netral`, `.isi-lentur`, `.isi-lentur-sempit`, `.petunjuk-tegas`, `.lencana[data-nada]`, `.tombol-sekunder[data-aktif="ya"]`, `.aksi-baris[data-ratakan]`, dan `.kartu[data-sorot="ya"]`
+
+### Ubah
+
+- Layar laporan dan halaman bagikan, layar rencana (plan, info, tanggal, seragam, vendor, dan rincian vendor), layar impor tamu, layar aplikasi, layar luring, dan halaman bagikan publik memakai kelas bersama di atas menggantikan gaya sebaris
+- `src/components/budget-bar.tsx`, `field.tsx`, `task-item.tsx`, `pwa.tsx`, dan `tab-rencana.tsx` memakai kelas bersama yang sama
+- Kelas bersama hanya memakai token warna yang sudah punya pasangan mode gelap, jadi mode gelap tidak perlu aturan tambahan per layar
+
+### Perbaiki
+
+- Mode gelap beberapa layar yang sebelumnya memakai warna sebaris tetap terbaca. Sebelumnya warna itu tidak ikut berubah saat tema gelap aktif
+
+## [0.10.0] - 1 Oktober 2026
+
+Layar Hari-H disusun ulang supaya susunannya mengikuti rancangan Stitch `checklist_timeline_web_app`, melanjutkan pekerjaan 0.9.0. Ini layar besar pertama di luar lima layar utama yang masih memakai kelas umum.
+
+### Tambah
+
+- `src/app/globals.css` blok `.hari-h-*`: kartu ringkasan bergradasi dengan angka persen besar dan bar kemajuan, baris pengatur ukuran huruf, pil lompat ke jam acara, dan kartu acara berurut waktu
+- Penanda acara yang sedang berjalan, aktif hanya kalau tanggal pernikahan sama dengan hari ini
+- Ikon sebaris `IkonKalender`, `IkonBagikan`, `IkonCetak`, dan `IkonTambah` di berkas layar Hari-H, polanya sama dengan layar akun
+- `.tanpa-cetak` akhirnya punya aturan CSS. Kelas ini dipakai enam tempat sejak lama tapi belum pernah didefinisikan, jadi penyembunyian saat cetak tidak pernah jalan
+
+### Ubah
+
+- `src/app/(app)/hari-h/page.tsx` memakai `jamSelesai` dari `src/lib/format.ts`. Sebelumnya ada perhitungan jam selesai sendiri di halaman ini, padahal fungsinya sudah ada
+- Pencarian acara yang sedang berjalan dipindah ke fungsi murni di luar komponen. Sebelumnya dipasang sebagai `useMemo` setelah baris pengembalian awal, dan itu melanggar aturan React tentang urutan hook
+
+### Hapus
+
+- Kelas CSS `.rundown-baris`, `.rundown-jam`, `.rundown-kartu`, dan `.rundown-waktu-badge`. Setelah layar Hari-H disusun ulang, tidak ada komponen yang memakainya lagi
+
+## [0.9.0] - 1 Oktober 2026
+
+Layar anggaran, tamu, dan akun disusun ulang supaya susunannya sama dengan rancangan Stitch, melanjutkan pekerjaan 0.8.0. Dua endpoint juga ditambah isinya karena rancangan itu meminta angka yang belum dikirim.
+
+### Tambah
+
+- `src/app/globals.css` blok `.anggaran-*`, `.tamu-*`, dan `.akun-*`
+- `GET /api/plans/{id}/budget-items` sekarang mengirim `payments` lengkap dengan `vendorName` dan `sebaranKategori`, supaya tab riwayat pembayaran dan diagram sebaran tidak perlu memanggil endpoint kedua
+- `GET /api/plans/{id}/guests` sekarang mengirim `summary.perKategori` dan `summary.perMeja`, supaya pil saringan dan daftar meja dapat angka yang benar tanpa dihitung ulang di browser
+- Ikon sebaris di berkas layar anggaran, tamu, dan akun. Sebelumnya Stitch memakai Material Symbols, di sini digambar sebagai SVG supaya tidak menambah unduhan font
+
+### Ubah
+
+- `src/app/(app)/anggaran/page.tsx` disusun ulang mengikuti `budget_vendor_web_app`: kartu anggaran bergradasi, pil status, diagram sebaran, tab daftar pos dan rincian pengeluaran
+- `src/app/(app)/tamu/page.tsx` disusun ulang mengikuti `daftar_tamu_rsvp_web_app`: kartu tamu bergradasi dengan cincin persentase, pil saringan kategori, kartu tamu dengan pilihan RSVP, dan daftar meja
+- `src/app/(app)/akun/page.tsx` disusun ulang mengikuti `atur_rencana_profil_calon_pengantin`: kartu identitas, formulir data dasar rencana, daftar rencana aktif, pilihan tema, unduh cadangan, dan baris informasi aplikasi
+- Kunci penyimpanan tema di layar akun disamakan jadi `haribesar-tema`. Sebelumnya layar itu memakai kunci lain, jadi pilihan gelap hilang setelah halaman dimuat ulang
+- Lambang merek di `DESIGN.md` tidak lagi disebut "dua cincin yang bertaut" karena yang dipakai sekarang gambar jadi dari Stitch
+
+### Perbaiki
+
+- Pil saringan di layar tamu tingginya 36px. Sekarang 44px, sesuai batas target sentuh
+- Dua kalimat di layar tamu menyebut satuan yang salah. `belumDiundang` itu jumlah orang, bukan jumlah undangan
+- Tiga properti CSS di blok `.akun-*` menunjuk token yang tidak pernah didefinisikan, jadi nilainya kosong. Sekarang memakai token yang ada, ditambah properti lokal untuk pasangan warna gelap
+
+### Catatan keputusan
+
+- Penggeser estimasi tamu dan pilihan gaya pernikahan di rancangan Stitch tidak dibuat. Tabel `plans` tidak punya kolomnya, jadi kontrolnya akan jadi tombol mati
+- Unggah foto pasangan di layar akun tidak dibuat. Belum ada penyimpanan berkas untuk avatar
+- Langkah 1 dari 3 dan persentase kesiapan di rancangan Stitch tidak dibuat. Aplikasi ini tidak punya alur bertahap
+- Tidak ada angka contoh dari Stitch yang dipakai. Semua angka di tiga layar itu dibaca dari data rencana yang benar-benar tersimpan
+
+## [0.8.0] - 1 Oktober 2026
+
+Layar masuk, daftar, beranda, dan rencana disusun ulang supaya bentuknya sama dengan rancangan di `docs/stitch_cute_wedding_planner`. Sebelumnya baru warnanya yang disamakan, susunannya belum.
+
+### Tambah
+
+- `src/components/auth-hero.tsx`. Panel merek untuk layar masuk dan daftar, sekali tulis dipakai dua layar
+- Token `--text-mini` 0.75rem dan lima token warna auth di `@theme`. Sebelumnya ukuran dan warnanya ditulis langsung di aturan CSS
+- `src/app/globals.css` blok `.rencana-*`. Kartu progres bergradasi, pil saringan, kartu tugas per kelompok waktu, dan tombol tambah melayang
+- Tombol "Muat template" dan pil saringan di rencana, plus lencana jumlah tugas per pil
+
+### Ubah
+
+- `src/app/(app)/beranda/page.tsx` disusun ulang mengikuti `beranda_wedding_planner`: kartu hitung mundur, ringkasan uang, dan daftar tugas terdekat
+- `src/app/(app)/rencana/page.tsx` disusun ulang mengikuti `checklist_timeline_pernikahan`: kartu progres dengan angka nyata, pil saringan, kelompok waktu dengan titik penanda, dan tombol tambah melayang
+- `src/app/globals.css` blok `.beranda-*` dan `.rencana-*` menyimpan pasangan warna teks di atas aksen sebagai properti lokal, bukan token global, karena hanya dipakai di dua layar itu
+- Lambang merek diganti dari gambar SVG cincin yang digambar sendiri ke berkas raster hasil potong logo Stitch, lewat `Merek` di `src/components/merek.tsx`
+
+### Perbaiki
+
+- Tombol "Ingat saya" di layar masuk hilang centangnya setelah halaman dimuat ulang. Nilainya dibaca sebelum hidrasi selesai
+- `src/app/(auth)/layout.tsx` punya satu `</div>` berlebih sehingga seluruh layar daftar gagal render
+- Ikon PWA dibuat ulang dari lambang baru. Sebelumnya masih lambang lama
+- `docs/` dan `.next` sempat bentrok waktu build jalan bersamaan dengan server dev, gejalanya 404 pada berkas `/_next/static`. Build sekarang dijalankan setelah server dev dimatikan
+
+### Catatan keputusan
+
+- Tombol Google di layar masuk tidak dirender. OAuth Google belum dikonfigurasi, jadi tombolnya akan jadi tombol mati
+- Papan inspirasi tema di rencana tidak dibuat. Belum ada fitur unggah gambar, jadi gambarnya akan jadi gambar contoh yang tidak bisa diganti
+- `TaskItem` tetap dipakai di rencana meski Stitch punya kotak centang sendiri. Kotak centang Stitch tingginya 28px, di bawah batas 44px
+## [0.7.0] - 1 Oktober 2026
+
+Arah desain diganti total ke "Blushing Romance" dari proyek Cute Wedding Planner di Google Stitch. Sebelumnya sage dan terracotta. Sekitar 130 pemakaian token di 20 berkas tetap jalan karena nama token dipertahankan, hanya nilainya yang berubah.
+
+### Ubah
+
+- `src/app/globals.css` blok `@theme` diganti ke palet blush: base `#fffdf9`, ink `#4a3b43`, blush `#ffb7c5`, peach `#ffd6ba`, lilac `#e8d7f1`, netral `#fff0f5`. Nama token lama dipertahankan supaya 20 berkas tidak perlu disentuh
+- Mode gelap jadi blok pasangan warna sendiri, base `#1f181c`, ink `#f4e9ee`. Sebelumnya hasil inversi
+- Bentuk kontrol jadi pill: tombol, input, pilih, kotak centang, lencana, tab. Card dan panel tetap `2rem`, lembar bawah `3rem`
+- Tombol utama jadi blush dengan tulisan Rosy Charcoal, tinggi minimum dari 44px ke 48px. Input dari 44px ke 52px
+- `src/app/layout.tsx` huruf diganti dari Fraunces dan Public Sans ke Plus Jakarta Sans dan Be Vietnam Pro, sumber dari `desain.json`
+- `viewport.themeColor` jadi `#FFFDF9` di mode terang dan `#1F181C` di mode gelap
+- Garis pemisah tipis di daftar diganti baris kartu terpisah sesuai aturan daftar di Stitch: `.pratinjau-baris`, `.tamu-kartu-bawah`, `.auth-kartu`
+- `DESIGN.md` ditulis ulang ke v2.0. Palet, tipografi, radius, dan aturan pill diperbarui. Larangan pill di v1.0 dihapus karena arah baru memang memakai pill
+
+### Perbaiki
+
+- Blush `#ffb7c5` di atas kanvas terang hanya `1,61:1`, gagal kalau dipakai sebagai teks. Semua teks aksen dialihkan ke blush gelap `#864e5a` yang mencapai `6,36:1`. Blush hanya dipakai sebagai isian besar, dengan tulisan `#4a3b43` mencapai `6,42:1`
+- Teks sekunder digelapkan dari `#8a8a8a` ke `#72666b`. Di kanvas naik dari `3,10:1` ke `5,40:1`, di panel `4,97:1`
+- `src/app/global-error.tsx` dan `src/app/manifest.ts` masih menyimpan hex lama `#fbf9f6`, `#2b2622`, dan `#b5643c`. Diganti ke palet baru
+- `src/app/layout.tsx` elemen `<html>` menimbulkan peringatan hidrasi. Skrip tema memasang `data-theme` sebelum React jalan, jadi server dan client tidak sama. Ditambah `suppressHydrationWarning`, karena selisih itu memang disengaja
+## [0.6.8] - 1 Oktober 2026
+
+Tampilan auth dirapikan dan tema global diratakan supaya setiap halaman memakai sumber yang sama.
+
+### Perbaiki
+
+- Aturan cetak di `src/app/cetak.css` tidak pernah diimpor di mana pun, sehingga navigasi, pita luring, dan pemenggalan halaman ikut tercetak. Sekarang diimpor dari `src/app/layout.tsx`
+- Tautan di dalam kalimat (`.tautan-kalimat`) punya tinggi 44px tapi lebar 42px untuk kata satu seperti "Daftar". Ditambah `min-width: 44px`
+- `.auth-merek-judul` dan `.auth-kartu` masing-masing terdefinisi dua kali. Aturan kedua diam-diam menang, jadi definisi pertama tidak pernah berlaku. Digabung jadi satu
+- `.tautan-kalimat` sempat punya enam properti tertulis dua kali berturut-turut. Dikembalikan ke satu deklarasi
+- Kontras teks utama di layar auth diuji di mode terang dan gelap, keduanya terbaca
+
+### Ubah
+
+- Lambang brand di layar auth mengecil dari 64px ke 56px dan kehilangan bayangan, diganti garis 1px
+- Sudut kartu auth mengikuti `--radius-panel` (14px), sebelumnya 32px, dan bayangannya diganti garis atas 1px karena DESIGN.md melarang bayangan pada kartu
+- Warna teks lambang dikembalikan ke `--text-h1` seperti yang tertulis di DESIGN.md, sebelumnya diteruskan ke `--text-h2`
+- Gradien pada `.auth-kepala` dihapus, jaraknya dipindah ke token `--jarak-*`
+
+---
+
 ## [0.6.7] - 1 Oktober 2026
 
 Layar masuk dan daftar dibersihkan dari tulisan yang tidak perlu.

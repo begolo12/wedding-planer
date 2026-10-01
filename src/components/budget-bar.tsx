@@ -30,18 +30,9 @@ export function BudgetBar({
   return (
     <div>
       {label || !ringkas ? (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "baseline",
-            gap: 12,
-            marginBottom: 6,
-            flexWrap: "wrap",
-          }}
-        >
+        <div className="bar-kepala">
           <span className="label-bagian">{label ?? "Terpakai"}</span>
-          <span style={{ fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>
+          <span className="keterangan-mini">
             <Rupiah nilai={terpakai} /> dari <Rupiah nilai={batas} />
           </span>
         </div>
@@ -61,13 +52,7 @@ export function BudgetBar({
         />
       </div>
 
-      <p
-        style={{
-          margin: "6px 0 0",
-          fontSize: "var(--text-kecil)",
-          color: lewat ? "var(--color-bata)" : "var(--color-muted)",
-        }}
-      >
+      <p className="bar-catatan" data-nada={lewat ? "bahaya" : undefined}>
         {batas <= 0
           ? "Batas anggaran belum diisi."
           : lewat

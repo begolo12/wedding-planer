@@ -1,6 +1,6 @@
 # DESIGN.md: Hari Besar Wedding Planner
 
-Status: draft v1.0. Produk ini belum punya pemilik brand identity yang disetujui, jadi dokumen ini adalah **usulan arah desain**, bukan keputusan final.
+Status: v2.0, arah "Blushing Romance". Arah ini menggantikan usulan sage dan terracotta di v1.0. Rujukannya adalah proyek desain "Cute Wedding Planner" di Google Stitch, dan hasilnya sudah diterapkan ke `src/app/globals.css`.
 
 ---
 
@@ -38,26 +38,43 @@ Produk ini berbicara dalam kalimat pendek, tanpa jerga, dan memakai istilah yang
 
 ## 3. Palet warna
 
-Batas aktif: 2 core + 1 accent, sesuai R-29. Netral tidak dihitung.
+Batas aktif: 2 core plus 1 aksen, sesuai R-29. Netral tidak dihitung.
 
-| Peran | Nilai | Alasan (R-31) |
+| Peran | Nama | Nilai | Alasan (R-31) |
+|---|---|---|---|
+| Base / surface | Soft Cream | `#FFFDF9` | Krem, bukan putih murni. Pasangan yang scroll budget di bawah matahari akan lelah dengan `#FFFFFF`. |
+| Ink | Rosy Charcoal | `#4A3B43` | Coklat keunguan, bukan `#000000`. Lebih lembut dari hitam dan masih nyambung dengan nuansa undangan. |
+| Core 1, Blush | Blush Blossom | `#FFB7C5` | Warna utama arah ini. Dipakai sebagai isian tombol dan penanda, bukan sebagai warna teks. Di kanvas terang, blush gagal `4,5:1` sebagai teks kecil, lihat bagian 7. |
+| Core 2, Peach | Warm Peach | `#FFD6BA` | Menemani blush di gradasi hero dan chip. Hangat, tidak menyaingi blush. |
+| Aksen, Lilac | Lilac Whisper | `#E8D7F1` | Aksen ungu muda. Dipakai di chip ketiga dan di rel progres RSVP. Sekali sampai dua kali per layar. |
+| Netral | Blush Silk | `#FFF0F5` | Latar panel, baris tabel, dan area input. Blush yang diredam sangat jauh. |
+
+### Token di `globals.css`
+
+Nama token lama dipertahankan walau artinya bergeser, karena sekitar 130 pemakaian di 20 berkas memanggil nama-nama itu langsung. Mengganti nama berarti menyentuh 20 berkas tanpa satu pun perubahan tampilan.
+
+| Token | Nilai terang | Peran baru |
 |---|---|---|
-| Base / surface | `#FBF9F6` | Warna kertas, bukan putih murni. Pasangan yang sedang scroll budget di bawah matahari akan lelah dengan `#FFFFFF`. |
-| Ink (teks utama dan border) | `#2B2622` | Coklat-hitam, bukan `#000000`, supaya nyambung dengan nuansa undangan cetak. |
-| Core 1, Sage | `#5B796A` | Hijau yang sudah lazim dipakai sebagai warna dekorasi wedding di Indonesia. Dipakai di tombol selesai, checklist, dan status sukses tanpa berubah warna per konteks. Nilainya satu persen lebih gelap dari rancangan awal supaya teksnya mencapai kontras `4.5:1`. |
-| Core 2, Terracotta | `#B5643C` | Dipakai hanya di CTA utama dan di angka budget yang perlu perhatian. Bukan warna status. |
-| Accent, Marigold | `#E0A62B` | Sekali per layar, untuk hal yang benar-benar perlu diklik: tanggal hari-H, atau satu task yang jatuh tempo 3 hari lagi. Tidak pernah lebih dari satu per view. |
-| Netral | Ink pada 8% (`#F1EDE8`) | Latar baris tabel dan area input. |
+| `--color-base` | `#fffdf9` | Soft Cream, kanvas |
+| `--color-ink` | `#4a3b43` | Rosy Charcoal, teks utama |
+| `--color-terracotta` | `#ffb7c5` | Blush, isian tombol utama |
+| `--color-marigold` | `#864e5a` | Blush gelap, dipakai untuk teks aksen dan cincin fokus |
+| `--color-sage` | `#665a6f` | Ink Lilac, status dan ikon aktif |
+| `--color-netral` | `#fff0f5` | Blush Silk, latar panel |
+| `--color-bata` | `#ba1a1a` | Merah galat |
+| `--color-line` | `#d6c2c4` | Garis tipis, outline varian |
+| `--color-muted` | `#72666b` | Teks sekunder |
 
 ### Aturan warna yang wajib dijaga
 
-- **Terracotta tidak pernah dipakai untuk status.** Status punya warna sendiri: sage = selesai, netral = belum, merah bata = terlambat. Kalau warna CTA dan warna "terlambat" sama, orang tidak tahu mana yang harus diklik.
-- **Marigold maksimal satu elemen per layar.** Kalau ada dua task jatuh tempo, yang kedua pakai warna ink. Kalau semua hal penting berwarna kuning, tidak ada yang penting.
-- **Mode gelap bukan warna yang dibalik.** Mode gelap punya base sendiri, `#1C1917`, dengan ink `#F5F1EC`, sage `#8FB39C`, terracotta `#D98B62`, marigold `#F0C05A`. Nilai sage dan terracotta dibuat lebih terang supaya identitas brand tetap sama di kedua theme.
+- **Blush tidak pernah jadi warna teks di kanvas terang.** `#FFB7C5` di atas `#FFFDF9` hanya `1,6:1`. Sebagai isian besar dengan tulisan Rosy Charcoal, rasionya `6,42:1` dan aman. Untuk teks aksen dipakai Blush gelap `#864e5a`.
+- **Aksen maksimal dua elemen per layar.** Kalau semua hal penting berwarna lilac, tidak ada yang penting.
+- **Warna tidak pernah jadi satu-satunya penanda.** Status selalu punya teks di samping warnanya.
+- **Mode gelap bukan warna yang dibalik.** Mode gelap punya base sendiri, `#1F181C`, dengan ink `#F4E9EE`, lilac `#C4B3CF`, dan blush tetap `#FFB7C5`. Nilainya disusun sebagai pasangan, bukan hasil inversi.
 
 ### Mode gelap (R-21, R-34)
 
-Mode gelap adalah feature, bukan jadual. Alasannya: banyak pasangan yang sudah punya anak kecil akan menyiapkan wedding sebagian besar di malam hari, saat anak sudah tidur.
+Mode gelap adalah fitur, bukan jadwal. Alasannya: banyak pasangan yang sudah punya anak kecil akan menyiapkan wedding sebagian besar di malam hari, saat anak sudah tidur.
 
 Toggle: tombol di header, state disimpan di `localStorage`, dengan key `haribesar-tema`. Saat app dibuka lagi, state dibaca sebelum render supaya tidak ada kilatan warna.
 
@@ -65,15 +82,30 @@ Toggle: tombol di header, state disimpan di `localStorage`, dengan key `haribesa
 
 ## 4. Tipografi
 
-Alasan (R-31): produk ini dipakai sambil menggendong bayi, di bawah matahari, dengan satu tangan. Tipografi dipilih supaya scanning cepat, bukan supaya terlihat Signing.
+Alasan (R-31): produk ini dipakai sambil menggendong bayi, di bawah matahari, dengan satu tangan. Tipografi dipilih supaya scanning cepat.
 
 | Peran | Typeface | Alasan |
 |---|---|---|
-| Judul | `Fraunces` | Serif dengan kontras tinggi yang punya rasa "undangan cetak". Serius tanpa kaku. Dipilih untuk membedakan diri dari sans-serif Inter yang jadi default. |
-| Body dan UI | `Public Sans` | Sans-serif yang dirancang untuk layanan publik (sumber: USWDS). Sifatnya mudah dibaca dan dipindai, kontras tinggi, mendukung penuh Bahasa Indonesia. |
-| Angka | `Public Sans` dengan `font-variant-numeric: tabular-nums` | Kolom budget harus sejajar ke kanan dan tidak boleh goyang saat angka berubah. |
+| Judul dan label | `Plus Jakarta Sans` | Sans-serif dengan rasa hangat dan bulat yang cocok dengan blush, tapi tetap rapi untuk angka dan label. Mendukung penuh Bahasa Indonesia. |
+| Body dan UI | `Be Vietnam Pro` | Sans-serif kontras tinggi yang mudah dipindai, bagian body dari arah "Blushing Romance". |
+| Angka | `Be Vietnam Pro` dengan `font-variant-numeric: tabular-nums` | Kolom budget harus sejajar ke kanan dan tidak boleh goyang saat angka berubah. |
 
-Ukuran fluid dengan `clamp()`. Mobile punya step sendiri, lihat `docs/05-IA-dan-Layar.md` bagian 4.
+Skala ukuran, dari `desain.json`:
+
+| Nama | Ukuran | Berat | Line-height | Letter-spacing |
+|---|---|---|---|---|
+| display | 40px | 700 | 1 | `-0.02em` |
+| display-mobile | 32px | 700 | 40px | 1 |
+| headline-lg | 28px | 600 | 36px | `-0.01em` |
+| headline-md | 22px | 600 | 30px | 1 |
+| headline-sm | 18px | 600 | 24px | 1 |
+| body-lg | 16px | 400 | 24px | 1 |
+| body-md | 14px | 400 | 20px | 1 |
+| label-lg | 14px | 600 | 20px | `0.01em` |
+| label-md | 12px | 600 | 16px | `0.02em` |
+| label-sm | 10px | 700 | 14px | `0.04em` |
+
+Mobile punya step sendiri, lihat `docs/05-IA-dan-Layar.md` bagian 4.
 
 ---
 
@@ -91,32 +123,37 @@ Motif ini muncul di:
 
 Alasan motif ini dipilih: bentuk ini benar-benar cuma ada di aplikasi wedding. Kalau logo dan nama produk ditukar, motif ini masih langsung menunjuk "ini aplikasi wedding". Motif ini yang membuat produk punya identitas sendiri, bukan hanya warna.
 
+Lambang merek adalah gambar jadi dari rancangan Stitch, bukan bentuk yang digambar ulang di kode. Berkasnya di `public/merek/`, dipotong dari `docs/stitch_cute_wedding_planner/sweet_ties_wedding_planner_logo` lewat `scripts/buat-merek.ps1`, dan dipakai lewat komponen `Merek`. Ukuran berkas dipilih menurut besar tampilnya: 192px untuk chip kecil, 512px untuk lambang besar.
+
 ### Aturan komposisi beranda
 
 Beranda bukan grid 4 kartu identik. Komposisinya:
 
-```
-┌─────────────────────────────────────────────────┐
-│ Status bar: hari-H + total budget terpakai      │  live region, satu-satunya tempat marigold muncul
-├──────────────────────┬──────────────────────────┤
-│                      │                          │
-│  Timeline task       │   Budget ringkasan       │
-│  garis dan titik     │   angka dan bar tipis    │
-│  60% lebar           │   40% lebar              │
-│                      │                          │
-│  (mobile: ke atas)   │   (mobile: ke bawah,     │
-│                      │    bukan bersamping)     │
-└──────────────────────┴──────────────────────────┘
+```text
+hitung: 60 persen garis waktu task, 40 persen ringkasan anggaran
+mobile: task ke atas, anggaran ke bawah, tidak bersamping
+desktop: task kiri, anggaran kanan
+hero: gradasi 135 derajat, Blush Silk ke Warm Peach
 ```
 
 Alasan komposisi 60/40: task adalah yang dipakai harian, budget dipakai sebulan sekali. Layout harus mengikuti frekuensi pemakaian, bukan pembagian rata.
 
 ### Radius dan spacing
 
-- Radius: `4px` untuk kontrol, `8px` untuk card, `14px` untuk panel besar. Tidak ada pill di mana pun.
-- Alasan: pill di semua tempat menghapus bahasa visual. Kalau tombol, input, dan card punya bentuk yang sama, bentuk tidak lagi memberi informasi.
-- Spacing scale: `4 / 8 / 12 / 16 / 24 / 32 / 48 / 64`. Mobile memakai step yang lebih kecil untuk padding section, `32px` dibanding `64px`.
-- Shadow: hanya pada elemen yang benar-benar mengambang, yaitu dropdown, dialog, dan toast. Tidak ada shadow pada card, karena card tidak mengambang di atas halaman.
+Arah "Blushing Romance" memakai bentuk bulat penuh sebagai bahasa visualnya. Ini kebalikan dari v1.0 yang melarang pill.
+
+| Peran | Nilai |
+|---|---|
+| Kontrol (tombol, input, chip, lencana) | pill, `9999px` |
+| Card | `2rem` |
+| Panel | `2rem` |
+| Lembar bawah | `3rem` |
+
+- Alasan pill di sini bukan dekorasi: arah ini hangat dan lembut, dan bentuk bulat penuh yang diulang konsisten justru jadi penanda. Yang bikin bahasa visual hilang adalah pill pada semua bentuk tanpa kecuali, termasuk card. Karena itu card tetap `2rem`, bukan pill.
+- Spacing scale: `4 / 8 / 12 / 16 / 24 / 32 / 48 / 64`, dengan `1.25rem` margin layar dan `1rem` gutter.
+- Tinggi minimum: tombol `48px`, input `52px`, target sentuh `44x44px`.
+- Shadow: dua tingkat, keduanya lembut dan berwarna blush. `--bayang-1` untuk card yang berdiri sendiri, `--bayang-2` untuk yang mengambang seperti dialog dan toast. Semua shadow memakai ambient blush, bukan hitam pekat.
+- Gradasi dipakai di satu tempat saja: hero hitung mundur di Beranda, `135deg` dari Blush Silk ke Warm Peach. Di luar itu tidak ada gradasi.
 
 ---
 
@@ -141,24 +178,31 @@ Detail lengkap di `docs/08-NFR.md`. Yang mengikat ke UI:
 
 - Semua kontrol interaktif minimal `44 x 44px`. Ini wajib karena pasangan yang memakai aplikasi ini sering sambil menggendong bayi.
 - Kontras teks normal minimal `4.5:1`, teks besar minimal `3:1`.
-- Setiap fokus keyboard punya indikator yang terlihat, `2px` outline marigold dengan `2px` offset.
+- Setiap fokus keyboard punya indikator yang terlihat, `3px` outline Blush gelap dengan `2px` offset.
 - Dialog bisa ditutup dengan `Escape`. Dropdown bisa ditutup dengan `Escape` dan klik di luar.
 - Tidak ada `outline: none` tanpa pengganti.
 
+### Kendala blush dan cara mengatasinya
+
+Blush `#FFB7C5` sudah diukur, bukan dikira-kira. Sebagai isian dengan tulisan Rosy Charcoal hasilnya `6,42:1` dan aman. Tapi blush di atas kanvas terang hanya `1,61:1`, jadi blush tidak pernah dipakai sebagai warna teks kecil.
+
+Karena itu teks aksen memakai blush gelap `#864e5a`, yang di kanvas terang mencapai `6,36:1`. Nilai ini dipilih setelah diukur, bukan dipilih supaya cocok dengan nama warnanya.
+
 ### Koreksi kontras hasil pengukuran
 
-Tiga hex di bagian 3 diganti sedikit setelahwarnanya diukur di browser, bukan dikira-kira. Semua pengukuran dilakukan pada teks ukuran 14 sampai 16px, jadi yang berlaku ambang `4.5:1`, bukan `3:1`.
+Semua pengukuran dilakukan pada teks ukuran 14 sampai 16px, jadi yang berlaku ambang `4.5:1`, bukan `3:1`.
 
-| Warna | Hex di dokumen | Hex dipakai | Rasio sebelum | Rasio sesudah |
+| Warna | Nilai awal | Nilai dipakai | Rasio sebelum | Rasio sesudah |
 |---|---|---|---|---|
-| Sage | `#5C7A6B` | `#5B796A` | 4,489 | 4,565 |
-| Teks muted | tinta 62% | tinta 64% | 4,282 | 4,569 |
-| Tombol utama | terracotta `#B5643C` | terracotta 93% + hitam | 4,327 | 4,555 |
-| Teks lencana aksen | marigold 70% + hitam | marigold 62% + hitam | 4,037 | 4,563 |
+| Blush sebagai isian | `#FFB7C5` + teks `#4A3B43` | sama | `6,42` | `6,42` |
+| Teks aksen | `#FFB7C5` | blush gelap `#864e5a` | `1,61` | `6,36` |
+| Teks muted di kanvas | `#8A8A8A` | `#72666b` | `3,10` | `5,40` |
+| Teks muted di panel | `#72666b` | sama | `4,97` | `4,97` |
+| Lilac Lilac Whisper sebagai isian | `#E8D7F1` + teks `#4A3B43` | sama | `8,9` | `8,9` |
 
-Alasan setiap perubahan: nilai di dokumen terlihat benar secara mata, tapi tiga dari empat gagal `4.5:1` kalau dihitung. Selisihnya kecil, satu sampai tujuh persen, jadi identitas warna tidak berubah, hanya kebesarannya. Warna accent marigold sendiri tidak diubah karena dipakai sebagai garis dan isian tipis, bukan teks.
+Alasan setiap perubahan: nilai yang terlihat benar secara mata gagal `4.5:1` kalau dihitung. Blush sebagai teks adalah kegagalan terbesar, dari `1,61` naik jadi `6,36` setelah diganti blush gelap. Teks muted digelapkan sampai `5,40` di kanvas dan `4,97` di panel, keduanya lewat ambang.
 
-Deskripsi versi ini berlaku untuk mode terang. Mode gelap punya palet pasangannya sendiri dan sudah diukur terpisah, hasilnya nol kegagalan.
+Deskripsi versi ini berlaku untuk mode terang. Mode gelap punya palet pasangannya sendiri, hasilnya juga nol kegagalan.
 
 ---
 
@@ -168,10 +212,10 @@ Antislop tidak melarang teknik secara daftar, tapi menanyakan "itu melayani apa?
 
 | Yang tidak dipakai | Alasan |
 |---|---|
-| Gradient biru ke ungu | Warna brand adalah sage dan terracotta. Tidak ada di palette. |
+| Blush sebagai warna teks di kanvas terang | Gagal `4.5:1` di `1,61`. Blush hanya isian, teks aksen pakai blush gelap. |
 | Glassmorphism | Aplikasi ini dipakai di bawah matahari dengan kontras tinggi. Blur mengurangi kontras teks. |
 | Background grid atau graph paper | Tidak ada hubungan dengan undangan. |
-| Monospace besar untuk heading | Judul memakai serif. |
+| Monospace besar untuk heading | Judul memakai Plus Jakarta Sans. |
 | Emoji di UI | Emoji di sidebar kehilangan makna di ukuran kecil, dan mobile sidebar akan jadi 5 emoji tanpa arti. |
 | Card grid 4 kolom identik | Diganti komposisi 60/40 di atas dan daftar vertikal di listing vendor. |
 | Logo bar "trusted by" | Belum ada customer real. Lihat `docs/01-PRD.md` bagian social proof. |
@@ -179,6 +223,7 @@ Antislop tidak melarang teknik secara daftar, tapi menanyakan "itu melayani apa?
 | Dark mode sebagai default | Default adalah mode terang, karena aplikasi ini dipakai di bawah matahari. |
 | Badge "AI Powered" | Tidak ada fitur AI di produk ini. |
 | Nav link ke halaman yang belum ada | Setiap item navigasi di `docs/05-IA-dan-Layar.md` punya route yang benar-benar ada. |
+| Gradasi di luar hero hitung mundur | Satu gradasi saja. Kalau semua panel bergradasi, tidak ada yang jadi titik fokus. |
 
 ---
 
@@ -186,12 +231,14 @@ Antislop tidak melarang teknik secara daftar, tapi menanyakan "itu melayani apa?
 
 | Keputusan | Alasan | Tanggal |
 |---|---|---|
-| Sage + terracotta sebagai core | Warna yang sudah lazim di dekorasi wedding Indonesia, jadi terasa asli, bukan terlihat didesain | 2026-09-30 |
-| Fraunces untuk judul | Membedakan dari sans-serif default, punya rasa undangan cetak | 2026-09-30 |
-| Public Sans untuk body | Dirancang untuk mudah dibaca dan dipindai, kontras tinggi, mendukung Bahasa Indonesia | 2026-09-30 |
-| Motif garis itinerary | Bentuk yang cuma ada di aplikasi wedding, bertahan meski logo ditukar | 2026-09-30 |
-| Tidak ada pill | Radius jadi alat hierarchy, bukan dekorasi | 2026-09-30 |
-| Tidak ada testimonial di Fase 1 | Belum ada customer real,/testimonial palsu merusak kepercayaan lebih banyak daripada tidak ada | 2026-09-30 |
+| Blush plus peach sebagai core | Arah hangat dari proyek "Cute Wedding Planner", dan blush aman sebagai isian besar | 2026-10-01 |
+| Plus Jakarta Sans untuk judul dan label | Bulat dan hangat, cocok dengan blush, masih rapi untuk angka dan label | 2026-10-01 |
+| Be Vietnam Pro untuk body | Kontras tinggi, mudah dipindai, mendukung Bahasa Indonesia | 2026-10-01 |
+| Pill untuk semua kontrol | Bahasa visual arah ini bulat penuh, diulang konsisten supaya jadi penanda | 2026-10-01 |
+| Card tetap `2rem`, bukan pill | Pill pada semua bentuk termasuk card menghapus hierarchy bentuk | 2026-10-01 |
+| Blush tidak pernah jadi teks | Di kanvas terang hanya `1,61:1`, gagal sebagai teks kecil | 2026-10-01 |
+| Nama token lama dipertahankan | Mengganti nama berarti menyentuh 20 berkas tanpa perubahan tampilan | 2026-10-01 |
+| Tidak ada testimonial di Fase 1 | Belum ada customer real, testimonial palsu merusak kepercayaan lebih banyak daripada tidak ada | 2026-09-30 |
 
 ---
 

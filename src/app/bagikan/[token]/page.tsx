@@ -3,7 +3,7 @@
 import { use, useState, useEffect } from "react";
 import Link from "next/link";
 import { useMuat } from "@/lib/use-muat";
-import { Kerangka, Gagal } from "@/components/states";
+import { Kerangka } from "@/components/states";
 import { BudgetBar } from "@/components/budget-bar";
 import { Rupiah } from "@/components/rupiah";
 import type { Laporan } from "@/lib/laporan";
@@ -64,7 +64,7 @@ export default function HalamanBagikanPublik({
 
   if (memuat) {
     return (
-      <main style={{ maxWidth: 840, margin: "0 auto", padding: "24px 16px" }}>
+      <main className="bagikan">
         <Kerangka baris={8} />
       </main>
     );
@@ -72,20 +72,21 @@ export default function HalamanBagikanPublik({
 
   if (galat || !data) {
     return (
-      <main style={{ maxWidth: 840, margin: "0 auto", padding: "40px 16px", textAlign: "center" }}>
-        <h1 style={{ fontSize: "var(--text-h2)", color: "var(--color-bata)" }}>
-          Tautan Tidak Tersedia
-        </h1>
-        <p style={{ color: "var(--color-muted)", margin: "16px 0 24px" }}>
-          Tautan baca-saja ini mungkin sudah dicabut oleh pemilik rencana atau tidak lagi berlaku.
-        </p>
-        <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
-          <button type="button" className="tombol tombol-sekunder" onClick={muatUlang}>
-            Coba muat ulang
-          </button>
-          <Link className="tombol tombol-utama" href="/masuk">
-            Buka aplikasi
-          </Link>
+      <main className="bagikan">
+        <div className="bagikan-galat">
+          <h1>Tautan Tidak Tersedia</h1>
+          <p>
+            Tautan baca-saja ini mungkin sudah dicabut oleh pemilik rencana atau tidak lagi
+            berlaku.
+          </p>
+          <div className="aksi-baris">
+            <button type="button" className="tombol tombol-sekunder" onClick={muatUlang}>
+              Coba muat ulang
+            </button>
+            <Link className="tombol tombol-utama" href="/masuk">
+              Buka aplikasi
+            </Link>
+          </div>
         </div>
       </main>
     );
@@ -95,47 +96,32 @@ export default function HalamanBagikanPublik({
   if (data.tipe === "pengumuman" && data.announcement) {
     const p = data.announcement;
     return (
-      <main style={{ maxWidth: 680, margin: "0 auto", padding: "32px 16px" }}>
-        <div
-          style={{
-            padding: "8px 12px",
-            background: "var(--color-netral)",
-            borderRadius: 6,
-            fontSize: "var(--text-kecil)",
-            color: "var(--color-muted)",
-            marginBottom: 20,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <span>Pengumuman Resmi Pernikahan {data.plan.partnerName ? `bersama ${data.plan.partnerName}` : ""}</span>
-          <button
-            type="button"
-            className="tombol tombol-sekunder"
-            style={{ minHeight: 44, padding: "0 8px", fontSize: "var(--text-kecil)" }}
-            onClick={() => window.print()}
-          >
-            Cetak
-          </button>
+      <main className="bagikan">
+        <div className="bagikan-pita">
+          <div className="bagikan-pita-isi">
+            <span className="bagikan-pita-judul">Pengumuman Resmi</span>
+            <span>
+              {data.plan.partnerName ? `Pernikahan bersama ${data.plan.partnerName}` : "Rencana pernikahan"}
+            </span>
+          </div>
+          <div className="bagikan-pita-alat">
+            <button
+              type="button"
+              className="tombol tombol-sekunder tombol-kecil"
+              onClick={() => window.print()}
+            >
+              Cetak
+            </button>
+          </div>
         </div>
 
-        <article className="kartu" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <h1 style={{ margin: 0, fontSize: "var(--text-h1)" }}>{p.title}</h1>
-          <div style={{ fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>
-            Ditujukan untuk: <strong>{p.audience}</strong>
+        <article className="kartu tumpuk-sedang">
+          <h1>{p.title}</h1>
+          <p className="keterangan">
+            Ditujukan untuk <strong>{p.audience}</strong>
             {p.publishedAt ? ` • ${new Date(p.publishedAt).toLocaleDateString("id-ID")}` : ""}
-          </div>
-          <div
-            style={{
-              fontSize: "1.0625rem",
-              lineHeight: 1.6,
-              whiteSpace: "pre-wrap",
-              color: "var(--color-ink)",
-            }}
-          >
-            {p.body}
-          </div>
+          </p>
+          <p className="bagikan-teks">{p.body}</p>
         </article>
       </main>
     );
@@ -145,75 +131,40 @@ export default function HalamanBagikanPublik({
   const rep = data.report;
   if (!rep) return null;
 
-  const penggaliFont =
-    ukuranFont === "besar" ? "1.125rem" : ukuranFont === "sangat-besar" ? "1.25rem" : "1rem";
-
   return (
-    <main
-      style={{
-        maxWidth: 840,
-        margin: "0 auto",
-        padding: "24px 16px 60px",
-        fontSize: penggaliFont,
-      }}
-    >
+    <main className="bagikan" data-skala={ukuranFont}>
       {/* Pita Baca-Saja Atas */}
-      <div
-        style={{
-          padding: "8px 14px",
-          background: "var(--color-netral)",
-          border: "1px solid var(--color-garis)",
-          borderRadius: 6,
-          marginBottom: 20,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 8,
-        }}
-      >
-        <div style={{ fontSize: "var(--text-kecil)" }}>
-          <span style={{ fontWeight: 600 }}>Tautan Baca-Saja</span>
-          {data.label ? ` • Khusus: ${data.label}` : ""}
+      <div className="bagikan-pita">
+        <div className="bagikan-pita-isi">
+          <span className="bagikan-pita-judul">Tautan Baca-Saja</span>
+          {data.label ? <span>Khusus: {data.label}</span> : null}
         </div>
 
-        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-          <div style={{ display: "flex", gap: 2, marginRight: 8 }}>
+        <div className="bagikan-pita-alat">
+          <div className="bagikan-ukuran" role="group" aria-label="Ukuran huruf">
             <button
               type="button"
-              className="tombol tombol-sekunder"
-              style={{
-                padding: "0 8px",
-                fontSize: "11px",
-                fontWeight: ukuranFont === "normal" ? 700 : 400,
-                background: ukuranFont === "normal" ? "var(--color-kertas)" : "transparent",
-              }}
+              className="bagikan-ukuran-tombol"
+              data-aktif={ukuranFont === "normal" ? "ya" : "tidak"}
+              aria-pressed={ukuranFont === "normal"}
               onClick={() => ubahUkuranFont("normal")}
             >
               A
             </button>
             <button
               type="button"
-              className="tombol tombol-sekunder"
-              style={{
-                padding: "0 8px",
-                fontSize: "13px",
-                fontWeight: ukuranFont === "besar" ? 700 : 400,
-                background: ukuranFont === "besar" ? "var(--color-kertas)" : "transparent",
-              }}
+              className="bagikan-ukuran-tombol"
+              data-aktif={ukuranFont === "besar" ? "ya" : "tidak"}
+              aria-pressed={ukuranFont === "besar"}
               onClick={() => ubahUkuranFont("besar")}
             >
               A+
             </button>
             <button
               type="button"
-              className="tombol tombol-sekunder"
-              style={{
-                padding: "0 8px",
-                fontSize: "15px",
-                fontWeight: ukuranFont === "sangat-besar" ? 700 : 400,
-                background: ukuranFont === "sangat-besar" ? "var(--color-kertas)" : "transparent",
-              }}
+              className="bagikan-ukuran-tombol"
+              data-aktif={ukuranFont === "sangat-besar" ? "ya" : "tidak"}
+              aria-pressed={ukuranFont === "sangat-besar"}
               onClick={() => ubahUkuranFont("sangat-besar")}
             >
               A++
@@ -222,8 +173,7 @@ export default function HalamanBagikanPublik({
 
           <button
             type="button"
-            className="tombol tombol-sekunder"
-            style={{ minHeight: 44, padding: "0 10px", fontSize: "var(--text-kecil)" }}
+            className="tombol tombol-sekunder tombol-kecil"
             onClick={() => window.print()}
           >
             Cetak / PDF
@@ -232,33 +182,37 @@ export default function HalamanBagikanPublik({
       </div>
 
       {/* Header Utama */}
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ margin: 0, fontSize: "var(--text-h1)" }}>
+      <div className="bagikan-kepala">
+        <h1>
           {rep.judul.namaPasangan ? `Pernikahan ${rep.judul.namaPasangan}` : "Rencana Pernikahan"}
         </h1>
-        <p style={{ margin: "4px 0 0", color: "var(--color-muted)", fontSize: "var(--text-kecil)" }}>
+        <p>
           {rep.judul.tanggalTeks} • {rep.hitungMundur.teks}
         </p>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      <div className="tumpuk">
         {/* Ringkasan Anggaran */}
-        <section className="kartu" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Ringkasan Anggaran</h2>
+        <section className="kartu tumpuk-sedang">
+          <h2>Ringkasan Anggaran</h2>
 
           <div className="rekap">
             <div className="rekap-item">
-              <span className="rekap-nilai"><Rupiah nilai={rep.uang.planned} /></span>
+              <span className="rekap-nilai">
+                <Rupiah nilai={rep.uang.planned} />
+              </span>
               <span className="rekap-label">Rencana Batas</span>
             </div>
             <div className="rekap-item">
-              <span className="rekap-nilai" style={{ color: "var(--color-primary)" }}>
+              <span className="rekap-nilai teks-aksen">
                 <Rupiah nilai={rep.uang.paid} />
               </span>
               <span className="rekap-label">Sudah Dibayar ({rep.uang.persenTerpakai}%)</span>
             </div>
             <div className="rekap-item">
-              <span className="rekap-nilai"><Rupiah nilai={Math.abs(rep.uang.remaining)} /></span>
+              <span className="rekap-nilai">
+                <Rupiah nilai={Math.abs(rep.uang.remaining)} />
+              </span>
               <span className="rekap-label">
                 {rep.uang.remaining < 0 ? "Lebih dari anggaran" : "Sisa anggaran"}
               </span>
@@ -273,12 +227,14 @@ export default function HalamanBagikanPublik({
         </section>
 
         {/* Tugas & Tamu */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
-          <section className="kartu" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Kesiapan Tugas</h2>
-            <div className="rekap" style={{ gridTemplateColumns: "1fr 1fr" }}>
+        <div className="kisi-kartu">
+          <section className="kartu tumpuk-rapat">
+            <h2>Kesiapan Tugas</h2>
+            <div className="rekap rekap-dua">
               <div className="rekap-item">
-                <span className="rekap-nilai">{rep.tugas.selesai} / {rep.tugas.total}</span>
+                <span className="rekap-nilai">
+                  {rep.tugas.selesai} / {rep.tugas.total}
+                </span>
                 <span className="rekap-label">Selesai</span>
               </div>
               <div className="rekap-item">
@@ -288,15 +244,15 @@ export default function HalamanBagikanPublik({
             </div>
           </section>
 
-          <section className="kartu" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Tamu Undangan</h2>
-            <div className="rekap" style={{ gridTemplateColumns: "1fr 1fr" }}>
+          <section className="kartu tumpuk-rapat">
+            <h2>Tamu Undangan</h2>
+            <div className="rekap rekap-dua">
               <div className="rekap-item">
                 <span className="rekap-nilai">{rep.tamu.orang}</span>
                 <span className="rekap-label">Perkiraan Hadir</span>
               </div>
               <div className="rekap-item">
-                <span className="rekap-nilai" style={{ color: "var(--color-primary)" }}>
+                <span className="rekap-nilai teks-aksen">
                   {rep.tamu.kursi}
                 </span>
                 <span className="rekap-label">Pasti Hadir (Kursi)</span>
@@ -306,36 +262,18 @@ export default function HalamanBagikanPublik({
         </div>
 
         {/* Rundown Jadwal Acara */}
-        <section className="kartu" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Susunan Acara Hari-H (Rundown)</h2>
+        <section className="kartu tumpuk-sedang">
+          <h2>Susunan Acara Hari-H (Rundown)</h2>
 
           {rep.rundown.item.length > 0 ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div className="bagikan-acara">
               {rep.rundown.item.map((r) => (
-                <div
-                  key={r.id}
-                  style={{
-                    display: "flex",
-                    alignItems: "baseline",
-                    gap: 14,
-                    padding: "8px 10px",
-                    borderRadius: 4,
-                    background: "var(--color-netral)",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontWeight: 700,
-                      color: "var(--color-primary)",
-                      minWidth: 54,
-                    }}
-                  >
-                    {r.startTime}
-                  </span>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600 }}>{r.title}</div>
+                <div key={r.id} className="bagikan-acara-baris">
+                  <span className="bagikan-acara-jam">{r.startTime}</span>
+                  <div className="bagikan-acara-isi">
+                    <div className="bagikan-acara-judul">{r.title}</div>
                     {r.location ? (
-                      <div style={{ fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>
+                      <div className="bagikan-acara-ket">
                         Lokasi: {r.location} • Durasi: {r.durationMinutes} menit
                       </div>
                     ) : null}
@@ -344,44 +282,41 @@ export default function HalamanBagikanPublik({
               ))}
             </div>
           ) : (
-            <div style={{ fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>
-              Belum ada susunan acara rundown yang dimasukkan.
-            </div>
+            <p className="bagikan-kosong">Belum ada susunan acara rundown yang dimasukkan.</p>
           )}
         </section>
 
         {/* Vendor yang Belum Lunas */}
-        <section className="kartu" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Status Vendor & Tagihan</h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: "var(--text-kecil)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: "1px solid var(--color-garis)" }}>
-              <span>Total Tagihan Vendor:</span>
-              <strong><Rupiah nilai={rep.vendor.totalTagihan} /></strong>
+        <section className="kartu tumpuk-rapat">
+          <h2>Status Vendor &amp; Tagihan</h2>
+          <div className="bagikan-tabel">
+            <div className="bagikan-tabel-baris">
+              <span>Total Tagihan Vendor</span>
+              <strong>
+                <Rupiah nilai={rep.vendor.totalTagihan} />
+              </strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: "1px solid var(--color-garis)" }}>
-              <span>Sudah Dibayarkan:</span>
-              <strong style={{ color: "var(--color-primary)" }}><Rupiah nilai={rep.vendor.totalDibayar} /></strong>
+            <div className="bagikan-tabel-baris">
+              <span>Sudah Dibayarkan</span>
+              <strong className="angka teks-aksen">
+                <Rupiah nilai={rep.vendor.totalDibayar} />
+              </strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0" }}>
-              <span>Vendor Belum Lunas:</span>
-              <strong style={{ color: rep.vendor.belumLunas > 0 ? "var(--color-bata)" : "inherit" }}>
+            <div className="bagikan-tabel-baris">
+              <span>Vendor Belum Lunas</span>
+              <strong
+                className="angka"
+                data-nada={rep.vendor.belumLunas > 0 ? "bahaya" : undefined}
+              >
                 {rep.vendor.belumLunas} vendor
               </strong>
             </div>
           </div>
         </section>
 
-        {/* Catatan Kaki */}
-        <div
-          style={{
-            textAlign: "center",
-            fontSize: "12px",
-            color: "var(--color-muted)",
-            marginTop: 16,
-          }}
-        >
+        <p className="bagikan-catatan">
           Halaman ini bersifat baca-saja dan tidak dapat melakukan perubahan data.
-        </div>
+        </p>
       </div>
     </main>
   );

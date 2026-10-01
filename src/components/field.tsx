@@ -171,7 +171,7 @@ export function PilihanTombol<T extends string>({
 }) {
   return (
     <div className="isian-grup">
-      <span id={id} className="petunjuk" style={{ fontWeight: 600, color: "var(--color-ink)" }}>
+      <span id={id} className="petunjuk petunjuk-tegas">
         {label}
       </span>
       <div className="filter" role="group" aria-labelledby={id}>
@@ -182,11 +182,6 @@ export function PilihanTombol<T extends string>({
             className="tombol tombol-sekunder"
             aria-pressed={nilai === o.nilai}
             data-aktif={nilai === o.nilai ? "ya" : undefined}
-            style={
-              nilai === o.nilai
-                ? { background: "var(--color-netral)", borderColor: "var(--color-ink)" }
-                : undefined
-            }
             onClick={() => onUbah(o.nilai)}
           >
             {o.label}

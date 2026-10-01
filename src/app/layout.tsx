@@ -1,19 +1,34 @@
 import { type ReactNode } from "react";
-import { Fraunces, Public_Sans } from "next/font/google";
+import { Plus_Jakarta_Sans, Be_Vietnam_Pro } from "next/font/google";
 import { NAMA_PRODUK, NAMA_PRODUK_PENDEK } from "@/lib/konstanta";
 import "./globals.css";
+/*
+ * Aturan cetak dipisah ke berkas sendiri supaya tidak menambah bobot yang
+ * diunduh di setiap layar. Berkas ini hanya berisi blok `@media print`, jadi
+ * tidak ada aturan yang berefek sampai printer benar-benar diminta.
+ *
+ * Awalnya berkas ini sudah ada tapi tidak diimpor di mana pun, sehingga
+ * navigasi, pita luring, dan pemenggalan halaman tetap ikut tercetak.
+ */
+import "./cetak.css";
 
-const fraunces = Fraunces({
+/*
+ * Dua keluarga huruf, satu untuk judul dan satu untuk isi, sesuai DESIGN.md.
+ * Plus Jakarta Sans memegang judul dan label, Be Vietnam Pro memegang isi.
+ * Nama variabelnya tetap `--font-judul` dan `--font-teks` supaya globals.css
+ * tidak perlu tahu keluarga hurufnya apa.
+ */
+const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-fraunces",
-  axes: ["SOFT", "WONK"],
+  variable: "--font-plus-jakarta",
 });
 
-const publicSans = Public_Sans({
+const beVietnam = Be_Vietnam_Pro({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-public-sans",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-be-vietnam",
 });
 
 /**
@@ -40,8 +55,8 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 5,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#FBF9F6" },
-    { media: "(prefers-color-scheme: dark)", color: "#1C1917" },
+    { media: "(prefers-color-scheme: light)", color: "#FFFDF9" },
+    { media: "(prefers-color-scheme: dark)", color: "#1F181C" },
   ],
 };
 
@@ -61,7 +76,14 @@ const skripTema = `(function(){try{var b=localStorage,l="haribesar-tema",t=b.get
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="id" className={`${fraunces.variable} ${publicSans.variable}`}>
+    // suppressHydrationWarning: skrip tema memasang data-theme sebelum React
+    // jalan, jadi atribut di DOM tidak sama dengan hasil render server.
+    // Peringatan itu memang diharapkan di sini, bukan cacat.
+    <html
+      lang="id"
+      className={`${plusJakarta.variable} ${beVietnam.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: skripTema }} />
       </head>

@@ -9,7 +9,7 @@ export default function ErrorPage({
   reset: () => void;
 }) {
   return (
-    <main style={{ padding: "48px 16px", maxWidth: 600, margin: "0 auto" }}>
+    <main className="halaman-baca">
       <Gagal apa="Halaman" onCoba={reset} />
     </main>
   );

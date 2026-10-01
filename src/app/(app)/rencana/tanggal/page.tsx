@@ -175,10 +175,10 @@ export default function HalamanTanggal() {
   }
 
   return (
-    <div>
+    <div className="tumpuk-sedang">
       <div className="kepala-halaman">
         <div>
-          <h1 style={{ margin: 0, fontSize: "var(--text-h1)" }}>Tanggal Penting</h1>
+          <h1>Tanggal Penting</h1>
           <p>Tentukan tanggal akad, resepsi, dan rangkaian acara pernikahan.</p>
         </div>
         <div>
@@ -200,7 +200,7 @@ export default function HalamanTanggal() {
           </button>
         </Kosong>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <div className="tumpuk-rapat">
           {daftar.map((m) => {
             const selisih = selisihHari(m.eventDate);
             const statusHari =
@@ -213,90 +213,48 @@ export default function HalamanTanggal() {
                     : `${selisih} hari lagi`;
 
             return (
-              <div
+              <article
                 key={m.id}
-                className="kartu"
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 8,
-                  borderColor: m.isDayOf ? "var(--color-primary)" : undefined,
-                }}
+                className="kartu tumpuk-rapat"
+                data-sorot={m.isDayOf ? "ya" : undefined}
               >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    gap: 12,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                      <h2 style={{ margin: 0, fontSize: "var(--text-h3)" }}>{m.title}</h2>
-                      {m.isDayOf ? (
-                        <span
-                          style={{
-                            display: "inline-block",
-                            padding: "2px 8px",
-                            fontSize: "var(--text-kecil)",
-                            fontWeight: 600,
-                            borderRadius: 4,
-                            background: "var(--color-netral)",
-                            color: "var(--color-ink)",
-                          }}
-                        >
-                          Hari-H Utama
-                        </span>
-                      ) : null}
-                      <span
-                        style={{
-                          fontSize: "var(--text-kecil)",
-                          color: "var(--color-muted)",
-                        }}
-                      >
+                <div className="bagian-kepala">
+                  <div className="tumpuk-rapat isi-lentur">
+                    <div className="aksi-baris">
+                      <h2>{m.title}</h2>
+                      {m.isDayOf ? <span className="lencana lencana-aksen">Hari-H Utama</span> : null}
+                      <span className="lencana">
                         {LABEL_JENIS_TANGGAL[m.type as JenisTanggal] ?? m.type}
                       </span>
                     </div>
 
-                    <p style={{ margin: "4px 0 0", color: "var(--color-ink)" }}>
+                    <p className="paragraf-rapat">
                       {tanggalPanjangDari(m.eventDate)}
                       {m.eventTime ? ` • Jam ${m.eventTime}` : ""}
                       {statusHari ? ` (${statusHari})` : ""}
                     </p>
 
-                    {m.notes ? (
-                      <p style={{ margin: "4px 0 0", fontSize: "var(--text-kecil)", color: "var(--color-muted)" }}>
-                        {m.notes}
-                      </p>
-                    ) : null}
+                    {m.notes ? <p className="keterangan">{m.notes}</p> : null}
                   </div>
 
-                  <div style={{ display: "flex", gap: 8 }}>
+                  <div className="aksi-baris">
                     <button
                       type="button"
-                      className="tombol tombol-sekunder"
-                      style={{ minHeight: 44, padding: "0 12px", fontSize: "var(--text-kecil)" }}
+                      className="tombol tombol-sekunder tombol-kecil"
                       onClick={() => bukaUbah(m)}
                     >
                       Ubah
                     </button>
                     <button
                       type="button"
-                      className="tombol tombol-sekunder"
-                      style={{
-                        padding: "0 12px",
-                        fontSize: "var(--text-kecil)",
-                        color: "var(--color-bata)",
-                      }}
+                      className="tombol tombol-bahaya tombol-kecil"
                       onClick={() => setDihapus(m)}
                     >
                       Hapus
                     </button>
                   </div>
                 </div>
-              </div>
+              </article>
             );
           })}
         </div>
@@ -308,7 +266,7 @@ export default function HalamanTanggal() {
         judul={diedit ? "Ubah tanggal penting" : "Tambah tanggal"}
         onTutup={() => setLembarBuka(false)}
       >
-        <form onSubmit={simpan} noValidate style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <form onSubmit={simpan} noValidate className="tumpuk-sedang">
           <Isian label="Nama acara atau tanggal" id="formJudul" galat={formGalat ?? undefined}>
             <input
               id="formJudul"
@@ -351,17 +309,17 @@ export default function HalamanTanggal() {
             opsi={JENIS_TANGGAL.map((j) => ({ nilai: j, label: LABEL_JENIS_TANGGAL[j] }))}
           />
 
-          <div className="isian-grup">
-            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-              <input
-                type="checkbox"
-                checked={formHariH}
-                onChange={(e) => setFormHariH(e.target.checked)}
-                style={{ width: 18, height: 18 }}
-              />
-              <span>Jadikan Hari-H Utama (dipakai untuk hitung mundur di Beranda)</span>
-            </label>
-          </div>
+          <label className="pilih-kartu pilih-kartu-tengah" data-aktif="tidak">
+            <input
+              type="checkbox"
+              checked={formHariH}
+              onChange={(e) => setFormHariH(e.target.checked)}
+            />
+            <div className="pilih-kartu-isi">
+              <div className="pilih-kartu-judul">Jadikan Hari-H Utama</div>
+              <div className="pilih-kartu-ket">Dipakai untuk hitung mundur di Beranda.</div>
+            </div>
+          </label>
 
           <Isian label="Catatan atau lokasi" id="formCatatan">
             <textarea
@@ -374,7 +332,7 @@ export default function HalamanTanggal() {
             />
           </Isian>
 
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
+          <div className="dialog-tombol">
             <button
               type="button"
               className="tombol tombol-sekunder"

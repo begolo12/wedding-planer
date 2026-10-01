@@ -13,7 +13,6 @@ export function TabRencana() {
   const tabList = [
     { href: "/rencana", label: "Tugas" },
     { href: "/rencana/tanggal", label: "Tanggal penting" },
-    { href: "/hari-h", label: "Rundown Hari-H" },
     { href: "/rencana/plan", label: "Rincian acara" },
     { href: "/rencana/vendor", label: "Vendor" },
     { href: "/rencana/info", label: "Info keluarga" },
@@ -21,7 +20,7 @@ export function TabRencana() {
   ];
 
   return (
-    <nav className="tab" aria-label="Modul Rencana" style={{ marginBottom: 16 }}>
+    <nav className="tab tab-berjarak" aria-label="Modul Rencana">
       {tabList.map((t) => (
         <Link
           key={t.href}

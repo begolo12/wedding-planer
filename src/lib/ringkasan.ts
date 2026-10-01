@@ -1,6 +1,6 @@
 import { and, asc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { budgetItems, milestones, payments, plans, tasks, vendors } from "@/db/schema";
+import { budgetItems, guests, milestones, payments, plans, tasks, vendors } from "@/db/schema";
 import { kelompokkan, tanggalHariBesar, type KelompokWaktu } from "./plan";
 import { belumSelesai } from "./server-plan";
 import { hitungMundur, selisihHari } from "./format";
@@ -23,6 +23,16 @@ export type TugasRingkas = {
   kelompok: KelompokWaktu;
 };
 
+/** Satu vendor untuk kartu "Vendor Utama" di Beranda. Tanpa logo, hanya data
+ * yang benar benar tersimpan: nama, kategori, dan nomor telepon. */
+export type VendorRingkas = {
+  id: string;
+  name: string;
+  category: string;
+  phone: string | null;
+  status: string;
+};
+
 export type RingkasanPlan = {
   plan: {
     id: string;
@@ -38,6 +48,19 @@ export type RingkasanPlan = {
   jumlahTugas: { total: number; selesai: number; lewat: number; tanpaTenggat: number };
   uang: { planned: number; paid: number; remaining: number };
   jumlahVendor: number;
+  /** Tiga vendor pertama, untuk kartu "Vendor Utama". */
+  vendorUtama: VendorRingkas[];
+  /** Ringkasan tamu untuk kartu "Konfirmasi Tamu". Kursi = jumlah orang pada
+   * tamu berstatus hadir, orang = perkiraan kursi kalau semua yang belum
+   * menjawab ikut hadir. */
+  tamu: {
+    baris: number;
+    orang: number;
+    kursi: number;
+    tidakHadir: number;
+    belumKonfirmasi: number;
+    belumDiundang: number;
+  };
   tanggalBerikut: {
     id: string;
     title: string;
@@ -52,7 +75,7 @@ export async function ringkasanPlan(planId: string): Promise<RingkasanPlan> {
   const [plan] = await db.select().from(plans).where(eq(plans.id, planId)).limit(1);
 
   // Semua query di bawah punya filter planId, sesuai aturan AGENTS.md bagian 5.
-  const [semuaTugas, posAnggaran, semuaPembayaran, daftarMilestone, semuaVendor] =
+  const [semuaTugas, posAnggaran, semuaPembayaran, daftarMilestone, daftarVendor, ringkasTamu] =
     await Promise.all([
       db
         .select({
@@ -90,7 +113,30 @@ export async function ringkasanPlan(planId: string): Promise<RingkasanPlan> {
         .from(milestones)
         .where(eq(milestones.planId, planId))
         .orderBy(asc(milestones.eventDate)),
-      db.select({ id: vendors.id }).from(vendors).where(eq(vendors.planId, planId)),
+      db
+        .select({
+          id: vendors.id,
+          name: vendors.name,
+          category: vendors.category,
+          phone: vendors.phone,
+          status: vendors.status,
+        })
+        .from(vendors)
+        .where(eq(vendors.planId, planId))
+        .orderBy(asc(vendors.name)),
+      // Satu agregat untuk seluruh tamu, sama seperti endpoint /guests, supaya
+      // angka kartu Beranda tidak mungkin berbeda dengan halaman Tamu.
+      db
+        .select({
+          baris: sql<number>`count(*)::int`,
+          orang: sql<number>`coalesce(sum(${guests.guestCount}), 0)::int`,
+          kursi: sql<number>`coalesce(sum(case when ${guests.rsvpStatus} = 'hadir' then ${guests.guestCount} else 0 end), 0)::int`,
+          tidakHadir: sql<number>`coalesce(sum(case when ${guests.rsvpStatus} = 'tidak' then ${guests.guestCount} else 0 end), 0)::int`,
+          belumKonfirmasi: sql<number>`coalesce(sum(case when ${guests.rsvpStatus} = 'belum' then ${guests.guestCount} else 0 end), 0)::int`,
+          belumDiundang: sql<number>`coalesce(sum(case when ${guests.invitedAt} is null then ${guests.guestCount} else 0 end), 0)::int`,
+        })
+        .from(guests)
+        .where(eq(guests.planId, planId)),
     ]);
 
   // Milestone yang ditandai hari-H lebih dipercaya daripada tanggal di plan.
@@ -162,7 +208,22 @@ export async function ringkasanPlan(planId: string): Promise<RingkasanPlan> {
       tanpaTenggat: belumBeres.filter((t) => !t.dueDate).length,
     },
     uang: { planned, paid, remaining: planned - paid },
-    jumlahVendor: semuaVendor.length,
+    jumlahVendor: daftarVendor.length,
+    vendorUtama: daftarVendor.slice(0, 3).map((v) => ({
+      id: v.id,
+      name: v.name,
+      category: v.category,
+      phone: v.phone ?? null,
+      status: v.status,
+    })),
+    tamu: {
+      baris: ringkasTamu[0]?.baris ?? 0,
+      orang: ringkasTamu[0]?.orang ?? 0,
+      kursi: ringkasTamu[0]?.kursi ?? 0,
+      tidakHadir: ringkasTamu[0]?.tidakHadir ?? 0,
+      belumKonfirmasi: ringkasTamu[0]?.belumKonfirmasi ?? 0,
+      belumDiundang: ringkasTamu[0]?.belumDiundang ?? 0,
+    },
     tanggalBerikut: berikut
       ? {
           id: berikut.id,

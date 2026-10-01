@@ -66,6 +66,32 @@ export const GET = bungkus(async (req: Request, { params }: Params) => {
     .from(guests)
     .where(eq(guests.planId, planId));
 
+  // Jumlah undangan per kategori, dipakai oleh chip saringan di layar tamu.
+  // Dihitung di server karena chip perlu angkanya sebelum diklik, dan angka
+  // yang dihitung dari hasil saringan akan berubah setiap kali difilter.
+  const perKategori = await db
+    .select({
+      kategori: guests.category,
+      baris: sql<number>`count(*)::int`,
+      orang: sql<number>`coalesce(sum(${guests.guestCount}), 0)::int`,
+    })
+    .from(guests)
+    .where(eq(guests.planId, planId))
+    .groupBy(guests.category);
+
+  // Sebaran undangan per meja. Yang belum dialokasikan ikut, supaya pasangan
+  // tahu berapa yang masih menggantung.
+  const perMeja = await db
+    .select({
+      meja: guests.tableName,
+      baris: sql<number>`count(*)::int`,
+      orang: sql<number>`coalesce(sum(${guests.guestCount}), 0)::int`,
+    })
+    .from(guests)
+    .where(eq(guests.planId, planId))
+    .groupBy(guests.tableName)
+    .orderBy(asc(guests.tableName));
+
   return NextResponse.json({
     guests: daftar,
     summary: {
@@ -78,6 +104,8 @@ export const GET = bungkus(async (req: Request, { params }: Params) => {
       // Tabungan: jumlah orang kalau semua yang belum konfirmasi akhirnya
       // datang. Ini angka yang dipakai untuk memesan kursi cadangan.
       perkiraanMaksimal: rekap?.orang ?? 0,
+      perKategori,
+      perMeja,
     },
   });
 });

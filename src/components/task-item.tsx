@@ -92,16 +92,7 @@ export function TaskItem({
         {onBuka ? (
           <button
             type="button"
-            className="baris-judul"
-            style={{
-              background: "none",
-              border: 0,
-              padding: 0,
-              textAlign: "left",
-              color: "inherit",
-              font: "inherit",
-              cursor: "pointer",
-            }}
+            className="baris-judul tombol-polos"
             onClick={() => onBuka(tugas)}
           >
             {tugas.title}
