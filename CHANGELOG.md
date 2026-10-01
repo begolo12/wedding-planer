@@ -27,6 +27,18 @@ Aturan singkat:
 | Tulis alasan kalau tidak jelas | Pembaca versi berikutnya tidak perlu menebak |
 | Tambah entri baru di atas | Yang terbaru selalu di paling atas |
 
+## [0.6.5] - 1 Oktober 2026
+
+Peningkatan visual dan pengalaman layar masuk (login) dan daftar akun dengan fokus mobile 1st.
+
+#### Ubah
+
+- Tata letak layar auth dengan navigasi atas minimalis untuk kembali ke beranda dan pengalih mode gelap/terang
+- Monogram emblem cincin pernikahan dan hierarki tipografi Fraunces di kartu masuk
+- Tombol lihat kata sandi interaktif di dalam kolom isian tanpa pergeseran tata letak dan target sentuh 44x44px
+- Indikator putaran memuat saat tombol kirim ditekan untuk umpan balik responsif
+- Isian formulir dengan optimasi masukan ponsel (tipe surel, autokoreksi mati, petunjuk yang jelas)
+
 ---
 
 ## [0.6.4] - 1 Oktober 2026

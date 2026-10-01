@@ -1047,35 +1047,191 @@ textarea.isian {
   color: var(--color-muted);
 }
 
-/* Layar masuk dan daftar. Satu kartu di tengah, tanpa sisa menu. */
+/* Layar masuk dan daftar. Satu kartu di tengah, dengan navigasi atas minimalis. */
 .layar-auth {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  padding: 24px 16px;
+  min-height: 100dvh;
+  padding: 16px;
   background: var(--color-netral);
 }
 
-.auth-kartu {
+.auth-kontainer {
   width: min(420px, 100%);
-  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-navigasi-atas {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+.auth-tautan-balik {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-kecil);
+  font-weight: 600;
+  color: var(--color-muted);
+  text-decoration: none;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.auth-tautan-balik:hover {
+  color: var(--color-ink);
+}
+
+.auth-kartu {
+  padding: 28px 24px;
   background: var(--color-base);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-panel);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-ink) 4%, transparent);
 }
 
-.auth-merek {
-  display: block;
+@media (min-width: 480px) {
+  .auth-kartu {
+    padding: 32px 28px;
+  }
+}
+
+.auth-kepala {
   margin-bottom: 24px;
 }
 
-.auth-nama {
-  display: block;
+.auth-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.auth-emblem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: var(--color-netral);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-kartu);
+  flex-shrink: 0;
+}
+
+.auth-merek-teks {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-merek-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  font-weight: 600;
+}
+
+.auth-merek-judul {
+  font-family: var(--font-judul);
+  font-size: var(--text-h3);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--color-ink);
+}
+
+.auth-judul-blok {
+  margin-bottom: 20px;
+}
+
+.auth-judul {
   font-family: var(--font-judul);
   font-size: var(--text-h2);
   font-weight: 600;
   line-height: 1.2;
+  margin: 0;
+}
+
+.auth-subjudul {
+  margin: 6px 0 0;
+  font-size: var(--text-kecil);
+  color: var(--color-muted);
+  line-height: 1.45;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-sandi-bungkus {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.auth-sandi-bungkus .isian {
+  padding-right: 48px;
+}
+
+.auth-tombol-mata {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--color-muted);
+  cursor: pointer;
+  border-radius: var(--radius-kontrol);
+}
+
+.auth-tombol-mata:hover {
+  color: var(--color-ink);
+}
+
+.auth-tombol-mata:focus-visible {
+  outline: 2px solid var(--color-marigold);
+  outline-offset: -2px;
+}
+
+.auth-tombol-kirim {
+  min-height: 48px;
+  font-size: var(--text-base);
+  margin-top: 4px;
+}
+
+.auth-loading-teks {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.auth-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: putar-spinner 0.75s linear infinite;
+}
+
+@keyframes putar-spinner {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .auth-kaki {
@@ -1090,6 +1246,20 @@ textarea.isian {
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+.auth-keterangan-bawah {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: var(--color-muted);
+  padding: 4px 0;
+}
+
+.titik-pemisah {
+  opacity: 0.6;
 }
 
 /* Hitung mundur. Angka paling besar di seluruh aplikasi, karena ini yang
