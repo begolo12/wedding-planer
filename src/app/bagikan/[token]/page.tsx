@@ -8,7 +8,7 @@ import { BudgetBar } from "@/components/budget-bar";
 import { Rupiah } from "@/components/rupiah";
 import type { Laporan } from "@/lib/laporan";
 import { LABEL_AUDIEN, type Audien } from "@/lib/konstanta";
-import { tanggalPanjangDari } from "@/lib/format";
+import { tanggalPanjangDari, jamDari } from "@/lib/format";
 
 type ResponBagikan = {
   tipe: "laporan" | "pengumuman";
@@ -289,7 +289,7 @@ export default function HalamanBagikanPublik({
             <div className="bagikan-acara">
               {rep.rundown.item.map((r) => (
                 <div key={r.id} className="bagikan-acara-baris">
-                  <span className="bagikan-acara-jam">{r.startTime}</span>
+                  <span className="bagikan-acara-jam">{jamDari(r.startTime)}</span>
                   <div className="bagikan-acara-isi">
                     <div className="bagikan-acara-judul">{r.title}</div>
                     {r.location ? (

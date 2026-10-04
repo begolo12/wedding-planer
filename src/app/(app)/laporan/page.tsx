@@ -8,7 +8,7 @@ import { Kerangka, Kosong, Gagal } from "@/components/states";
 import { BudgetBar } from "@/components/budget-bar";
 import { Rupiah } from "@/components/rupiah";
 import { LABEL_KATEGORI_TAMU, NAMA_PRODUK, type KategoriTamu } from "@/lib/konstanta";
-import { tanggalPanjangDari, tanggalPendekDari } from "@/lib/format";
+import { tanggalPanjangDari, tanggalPendekDari, jamDari } from "@/lib/format";
 import type { Laporan } from "@/lib/laporan";
 
 /**
@@ -82,7 +82,10 @@ export default function HalamanLaporan() {
           keadaan="Belum ada isi untuk dilaporkan."
           jalanKeluar="Isi dulu tugas, anggaran, atau tamu, lalu laporan ini terisi sendiri dari data itu."
         >
-          <Link className="tombol tombol-utama" href="/rencana">
+          {/* Keadaan kosong ini memuat satu ajakan saja, jadi tombolnya
+              sekunder: layar ini tidak punya kepala halaman dan tidak boleh
+              punya dua tombol utama (DESIGN.md komposisi desktop poin 11). */}
+          <Link className="tombol tombol-sekunder" href="/rencana">
             Mulai isi rencana
           </Link>
         </Kosong>
@@ -340,7 +343,7 @@ export default function HalamanLaporan() {
 
             <p className="keterangan">
               {rep.rundown.total > 0
-                ? `${rep.rundown.total} acara terdaftar, mulai ${rep.rundown.jamMulai ?? "-"} sampai ${rep.rundown.jamSelesai ?? "-"}`
+                ? `${rep.rundown.total} acara terdaftar, mulai ${jamDari(rep.rundown.jamMulai)} sampai ${jamDari(rep.rundown.jamSelesai)}`
                 : "Belum ada susunan acara rundown."}
             </p>
 
@@ -348,7 +351,7 @@ export default function HalamanLaporan() {
               <div className="tumpuk-rapat">
                 {rep.rundown.item.slice(0, 5).map((r) => (
                   <div className="butir" key={r.id}>
-                    <span className="lencana lencana-aksen angka">{r.startTime}</span>
+                    <span className="lencana lencana-aksen angka">{jamDari(r.startTime)}</span>
                     <div className="butir-isi">
                       <div className="butir-judul">{r.title}</div>
                       {r.location ? <div className="butir-ket">{r.location}</div> : null}
@@ -459,7 +462,7 @@ export default function HalamanLaporan() {
             >
               Cetak laporan
             </button>
-            <Link className="tombol tombol-utama" href="/laporan/bagikan">
+            <Link className="tombol tombol-sekunder" href="/laporan/bagikan">
               Bagikan ke WhatsApp
             </Link>
           </div>

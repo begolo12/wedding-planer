@@ -174,7 +174,8 @@ export default function HalamanImporTamu() {
       </div>
 
       {langkah === 1 ? (
-        <form onSubmit={periksaDaftar} noValidate className="kartu tumpuk-sedang">
+        <div className="grid-daftar">
+          <form onSubmit={periksaDaftar} noValidate className="kartu">
           <Pilih
             label="Kategori untuk tamu yang diimpor"
             id="kategoriImpor"
@@ -220,27 +221,43 @@ export default function HalamanImporTamu() {
             </button>
           </div>
         </form>
-      ) : (
-        <div className="tumpuk-sedang">
-          <div className="rekap">
-            <div className="rekap-item">
-              <span className="rekap-nilai">{preview.length}</span>
-              <span className="rekap-label">Baris terbaca</span>
-            </div>
-            <div className="rekap-item">
-              <span className="rekap-nilai teks-aksen">
-                {dipilih.size}
-              </span>
-              <span className="rekap-label">Dipilih untuk disimpan</span>
-            </div>
-            <div className="rekap-item">
-              <span className="rekap-nilai teks-bahaya">
-                {preview.filter((p) => p.kembar).length}
-              </span>
-              <span className="rekap-label">Nama kembar (dilewati)</span>
-            </div>
-          </div>
 
+          {/* Rel kanan: format yang dibaca layar ini. Isi rel hanya
+              ringkasan atau aksi cepat (DESIGN.md komposisi desktop poin 3),
+              jadi penjelasan format ditaruh di sini, bukan di bawah form
+              supaya baris isian tidak melebar penuh di desktop. */}
+          <aside className="rel-samping">
+            <div className="kartu tumpuk-rapat">
+              <h2 className="label-bagian">Yang bisa ditempel</h2>
+              <ul className="daftar-butir">
+                <li>Satu nama per baris, atau nama dipisah koma.</li>
+                <li>
+                  Boleh sekalian jumlah orang, misalnya:
+                  <br />
+                  <code>Bpk. Danu &amp; Ibu, 2</code>
+                </li>
+                <li>
+                  Boleh cuma nama. Jumlahnya otomatis dihitung satu orang.
+                </li>
+                <li>
+                  Nomor WhatsApp yang menempel di belakang nama ikut dipisah
+                  dan disimpan.
+                </li>
+                <li>Nama yang sudah ada di daftar ditandai, tidak disimpan dua kali.</li>
+              </ul>
+              <p className="keterangan">
+                Tidak ada yang tersimpan sebelum kamu memeriksa dan menekan
+                tombol simpan di langkah dua.
+              </p>
+            </div>
+          </aside>
+        </div>
+      ) : (
+        <div className="grid-daftar">
+          {/* Kolom utama: pilihan dan daftar pratinjau. Angka rekap dan
+              tombol simpan pindah ke rel kanan supaya angka dan tindakannya
+              tidak terpisah (DESIGN.md komposisi desktop poin 3). */}
+          <div className="tumpuk-rapat">
           <label className="pilih-kartu">
             <input
               type="checkbox"
@@ -290,25 +307,51 @@ export default function HalamanImporTamu() {
             ))}
           </div>
 
-          <div className="aksi-baris" data-ratakan="antara">
-            <button
-              type="button"
-              className="tombol tombol-sekunder"
-              onClick={() => setLangkah(1)}
-            >
-              ← Ubah teks masukan
-            </button>
-            <button
-              type="button"
-              className="tombol tombol-utama"
-              disabled={sedangSimpan || dipilih.size === 0}
-              onClick={simpanHasil}
-            >
-              {sedangSimpan
-                ? "Menyimpan ke daftar tamu..."
-                : `Simpan ${dipilih.size} tamu ke daftar`}
-            </button>
           </div>
+
+          <aside className="rel-samping">
+            <div className="rekap rekap-tiga">
+              <div className="rekap-item">
+                <span className="rekap-nilai">{preview.length}</span>
+                <span className="rekap-label">Baris terbaca</span>
+              </div>
+              <div className="rekap-item">
+                <span className="rekap-nilai teks-aksen">
+                  {dipilih.size}
+                </span>
+                <span className="rekap-label">Dipilih untuk disimpan</span>
+              </div>
+              <div className="rekap-item">
+                <span className="rekap-nilai teks-bahaya">
+                  {preview.filter((p) => p.kembar).length}
+                </span>
+                <span className="rekap-label">Nama kembar (dilewati)</span>
+              </div>
+            </div>
+
+            {/* Tombol simpan menumpuk penuh di rel supaya angka rekap dan
+                tindakannya satu pandangan. Di mobile rel turun ke bawah
+                daftar, jadi tombol tetap di akhir alur. */}
+            <div className="tumpuk-rapat">
+              <button
+                type="button"
+                className="tombol tombol-utama tombol-lebar"
+                disabled={sedangSimpan || dipilih.size === 0}
+                onClick={simpanHasil}
+              >
+                {sedangSimpan
+                  ? "Menyimpan ke daftar tamu..."
+                  : `Simpan ${dipilih.size} tamu ke daftar`}
+              </button>
+              <button
+                type="button"
+                className="tombol tombol-sekunder tombol-lebar"
+                onClick={() => setLangkah(1)}
+              >
+                ← Ubah teks masukan
+              </button>
+            </div>
+          </aside>
         </div>
       )}
     </div>

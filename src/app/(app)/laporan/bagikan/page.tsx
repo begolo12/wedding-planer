@@ -200,8 +200,10 @@ export default function HalamanBagikanLaporan() {
       <div className="kisi-kartu">
         {/* Kolom Kiri: Pilihan Konten */}
         <div className="tumpuk-sedang">
-          <section className="kartu tumpuk-rapat">
-            <h2>Pilihan Format Teks</h2>
+          <section className="panel-daftar" aria-label="Pilihan format teks">
+            <div className="panel-daftar-kepala">
+              <h2>Pilihan Format Teks</h2>
+            </div>
 
             <div className="tumpuk-rapat">
               <label className="pilih-kartu" data-aktif={varian === "ringkas" ? "ya" : "tidak"}>
@@ -344,15 +346,25 @@ export default function HalamanBagikanLaporan() {
 
         {/* Kolom Kanan: Pratinjau Teks WhatsApp */}
         <div className="tumpuk-sedang">
-          <section className="kartu tumpuk-rapat">
-            <div className="bagian-kepala">
-              <h2>Yang akan dikirim</h2>
-              <span
-                className="angka penghitung"
-                data-nada={panjangTeks > batasTeks ? "bahaya" : undefined}
+          <section className="panel-daftar" aria-label="Pratinjau teks WhatsApp">
+            <div className="panel-daftar-kepala">
+              <div className="bagian-kepala">
+                <h2>Yang akan dikirim</h2>
+                <span
+                  className="angka penghitung"
+                  data-nada={panjangTeks > batasTeks ? "bahaya" : undefined}
+                >
+                  {panjangTeks} / {batasTeks} karakter
+                </span>
+              </div>
+              <a
+                className="tombol tombol-utama"
+                href={urlWa || `https://wa.me/?text=${encodeURIComponent(teksHasil)}`}
+                target="_blank"
+                rel="noreferrer"
               >
-                {panjangTeks} / {batasTeks} karakter
-              </span>
+                Buka WhatsApp →
+              </a>
             </div>
 
             {terpotong ? (
@@ -365,7 +377,7 @@ export default function HalamanBagikanLaporan() {
               {sedangMenyusun ? "Menyusun teks terbaru..." : teksHasil}
             </div>
 
-            <div className="aksi-baris" data-bagi="ya">
+            <div className="aksi-baris">
               <button
                 type="button"
                 className="tombol tombol-sekunder"
@@ -373,15 +385,6 @@ export default function HalamanBagikanLaporan() {
               >
                 Salin Teks
               </button>
-
-              <a
-                className="tombol tombol-utama"
-                href={urlWa || `https://wa.me/?text=${encodeURIComponent(teksHasil)}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Buka WhatsApp →
-              </a>
             </div>
           </section>
         </div>

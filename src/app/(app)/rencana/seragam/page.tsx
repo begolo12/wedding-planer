@@ -298,7 +298,12 @@ export default function HalamanSeragam() {
         </div>
       </div>
 
+      {/* Satu panel untuk tab modul, ringkasan, saringan, daftar busana, dan
+          keadaan kosongnya (DESIGN.md komposisi desktop poin 5 dan 6). */}
+      <div className="panel-daftar" aria-label="Daftar barang busana">
+        <div className="panel-daftar-kepala">
       <TabRencana />
+        </div>
 
       {dariPerangkat ? (
         <p className="keterangan">
@@ -363,7 +368,7 @@ export default function HalamanSeragam() {
           {bisaUbah ? (
             <button
               type="button"
-              className="tombol tombol-utama"
+              className="tombol tombol-sekunder"
               disabled={!anggaranSiap || summary.estimatedCost <= 0 || sedangMasukkan}
               onClick={() => setBukaMasukkanAnggaran(true)}
             >
@@ -424,7 +429,7 @@ export default function HalamanSeragam() {
           jalanKeluar="Tambahkan baju yang perlu dijahit atau disewa."
         >
           {bisaUbah ? (
-            <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
+            <button type="button" className="tombol tombol-sekunder" onClick={bukaTambah}>
               Tambah barang
             </button>
           ) : null}
@@ -550,6 +555,8 @@ export default function HalamanSeragam() {
           })}
         </div>
       )}
+      </div>
+      {/* Akhir panel barang busana */}
 
       {/* Lembar Tambah / Ubah */}
       <Lembar

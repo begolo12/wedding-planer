@@ -27,6 +27,34 @@ Aturan singkat:
 | Tulis alasan kalau tidak jelas | Pembaca versi berikutnya tidak perlu menebak |
 | Tambah entri baru di atas | Yang terbaru selalu di paling atas |
 
+## [0.16.0] - 4 Oktober 2026
+
+Putaran ini memperbaiki komposisi tampilan di layar lebar. Owner produk melaporkan halaman Rencana di desktop terlihat setengah jadi: kolom konten hanya memakai sekitar 830px dari 1568px, keadaan kosong melayang di tengah sementara saringan rata kiri, dan dua tombol untuk aksi yang sama. Aturan komposisi desktop sekarang ditulis di `DESIGN.md` bagian 5 dan berlaku seragam.
+
+### Tambah
+
+- Kepala halaman seragam di setiap layar: satu judul, satu kalimat pengantar, dan satu tombol utama rata kanan
+- Kepala aplikasi di atas isi: lambang, nama produk, tombol tema, dan tautan Akun
+- Panel daftar tunggal per layar, memuat tab, saringan, daftar, dan keadaan kosong dalam satu wadah
+- Varian dua kolom untuk `/masuk` dan `/daftar` mulai 1023px, kepala di kiri dan kartu form di kanan
+- Kelompok tugas baru "Setelah minggu ini", supaya tugas bertenggat di masa depan tidak lagi salah berlabel "Belum ada tenggat"
+- Tombol konfirmasi pada dialog yang menghapus atau mencabut memakai warna status, bukan warna aksen
+- Sakelar nyala/mati menggantikan tombol berbentuk campuran pada "Tampilkan selesai"
+
+### Ubah
+
+- Kontainer 1200px di tengah dan kolom isi mengisi sisa lebar: pada 1568px lebar terpakai naik dari 1060px ke 1185px (diukur)
+- Keadaan kosong dan keadaan gagal rata kiri di dalam panel, tidak lagi mengambang di tengah kanvas
+- Tab aktif dan pil saring aktif memakai pembalikan tinta, sehingga aksen per layar turun menjadi dua bidang
+- Satu tombol utama per aksi per layar: tombol melayang disembunyikan di desktop, dan ajakan di keadaan kosong menjadi sekunder
+- Jam rundown dan jam ringkasan laporan dicetak sebagai "08.00", bukan "08:00:00"
+- Daftar panjang dan tabel laporan memakai panel, bukan melebar penuh di desktop
+
+### Perbaiki
+
+- Tugas dengan tenggat setelah pekan ini tidak lagi muncul di bawah judul "Belum ada tenggat"
+- Sisa dari pembatalan: tombol konfirmasi pada dialog sempat memakai gaya utama untuk dua pekerjaan sekaligus
+
 ## [0.15.1] - 4 Oktober 2026
 
 ### Ubah

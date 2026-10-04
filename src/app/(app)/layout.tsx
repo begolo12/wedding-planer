@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
-import { NavBawah, NavSisi } from "@/components/nav";
+import { KepalaApp, NavBawah, NavSisi } from "@/components/nav";
 import { ToastHost } from "@/components/toast";
 import { LuringBanner } from "@/components/luring-banner";
 import { DaftarServiceWorker, InstallPrompt } from "@/components/pwa";
@@ -29,6 +29,7 @@ export default async function LayoutApp({ children }: { children: ReactNode }) {
       <div className="isi-app">
         <LuringBanner />
         <InstallPrompt />
+        <KepalaApp />
         <main className="bungkus" id="konten">
           {children}
         </main>

@@ -40,7 +40,13 @@ export function teksHitungMundur(tanggal: string | null): string | null {
  * pengelompokannya persis sama. Minggu dihitung sampai hari Minggu, bukan
  * tujuh hari ke depan, karena orang berpikir dalam minggu kalender.
  */
-export type KelompokWaktu = "lewat" | "hariIni" | "mingguIni" | "tanpaTenggat" | "selesai";
+export type KelompokWaktu =
+  | "lewat"
+  | "hariIni"
+  | "mingguIni"
+  | "setelahMingguIni"
+  | "tanpaTenggat"
+  | "selesai";
 
 export function kelompokkan(tanggal: string | null, status: string): KelompokWaktu {
   if (status === "selesai") return "selesai";
@@ -49,13 +55,20 @@ export function kelompokkan(tanggal: string | null, status: string): KelompokWak
   if (selisih === null) return "tanpaTenggat";
   if (selisih < 0) return "lewat";
   if (selisih === 0) return "hariIni";
-  return tanggal <= akhirMingguIni() ? "mingguIni" : "tanpaTenggat";
+  return tanggal <= akhirMingguIni() ? "mingguIni" : "setelahMingguIni";
 }
 
+/**
+ * Label tiap kelompok. "Belum ada tenggat" hanya untuk tugas yang benar-benar
+ * tidak punya tanggal. Sebelumnya tugas bertenggat jauh juga masuk ke sana,
+ * jadi baris bertanggal muncul di bawah judul "Belum ada tenggat" dan judulnya
+ * berbohong.
+ */
 export const LABEL_KELOMPOK: Record<KelompokWaktu, string> = {
   lewat: "Lewat jatuh tempo",
   hariIni: "Hari ini",
   mingguIni: "Minggu ini",
+  setelahMingguIni: "Setelah minggu ini",
   tanpaTenggat: "Belum ada tenggat",
   selesai: "Sudah selesai",
 };
@@ -64,6 +77,7 @@ export const URUTAN_KELOMPOK: KelompokWaktu[] = [
   "lewat",
   "hariIni",
   "mingguIni",
+  "setelahMingguIni",
   "tanpaTenggat",
   "selesai",
 ];

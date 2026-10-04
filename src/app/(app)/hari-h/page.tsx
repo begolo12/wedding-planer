@@ -9,7 +9,7 @@ import { Kerangka, Kosong, Gagal } from "@/components/states";
 import { Lembar, DialogKonfirmasi, toast } from "@/components/toast";
 import { Isian, Pilih } from "@/components/field";
 import { minta, pesanGalat } from "@/lib/api-client";
-import { hitungMundur, jamSelesai, hariIni } from "@/lib/format";
+import { hitungMundur, jamDari, jamSelesai, hariIni } from "@/lib/format";
 import { ZONA } from "@/lib/konstanta";
 import { TEMPLATE_RUNDOWN, NAMA_ADAT } from "@/lib/template";
 import type { rundownItems } from "@/db/schema";
@@ -333,7 +333,7 @@ export default function HalamanHariH() {
       "",
       ...items.map(
         (it) =>
-          `• *${it.startTime}* (${it.durationMinutes ?? 0} mnt) - ${it.title}${
+          `• *${jamDari(it.startTime)}* (${it.durationMinutes ?? 0} mnt) - ${it.title}${
             it.location ? `\n  Lokasi: ${it.location}` : ""
           }${it.picName ? `\n  PIC: ${it.picName}` : ""}${
             it.notes ? `\n  Catatan: ${it.notes}` : ""
@@ -364,7 +364,21 @@ export default function HalamanHariH() {
 
   return (
     <div className="hari-h">
-      <h1 className="sr-only">Rundown acara</h1>
+      {/* Kepala halaman: judul di kiri, satu aksi utama di kanan. "Tambah
+          acara" dipindah ke sini dari toolbar supaya layar ini punya satu
+          tombol utama saja (DESIGN.md komposisi desktop poin 11). */}
+      <div className="kepala-halaman">
+        <div>
+          <h1>Rundown hari-H</h1>
+          <p>Urutan acara dari persiapan sampai acaranya selesai, lengkap dengan jamnya.</p>
+        </div>
+        {bisaUbah ? (
+          <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
+            <IkonTambah />
+            Tambah acara
+          </button>
+        ) : null}
+      </div>
 
       <section className="hari-h-ringkas">
         <div className="hari-h-ringkas-atas">
@@ -380,7 +394,7 @@ export default function HalamanHariH() {
               <p className="hari-h-ringkas-ket">
                 {items.length === 0
                   ? "Belum ada acara tersusun. Pasang template atau susun satu per satu."
-                  : `${items.length} acara tersusun, dari jam ${items[0].startTime} sampai jam ${items[items.length - 1].startTime}.`}
+                  : `${items.length} acara tersusun, dari jam ${jamDari(items[0].startTime)} sampai jam ${jamDari(items[items.length - 1].startTime)}.`}
               </p>
             </div>
           </div>
@@ -443,16 +457,6 @@ export default function HalamanHariH() {
               </button>
             </>
           ) : null}
-          {bisaUbah ? (
-            <button
-              type="button"
-              className="hari-h-tombol hari-h-tombol-utama"
-              onClick={bukaTambah}
-            >
-              <IkonTambah />
-              Tambah acara
-            </button>
-          ) : null}
         </div>
       </section>
 
@@ -479,19 +483,19 @@ export default function HalamanHariH() {
                   onUbah={setAdat}
                   opsi={NAMA_ADAT.map((n) => ({ nilai: n, label: n }))}
                 />
+                {/* Kepala halaman sudah memakai tombol utama "Tambah acara".
+                    Memasang template dan menyusun manual adalah dua cara
+                    berbeda menuju rundown pertama, jadi keduanya sekunder
+                    (DESIGN.md komposisi desktop poin 11). */}
                 <button
                   type="button"
-                  className="hari-h-tombol hari-h-tombol-utama"
+                  className="tombol tombol-sekunder"
                   disabled={sedangPasangTemplate}
                   onClick={pasangTemplateStandar}
                 >
                   {sedangPasangTemplate ? "Memasang..." : "Pakai template rundown"}
                 </button>
-                <button
-                  type="button"
-                  className="hari-h-tombol hari-h-tombol-halus"
-                  onClick={bukaTambah}
-                >
+                <button type="button" className="tombol tombol-halus" onClick={bukaTambah}>
                   Buat manual dari awal
                 </button>
               </>
@@ -500,21 +504,28 @@ export default function HalamanHariH() {
         </Kosong>
       ) : (
         <>
-          <nav className="hari-h-lompat tanpa-cetak" aria-label="Lompat ke acara">
-            <span className="hari-h-lompat-label">Lompat ke jam</span>
-            <div className="hari-h-lompat-pil-daftar">
-              {items.map((it) => (
-                <a
-                  key={it.id}
-                  className="hari-h-lompat-pil"
-                  data-aktif={it.id === idSekarang ? "ya" : "tidak"}
-                  href={`#acara-${it.id}`}
-                >
-                  {it.startTime}
-                </a>
-              ))}
+          {/* Satu panel untuk lompat jam dan daftar acara, supaya keadaan
+              kosong tidak lagi mengambang di kanvas kosong
+              (DESIGN.md komposisi desktop poin 5 dan 6). */}
+          <div className="panel-daftar" aria-label="Daftar acara rundown">
+            <div className="panel-daftar-kepala">
+              <h2 className="label-bagian">Susunan Acara</h2>
+              <nav className="hari-h-lompat tanpa-cetak" aria-label="Lompat ke acara">
+                <span className="hari-h-lompat-label">Lompat ke jam</span>
+                <div className="hari-h-lompat-pil-daftar">
+                  {items.map((it) => (
+                    <a
+                      key={it.id}
+                      className="hari-h-lompat-pil"
+                      data-aktif={it.id === idSekarang ? "ya" : "tidak"}
+                      href={`#acara-${it.id}`}
+                    >
+                      {jamDari(it.startTime)}
+                    </a>
+                  ))}
+                </div>
+              </nav>
             </div>
-          </nav>
 
           <ol className="hari-h-daftar">
             {items.map((item) => {
@@ -535,7 +546,7 @@ export default function HalamanHariH() {
                   </div>
 
                   <div className="hari-h-acara-jam">
-                    <strong style={{ fontSize: skalaFont.jam }}>{item.startTime}</strong>
+                    <strong style={{ fontSize: skalaFont.jam }}>{jamDari(item.startTime)}</strong>
                     {item.durationMinutes ? <span>{item.durationMinutes} menit</span> : null}
                     {selesai ? <span>sampai {selesai}</span> : null}
                   </div>
@@ -599,6 +610,8 @@ export default function HalamanHariH() {
               );
             })}
           </ol>
+          </div>
+          {/* Akhir panel daftar acara */}
         </>
       )}
 

@@ -72,8 +72,9 @@ describe("hari dan hitung mundur memakai kalender Asia/Jakarta", () => {
     expect(hariIni()).toBe("2026-07-05");
     expect(akhirMingguIni()).toBe("2026-07-05");
     expect(kelompokkan("2026-07-05", "belum")).toBe("hariIni");
-    // Senin berikutnya sudah di luar minggu ini.
-    expect(kelompokkan("2026-07-06", "belum")).toBe("tanpaTenggat");
+    // Senin berikutnya sudah di luar minggu ini, tapi masih punya tanggal,
+    // jadi masuk "setelah minggu ini", bukan "belum ada tenggat".
+    expect(kelompokkan("2026-07-06", "belum")).toBe("setelahMingguIni");
   });
 
   it("sehari sebelum Minggu masih masuk minggu ini", () => {

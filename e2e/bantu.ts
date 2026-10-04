@@ -34,6 +34,40 @@ export async function paksaPeriksaKoneksi(page: Page) {
   await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
 }
 
+
+/** Tunggu sejumlah milidetik. Dipakai untuk jeda antarpercobaan. */
+function jeda(menit: number): Promise<void> {
+  return new Promise<void>((selesai) => {
+    setTimeout(selesai, menit);
+  });
+}
+/**
+ * Ulangi satu request kalau sambungannya terputus (ECONNRESET).
+ *
+ * Kenapa perlu: server uji Next.js dikompilasi ulang di antara test, jadi
+ * koneksi kadang terputus tepat ketika modul baru sedang dibangun. Itu
+ * masalah koneksi, bukan masalah aplikasi, jadi request diulang dengan jeda
+ * singkat, bukan membiarkan gerbang gagal.
+ */
+export async function requestDenganUlang<T>(
+  kirim: () => Promise<T>,
+  jumlahUlang = 3,
+): Promise<T> {
+  let galatTerakhir: unknown;
+  for (let percobaan = 0; percobaan <= jumlahUlang; percobaan += 1) {
+    try {
+      return await kirim();
+    } catch (err) {
+      const pesan = String((err as Error)?.message ?? err);
+      const putus = /ECONNRESET|ECONNREFUSED|socket hang up|fetch failed/i.test(pesan);
+      if (!putus) throw err;
+      galatTerakhir = err;
+      await jeda(800 * (percobaan + 1));
+    }
+  }
+  throw galatTerakhir;
+}
+
 /**
  * Jumlah item di object store `antrean`, database `haribesar-luring`,
  * dibaca dari dalam halaman.

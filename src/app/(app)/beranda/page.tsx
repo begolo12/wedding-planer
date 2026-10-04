@@ -8,7 +8,7 @@ import type { RingkasanPlan } from "@/lib/ringkasan";
 import { Kerangka, Kosong, Gagal } from "@/components/states";
 import { TaskItem } from "@/components/task-item";
 import { Rupiah } from "@/components/rupiah";
-import { tanggalPanjangDari } from "@/lib/format";
+import { jamDari, tanggalPanjangDari } from "@/lib/format";
 
 /**
  * Beranda utama aplikasi.
@@ -139,7 +139,25 @@ export default function HalamanBeranda() {
 
   return (
     <div className="beranda">
-      <h1 className="sr-only">Beranda</h1>
+      {/* Kepala halaman: judul dan satu aksi utama. Tombol "Tambah Tugas"
+          milik hero dihapus supaya tidak ada dua tombol utama untuk pekerjaan
+          yang sama di satu layar. */}
+      <div className="kepala-halaman">
+        <div>
+          <h1>Beranda</h1>
+          <p>
+            Ringkasan hari ini: tugas terdekat, sisa anggaran, dan hitung mundur menuju hari
+            besar.
+          </p>
+        </div>
+        {bisaUbah ? (
+          <Link className="tombol tombol-utama" href="/rencana">
+            <IkonTambah size={18} />
+            Tambah tugas
+          </Link>
+        ) : null}
+      </div>
+
       <section className="beranda-hero">
         <span className="beranda-cahaya beranda-cahaya-kanan" aria-hidden="true" />
         <span className="beranda-cahaya beranda-cahaya-kiri" aria-hidden="true" />
@@ -209,13 +227,19 @@ export default function HalamanBeranda() {
           )}
         </div>
 
+        {/*
+          Maksimal tiga aksi sekunder, dan ketiganya menuju modul berbeda:
+          rencana, anggaran, dan tamu. "Bagikan" dan "Cetak laporan" dihapus
+          karena keduanya berakhir di modul laporan yang sama, jadi dua tombol
+          itu satu pekerjaan di dua tempat, dan laporan tetap terjangkau lewat
+          item "Laporan" di navigasi. Tidak ada tombol bergaya utama di baris
+          ini: aksi utama layar sudah ada di kepala halaman.
+          Ketiganya tetap disembunyikan saat luring, karena isinya menambah
+          data dan penambahan data butuh koneksi.
+        */}
         <div className="beranda-aksi">
           {bisaUbah ? (
             <>
-              <Link className="beranda-aksi-pil beranda-aksi-utama" href="/rencana">
-                <IkonTambah size={18} />
-                Tambah Tugas
-              </Link>
               <Link className="beranda-aksi-pil" href="/rencana">
                 <IkonChecklist size={18} />
                 Muat checklist
@@ -230,14 +254,6 @@ export default function HalamanBeranda() {
               </Link>
             </>
           ) : null}
-          <Link className="beranda-aksi-pil" href="/laporan/bagikan">
-            <IkonBagikan size={18} />
-            Bagikan
-          </Link>
-          <Link className="beranda-aksi-pil beranda-aksi-halus" href="/laporan">
-            <IkonCetak size={18} />
-            Cetak laporan
-          </Link>
         </div>
       </section>
 
@@ -255,7 +271,7 @@ export default function HalamanBeranda() {
               <div className="tumpuk-rapat">
                 {dataRundown.rundown.slice(0, 4).map((r) => (
                   <div className="butir" key={r.id}>
-                    <span className="lencana lencana-aksen angka">{r.startTime}</span>
+                    <span className="lencana lencana-aksen angka">{jamDari(r.startTime)}</span>
                     <div className="butir-isi">
                       <div className="butir-judul">{r.title}</div>
                       {r.location ? <div className="butir-ket">{r.location}</div> : null}
@@ -409,12 +425,10 @@ export default function HalamanBeranda() {
               <span className="beranda-tugas-petunjuk">
                 Tekan lingkaran untuk menandai tugas selesai
               </span>
-              {bisaUbah ? (
-                <Link className="beranda-kartu-tautan" href="/rencana">
-                  <IkonTambah size={16} />
-                  Buat tugas baru
-                </Link>
-              ) : null}
+              <Link className="beranda-kartu-tautan" href="/rencana">
+                Lihat semua tugas
+                <IkonPanah size={16} />
+              </Link>
             </div>
           </section>
         </div>
@@ -437,7 +451,7 @@ export default function HalamanBeranda() {
                   <span className="beranda-tanggal-nama">{tanggalBerikut.title}</span>
                   <span className="beranda-kartu-kecil">
                     {tanggalPanjangDari(tanggalBerikut.eventDate)}
-                    {tanggalBerikut.eventTime ? ` jam ${tanggalBerikut.eventTime}` : ""}
+                    {tanggalBerikut.eventTime ? ` jam ${jamDari(tanggalBerikut.eventTime)}` : ""}
                   </span>
                   <span className="beranda-kartu-kecil">
                     {tanggalBerikut.selisihHari === 0
@@ -569,12 +583,6 @@ const IkonUang = ({ size }: { size?: number }) => (
 );
 const IkonTamu = ({ size }: { size?: number }) => (
   <Ikon size={size} d="M15 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20M11.5 7.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0M18 8v6M21 11h-6" />
-);
-const IkonBagikan = ({ size }: { size?: number }) => (
-  <Ikon size={size} d="M12 16V4M8 8l4-4 4 4M5 16v3a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3" />
-);
-const IkonCetak = ({ size }: { size?: number }) => (
-  <Ikon size={size} d="M7 9V4h10v5M7 18H5v-6h14v6h-2M7 15h10v5H7z" />
 );
 const IkonChecklist = ({ size }: { size?: number }) => (
   <Ikon size={size} d="M4 7h4v4H4zM4 15h4v4H4zM11 9h9M11 17h9" />

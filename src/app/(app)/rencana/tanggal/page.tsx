@@ -232,7 +232,12 @@ export default function HalamanTanggal() {
         </p>
       ) : null}
 
+      {/* Satu panel untuk tab modul, pencarian, daftar tanggal, dan keadaan
+          kosongnya (DESIGN.md komposisi desktop poin 5 dan 6). */}
+      <div className="panel-daftar" aria-label="Daftar tanggal penting">
+        <div className="panel-daftar-kepala">
       <TabRencana />
+        </div>
 
       {daftar.length === 0 ? (
         <Kosong
@@ -240,9 +245,15 @@ export default function HalamanTanggal() {
           jalanKeluar="Tambahkan tanggal akad nikah atau resepsi untuk mengaktifkan hitung mundur di Beranda."
         >
           {bisaUbah ? (
-            <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
-              Tambah tanggal
-            </button>
+            <>
+              {/* Kepala halaman sudah memakai tombol utama "Tambah tanggal",
+                  jadi ajakan di keadaan kosong ini sekunder supaya tidak ada
+                  dua tombol utama untuk satu aksi (DESIGN.md komposisi
+                  desktop poin 11). */}
+              <button type="button" className="tombol tombol-sekunder" onClick={bukaTambah}>
+                Tambah tanggal
+              </button>
+            </>
           ) : null}
         </Kosong>
       ) : (
@@ -355,6 +366,8 @@ export default function HalamanTanggal() {
           )}
         </div>
       )}
+      </div>
+      {/* Akhir panel daftar tanggal */}
 
       {/* Lembar Tambah / Ubah Tanggal */}
       <Lembar

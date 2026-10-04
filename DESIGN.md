@@ -132,7 +132,8 @@ Beranda bukan grid 4 kartu identik. Komposisinya:
 ```text
 hitung: 60 persen garis waktu task, 40 persen ringkasan anggaran
 mobile: task ke atas, anggaran ke bawah, tidak bersamping
-desktop: task kiri, anggaran kanan
+desktop 1280px ke atas: task kiri, anggaran kanan, rasio kolom 1,6 : 1
+   dengan gutter 16px, jadi kolom utama terukur 60,5 persen dari kontainer
 hero: gradasi 135 derajat, Blush Silk ke Warm Peach
 ```
 
@@ -154,6 +155,66 @@ Arah "Blushing Romance" memakai bentuk bulat penuh sebagai bahasa visualnya. Ini
 - Tinggi minimum: tombol `48px`, input `52px`, target sentuh `44x44px`.
 - Shadow: dua tingkat, keduanya lembut dan berwarna blush. `--bayang-1` untuk card yang berdiri sendiri, `--bayang-2` untuk yang mengambang seperti dialog dan toast. Semua shadow memakai ambient blush, bukan hitam pekat.
 - Gradasi dipakai di satu tempat saja: hero hitung mundur di Beranda, `135deg` dari Blush Silk ke Warm Peach. Di luar itu tidak ada gradasi.
+
+### Komposisi desktop (wajib, berlaku mulai `expanded`, lebar di atas 1023px)
+
+Bagian ini mengikat semua layar. Angka di bawah bukan saran, dan setiap kelas yang disebut sudah ada di `globals.css`, jadi layar baru cukup memakainya, tidak menyusun aturan sendiri.
+
+**1. Satu kontainer, 1200px, di tengah.** `.bungkus` (isi halaman) dan `.kepala-app-dalam` (kepala aplikasi) memakai lebar maksimum `1200px` dengan `margin: 0 auto`. Di `expanded`, isi kontainer memakai padding `32px` kiri kanan dan `48px` bawah. Tidak ada layar yang menambah batas lebar sendiri, dan tidak ada kolom yang menempel kiri tanpa `margin: 0 auto` kecuali form satu kolom di bawah ini.
+
+**2. Isi wajib mengisi sisa lebar.** `.isi-app` di dalam `.tata-app` wajib `flex: 1 1 auto; min-width: 0`. Tanpa `flex`, lebarnya jatuh ke max-content halaman: diukur di 1568px, kolom isi hanya terpakai 1060px padahal tersedia 1313px, jadi separuh kanan layar kosong.
+
+**3. Grid dua kolom untuk layar daftar.** Wadahnya `.grid-daftar`: satu kolom di bawah 1023px, dua kolom mulai 1023px dengan `grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr)` dan gutter `16px`. Artinya kolom utama memakai 60 sampai 66 persen kontainer (terukur 60,1 persen di 1024px dan 60,7 persen di 1568px) dan rel samping 34 sampai 40 persen. Isi rel hanya dua macam: ringkasan, atau aksi cepat. Rel tidak pernah dipakai untuk menaruh daftar utama.
+
+**4. Satu kepala per layar, dua baris.** Kepala selalu dua baris di dalam kontainer yang sama.
+- Baris identitas: `.kepala-app`, dari tata letak, sama untuk semua layar. Isinya lambang produk, nama produk, tombol tema, dan tautan Akun. Tidak ada judul halaman di sini.
+- Baris judul: `.kepala-halaman`, dari halaman. Isinya `h1` yang menjelaskan isi layar, satu kalimat pengantar, dan satu aksi utama rata kanan. Judul tidak pernah ditulis dua kali.
+
+**5. Satu panel untuk satu daftar.** Tab, filter, dan daftar duduk di dalam satu `.panel-daftar` dengan lebar penuh kolom. Kepala panel (`.panel-daftar-kepala`) berisi baris tab saja, dan di `expanded` tab wajib muat satu baris: baris tab adalah navigasi modul, dan membelahnya jadi dua baris membuat modul terakhir tidak terlihat. Aksi sekunder yang dulu menempel di baris tab pindah ke rel samping sebagai `.panel-aksi-cepat`. Daftar yang kosong tetap berada di dalam panel ini.
+
+**6. Keadaan kosong dan keadaan gagal rata kiri, di dalam panel.** `.kosong` selalu `align-items: flex-start` dan `text-align: left`, dan punya permukaan panel sendiri (`--color-kartu-putih`, `--radius-panel`). Satu layar hanya boleh punya satu sumbu perataan: keadaan kosong harus sejajar dengan baris filter di atasnya, bukan di tengah kanvas. Kalau `.kosong` sudah berada di dalam `.panel-daftar`, permukaannya dimatikan supaya tidak ada kartu di dalam kartu.
+
+**7. Jarak hanya dari skala.** Jarak antarbagian memakai kelipatan `4 / 8 / 12 / 16 / 24 / 32 / 48 / 64`: antar elemen dalam satu baris `8`, antar bagian di dalam panel `16`, antar bagian besar di halaman `24`, jarak tepi kontainer `32`. Tidak boleh ada ruang kosong lebih dari `48px` tanpa isi di dalam satu panel. Terukur di `/rencana`: kepala panel ke baris filter `16px`, baris pencarian ke keadaan kosong `16px`.
+
+**8. Latar menutup penuh setinggi viewport di kedua tema.** `html` dan `.tata-app` memakai `background: var(--color-base)` dan `.tata-app` `min-height: 100vh`. Tidak ada warna tema terang yang boleh dipakai lewat nilai hex langsung; semua latar lewat token, supaya di mode gelap tidak ada bidang terang yang bocor. `--color-kotak-abu` tidak dipakai sebagai trek bar jika latar di belakangnya juga `--color-kotak-abu`.
+
+**9. Aksen maksimal dua bidang per layar.** Yang dihitung sebagai bidang aksen: kontrol yang bisa ditekan dan terisi penuh warna aksen (tombol utama, pil saring aktif, tab aktif, sakelar menyala) dan batang progres. Yang tidak dihitung: chip status yang tidak bisa ditekan, ikon atau tulisan berwarna aksen di atas permukaan netral, dan bayangan. Contoh yang sudah benar:
+
+| Layar | Bidang aksen 1 | Bidang aksen 2 |
+|---|---|---|
+| Rencana | tombol `Tambah tugas` (blush) | batang progres (marigold) |
+| Beranda | tombol `Tambah tugas` di kepala halaman (blush) | tidak ada, hero memakai gradasi |
+
+Karena itu tab aktif dan pil saring aktif tidak memakai warna aksen: keduanya ditandai pembalikan `--color-ink` (latar tinta, tulisan kanvas), yang justru punya kontras paling tinggi. Bila `--color-primary` dipakai di semua hal yang penting, tidak ada lagi yang penting.
+
+Pengecualian: pita di tingkat aplikasi (`.pita` untuk ajakan pasang, `.pita-luring` untuk keadaan sambungan) berada di luar area halaman dan tidak dihitung dalam anggaran aksen halaman. Anggaran itu dihitung per layar, bukan per viewport.
+
+**10. Gradasi hanya di satu tempat.** Hero hitung mundur Beranda. Di luar itu, termasuk kartu progres, batang progres, tombol melayang, dan panel, tidak ada `linear-gradient` sebagai latar. Batang progres memakai satu warna token, `--color-marigold`, bukan gradasi.
+
+**11. Satu tombol utama untuk satu aksi, per layar.** Satu layar hanya boleh punya satu kontrol bergaya utama untuk satu pekerjaan. Layar yang memakai tombol melayang (`.rencana-fab`, `.tamu-fab`, `.anggaran-fab`) menyembunyikan aksi kepala halamannya di bawah 1023px (`.hanya-expanded`), dan menyembunyikan tombol melayangnya di `expanded`. Alasannya di `docs/05-IA-dan-Layar.md` bagian 7: tombol tetap di bawah adalah pola jari, bukan pola tetikus.
+
+**12. Dua layar satu kolom yang dikecualikan.** `/rencana/plan` (`.rencana-plan`, maksimum `640px`) dan `/akun` (maksimum `880px`) memang satu kolom karena isinya form. Keduanya memakai `margin-inline: auto` supaya kolomnya duduk di tengah kontainer, bukan menempel kiri.
+
+**13. Kelas bantu yang boleh dipakai layar lain tanpa menyentuh `globals.css`.** Daftar ini yang jadi kontrak antara aturan komposisi dan pekerja layar.
+
+| Kelas | Untuk apa | Angka |
+|---|---|---|
+| `.grid-daftar` | Layar daftar: kolom utama + rel kanan | 1 kolom di bawah 1023px, `1.6fr : 1fr` + gutter 16px mulai 1023px |
+| `.rel-samping` | Isi rel kanan: ringkasan atau aksi cepat | satu kolom, gap 24px |
+| `.panel-daftar` + `.panel-daftar-kepala` | Wadah tunggal tab + filter + daftar | gap 16px; kepala panel berisi baris tab saja, dan di expanded tab muat satu baris |
+| `.kartu-progres` + `.kartu-progres-angka` + `.kartu-progres-ket` | Ringkasan progres di rel | satu kolom penuh, angka maksimum 40px |
+| `.panel-aksi-cepat` | Aksi sekunder yang tidak boleh menempel di baris tab | satu kolom rata kiri, gap 12px, maksimum satu tombol sekunder di dalamnya |
+| `.baris-meta` | Metadata baris tugas | satu bentuk untuk semua metadata di dalamnya; `.lencana` di dalam `.baris-meta` tampil sebagai teks, bukan chip |
+| `.kisi-dua` | Daftar kartu yang maksimal dua kolom (vendor, busana) | 1 kolom di bawah 1080px, `repeat(2, minmax(360px, 1fr))` mulai 1080px |
+| `.rekap-tiga` | Panel angka yang isinya tepat tiga (pembayaran vendor) | `repeat(3, minmax(0, 1fr))` mulai 640px; `.rekap-dua` untuk dua angka |
+| `.sakelar` + `.sakelar-jalur` + `.sakelar-titik` | Kontrol nyala/mati | tinggi 52px, jalur 44x24px |
+| `.hanya-expanded` | Aksi kepala halaman pada layar yang punya tombol melayang | sembunyi di bawah 1023px |
+| `.kepala-halaman` | Judul + satu aksi utama | rata kanan, `h1` maksimum 40px |
+
+Kelas di luar daftar ini tidak boleh dipakai untuk kepentingan tata letak baru; usulkan dulu ke pemilik `globals.css`.
+
+**14. Layar publik di luar tata letak aplikasi.** Layar masuk dan daftar (`/masuk`, `/daftar`) memakai varian dua kolom mulai 1023px: kepala dan lambang di kiri (`.auth-kepala`), kartu form di kanan (`.auth-kartu`, `align-self: center` supaya tingginya mengikuti isi), dan strip jaminan (`.auth-aman`) di bawah kepala. Di bawah 1023px susunannya tetap satu kolom seperti rancangan Stitch, jadi tidak ada yang berubah di HP. Sebelumnya, kolom 480px berdiri sendiri di tengah dan di 1440px menyisakan hampir separuh layar kosong; itu keluhan yang sama dengan `/rencana` sebelum diperbaiki.
+Layar baca statis (`/aplikasi`, `/luring`, `/kebijakan`) tetap satu kolom `min(720px, 100%)` di tengah, karena isinya teks panjang dan lebar baca yang enak justru lebih penting daripada memakai seluruh kanvas. Layar tautan publik (`/bagikan/{token}`) tetap `min(840px, 100%)` dengan pita alat yang sticky, karena keluarga membukanya dari HP.
 
 ---
 
@@ -240,6 +301,11 @@ Antislop tidak melarang teknik secara daftar, tapi menanyakan "itu melayani apa?
 | Nama token lama dipertahankan | Mengganti nama berarti menyentuh 20 berkas tanpa perubahan tampilan | 2026-10-01 |
 | Tidak ada testimonial di Fase 1 | Belum ada customer real, testimonial palsu merusak kepercayaan lebih banyak daripada tidak ada | 2026-09-30 |
 | Nama produk `Rapi Nikah` | Berbahasa Indonesia, netral untuk semua agama dan adat, 10 karakter sehingga aman untuk nama pendek PWA, dan terhubung ke inti produk ("rapi" = catatan tidak tercecer). Kandidat dan pemeriksaannya ada di `CHANGELOG.md` 0.14.0 | 2026-10-04 |
+| Kontainer desktop 1200px di tengah, `.isi-app` wajib `flex: 1 1 auto` | Diukur: tanpa `flex`, kolom isi hanya terpakai 1060px dari 1313px yang tersedia di layar 1568px, dan sisa kanan kosong | 2026-10-04 |
+| Tab aktif dan pil saring aktif memakai pembalikan tinta, bukan warna aksen | Aksen per layar dibatasi dua bidang; dua bidang itu sudah dipakai tombol utama dan batang progres, dan pembalikan tinta justru kontras paling tinggi | 2026-10-04 |
+| Aksi utama pindah dari tombol melayang ke kepala halaman di `expanded` | Tombol melayang dan tombol kepala adalah pola untuk dua perangkat berbeda; memakai keduanya sekaligus memberi dua tombol utama untuk satu pekerjaan | 2026-10-04 |
+| Hiasan bunga di sudut kartu progres dihapus | Selalu terpotong `overflow: hidden`, dan pada progres nol persen tidak menambah informasi | 2026-10-04 |
+| Layar masuk dan daftar memakai dua kolom di desktop | Kolom 480px di tengah menyisakan hampir separuh layar kosong di 1440px, dan itu keluhan yang sama dengan `/rencana`. Mulai 1023px kepala pindah ke kiri, kartu form ke kanan, sedangkan di HP tetap satu kolom seperti rancangan Stitch | 2026-10-04 |
 
 ---
 

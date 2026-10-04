@@ -305,6 +305,7 @@ export default function HalamanTugas() {
       lewat: [],
       hariIni: [],
       mingguIni: [],
+      setelahMingguIni: [],
       tanpaTenggat: [],
       selesai: [],
     };
@@ -343,60 +344,61 @@ export default function HalamanTugas() {
 
   return (
     <div className="rencana">
-      <h1 className="sr-only">Tugas</h1>
-      <section className="rencana-hero">
-        <span className="rencana-hias rencana-hias-kanan" aria-hidden="true">
-          <IkonBunga size={96} />
-        </span>
-        <span className="rencana-hias rencana-hias-kiri" aria-hidden="true">
-          <IkonBungaKecil size={80} />
-        </span>
-
-        <div className="rencana-hero-kepala">
-          <span className="rencana-hero-label">
-            <span className="rencana-ikon-bulat">
-              <IkonBunga size={18} />
-            </span>
-            Langkah Menuju Hari Bahagia
-          </span>
-          {teksMundur ? (
-            <span className="rencana-pil-kilau">{teksMundur}</span>
-          ) : null}
+      {/* Kepala halaman: judul di kiri, satu aksi utama di kanan. Tombol
+          melayang disembunyikan di `expanded` supaya aksi yang sama tidak punya
+          dua pemicu (DESIGN.md komposisi desktop poin 11). */}
+      <div className="kepala-halaman">
+        <div>
+          <h1>Tugas</h1>
+          <p>Semua yang harus selesai sebelum hari besar, dikelompokkan menurut waktunya.</p>
         </div>
+        {bisaUbah ? (
+          <button
+            type="button"
+            className="tombol tombol-utama hanya-expanded"
+            onClick={bukaTambah}
+          >
+            Tambah tugas
+          </button>
+        ) : null}
+      </div>
 
-        <div className="rencana-hero-isi">
-          <div className="rencana-hero-baris">
-            <p className="rencana-hero-angka">
-              Progres Persiapan: <span>{persenProgres}%</span>
-            </p>
-            <span className="rencana-hero-lencana">
-              {tugasSelesai} dari {totalTugas} selesai
-            </span>
-          </div>
-          <div className="rencana-bar">
-            <div className="rencana-bar-isi" style={{ width: `${persenProgres}%` }} />
-          </div>
-          <p className="rencana-hero-catatan">
-            <IkonHati size={16} />
-            Pelan tapi pasti, langkah menuju hari bahagiamu makin dekat.
-          </p>
+      {/* Kartu progres: angka besar, bar, dan satu kalimat yang jujur
+          mengikuti keadaan, bukan pujian yang tidak cocok dengan 0 persen
+          (DESIGN.md bagian 6). */}
+      <section className="kartu-progres">
+        <p className="kartu-progres-angka">
+          {totalTugas > 0 ? (
+            <>
+              {persenProgres}% <span>dari {totalTugas} tugas selesai</span>
+            </>
+          ) : (
+            <>
+              Belum ada tugas <span>belum ada apa pun untuk diselesaikan</span>
+            </>
+          )}
+        </p>
+        <div className="rencana-bar">
+          <div className="rencana-bar-isi" style={{ width: `${persenProgres}%` }} />
         </div>
+        <p className="kartu-progres-ket">
+          {teksMundur ? `Hari besar ${teksMundur}. ` : ""}
+          {tugasSelesai > 0
+            ? `${tugasSelesai} tugas selesai, ${totalTugas - tugasSelesai} masih tersisa.`
+            : "Belum ada tugas yang selesai. Mulai dari yang paling dekat dengan tanggal."}
+        </p>
       </section>
 
-      <div className="rencana-aksi">
+      {/* Jalan pintas template, satu-satunya jalan kedua menuju tugas pertama. */}
+      <div className="aksi-baris">
         {bisaUbah ? (
-          <>
-            <button
-              type="button"
-              className="tombol tombol-sekunder"
-              onClick={() => setLembarTemplate(true)}
-            >
-              Muat template
-            </button>
-            <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
-              Tambah tugas
-            </button>
-          </>
+          <button
+            type="button"
+            className="tombol tombol-sekunder"
+            onClick={() => setLembarTemplate(true)}
+          >
+            Muat template
+          </button>
         ) : null}
       </div>
 
@@ -407,7 +409,14 @@ export default function HalamanTugas() {
         </p>
       ) : null}
 
+      {/* Satu panel untuk tab modul, saringan, daftar, dan keadaan kosongnya,
+          supaya keadaan kosong tidak lagi mengambang di kanvas kosong dan
+          perataannya sama dengan baris saringan di atasnya
+          (DESIGN.md komposisi desktop poin 5 dan 6). */}
+      <div className="panel-daftar" aria-label="Daftar tugas">
+        <div className="panel-daftar-kepala">
       <TabRencana />
+        </div>
 
       {/* Saringan cepat dan pencarian */}
       <section className="rencana-saring" aria-label="Saringan tugas">
@@ -490,7 +499,7 @@ export default function HalamanTugas() {
             <>
               <button
                 type="button"
-                className="tombol tombol-utama"
+                className="tombol tombol-sekunder"
                 onClick={() => setLembarTemplate(true)}
               >
                 Muat checklist bawaan
@@ -596,6 +605,8 @@ export default function HalamanTugas() {
           ) : null}
         </div>
       )}
+      </div>
+      {/* Akhir panel daftar tugas */}
 
       {/* Lembar Tambah / Ubah Tugas */}
       <Lembar
@@ -775,67 +786,6 @@ function LencanaStatus({ tugas, kelompok }: { tugas: TugasLengkap; kelompok: Kel
     return <span className="rencana-status" data-jenis="redup">Belum ada tenggat</span>;
   }
   return <span className="rencana-status" data-jenis="sedang">Sedang</span>;
-}
-
-/** Ikon bunga bergaya, dipakai sebagai hiasan kartu progres. */
-function IkonBunga({ size = 20 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.6}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <circle cx="12" cy="7" r="3" />
-      <circle cx="17.5" cy="11" r="3" />
-      <circle cx="15.4" cy="17.4" r="3" />
-      <circle cx="8.6" cy="17.4" r="3" />
-      <circle cx="6.5" cy="11" r="3" />
-    </svg>
-  );
-}
-
-/** Hiasan bunga kecil lima lingkaran untuk sudut kartu. */
-function IkonBungaKecil({ size = 20 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <circle cx="12" cy="4.5" r="3.2" />
-      <circle cx="19" cy="9.5" r="3.2" />
-      <circle cx="16.5" cy="17.8" r="3.2" />
-      <circle cx="7.5" cy="17.8" r="3.2" />
-      <circle cx="5" cy="9.5" r="3.2" />
-      <circle cx="12" cy="12" r="2.4" />
-    </svg>
-  );
-}
-
-/** Hati kecil untuk baris penyemangat di kartu progres. */
-function IkonHati({ size = 16 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path d="M12 20.5S3.5 14.6 3.5 9.2A4.7 4.7 0 0 1 12 6a4.7 4.7 0 0 1 8.5 3.2c0 5.4-8.5 11.3-8.5 11.3z" />
-    </svg>
-  );
 }
 
 /** Ikon plus untuk tombol tambah tugas. */

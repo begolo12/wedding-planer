@@ -327,7 +327,7 @@ Ukuran di bawah sudah diukur, kecuali baris yang ditandai belum di bagian 18.
 | Plan sampai pembayaran | Ya, Rp 5.000.000 | e2e Playwright alur utama |
 | Antrean luring tidak kehilangan data | Ya, 3 perubahan terkirim berurutan; isi object store antrean 1 lalu 3 lalu 0 | e2e alur luring |
 | Bentuk tabel bisa dijelaskan tanpa membuka database | Ya | Migrasi ter-commit, dan `docs/03-Data-Model.md` sudah dilengkapi |
-| Build dan tipe | Hijau | `npm run lint`, 89 test, `npm run build` 56 rute |
+| Build dan tipe | Hijau | `npm run lint`, 137 test, `npm run build` 26 rute statis dan dinamis |
 | Kontras | 0 gagal di terang dan gelap; rasio terburuk 4,55 di terang dan 5,35 di gelap | Diukur di 17 rute pada 390 dan 1440 px |
 | Test | 89 test hijau, plus 5 e2e hijau | Vitest dan Playwright |
 | Migrasi dari nol | 15 tabel terbentuk, "migrations applied successfully" | `db:migrate` ke database sementara `wedding_uji_20261004`, lalu di-DROP |

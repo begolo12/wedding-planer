@@ -26,6 +26,8 @@ Nada bahasa sudah ditetapkan di [`DESIGN.md`](../DESIGN.md) bagian 2. Dokumen in
 | Tanpa tanda seru, kecuali memang keganjilan | "Tersimpan" | "Berhasil disimpan!" |
 | Angka rupiah penuh | `Rp 4.500.000` | `Rp 4,5jt` |
 | Tanggal di teks tampil | `30 Juni 2026` | `2026-06-30` |
+| Jam di teks tampil | `07.00` | `07:00:00`, `7.00` |
+| Tanggal dan jam bersama | `30 Juni 2027 jam 10.00` | `30 Juni 2027 jam 10:00:00` |
 | Tanya ke user pakai "kamu" atau langsung nama | "Hapus tugas ini?" | "Apakah Anda yakin ingin menghapus tugas ini?" |
 | Sebut tindakan di pesan galat | "Gagal menyimpan" | "Terjadi kesalahan" |
 
@@ -158,6 +160,25 @@ Urutan: Beranda, Rencana, Anggaran, Tamu.
 ### 6.4 Task terlambat
 
 Labelnya "Terlambat", bukan "Overdue", karena "overdue" lebih sering dipakai untuk hutang dan terasa seperti tagihan.
+
+### 6.5 Kelompok waktu daftar tugas
+
+Daftar tugas dikelompokkan per waktu, bukan per kategori. Urutannya tetap:
+paling mendesak dulu.
+
+| Nilai di kode | Label | Isi |
+|---|---|---|
+| `lewat` | Lewat jatuh tempo | Tenggatnya sudah lewat dan belum selesai |
+| `hariIni` | Hari ini | Tenggatnya hari ini |
+| `mingguIni` | Minggu ini | Tenggatnya setelah hari ini, masih sampai hari Minggu pekan ini |
+| `setelahMingguIni` | Setelah minggu ini | Tenggatnya punya tanggal dan jatuh setelah pekan ini |
+| `tanpaTenggat` | Belum ada tenggat | Tugas yang benar-benar belum punya tanggal |
+| `selesai` | Sudah selesai | Tugas berstatus selesai, disembunyikan secara bawaan |
+
+**Alasan `setelahMingguIni` dipisah.** Sebelumnya tugas bertenggat jauh ikut masuk
+"Belum ada tenggat", jadi barisnya menampilkan tanggal di bawah judul yang
+berbunyi tidak ada tenggat. Label "Belum ada tenggat" sekarang hanya untuk tugas
+tanpa tanggal, dan tugas bertanggal jauh punya judulnya sendiri.
 
 ---
 

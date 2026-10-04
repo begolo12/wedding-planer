@@ -3,6 +3,35 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "./theme-toggle";
+import { Merek, NAMA_MEREK } from "./merek";
+
+/**
+ * Kepala aplikasi untuk breakpoint expanded. Isinya sengaja tetap di semua
+ * layar: identitas produk, tombol tema, dan jalan ke Akun. Judul halaman dan
+ * aksi utamanya tidak di sini, tapi di `.kepala-halaman` milik tiap halaman,
+ * supaya judul tidak pernah tertulis dua kali dan tiap halaman tetap bisa
+ * memilih aksi utamanya sendiri.
+ */
+export function KepalaApp() {
+  return (
+    <header className="kepala-app tanpa-cetak">
+      <div className="kepala-app-dalam">
+        <Link className="kepala-app-merek" href="/beranda">
+          <span className="kepala-app-lambang">
+            <Merek ukuran={32} />
+          </span>
+          <span className="kepala-app-nama">{NAMA_MEREK}</span>
+        </Link>
+        <div className="kepala-app-aksi">
+          <ThemeToggle />
+          <Link className="kepala-app-akun" href="/akun">
+            Akun
+          </Link>
+        </div>
+      </div>
+    </header>
+  );
+}
 
 // Empat item bawah dari docs/05-IA-dan-Layar.md bagian 3. Sengaja empat,
 // bukan lima, supaya bilah bawah tetap muat di layar 360px tanpa mengecilkan
@@ -93,7 +122,6 @@ export function NavSisi({ namaPasangan }: { namaPasangan: string }) {
         >
           Akun
         </Link>
-        <ThemeToggle />
       </div>
     </nav>
   );

@@ -197,7 +197,11 @@ export default function HalamanVendor() {
         </div>
       </div>
 
-      <TabRencana />
+      {/* Satu panel untuk tab, ringkasan, saringan, dan daftar vendor. */}
+      <div className="panel-daftar" aria-label="Daftar vendor">
+        <div className="panel-daftar-kepala">
+          <TabRencana />
+        </div>
 
       {dariPerangkat ? (
         <p className="keterangan">
@@ -238,7 +242,7 @@ export default function HalamanVendor() {
       ) : null}
 
       {/* Filter Bar */}
-      <div className="kartu tumpuk-rapat">
+      <div className="tumpuk-rapat">
         <input
           type="search"
           className="isian"
@@ -297,14 +301,14 @@ export default function HalamanVendor() {
         >
           {vendors.length === 0 ? (
             bisaUbah ? (
-              <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
+              <button type="button" className="tombol tombol-sekunder" onClick={bukaTambah}>
                 Tambah vendor
               </button>
             ) : null
           ) : null}
         </Kosong>
       ) : (
-        <div className="kisi-kartu">
+        <div className="kisi-dua">
           {daftarTersaring.map((v) => {
             const statusNada =
               v.status === "selesai" ? "aksen" : v.status === "dibook" ? undefined : "redup";
@@ -389,6 +393,7 @@ export default function HalamanVendor() {
           })}
         </div>
       )}
+      </div>
 
       {/* Lembar Tambah Vendor */}
       <Lembar

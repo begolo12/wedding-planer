@@ -168,7 +168,23 @@
 html,
 body {
   max-width: 100vw;
-  overflow-x: hidden;
+  /* `clip`, bukan `hidden`. `overflow-x: hidden` membuat body jadi wadah
+     gulir sendiri, dan itu mematikan `position: sticky` untuk semua elemen di
+     dalamnya: pita bagikan yang seharusnya menempel di atas ikut tergulir
+     hilang (terukur di 390px: atas pita -566px setelah gulir 590px).
+     `clip` memotong isi yang meluber tanpa membuat wadah gulir, jadi potongan
+     mendatarnya tetap ada dan sticky kembali bekerja. Di peramban lama yang
+     belum mengenal `clip`, deklarasinya diabaikan dan halaman kembali ke
+     perilaku gulir biasa, bukan rusak. */
+  overflow-x: clip;
+}
+
+/* Kanvas dicat di html, bukan hanya lewat propagasi body. Alasannya: kalau
+   dokumen lebih pendek dari viewport, atau ada elemen yang tidak menutup
+   penuh ke dasar layar, sisa piksel di bawah tetap memakai warna tema dan
+   tidak jatuh ke warna bawaan browser. */
+html {
+  background: var(--color-base);
 }
 
 body {
@@ -357,6 +373,32 @@ h3 {
   display: grid;
   gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+/*
+ * Kisi kartu yang paling banyak dua kolom. Dipakai layar daftar kartu seperti
+ * vendor dan busana, yang kartunya butuh lebar untuk memuat nama dan nominal
+ * sebaris. Di bawah 1080px satu kolom penuh, mulai 1080px dua kolom dengan
+ * lantai 360px per kolom.
+ *
+ * Lantai 360px aman karena kontainer di 1080px sudah 776px, jadi
+ * 2 x 360px + gutter 16px = 736px masih muat tanpa geser mendatar. Kalau
+ * breakpointnya dipasang di 1023px, kontainer cuma 719px dan tiap kolom jatuh
+ * ke 351px, di bawah lantainya.
+ *
+ * Kolomnya sengaja ditulis dua eksplisit, bukan auto-fit: auto-fit di
+ * kontainer 1136px akan membuat tiga kolom, dan kartu vendor mengecil lagi.
+ */
+.kisi-dua {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 1080px) {
+  .kisi-dua {
+    grid-template-columns: repeat(2, minmax(360px, 1fr));
+  }
 }
 
 a {
@@ -613,42 +655,34 @@ a {
 }
 
 .tombol-utama:hover:not(:disabled) {
-  background: #ffa8b8;
+  /* Bukan nilai hex sendiri, tapi campuran token supaya warna hover tetap
+     satu keluarga dengan blush dan ikut berubah kalau palet berubah. */
+  background: color-mix(in srgb, var(--color-terracotta) 86%, var(--color-ink));
   box-shadow: var(--bayang-2);
 }
 
 .tombol-sekunder {
-  background: #fff0f3;
-  border-color: #ffb7c5;
+  background: var(--color-netral);
+  border-color: var(--color-terracotta);
   border-width: 1.5px;
   color: var(--color-ink);
 }
 
 .tombol-sekunder:hover:not(:disabled) {
-  background: #ffe4ea;
+  background: color-mix(in srgb, var(--color-terracotta) 30%, var(--color-base));
 }
 
 /*
- * Tombol sekunder memakai blush sangat muda sebagai isian. Di mode gelap
- * blush muda itu tetap blush muda, jadi tanpa aturan ini tulisannya yang
- * nyaris putih jatuh di atas latar nyaris putih. Yang diganti latarnya,
- * bukan tulisannya, supaya bentuk tombolnya tidak berubah.
+ * Di mode gelap bidang blush muda tidak lagi blush muda karena token netral
+ * sudah gelap, jadi latar dan garisnya tidak perlu ditimpa. Yang tetap perlu
+ * ditimpa hanya hover, supaya campuran blush muda tidak bocor ke tema gelap
+ * saat sistem memilih tema terang.
  */
-[data-theme="gelap"] .tombol-sekunder {
-  background: var(--color-netral);
-  border-color: var(--color-terracotta);
-}
-
 [data-theme="gelap"] .tombol-sekunder:hover:not(:disabled) {
   background: var(--color-kotak-abu);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="terang"]) .tombol-sekunder {
-    background: var(--color-netral);
-    border-color: var(--color-terracotta);
-  }
-
   :root:not([data-theme="terang"]) .tombol-sekunder:hover:not(:disabled) {
     background: var(--color-kotak-abu);
   }
@@ -670,6 +704,27 @@ a {
   background: transparent;
   border-color: var(--color-bata);
   color: var(--color-bata);
+}
+
+/*
+ * Tombol ya pada dialog yang isinya menghapus atau membatalkan sesuatu yang
+ * tidak bisa dikembalikan. Tombolnya memakai warna status, bukan warna aksen,
+ * supaya di dialog itu tombol memusatkan perhatian tanpa menambah satu lagi
+ * bidang aksen di halaman yang sudah punya tombol utama (DESIGN.md komposisi
+ * desktop poin 9). Dialog lain tetap memakai gaya utama.
+ */
+.tombol-hapus-ya {
+  background: var(--color-bata);
+  border-color: var(--color-bata);
+  color: var(--color-kartu-putih);
+}
+
+.tombol-hapus-ya:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-bata) 84%, var(--color-ink));
+}
+
+[data-theme="gelap"] .tombol-hapus-ya:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-bata) 78%, var(--color-base));
 }
 
 /*
@@ -776,6 +831,85 @@ textarea.isian {
   min-height: 96px;
   resize: vertical;
   border-radius: var(--radius-kartu);
+}
+
+/*
+ * Sakelar: kotak centang yang tampil sebagai jalur dan titik, dibungkus label
+ * yang seluruhnya bisa ditekan. Dipakai saat satu tombol bisa berarti tombol
+ * atau pilihan; bentuk jalur dan titik tidak bisa disalahartikan sebagai
+ * tombol aksi. Tingginya 52px, di atas batas target sentuh 44px.
+ */
+.sakelar {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 16px 0 12px;
+  border: 1.5px solid color-mix(in srgb, var(--color-ink) 12%, transparent);
+  border-radius: var(--radius-pil);
+  background: var(--color-kartu-putih);
+  color: var(--color-ink);
+  font-size: var(--text-kecil);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sakelar:hover {
+  border-color: color-mix(in srgb, var(--color-ink) 22%, transparent);
+}
+
+/* Kotak centang aslinya tetap ada di pohon aksesibilitas, hanya tidak
+   digambar, supaya pembaca layar dan tombol spasi tetap bekerja. */
+.sakelar input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.sakelar-jalur {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  width: 44px;
+  height: 24px;
+  padding: 3px;
+  border-radius: var(--radius-pil);
+  background: color-mix(in srgb, var(--color-ink) 22%, transparent);
+  transition: background 0.18s ease;
+}
+
+.sakelar-titik {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-pil);
+  background: var(--color-base);
+  transition: transform 0.18s ease;
+}
+
+.sakelar input:checked + .sakelar-jalur {
+  background: var(--color-ink);
+}
+
+.sakelar input:checked + .sakelar-jalur .sakelar-titik {
+  transform: translateX(20px);
+}
+
+.sakelar input:focus-visible + .sakelar-jalur {
+  outline: 3px solid var(--color-marigold);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sakelar-jalur,
+  .sakelar-titik {
+    transition: none;
+  }
 }
 
 /* Tombol paling kecil tetap 44px tingginya, karena jempol tidak bisa
@@ -1005,16 +1139,20 @@ textarea.isian {
 }
 
 .nav-daftar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   list-style: none;
   margin: 0;
   padding: 0 8px;
 }
 
 .nav-tautan {
+  position: relative;
   display: flex;
   align-items: center;
   min-height: 44px;
-  padding: 0 12px;
+  padding: 0 12px 0 16px;
   border-radius: var(--radius-kontrol);
   color: var(--color-muted);
   font-weight: 600;
@@ -1025,16 +1163,32 @@ textarea.isian {
   color: var(--color-ink);
 }
 
+/* Item aktif ditandai dua hal sekaligus, bukan hanya warna: latar permukaan
+   dan batang tegak di kiri. Batang itu memakai warna tinta, jadi bukan
+   elemen aksen dan tidak menambah anggaran aksen layar. Sebelumnya item aktif
+   hanya beda latar, sehingga di daftar tujuh item penandanya tidak terbaca. */
 .nav-tautan[data-aktif="ya"] {
   background: var(--color-netral);
   color: var(--color-ink);
+  font-weight: 700;
+}
+
+.nav-tautan[data-aktif="ya"]::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  width: 3px;
+  height: 20px;
+  margin-top: -10px;
+  border-radius: var(--radius-pil);
+  background: var(--color-ink);
 }
 
 .nav-kaki {
   margin-top: auto;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
   padding: 16px;
   border-top: 1px solid var(--color-line);
@@ -1043,6 +1197,14 @@ textarea.isian {
 /* Ruang bawah supaya konten terakhir tidak tertutup bilah bawah. */
 .isi-app {
   padding-bottom: 80px;
+}
+
+/* Cangkang menutup penuh setinggi viewport di kedua tema. Tanpa min-height,
+   sisa tinggi di bawah isi tidak dicat pemiliknya, dan di mode gelap itu
+   terlihat sebagai strip warna terang di dasar layar. */
+.tata-app {
+  min-height: 100vh;
+  background: var(--color-base);
 }
 
 @media (min-width: 1023px) {
@@ -1069,8 +1231,20 @@ textarea.isian {
     border-right: 1px solid var(--color-line);
   }
 
+  /* Isi wajib mengisi sisa lebar setelah bilah samping. Tanpa `flex: 1 1 auto`
+     lebar isi jatuh ke max-content halaman, jadi di layar 1568px kolom isi
+     hanya terpakai sekitar 1060px (terukur) dan sisa kanan menganggur.
+     `min-width: 0` wajib supaya isi boleh menyusut di bawah max-content. */
   .isi-app {
+    flex: 1 1 auto;
+    min-width: 0;
     padding-bottom: 0;
+  }
+
+  /* Jarak tepi kontainer di expanded. 32px = --jarak-6, bagian dari skala
+     4/8/12/16/24/32/48/64. */
+  .bungkus {
+    padding: 8px 32px 48px;
   }
 }
 
@@ -1080,18 +1254,100 @@ textarea.isian {
   }
 }
 
+/* Kepala aplikasi: identitas produk, tombol tema, dan jalan ke Akun. Hanya
+   tampil di expanded, karena di compact dan medium sudah ada bilah bawah, dan
+   menambah bilah atas akan memakan tinggi layar yang sempit. Judul halaman
+   dan aksi utamanya sengaja TIDAK di sini, tapi di `.kepala-halaman` di
+   bawahnya, supaya judul tidak pernah tertulis dua kali. */
+.kepala-app {
+  display: none;
+}
+
+@media (min-width: 1023px) {
+  .kepala-app {
+    display: block;
+    background: var(--color-base);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-ink) 8%, transparent);
+  }
+}
+
+.kepala-app-dalam {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 32px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+}
+
+.kepala-app-merek {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* `.merek-lambang` memakai width dan height 100 persen, jadi ukurannya
+   ditentukan wadahnya, bukan berkas gambarnya. Tanpa kotak berukuran tetap
+   ini, lambang melebar mengikuti lebar kepala aplikasi. */
+.kepala-app-lambang {
+  flex: none;
+  width: 32px;
+  height: 32px;
+}
+
+.kepala-app-nama {
+  font-family: var(--font-judul);
+  font-size: var(--text-h3);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.kepala-app-aksi {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Tautan Akun di kepala aplikasi. Bentuknya pil supaya sama dengan kontrol
+   lain di baris yang sama, dan tingginya 44px supaya target sentuh lolos. */
+.kepala-app-akun {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-kontrol);
+  color: var(--color-ink);
+  font-size: var(--text-kecil);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.kepala-app-akun:hover {
+  background: var(--color-netral);
+}
+
 /* Kepala halaman. Judul menjelaskan isinya, bukan mengulang nama modul.
-   Garis rambut di bawah kepala memisahkan judul dari isinya, seperti garis
-   pemisah di layar Stitch. Jaraknya tidak ditambah lewat margin bawah,
-   karena pembungkus isi di tiap layar sudah punya jarak sendiri. */
+   Di baris yang sama duduk satu aksi utama halaman, rata kanan, supaya
+   mata pengguna tidak perlu mencari tombol utama di tempat lain.
+   Garis rambut di bawah kepala memisahkan judul dari isinya. */
 .kepala-halaman {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 12px 16px;
-  padding: 24px 0 16px;
+  padding: 8px 0 20px;
   border-bottom: 1px solid color-mix(in srgb, var(--color-ink) 8%, transparent);
+}
+
+.kepala-halaman > :first-child {
+  min-width: 0;
 }
 
 .kepala-halaman h1 {
@@ -1245,19 +1501,25 @@ textarea.isian {
 }
 
 /* Layar kosong dan gagal. Selalu dua kalimat, selalu ada jalan keluar.
-   Isinya ditengahkan sebagai satu kolom supaya keadaan kosong tidak terasa
-   seperti halaman rusak. */
+   Rata kiri, bukan rata tengah: satu layar hanya boleh punya satu sumbu
+   perataan, dan sumbu itu dipakai bersama baris filter di atasnya. Isinya
+   juga duduk di atas permukaan panel sendiri, supaya keadaan kosong tidak
+   mengambang di kanvas yang lebar. */
 .kosong {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 40px 16px;
-  text-align: center;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 24px;
+  border: 1px solid color-mix(in srgb, var(--color-ink) 8%, transparent);
+  border-radius: var(--radius-panel);
+  background: var(--color-kartu-putih);
+  text-align: left;
   color: var(--color-muted);
 }
 
 .kosong p {
-  margin: 0 auto 6px;
+  margin: 0;
   max-width: 42ch;
 }
 
@@ -1269,7 +1531,7 @@ textarea.isian {
   justify-content: center;
   width: 64px;
   height: 64px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   border-radius: var(--radius-pil);
   background: var(--color-netral);
   color: var(--color-primary);
@@ -1286,7 +1548,7 @@ textarea.isian {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  justify-content: center;
+  justify-content: flex-start;
   margin-top: 16px;
 }
 
@@ -1522,10 +1784,14 @@ textarea.isian {
   color: var(--color-ink);
 }
 
+/* Tab aktif ditandai pembalikan warna ink, bukan warna aksen. Alasan yang
+   sama dengan pil saringan: aksen per layar dibatasi dua bidang. Selain itu
+   pembalikan ink punya kontras paling tinggi, jadi tab yang sedang dibuka
+   tetap yang paling menonjol tanpa memakai warna tema. */
 .tab a[data-aktif="ya"] {
-  background: var(--color-primary);
+  background: var(--color-ink);
   color: var(--color-base);
-  border-color: var(--color-primary);
+  border-color: var(--color-ink);
 }
 
 /* Baris daftar. Tinggi minimal 56px supaya nyaman ditekan di HP. */
@@ -1638,6 +1904,23 @@ textarea.isian {
   color: var(--color-muted);
 }
 
+/*
+ * Semua metadata di baris tugas satu bentuk: teks. Terukur sebelumnya isinya
+ * campuran, tenggat dan kategori sebagai teks tapi prioritas sebagai chip,
+ * padahal ketiganya metadata yang setara, jadi mata mengira prioritas lebih
+ * penting. Chip di dalam baris ini dimatikan bentuknya, bukan dihapus, supaya
+ * penanda teksnya tetap ada. Aturannya satu untuk semua baris tugas, dan
+ * warnanya ikut teks sekitarnya, jadi tidak ada aksen baru di dalam baris.
+ */
+.baris-meta .lencana {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: inherit;
+  font-weight: 600;
+  color: inherit;
+}
+
 /* Layar masuk dan daftar. Susunannya mengikuti layar "Masuk" di proyek
    Stitch: badge kecil, lambang bulat, sapaan, lalu kartu putih berisi form.
    Kartu memakai bayang lembut karena di sini memang mengambang di atas
@@ -1671,6 +1954,7 @@ textarea.isian {
   align-items: center;
   justify-content: space-between;
   gap: var(--jarak-3);
+  padding: var(--jarak-3) 0 0;
 }
 
 /* Lambang merek: gambar tembus pandang dari `scripts/buat-merek.ps1`. Karena
@@ -1981,6 +2265,50 @@ textarea.isian {
 @media (min-width: 480px) {
   .auth-kartu {
     padding: var(--jarak-6);
+  }
+}
+
+/* Varian desktop layar masuk dan daftar: kepala dan lambang di kiri, kartu
+   form di kanan, dengan strip jaminan di bawah kepala. Sebelum ini, kolom
+   480px berdiri sendiri di tengah dan menyisakan hampir separuh layar kosong
+   di 1440px (terukur pada audit komposisi desktop). Dipakai mulai 1024px,
+   sama dengan breakpoint `expanded` yang dipakai tata letak aplikasi, supaya
+   di tablet dan HP susunannya tetap satu kolom seperti rancangan Stitch.
+   Kartu form tidak direntangkan: `align-self: center` membuatnya setinggi
+   isinya, bukan setinggi baris grid. */
+@media (min-width: 1024px) {
+  .auth-kontainer {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(420px, 0.85fr);
+    grid-template-areas:
+      "navigasi navigasi"
+      "kepala kartu"
+      "aman kartu";
+    align-content: center;
+    align-items: start;
+    column-gap: var(--jarak-6);
+    row-gap: var(--jarak-5);
+    max-width: 1120px;
+  }
+
+  .auth-navigasi-atas {
+    grid-area: navigasi;
+    padding-top: 0;
+  }
+
+  .auth-kepala {
+    grid-area: kepala;
+    padding-top: 0;
+  }
+
+  .auth-kartu {
+    grid-area: kartu;
+    align-self: center;
+    margin-top: 0;
+  }
+
+  .auth-aman {
+    grid-area: aman;
   }
 }
 
@@ -2657,6 +2985,14 @@ textarea.isian {
 /* Pita baca-saja di puncak halaman. Memberi tahu bahwa halaman ini tidak bisa
    mengubah data, sekaligus menampung alat cetak dan ukuran huruf. */
 .bagikan-pita {
+  /* Menempel di atas saat halaman digulir, supaya tombol cetak tidak hilang.
+     Position sticky, bukan fixed: sticky tetap memakai ruang tata letaknya,
+     jadi tidak menutupi baris pertama isi di layar sempit dan tidak perlu
+     ditambahi padding pengganti. `z-index: 30` menaruhnya di atas isi tapi
+     tetap di bawah bilah navigasi bawah (z-index 40) dan lapisan dialog. */
+  position: sticky;
+  top: 0;
+  z-index: 30;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -3478,9 +3814,13 @@ textarea.isian {
   filter: brightness(1.05);
 }
 
+/* Di expanded tombol melayang tamu disembunyikan, karena aksi kepala halaman
+   "Tambah tamu" sudah jadi satu-satunya jalan tambah. Dua tombol untuk satu
+   aksi membuat pengguna ragu mana yang harus ditekan. Aturan yang sama
+   berlaku untuk .anggaran-fab. */
 @media (min-width: 1023px) {
   .tamu-fab {
-    bottom: 24px;
+    display: none;
   }
 }
 
@@ -3810,37 +4150,23 @@ textarea.isian {
   flex: none;
 }
 
-.beranda-aksi-utama {
-  border-color: transparent;
-  background: var(--beranda-aksen);
-  color: var(--beranda-aksen-teks);
-}
-
-.beranda-aksi-utama:hover {
-  background: var(--color-marigold);
-  filter: brightness(1.06);
-}
-
-.beranda-aksi-halus {
-  border-color: transparent;
-  background: transparent;
-  color: var(--color-marigold);
-}
-
-.beranda-aksi-halus:hover {
-  background: var(--color-kotak-abu);
-}
-
-/* Kolom utama dan sisi. */
+/* Kolom utama dan sisi. Rasionya 60 : 40 mulai 1280px, lihat komentar di
+   dalam media query di bawah. */
 .beranda-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 20px;
+  gap: 24px;
 }
 
-@media (min-width: 1080px) {
+@media (min-width: 1280px) {
   .beranda-grid {
-    grid-template-columns: minmax(0, 1fr) 340px;
+    /* Gutter 16px, sesuai aturan "1rem gutter" di DESIGN.md bagian 5. Dengan
+       gutter 16px, 1,6 : 1 memberi kolom utama 60,5 persen dari kontainer
+       (terukur 60,5 di 1280px dan 60,7 di 1568px). Versi sebelumnya memakai
+       rel lebar tetap 340px, jadi rasionya 68 : 32 dan angka 60 : 40 yang
+       tertulis di DESIGN.md belum pernah benar-benar terlihat. */
+    gap: 16px;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
     align-items: start;
   }
 }
@@ -4310,85 +4636,157 @@ textarea.isian {
    ========================================================================== */
 
 .rencana {
-  --rencana-aksen-teks: #ffffff;
   --rencana-pink-teks: #5e2f3a;
-  --rencana-bata-teks: #ffffff;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
   /* Ruang bawah supaya tombol melayang tidak menutup kartu terakhir. */
   padding-bottom: 64px;
 }
 
 [data-theme="gelap"] .rencana {
-  --rencana-aksen-teks: #360c19;
   --rencana-pink-teks: #360c19;
-  --rencana-bata-teks: #3a0b0b;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="terang"]) .rencana {
-    --rencana-aksen-teks: #360c19;
     --rencana-pink-teks: #360c19;
-    --rencana-bata-teks: #3a0b0b;
   }
 }
 
-/* Kartu progres */
-.rencana-hero {
-  position: relative;
-  overflow: hidden;
+/* Susunan dua kolom untuk layar daftar di expanded: kolom utama untuk daftar,
+   rel kanan untuk ringkasan. Rasionya 1,6 : 1, jadi kolom utama 61,5 persen,
+   masih di dalam rentang 60 sampai 66 persen aturan komposisi desktop. */
+.grid-daftar {
+  display: grid;
+  gap: 24px;
+}
+
+@media (min-width: 1023px) {
+  .grid-daftar {
+    /* Gutter 16px mengikuti aturan "1rem gutter" di DESIGN.md bagian 5.
+       Dengan gutter 16px, 1,6 : 1 menghasilkan kolom utama 60,5 persen dari
+       kontainer di semua lebar expanded (terukur 60,0 persen di 1280px),
+       jadi aturan 60 sampai 66 persen benar-benar terpenuhi tanpa
+       bergantung lebar layar. */
+    gap: 16px;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+/* Aksi di kepala halaman yang hanya tampil saat tombol melayang
+   disembunyikan, yaitu di expanded. Di compact dan medium tombol melayang
+   sudah jadi satu-satunya jalan tambah, jadi aksi kedua akan membuat dua
+   tombol utama untuk satu pekerjaan yang sama. */
+@media (max-width: 1022px) {
+  .hanya-expanded {
+    display: none;
+  }
+}
+
+.rel-samping {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+/* Wadah tunggal untuk tab, saringan, dan daftar. Satu panel, bukan tiga
+   bagian terpisah yang masing-masing berhenti di lebar berbeda. */
+.panel-daftar {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: clamp(20px, 4vw, 32px);
+  min-width: 0;
+  padding: clamp(16px, 2vw, 24px);
+  border: 1px solid color-mix(in srgb, var(--color-ink) 8%, transparent);
+  border-radius: var(--radius-panel);
+  background: var(--color-kartu-putih);
+}
+
+.panel-daftar-kepala {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (min-width: 1023px) {
+  /* Tab dan aksi panel berbagi satu baris selebar panel, jadi tidak ada
+     ruang kosong besar di kanan baris tab. */
+  .panel-daftar-kepala {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  /* Di expanded semua tab muat dalam satu baris, jadi tidak perlu gulir
+     mendatar dan tidak perlu potongan tepi penanda tab lain. */
+  .panel-daftar-kepala .tab {
+    flex-wrap: wrap;
+    overflow: visible;
+    padding-bottom: 0;
+    mask-image: none;
+  }
+}
+
+/* Tab di dalam kepala panel tidak perlu jarak bawah sendiri, karena jarak
+   antarbagian sudah diatur oleh gap kepala panel. */
+.panel-daftar-kepala .tab-berjarak {
+  margin-bottom: 0;
+}
+
+/* Keadaan kosong di dalam panel tidak menggambar permukaannya sendiri, supaya
+   tidak ada kartu di dalam kartu. Perataan kirinya tetap dari `.kosong`. */
+.panel-daftar .kosong {
+  padding: 8px 0 0;
+  border: 0;
+  background: transparent;
+}
+
+/* Panel aksi cepat di rel samping: satu label, satu penjelasan singkat, satu
+   tombol sekunder. Dipakai untuk aksi yang tidak boleh lagi menempel di
+   kepala panel daftar karena kepala panel itu dipakai baris tab. */
+.panel-aksi-cepat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: clamp(16px, 2vw, 24px);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-panel);
+  background: var(--color-netral);
+}
+
+/* Kartu progres ringkas di rel kanan. Isinya satu kolom penuh, jadi tidak ada
+   ruang mati di tengah kartu seperti kartu selebar kanvas sebelumnya. */
+.kartu-progres {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: clamp(20px, 2.4vw, 28px);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-lembar);
   background: var(--color-netral);
 }
 
-.rencana-hias {
-  position: absolute;
-  color: var(--color-primary);
-  opacity: 0.16;
-  pointer-events: none;
-}
-
-.rencana-hias-kanan {
-  top: -18px;
-  right: -14px;
-}
-
-.rencana-hias-kiri {
-  bottom: -22px;
-  left: -18px;
-  color: var(--color-terracotta);
-  opacity: 0.32;
-  fill: currentColor;
-}
-
-.rencana-hero-kepala,
-.rencana-hero-isi {
-  position: relative;
-  z-index: 1;
-}
-
-.rencana-hero-kepala {
+.kartu-progres-kepala {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px 12px;
 }
 
-.rencana-hero-label {
+.kartu-progres-label {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   font-family: var(--font-judul);
   font-size: var(--text-kecil);
   font-weight: 700;
-  color: var(--color-marigold);
+  color: var(--color-muted);
 }
 
 .rencana-ikon-bulat {
@@ -4402,58 +4800,31 @@ textarea.isian {
   color: var(--color-badge-teks);
 }
 
-.rencana-pil-kilau {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: var(--radius-pil);
-  background: var(--color-base);
-  font-size: var(--text-kecil);
-  font-weight: 600;
-  box-shadow: var(--bayang-1);
-}
-
-.rencana-hero-isi {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.rencana-hero-baris {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.rencana-hero-angka {
+.kartu-progres-angka {
   margin: 0;
   font-family: var(--font-judul);
-  font-size: var(--text-h2);
-  font-weight: 700;
-  line-height: 1.25;
-}
-
-.rencana-hero-angka span {
   font-size: var(--text-h1);
+  font-weight: 700;
+  line-height: 1.1;
   color: var(--color-marigold);
   font-variant-numeric: tabular-nums;
 }
 
-.rencana-hero-lencana {
-  padding: 6px 14px;
-  border-radius: var(--radius-pil);
-  background: var(--color-base);
+.kartu-progres-ket {
+  margin: 0;
   font-size: var(--text-kecil);
-  font-weight: 600;
-  white-space: nowrap;
+  color: var(--color-muted);
 }
 
+/* Bar progres. Treknya memakai permukaan kotak-abu dengan garis rambut di
+   tepinya, bukan campuran warna tinta. Alasannya hasil pengukuran: campuran
+   tinta 14 persen di mode gelap menghasilkan batang terang yang justru
+   terbaca sebagai "penuh" padahal progresnya nol persen. Dengan trek gelap
+   bergaris, batang tanpa isian terbaca sebagai kosong di dua tema.
+   Isiannya satu warna token, tanpa gradasi. */
 .rencana-bar {
-  height: 16px;
-  padding: 2px;
+  height: 12px;
+  border: 1px solid var(--color-line);
   border-radius: var(--radius-pil);
   background: var(--color-kotak-abu);
   overflow: hidden;
@@ -4466,25 +4837,18 @@ textarea.isian {
   transition: width 0.7s ease;
 }
 
-.rencana-hero-catatan {
-  display: flex;
+/* Pil jumlah hari menuju hari besar. Latarnya kanvas, jadi bukan elemen
+   aksen; yang mengangkatnya hanya bayangan. */
+.rencana-pil-kilau {
+  display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin: 0;
+  padding: 6px 14px;
+  border-radius: var(--radius-pil);
+  background: var(--color-base);
   font-size: var(--text-kecil);
-  color: var(--color-muted);
-}
-
-.rencana-hero-catatan svg {
-  flex: none;
-  color: var(--color-marigold);
-}
-
-/* Tombol aksi di bawah kartu progres */
-.rencana-aksi {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  font-weight: 600;
+  box-shadow: var(--bayang-1);
 }
 
 /* Pil saringan dan pencarian */
@@ -4527,10 +4891,14 @@ textarea.isian {
   border-color: var(--color-marigold);
 }
 
+/* Pil saringan aktif ditandai pembalikan warna ink, bukan warna aksen.
+   Alasannya: aksen per layar dibatasi dua bidang, dan dua bidang itu sudah
+   dipakai tombol utama dan bar progres. Pembalikan ink tetap jelas terbaca
+   dan tetap punya penanda non-warna lewat aria-pressed. */
 .rencana-pil[data-aktif="ya"] {
-  border-color: transparent;
-  background: var(--color-marigold);
-  color: var(--rencana-aksen-teks);
+  border-color: var(--color-ink);
+  background: var(--color-ink);
+  color: var(--color-base);
 }
 
 .rencana-pil-angka {
@@ -4554,6 +4922,9 @@ textarea.isian {
    dibaca di layar lebar. */
 .rencana-plan {
   max-width: 640px;
+  /* Form satu kolom tetap duduk di tengah kontainer, bukan menempel kiri.
+     Aturan komposisi desktop di DESIGN.md bagian 5 nomor 12. */
+  margin-inline: auto;
 }
 
 .rencana-cari > input.isian {
@@ -4675,34 +5046,18 @@ textarea.isian {
   flex: 0 0 auto;
 }
 
+/* Chip status di kanan kartu tugas. Hanya satu keadaan yang butuh chip, yaitu
+   "Selesai". Status waktu sudah dibawa judul kelompoknya, dan prioritas sudah
+   tertulis di baris meta. Varian lewat, tinggi, dan sedang dihapus karena
+   ketiganya hanya menjadi metadata kedua di baris yang sama. */
 .rencana-status {
   padding: 4px 12px;
   border-radius: var(--radius-pil);
   font-size: var(--text-mini);
   font-weight: 700;
   white-space: nowrap;
-  background: var(--color-netral);
-  color: var(--color-muted);
-}
-
-.rencana-status[data-jenis="selesai"] {
   background: var(--color-terracotta);
   color: var(--rencana-pink-teks);
-}
-
-.rencana-status[data-jenis="lewat"] {
-  background: var(--color-bata);
-  color: var(--rencana-bata-teks);
-}
-
-.rencana-status[data-jenis="tinggi"] {
-  background: var(--color-badge-latar);
-  color: var(--color-badge-teks);
-}
-
-.rencana-status[data-jenis="sedang"] {
-  background: var(--color-netral);
-  color: var(--color-muted);
 }
 
 /* Tombol tambah melayang, dinaikkan supaya tidak menutup navigasi bawah */
@@ -4731,10 +5086,14 @@ textarea.isian {
   filter: brightness(1.05);
 }
 
-/* Di lebar ini bilah bawah hilang, jadi tombol turun ke pojok bawah. */
+/* Di expanded tombol melayang disembunyikan, bukan dipindah ke bawah.
+   Alasannya: aksi utama layar sudah ada di kepala halaman, dan dua tombol
+   untuk satu aksi membuat pengguna ragu mana yang harus ditekan. Di compact
+   dan medium tombol ini tetap satu-satunya jalan tambah tugas, sesuai
+   docs/05 bagian 7 ("tambah tugas lewat tombol tetap di bawah"). */
 @media (min-width: 1023px) {
   .rencana-fab {
-    bottom: 24px;
+    display: none;
   }
 }
 
@@ -5380,10 +5739,11 @@ textarea.isian {
   filter: brightness(1.05);
 }
 
-/* Di lebar ini bilah bawah hilang, jadi tombol turun ke pojok bawah. */
+/* Di expanded tombol melayang anggaran disembunyikan, sama seperti .tamu-fab
+   dan .rencana-fab: aksi kepala halaman yang jadi satu-satunya jalan tambah. */
 @media (min-width: 1023px) {
   .anggaran-fab {
-    bottom: 24px;
+    display: none;
   }
 }
 
@@ -5978,6 +6338,9 @@ textarea.isian {
   .akun {
     padding-bottom: 32px;
     max-width: 880px;
+    /* Satu kolom karena isinya form, tapi tetap di tengah kontainer.
+       Aturan komposisi desktop di DESIGN.md bagian 5 nomor 12. */
+    margin-inline: auto;
   }
 
   .akun-tema-pilih {
@@ -6707,6 +7070,40 @@ textarea.isian {
 .pita-isi {
   flex: 1 1 auto;
   min-width: 0;
+}
+
+/*
+ * Pita ajakan pasang di desktop. Di layar lebar, pita selebar viewport membuat
+ * satu baris teks membentang lebih dari 1800px dan barisnya tidak nyaman
+ * dibaca. Di desktop isinya dibatasi selebar kontainer 1200px dan duduk di
+ * tengah, baris teksnya dibatasi 68ch, tingginya dikecilkan dari 64px ke 52px,
+ * dan tombolnya diturunkan ke 44px (masih di atas batas target sentuh).
+ * Semua aturan ini di dalam media expanded, jadi perilaku di mobile persis
+ * seperti sebelumnya, sesuai keputusan pemasangan PWA di docs/07.
+ */
+@media (min-width: 1023px) {
+  .pita {
+    justify-content: center;
+    padding: 4px 32px;
+    gap: 12px;
+  }
+
+  .pita-isi {
+    flex: 0 1 auto;
+    /*
+     * Batas 56rem (896px), bukan 68ch atau 84ch. Terukur di 1568px: pesannya
+     * satu baris 728px, tautan "Selengkapnya" 98px, jadi 830px. Di 795px
+     * tautannya jatuh ke baris kedua dan kotak inline-flex 44px-nya membuat
+     * pita jadi 74px (lebih tinggi dari 64px sebelum diubah). Di 896px
+     * semuanya muat satu baris, jadi pitanya 52px, dan panjang barisnya
+     * dibatasi 896px, bukan 1620px seperti sebelumnya.
+     */
+    max-width: min(1200px, 56rem);
+  }
+
+  .pita .tombol {
+    min-height: 44px;
+  }
 }
 
 /* Deretan tab yang perlu jarak bawah sebelum isinya. */

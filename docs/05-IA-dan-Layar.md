@@ -127,11 +127,14 @@ Daftar tugas dikelompokkan berdasarkan waktu, bukan kategori:
 Lewat jatuh tempo        (warna status, bukan merah menyala)
 Hari ini
 Minggu ini
-Belum ada tenggat
+Setelah minggu ini       (punya tanggal, tapi di luar pekan ini)
+Belum ada tenggat        (hanya tugas tanpa tanggal)
 Sudah selesai            (disembunyikan secara bawaan)
 ```
 
 **Alasannya** mengelompokkan berdasarkan waktu lebih berguna daripada berdasarkan kategori. Pasangan lebih sering bertanya "apa yang harus saya kerjakan hari ini" daripada "apa tugas saya di kategori katering".
+
+**Alasannya "Setelah minggu ini" dipisah dari "Belum ada tenggat"** tugas bertenggat jauh pernah ikut masuk "Belum ada tenggat", sehingga barisnya menampilkan tanggal di bawah judul yang berbunyi tidak ada tenggat. Sekarang "Belum ada tenggat" hanya untuk tugas yang benar-benar belum punya tanggal.
 
 **Filter**: kategori, status, dan siapa yang mengerjakan. Filter tersimpan di URL supaya bisa dibagikan ke pasangan.
 

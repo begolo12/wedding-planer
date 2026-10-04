@@ -47,6 +47,10 @@ export function ToastHost() {
 /**
  * Dialog konfirmasi memakai elemen `<dialog>` bawaan, bukan pustaka modal.
  * Alasannya: Escape, fokus terkunci, dan lapisan atas sudah ditangani browser.
+ *
+ * Tombol "ya" memakai gaya utama karena dialog adalah permukaannya sendiri:
+ * di dalam dialog tidak ada tombol utama lain, dan pemanggilnya sudah
+ * menyesuaikan (misalnya "Ya, tandai semua" pada dialog tandai undangan).
  */
 export function DialogKonfirmasi({
   buka,
@@ -56,6 +60,7 @@ export function DialogKonfirmasi({
   onTutup,
   onYa,
   sedangJalan,
+  bahaya,
 }: {
   buka: boolean;
   judul: string;
@@ -64,6 +69,8 @@ export function DialogKonfirmasi({
   onTutup: () => void;
   onYa: () => void;
   sedangJalan?: boolean;
+  /** Isi dialog menghapus atau membatalkan yang tidak bisa dikembalikan. */
+  bahaya?: boolean;
 }) {
   return (
     <dialog
@@ -82,7 +89,7 @@ export function DialogKonfirmasi({
         </button>
         <button
           type="button"
-          className="tombol tombol-utama"
+          className={bahaya ? "tombol tombol-hapus-ya" : "tombol tombol-utama"}
           onClick={onYa}
           disabled={sedangJalan}
         >

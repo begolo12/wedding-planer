@@ -333,23 +333,34 @@ export default function HalamanTamu() {
 
   return (
     <div className="tamu">
-      {/* Judul halaman dibaca pembaca layar saja, supaya susunan layar tetap
-          rapat seperti rancangan tanpa kehilangan penanda halaman. */}
-      <h1 className="sr-only">Tamu</h1>
-
-      {/* Aksi cepat di paling atas */}
-      <div className="tamu-aksi">
+      {/* Kepala halaman: judul di kiri, satu aksi utama di kanan. Aksi yang
+          sama tidak diulang di tombol melayang, karena `.tamu-fab` sudah
+          disembunyikan di `expanded` (DESIGN.md komposisi desktop poin 11). */}
+      <div className="kepala-halaman">
+        <div>
+          <h1>Tamu</h1>
+          <p>Kelola daftar undangan, konfirmasi kehadiran, dan sebaran meja.</p>
+        </div>
         {bisaUbah ? (
-          <>
-            <button type="button" className="tamu-aksi-tombol tamu-aksi-utama" onClick={bukaTambah}>
-              <IkonTambahTamu size={20} />
-              Tambah tamu
-            </button>
-            <Link className="tamu-aksi-tombol tamu-aksi-sekunder" href="/tamu/impor">
-              <IkonTempel size={20} />
-              Tempel daftar
-            </Link>
-          </>
+          <button
+            type="button"
+            className="tombol tombol-utama hanya-expanded"
+            onClick={bukaTambah}
+          >
+            <IkonTambahTamu size={18} />
+            Tambah tamu
+          </button>
+        ) : null}
+      </div>
+
+      {/* Jalan pintas tempel daftar. Tombol tambah ada di kepala halaman saat
+          `expanded`, dan di tombol melayang saat compact dan medium. */}
+      <div className="aksi-baris">
+        {bisaUbah ? (
+          <Link className="tombol tombol-sekunder" href="/tamu/impor">
+            <IkonTempel size={20} />
+            Tempel daftar
+          </Link>
         ) : null}
       </div>
 
@@ -440,6 +451,20 @@ export default function HalamanTamu() {
           </div>
         </div>
       ) : null}
+
+      {/* Satu panel untuk pencarian, saringan, daftar, dan keadaan kosongnya,
+          supaya keadaan kosong tidak lagi mengambang di kanvas kosong dan
+          perataannya sama dengan baris saringan di atasnya
+          (DESIGN.md komposisi desktop poin 5 dan 6). */}
+      <div className="panel-daftar" aria-label="Daftar tamu">
+        <div className="panel-daftar-kepala">
+          <h2 className="label-bagian">Daftar Tamu</h2>
+          {rawGuests.length > 0 ? (
+            <p className="tamu-jumlah">
+              {tamuTampil.length} dari {rawGuests.length} undangan ditampilkan
+            </p>
+          ) : null}
+        </div>
 
       {/* Pencarian dan saringan status */}
       <div className="tamu-saring">
@@ -533,7 +558,12 @@ export default function HalamanTamu() {
           >
             {bisaUbah ? (
               <>
-                <Link className="tombol tombol-utama" href="/tamu/impor">
+                {/* Kepala halaman sudah memakai tombol utama "Tambah tamu".
+                    Dua jalan masuk ke tambah itu, satu per satu dan tempel
+                    daftar, adalah dua cara berbeda, jadi di keadaan kosong
+                    keduanya sekunder supaya hanya ada satu tombol utama
+                    (DESIGN.md komposisi desktop poin 11). */}
+                <Link className="tombol tombol-sekunder" href="/tamu/impor">
                   Tempel daftar
                 </Link>
                 <button type="button" className="tombol tombol-sekunder" onClick={bukaTambah}>
@@ -686,6 +716,8 @@ export default function HalamanTamu() {
           ) : null}
         </>
       )}
+      </div>
+      {/* Akhir panel daftar tamu */}
 
       {/* Sebaran meja, hanya kalau ada tamu yang sudah dialokasikan */}
       {mejaTerisi.length > 0 ? (

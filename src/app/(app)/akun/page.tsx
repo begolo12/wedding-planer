@@ -266,7 +266,14 @@ export default function HalamanAkun() {
 
   return (
     <div className="akun">
-      <h1 className="sr-only">Akun dan Pengaturan</h1>
+      {/* Kepala halaman supaya sama dengan layar lain. Aksi utama "Simpan
+          data dasar" tetap di kaki layar, dekat dengan formnya. */}
+      <div className="kepala-halaman">
+        <div>
+          <h1>Akun</h1>
+          <p>Identitas, tanggal pernikahan, tema tampilan, dan daftar rencana.</p>
+        </div>
+      </div>
 
       {/* Sapa singkat. Nadanya sama dengan layar lain, isinya dari data nyata. */}
       <div className="akun-sapa">

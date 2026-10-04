@@ -356,14 +356,39 @@ export default function HalamanAnggaran() {
 
   return (
     <div className="anggaran">
-      <h1 className="sr-only">Anggaran</h1>
-      {/* Sapa dan hitung mundur */}
-      <div className="anggaran-sapa">
-        <span className="anggaran-sapa-ikon" aria-hidden="true">
-          <IkonKilau size={16} />
-        </span>
-        <span className="anggaran-sapa-teks">Semua pos anggaranmu tersusun rapi di sini.</span>
-        {teksHari ? <span className="anggaran-hitung">{teksHari}</span> : null}
+      {/* Kepala halaman: judul di kiri, satu aksi utama di kanan. Tombol
+          melayang disembunyikan di `expanded` supaya aksi yang sama tidak punya
+          dua pemicu (DESIGN.md komposisi desktop poin 11). */}
+      <div className="kepala-halaman">
+        <div>
+          <h1>Anggaran</h1>
+          <p>Semua pos anggaranmu tersusun rapi di sini.</p>
+        </div>
+        {bisaUbah ? (
+          <button
+            type="button"
+            className="tombol tombol-utama hanya-expanded"
+            onClick={bukaTambah}
+          >
+            <IkonTambah size={18} />
+            Tambah pos
+          </button>
+        ) : null}
+      </div>
+
+      {/* Jalan pintas memuat pos bawaan. Satu-satunya jalan kedua menuju
+          penambahan, jadi sekunder. */}
+      <div className="aksi-baris">
+        {bisaUbah ? (
+          <button
+            type="button"
+            className="tombol tombol-sekunder"
+            disabled={sedangMuatBawaan}
+            onClick={pasangPosBawaan}
+          >
+            {sedangMuatBawaan ? "Memasang..." : "Muat pos bawaan"}
+          </button>
+        ) : null}
       </div>
 
       {/* Kartu besar: total rencana anggaran */}
@@ -454,27 +479,6 @@ export default function HalamanAnggaran() {
         </div>
       </section>
 
-      {/* Aksi cepat */}
-      <div className="anggaran-aksi">
-        {bisaUbah ? (
-          <>
-            <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
-              <IkonTambah size={18} />
-              Tambah pos
-            </button>
-            {rawItems.length === 0 ? (
-              <button
-                type="button"
-                className="tombol tombol-sekunder"
-                disabled={sedangMuatBawaan}
-                onClick={pasangPosBawaan}
-              >
-                {sedangMuatBawaan ? "Memasang..." : "Muat pos bawaan"}
-              </button>
-            ) : null}
-          </>
-        ) : null}
-      </div>
 
       {dariPerangkat ? (
         <p className="keterangan">
@@ -483,33 +487,40 @@ export default function HalamanAnggaran() {
         </p>
       ) : null}
 
-      {/* Tab daftar pos dan rincian pengeluaran */}
-      <div className="anggaran-tab" role="tablist" aria-label="Bagian anggaran">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === "pos"}
-          className="anggaran-tab-pil"
-          data-aktif={tab === "pos" ? "ya" : "tidak"}
-          onClick={() => setTab("pos")}
-        >
-          <IkonKedai size={16} />
-          Daftar Pos
-          <span className="anggaran-pil-angka">{rawItems.length}</span>
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === "pengeluaran"}
-          className="anggaran-tab-pil"
-          data-aktif={tab === "pengeluaran" ? "ya" : "tidak"}
-          onClick={() => setTab("pengeluaran")}
-        >
-          <IkonStruk size={16} />
-          Rincian Pengeluaran
-          <span className="anggaran-pil-angka">{bayarList.length}</span>
-        </button>
-      </div>
+      {/* Satu panel untuk tab, saringan, daftar pos, dan rincian pengeluaran,
+          supaya keadaan kosong tidak lagi mengambang di kanvas kosong
+          (DESIGN.md komposisi desktop poin 5 dan 6). */}
+      <div className="panel-daftar" aria-label="Daftar anggaran">
+        <div className="panel-daftar-kepala">
+          <div className="anggaran-tab" role="tablist" aria-label="Bagian anggaran">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === "pos"}
+              className="anggaran-tab-pil"
+              data-aktif={tab === "pos" ? "ya" : "tidak"}
+              onClick={() => setTab("pos")}
+            >
+              <IkonKedai size={16} />
+              Daftar Pos
+              <span className="anggaran-pil-angka">{rawItems.length}</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === "pengeluaran"}
+              className="anggaran-tab-pil"
+              data-aktif={tab === "pengeluaran" ? "ya" : "tidak"}
+              onClick={() => setTab("pengeluaran")}
+            >
+              <IkonStruk size={16} />
+              Rincian Pengeluaran
+              <span className="anggaran-pil-angka">{bayarList.length}</span>
+            </button>
+          </div>
+        </div>
+
+      <div className="panel-daftar-isi">
 
       {tab === "pos" ? (
         <>
@@ -548,9 +559,14 @@ export default function HalamanAnggaran() {
             >
               {bisaUbah ? (
                 <>
+                  {/* Kepala halaman sudah memakai tombol utama "Tambah pos".
+                      Dua jalan menuju penambahan (muat bawaan atau tulis
+                      sendiri) jadi dua cara berbeda, jadi di keadaan kosong
+                      keduanya sekunder supaya hanya ada satu tombol utama
+                      (DESIGN.md komposisi desktop poin 11). */}
                   <button
                     type="button"
-                    className="tombol tombol-utama"
+                    className="tombol tombol-sekunder"
                     disabled={sedangMuatBawaan}
                     onClick={pasangPosBawaan}
                   >
@@ -657,7 +673,10 @@ export default function HalamanAnggaran() {
               keadaan="Belum ada pembayaran tercatat."
               jalanKeluar="Catat pembayaran dari halaman vendor supaya rinciannya muncul di sini."
             >
-              <Link className="tombol tombol-utama" href="/rencana/vendor">
+              {/* Mengarahkan ke daftar vendor, bukan menambah apa pun di layar
+                  ini, jadi bukan aksi utama layar (DESIGN.md komposisi desktop
+                  poin 11). */}
+              <Link className="tombol tombol-sekunder" href="/rencana/vendor">
                 Buka daftar vendor
               </Link>
             </Kosong>
@@ -689,6 +708,9 @@ export default function HalamanAnggaran() {
           </div>
         </>
       )}
+      </div>
+      </div>
+      {/* Akhir panel daftar anggaran */}
 
       {/* Catatan penutup, isinya dihitung dari data nyata */}
       <div className="anggaran-tips">

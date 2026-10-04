@@ -1,6 +1,6 @@
 {
   "name": "wedding-planer",
-  "version": "0.15.1",
+  "version": "0.16.0",
   "private": true,
   "scripts": {
     "dev": "node scripts/dev.mjs",

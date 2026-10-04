@@ -226,7 +226,12 @@ export default function HalamanInfo() {
         </p>
       ) : null}
 
+      {/* Satu panel untuk tab modul, ringkasan, daftar pengumuman, dan keadaan
+          kosongnya (DESIGN.md komposisi desktop poin 5 dan 6). */}
+      <div className="panel-daftar" aria-label="Pengumuman untuk keluarga">
+        <div className="panel-daftar-kepala">
       <TabRencana />
+        </div>
 
       {summary && summary.total > 0 ? (
         <div className="rekap rekap-tiga">
@@ -253,9 +258,14 @@ export default function HalamanInfo() {
           jalanKeluar="Tulis satu pengumuman yang perlu dibaca semua orang."
         >
           {bisaUbah ? (
-            <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
-              Tambah pengumuman
-            </button>
+            <>
+              {/* Kepala halaman sudah memakai tombol utama "Tambah
+                  pengumuman", jadi ajakan di keadaan kosong ini sekunder
+                  (DESIGN.md komposisi desktop poin 11). */}
+              <button type="button" className="tombol tombol-sekunder" onClick={bukaTambah}>
+                Tambah pengumuman
+              </button>
+            </>
           ) : null}
         </Kosong>
       ) : (
@@ -332,6 +342,8 @@ export default function HalamanInfo() {
           ))}
         </div>
       )}
+      </div>
+      {/* Akhir panel pengumuman */}
 
       <DialogKonfirmasi
         buka={Boolean(dicabut)}

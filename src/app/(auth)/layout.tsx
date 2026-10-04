@@ -28,17 +28,21 @@ export default function LayoutAuth({ children }: { children: ReactNode }) {
       </a>
 
       <div className="auth-kontainer">
-        <div className="auth-kepala">
-          <header className="auth-navigasi-atas">
-            <Link href="/" className="auth-merek-chip" aria-label={`Beranda ${NAMA_PRODUK}`}>
-              <span className="auth-merek-ikon" aria-hidden="true">
-                <Merek ukuran={32} />
-              </span>
-              <span className="auth-merek-nama">{NAMA_PRODUK}</span>
-            </Link>
-            <ThemeToggle />
-          </header>
+        {/* Baris identitas layar: chip merek dan tombol tema. Ditaruh di
+            tingkat kontainer, bukan di dalam kolom kepala, supaya di desktop
+            bisa membentang di atas dua kolom dan tombol tema tidak
+            menggantung di tengah kolom kiri. */}
+        <header className="auth-navigasi-atas">
+          <Link href="/" className="auth-merek-chip" aria-label={`Beranda ${NAMA_PRODUK}`}>
+            <span className="auth-merek-ikon" aria-hidden="true">
+              <Merek ukuran={32} />
+            </span>
+            <span className="auth-merek-nama">{NAMA_PRODUK}</span>
+          </Link>
+          <ThemeToggle />
+        </header>
 
+        <div className="auth-kepala">
           <AuthHero />
         </div>
 

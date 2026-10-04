@@ -83,8 +83,17 @@ describe("kelompokkan", () => {
     expect(kelompokkan(geserHari(0), "belum")).toBe("hariIni");
   });
 
-  it("jauh di depan masuk belum ada tenggat", () => {
-    expect(kelompokkan(geserHari(60), "belum")).toBe("tanpaTenggat");
+  it("jauh di depan masuk setelah minggu ini, bukan belum ada tenggat", () => {
+    expect(kelompokkan(geserHari(60), "belum")).toBe("setelahMingguIni");
+  });
+
+  it("kelompok belum ada tenggat hanya untuk tugas tanpa tanggal", () => {
+    // Label "Belum ada tenggat" tidak boleh lagi dipakai untuk tugas yang
+    // punya tanggal, karena barisnya akan menampilkan tanggal di bawah judul
+    // yang berbunyi tidak ada tenggat.
+    expect(kelompokkan(null, "belum")).toBe("tanpaTenggat");
+    expect(kelompokkan(geserHari(60), "belum")).not.toBe("tanpaTenggat");
+    expect(kelompokkan(geserHari(0), "selesai")).not.toBe("tanpaTenggat");
   });
 
   it("masih di minggu ini masuk minggu ini, kecuali hari ini hari Minggu", () => {

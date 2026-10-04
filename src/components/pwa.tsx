@@ -110,7 +110,7 @@ export function InstallPrompt() {
       {ios ? null : peristiwa ? (
         <button
           type="button"
-          className="tombol tombol-utama"
+          className="tombol tombol-sekunder"
           onClick={async () => {
             await peristiwa.prompt();
             setTampil(false);

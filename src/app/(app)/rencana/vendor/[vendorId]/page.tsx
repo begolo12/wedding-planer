@@ -323,7 +323,7 @@ export default function HalamanDetailVendor() {
       ) : null}
 
       {/* Ringkasan Finansial Vendor */}
-      <div className="rekap">
+      <div className="rekap rekap-tiga">
         <div className="rekap-item">
           <span className="rekap-nilai rekap-nilai-kecil">
             <Rupiah nilai={vendor.plannedAmount} />
