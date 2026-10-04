@@ -32,6 +32,7 @@ Aturan singkat:
 ### Ubah
 
 - Empat keputusan produk dicatat di dokumen (cadangan porsi katering, integrasi sewa kursi, kontak halaman kebijakan, dan harga serta model bisnis), dan kontak halaman kebijakan memakai kanal yang sudah ada. Tidak ada perubahan perilaku aplikasi lain
+- Dokumen deploy diselaraskan dengan kenyataan: produksi sudah tayang di Vercel dan terpicu otomatis saat push ke cabang main
 
 ## [0.15.0] - 4 Oktober 2026
 

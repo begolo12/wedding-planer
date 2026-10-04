@@ -247,4 +247,6 @@ Apa yang harus diukur sebelum rilis, dan apa yang boleh ditunda:
 | Uji beban | Setelah rilis | Belum diukur |
 | Field data Core Web Vitals | Setelah rilis | Belum ada |
 
+Catatan 4 Oktober 2026: aplikasi sudah tayang di `https://wedding-planer-self.vercel.app` sejak tanggal itu, jadi Lighthouse dan Core Web Vitals sudah bisa diukur kapan saja. Status di tabel tetap "belum diukur" karena pengukurannya belum dijalankan.
+
 Baris yang masih "belum" memang belum diukur, dan tidak diisi perkiraan. Alasannya ada di `18-Rencana-Produksi-dan-Pemakaian-Harian.md` bagian 18.

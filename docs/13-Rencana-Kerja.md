@@ -161,5 +161,5 @@ Tiga tahap sudah jalan. Angka yang bisa diukur sudah ditulis di `08-NFR.md`, dan
 
 1. Yang sudah diukur ada di `08-NFR.md` bagian "Rencana pengukuran": kontras, lebar 360px, dark mode, tombol tanpa handler, dan PDF
 2. Yang belum (Lighthouse, LCP, screen reader, keyboard penuh, install iOS, uji luring di desa, uji beban) tetap ditulis "belum", jangan diisi perkiraan
-3. Versi sekarang 0.14.0. Rilis produksi menunggu deploy, database produksi, dan backup, yang ketiganya belum ada
+3. Versi sekarang 0.15.1. Aplikasi sudah tayang di `https://wedding-planer-self.vercel.app` sejak 4 Oktober 2026 dan deploy terpicu otomatis saat push ke `main`. Yang belum ada tinggal backup harian database, restore teruji, pemantauan dan agregasi log, dan pemastian pemisahan database produksi
 4. Tulis di `CHANGELOG.md` apa yang berubah

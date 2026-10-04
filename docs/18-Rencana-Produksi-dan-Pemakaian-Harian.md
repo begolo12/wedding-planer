@@ -55,7 +55,7 @@ Tiap kelompok punya syarat selesai sendiri. Kelompok yang lebih tinggi selesai l
 | P1 | Test otomatis | Tidak ada satu pun test. Semua yang dianggap "sudah jalan" hanya terbukti karena diklik manual satu kali |
 | P1 | Perbaikan kontrak | Dua endpoint menjawab dengan bentuk berbeda dari `04-API-Contract.md` |
 | P2 | Verifikasi surel dan lupa kata sandi | Butuh penyedia surel. Itu keputusan lima pertanyaan dari `06-Stack-dan-Batas.md`, masuk P2 karena belum ada masalah nyata yang menyalakannya |
-| P2 | Jalur deploy dan backup | Satu container, satu pipeline. Belum ada target deploy yang dipilih |
+| P2 | Jalur deploy dan backup | Deploy sudah jalan di Vercel dan terpicu otomatis saat push ke `main` (bagian 12). Yang tersisa backup harian, restore teruji, pemantauan dan agregasi log, serta pemastian pemisahan database produksi |
 | P2 | Uji aksesibilitas | Warna sudah berpasangan, tetapi belum diukur. Target sentuh 44px sudah ada di CSS, tetapi belum diuji dengan keyboard |
 | P3 | Keselarasan dokumen | Beberapa dokumen berbeda isi dengan kode. Tidak memblokir pengguna, tidak memblokir produksi |
 
@@ -231,15 +231,26 @@ Kalau nanti masuk Fase 2, urutan yang benar: lupa kata sandi dulu, baru verifika
 
 ## 12. P2 Jalur deploy dan backup
 
-Belum ada target deploy yang dipilih. `06-Stack-dan-Batas.md` bagian 2 hanya menulis "satu platform, satu proses", dan itu belum jadi pilihan yang bisa dieksekusi.
+Keputusan pemilik produk 4 Oktober 2026: target deploy adalah Vercel, tersambung ke repositori GitHub `begolo12/wedding-planer`, dan deploy terpicu otomatis setiap push ke cabang `main`. Produksi sudah tayang di `https://wedding-planer-self.vercel.app`.
 
-| Yang harus diputuskan | Pilihan | Alasan memilih yang ini |
+Bukti diperiksa 4 Oktober 2026 setelah commit `fa9dfd1`: `GET /api/kesehatan` menjawab 200 dalam 2,43 detik (artinya database produksi terhubung), `/manifest.webmanifest` memuat name dan short_name "Rapi Nikah", `HEAD /masuk` mengirim lima header keamanan tanpa CSP, dan `GET /kebijakan` menjawab 200.
+
+| Yang sudah berlaku | Keadaan | Alasan atau bukti |
 |---|---|---|
-| Target deploy | Satu platform terkelola yang mendukung Node.js dan container | `06-Stack-dan-Batas.md` bagian 3 sudah menolak Kubernetes. Yang dibutuhkan hanya satu proses |
+| Target deploy | Vercel, tersambung ke repositori GitHub, deploy otomatis saat push ke `main` | Bukti di paragraf atas. Pilihan "satu platform terkelola, satu proses" di `06-Stack-dan-Batas.md` bagian 2 sudah terjawab |
 | Cara menjalankan migrasi | `db:migrate` sebagai langkah release, bukan dijalankan saat aplikasi start | Kalau migrasi jalan saat start, dua instance yang start bersamaan bisa menjalankan migrasi yang sama dua kali |
-| Backup database | Dump harian ke storage yang sama dengan platform | Data plan yang hilang berarti pasangan kehilangan catatan pembayaran mereka. Ini satu-satunya data yang tidak bisa dibangun ulang |
 | Pemantauan | Health check di `/api/kesehatan` plus log server biasa | `06-Stack-dan-Batas.md` bagian 3 sudah menolak Sentry. Health check sudah ada, tinggal diberi tahu platform |
-| Image container | `output: "standalone"` di `next.config.mjs` plus `Dockerfile` multi-stage | Tanpa `standalone`, image membawa `node_modules` penuh. Keduanya adalah pasangan yang benar, dan tidak ada biaya licence |
+
+Yang masih belum:
+
+| Yang belum | Keadaan sekarang | Yang dibutuhkan |
+|---|---|---|
+| Backup harian database | Belum ada bukti dump harian berjalan | Jadwal dump dan storage tujuan |
+| Restore yang pernah diuji | Belum pernah dicoba memulihkan dari dump | Satu uji restore ke database terpisah |
+| Pemantauan dan agregasi log | Health check sudah ada, tetapi belum ada yang memberi tahu saat gagal, dan log belum diagregasi | Pemberitahuan dari platform atau alat pemantauan |
+| Pemisahan database produksi | Database produksi memang terhubung, dibuktikan `GET /api/kesehatan` 200, tetapi belum dipastikan terpisah dari database pengembangan | Konfirmasi nama dan host database produksi berbeda dari pengembangan |
+
+Catatan: baris "Image container" dengan `output: "standalone"` dan `Dockerfile` tidak dipakai. Vercel yang menangani build dan proses, jadi tidak ada container yang dibangun dari repo. Kalau nanti pindah platform, keputusan itu ditulis ulang di sini.
 
 ---
 
@@ -337,8 +348,8 @@ Celah di bawah disengaja belum dikerjakan, atau sudah selesai di kode tapi belum
 
 | Celah | Alasan | Yang dibutuhkan |
 |---|---|---|
-| Deploy produksi, database produksi, backup, dan pemantauan | Belum ada target deploy yang dipilih, dan `DATABASE_URL` di mesin ini masih localhost. Env produksi `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`, `DATABASE_URL`, dan `DATABASE_URL_UNPOOLED` belum dipasang | Pilihan platform, lalu env produksi diisi |
-| Lighthouse dan Core Web Vitals | Belum diukur karena belum ada target deploy untuk diukur | Deploy, lalu ukur |
+| Backup harian database, restore teruji, pemantauan dan agregasi log, dan pemastian pemisahan database produksi | Deploy produksi sudah ada dan tayang di `https://wedding-planer-self.vercel.app` sejak 4 Oktober 2026. `GET /api/kesehatan` menjawab 200, artinya database produksi terhubung, tetapi backup harian belum terbukti berjalan, restore belum pernah diuji, belum ada pemberitahuan saat gagal, dan pemisahan database produksi dari database pengembangan belum dipastikan | Jadwal dan uji backup, alat pemantauan dan agregasi log, konfirmasi database produksi terpisah |
+| Lighthouse dan Core Web Vitals | Belum diukur, padahal aplikasi sudah tayang di `https://wedding-planer-self.vercel.app` sejak 4 Oktober 2026, jadi pengukurannya bisa dijalankan kapan saja | Jalankan Lighthouse, lalu catat hasilnya |
 | Screen reader dan jalur keyboard penuh | Belum diuji. Keyboard dasar jalan, tapi seluruh alur belum dijalankan tanpa tetikus | Uji manual, lalu catat |
 | Jalur ssl remote | Host remote belum tersedia, dan `DATABASE_URL` di mesin ini localhost | Koneksi remote untuk uji ssl |
 | Dialog konflik 409 | Tidak dibangun karena `01-PRD.md` bagian 4.2 memutuskan last-write-wins. Sudah dicatat di `07-PWA.md` | Data nyata yang menunjukkan sunting bersamaan |
