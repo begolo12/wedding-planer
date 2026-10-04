@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { shareLinks } from "@/db/schema";
-import { bungkus, tidakDitemukan } from "@/lib/galat";
+import { bungkus, idUuid, tidakDitemukan } from "@/lib/galat";
 import { konteksPlan } from "@/lib/api";
 
 type Params = { params: Promise<{ planId: string; linkId: string }> };
@@ -18,6 +18,7 @@ type Params = { params: Promise<{ planId: string; linkId: string }> };
 export const DELETE = bungkus(async (_req: Request, { params }: Params) => {
   const { planId, linkId } = await params;
   await konteksPlan(planId);
+  idUuid(linkId, "Tautan");
 
   const dihapus = await db
     .delete(shareLinks)

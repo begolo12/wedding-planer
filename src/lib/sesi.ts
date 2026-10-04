@@ -3,7 +3,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import { db } from "@/db";
 import { plans } from "@/db/schema";
 import { auth } from "@/lib/auth";
-import { belumMasuk, tidakDitemukan, tidakPunyaAkses } from "@/lib/galat";
+import { belumMasuk, idUuid, tidakDitemukan, tidakPunyaAkses } from "@/lib/galat";
 
 export type Pengguna = {
   id: string;
@@ -33,9 +33,10 @@ export async function wajibMasuk(): Promise<Pengguna> {
  * Plan yang sudah dihapus lembut dianggap tidak ada.
  */
 export async function planMilikSaya(planId: string, pengguna: Pengguna) {
-  if (!planId || !/^[0-9a-f-]{36}$/i.test(planId)) {
-    throw tidakDitemukan("Rencana");
-  }
+  // Plan yang id-nya bukan UUID sudah pasti tidak ada, dan menanyakan nilai
+  // seperti itu ke Postgres berakhir jadi 500. Pola UUID yang sama dipakai
+  // idUuid untuk semua id anak, jadi pemeriksaannya satu bahasa.
+  idUuid(planId, "Rencana");
 
   const [plan] = await db
     .select()

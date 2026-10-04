@@ -18,11 +18,43 @@ import {
 // Semua bentuk isian ditulis di satu berkas. Layar dan API membaca dari sini,
 // jadi aturan tidak bisa berbeda antara form di layar dan pemeriksaan di server.
 
+/**
+ * Tanggal harus benar-benar ada di kalender, bukan cuma berbentuk benar.
+ * Regex saja meloloskan 2026-02-30 dan 2026-13-45; nilai itu ditolak kolom
+ * `date` Postgres dan berubah jadi 500, padahal kontrak mensyaratkan 422.
+ */
+function adaDiKalender(teks: string): boolean {
+  const [tahun, bulan, hari] = teks.split("-").map(Number);
+  if (bulan < 1 || bulan > 12 || hari < 1) return false;
+  const dibuat = new Date(Date.UTC(tahun, bulan - 1, hari));
+  // Date.UTC memetakan tahun 0-99 ke 1900-an, jadi tahunnya disetel ulang
+  // dulu sebelum dibandingkan.
+  dibuat.setUTCFullYear(tahun);
+  return (
+    dibuat.getUTCFullYear() === tahun &&
+    dibuat.getUTCMonth() === bulan - 1 &&
+    dibuat.getUTCDate() === hari
+  );
+}
+
 const tanggal = z
   .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Tanggal harus dalam bentuk 2026-06-30.");
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Tanggal harus dalam bentuk 2026-06-30.")
+  .refine(adaDiKalender, "Tanggal itu tidak ada di kalender.");
 
-const jam = z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/, "Jam harus dalam bentuk 07:00.");
+/**
+ * Jam harus berada di rentang 00:00-23:59:59. Regex saja meloloskan 25:99,
+ * yang ditolak kolom `time` Postgres dan berubah jadi 500, bukan 422.
+ */
+function jamSah(teks: string): boolean {
+  const [h, m, s = 0] = teks.split(":").map(Number);
+  return h <= 23 && m <= 59 && s <= 59;
+}
+
+const jam = z
+  .string()
+  .regex(/^\d{2}:\d{2}(:\d{2})?$/, "Jam harus dalam bentuk 07:00.")
+  .refine(jamSah, "Jam harus antara 00:00 dan 23:59.");
 
 const teksWajib = (nama: string, maks = 120) =>
   z.string().trim().min(1, `${nama} belum diisi.`).max(maks, `${nama} terlalu panjang.`);

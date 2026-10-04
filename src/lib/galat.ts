@@ -51,6 +51,20 @@ export const tidakDitemukan = (apa = "Data") =>
 export const tidakValid = (message: string, fields?: Record<string, string>) =>
   new GalatAplikasi("VALIDATION_ERROR", message, fields);
 
+const POLA_UUID =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Id yang datang dari path harus UUID yang sah. Nilai lain tidak mungkin ada
+ * di database, jadi langsung dijawab NOT_FOUND. Tanpa pemeriksaan ini, id
+ * seperti "undefined" atau 36 tanda hubung sampai ke Postgres sebagai uuid
+ * dan berubah jadi 500 INTERNAL_ERROR, padahal kontrak mensyaratkan 404.
+ */
+export function idUuid(nilai: string, apa = "Data"): string {
+  if (!POLA_UUID.test(nilai)) throw tidakDitemukan(apa);
+  return nilai;
+}
+
 function dariZod(err: ZodError): GalatAplikasi {
   const fields: Record<string, string> = {};
   for (const isu of err.issues) {

@@ -27,6 +27,24 @@ Aturan singkat:
 | Tulis alasan kalau tidak jelas | Pembaca versi berikutnya tidak perlu menebak |
 | Tambah entri baru di atas | Yang terbaru selalu di paling atas |
 
+## [0.12.1] - 4 Oktober 2026
+
+Id dari alamat dan tanggal atau jam dari isian yang bentuknya benar tapi isinya tidak masuk akal sampai ke database dan ditolak di sana. Yang keluar ke pengguna bukan pesan yang bisa dibaca, tapi `500 INTERNAL_ERROR`, padahal kontrak menjanjikan `404 NOT_FOUND` untuk data yang tidak ada dan `422 VALIDATION_ERROR` untuk isian yang salah. Semua jalur itu ditutup.
+
+### Perbaiki
+
+- `src/lib/galat.ts` menambah `idUuid(nilai, apa)`: id dari path yang bukan UUID dijawab `404` dengan pesan Indonesia, bukan `500`. Sebelumnya nilai seperti `undefined` atau 36 tanda hubung sampai ke kolom `uuid` Postgres dan pecah di sana
+- Tiga belas berkas route memakai `idUuid` untuk id anak, jadi perilakunya satu bahasa di seluruh API: `announcements/[id]`, `announcements/[id]/share`, `budget-items/[itemId]`, `guests/[guestId]`, `milestones/[milestoneId]`, `outfits/[itemId]`, `payments/[paymentId]`, `report/links/[linkId]`, `rundown/[itemId]`, `tasks/[taskId]`, `tasks/[taskId]/toggle`, `vendors/[vendorId]`, `vendors/[vendorId]/payments`
+- `src/lib/sesi.ts` memakai `idUuid` yang sama untuk `planId`. Pola lama `/^[0-9a-f-]{36}$/` meloloskan 36 tanda hubung, pola baru menuntut bentuk UUID yang sah
+- `src/lib/skema.ts` menolak tanggal yang tidak ada di kalender dengan `422`. Sebelumnya `2026-02-30` dan `2026-13-45` lolos pemeriksaan bentuk lalu ditolak kolom `date` Postgres sebagai `500`. Tanggal kabisat `2028-02-29` tetap diterima
+- `src/lib/skema.ts` membatasi jam ke `00:00:00`-`23:59:59` dengan `422`. Sebelumnya `25:99` lolos lalu ditolak kolom `time` Postgres sebagai `500`
+- Versi naik dari 0.12.0 ke 0.12.1
+
+### Catatan keputusan
+
+- Pemeriksaan id ditaruh di helper `idUuid`, bukan diulang di tiap route. Satu pola, satu pesan, dan route baru yang lupa memakainya ketahuan dari ketiadaan panggilan, bukan dari perilaku yang berbeda
+- Tanggal dan jam diperiksa dengan perbandingan kalender, bukan ditambah daftar hari per bulan. Aturan kabisat jadi ikut benar tanpa ditulis ulang
+
 ## [0.12.0] - 1 Oktober 2026
 
 Ini rilis pertama yang membawa ke Git seluruh pekerjaan yang selama ini hanya ada di komputer. Entri 0.7.0 sampai 0.11.1 sudah ditulis di berkas ini tapi belum pernah dikirim ke Git, jadi versi terakhir di Git masih 0.6.7. Selain mengejar ketertinggalan itu, rilis ini menutup sisa pekerjaan yang belum tercatat: judul tab layar masuk dan daftar, kepala layar auth yang lengkap, dua kartu baru di beranda, dan pembersihan berkas perkakas.

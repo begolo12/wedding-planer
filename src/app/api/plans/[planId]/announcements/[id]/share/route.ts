@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { announcements } from "@/db/schema";
-import { bacaJson, bungkus, tidakDitemukan } from "@/lib/galat";
+import { bacaJson, bungkus, idUuid, tidakDitemukan } from "@/lib/galat";
 import { konteksPlan } from "@/lib/api";
 import { buatToken, urlTautan } from "@/lib/tautan";
 
@@ -26,6 +26,7 @@ type Params = { params: Promise<{ planId: string; id: string }> };
 export const POST = bungkus(async (req: Request, { params }: Params) => {
   const { planId, id } = await params;
   await konteksPlan(planId);
+  idUuid(id, "Pengumuman");
 
   const [baris] = await db
     .select()

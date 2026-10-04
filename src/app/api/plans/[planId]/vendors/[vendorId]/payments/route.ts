@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 import { and, asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { payments, vendors } from "@/db/schema";
-import { bacaJson, bungkus, tidakDitemukan } from "@/lib/galat";
+import { bacaJson, bungkus, idUuid, tidakDitemukan } from "@/lib/galat";
 import { konteksPlan } from "@/lib/api";
 import { skemaPembayaran } from "@/lib/skema";
 
 type Params = { params: Promise<{ planId: string; vendorId: string }> };
 
 async function vendorMilikSaya(planId: string, vendorId: string) {
+  idUuid(vendorId, "Vendor");
   const [baris] = await db
     .select({ id: vendors.id })
     .from(vendors)
