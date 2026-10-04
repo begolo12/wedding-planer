@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePlan } from "@/lib/use-plan";
 import { useMuat } from "@/lib/use-muat";
+import { useStatusLuring } from "@/lib/status-luring";
 import { TabRencana } from "@/components/tab-rencana";
 import { TaskItem, type TugasBaris } from "@/components/task-item";
 import { Kerangka, Kosong, Gagal } from "@/components/states";
@@ -21,12 +22,16 @@ import {
   LABEL_PENUGASAN,
 } from "@/lib/konstanta";
 import { kelompokkan, LABEL_KELOMPOK, URUTAN_KELOMPOK, type KelompokWaktu } from "@/lib/plan";
-import { selisihHari, hitungMundur } from "@/lib/format";
+import { selisihHari, hitungMundur, rupiah } from "@/lib/format";
+import { Rupiah } from "@/components/rupiah";
 
 type TugasLengkap = TugasBaris & {
   budgetItemId?: string | null;
   sortOrder?: number;
 };
+
+/** Pos anggaran yang bisa ditautkan ke tugas supaya nominalnya terlihat. */
+type PosRingkas = { id: string; name: string; plannedAmount: number };
 
 /** Saringan cepat di atas daftar tugas. "semua" berarti tanpa saringan. */
 type SaringTugas = "semua" | "mendesak" | "belumTenggat" | "selesai";
@@ -57,6 +62,9 @@ const SARINGAN: { id: SaringTugas; label: string }[] = [
 export default function HalamanTugas() {
   const { plan, planId, memuat: memuatPlan, galat: galatPlan, muatUlang: muatPlan } = usePlan();
 
+  const { luring, dariPerangkat } = useStatusLuring();
+  const bisaUbah = !luring && !dariPerangkat;
+
   const {
     data: dataTugas,
     memuat: memuatTugas,
@@ -66,10 +74,21 @@ export default function HalamanTugas() {
     aktif: Boolean(planId),
   });
 
+  // Pos anggaran dipakai untuk mengisi nominal tugas. Tugas tidak menyimpan
+  // nominal sendiri, jadi nominalnya mengikuti pos anggaran yang ditautkan.
+  // Alasannya, uang hanya boleh punya satu sumber, dan sumbernya ada di pos.
+  const { data: dataPos } = useMuat<{ items: PosRingkas[] }>(
+    planId ? `/api/plans/${planId}/budget-items` : null,
+    { aktif: Boolean(planId) },
+  );
+  const daftarPos = dataPos?.items ?? [];
+
   const [kategoriPilihan, setKategoriPilihan] = useState<string>("semua");
   const [tampilkanSelesai, setTampilkanSelesai] = useState<boolean>(false);
   const [kataKunci, setKataKunci] = useState<string>("");
+  const [penugasanPilihan, setPenugasanPilihan] = useState<string>("semua");
   const [saring, setSaring] = useState<SaringTugas>("semua");
+  const [batasTugas, setBatasTugas] = useState(20);
 
   // Lembar tambah / ubah tugas
   const [lembarBuka, setLembarBuka] = useState(false);
@@ -91,6 +110,7 @@ export default function HalamanTugas() {
   const [formTenggat, setFormTenggat] = useState("");
   const [formPrioritas, setFormPrioritas] = useState<Prioritas>("sedang");
   const [formPenugasan, setFormPenugasan] = useState<Penugasan>("saya");
+  const [formPosId, setFormPosId] = useState("");
   const [formCatatan, setFormCatatan] = useState("");
   const [formGalat, setFormGalat] = useState<string | null>(null);
 
@@ -101,6 +121,7 @@ export default function HalamanTugas() {
     setFormTenggat("");
     setFormPrioritas("sedang");
     setFormPenugasan("saya");
+    setFormPosId("");
     setFormCatatan("");
     setFormGalat(null);
     setLembarBuka(true);
@@ -121,6 +142,7 @@ export default function HalamanTugas() {
     setFormPenugasan(
       PENUGASAN.includes(t.assignee as Penugasan) ? (t.assignee as Penugasan) : "saya",
     );
+    setFormPosId(t.budgetItemId ?? "");
     setFormCatatan(t.notes ?? "");
     setFormGalat(null);
     setLembarBuka(true);
@@ -145,6 +167,7 @@ export default function HalamanTugas() {
         dueDate: formTenggat || null,
         priority: formPrioritas,
         assignee: formPenugasan,
+        budgetItemId: formPosId || null,
         notes: formCatatan.trim() || null,
       };
 
@@ -153,13 +176,13 @@ export default function HalamanTugas() {
           method: "PATCH",
           body: payload,
         });
-        toast("Perubahan tugas tersimpan");
+        toast("Tersimpan");
       } else {
         await minta(`/api/plans/${planId}/tasks`, {
           method: "POST",
           body: { ...payload, status: "belum", sortOrder: 0 },
         });
-        toast("Tugas baru ditambahkan");
+        toast("Tersimpan");
       }
 
       setLembarBuka(false);
@@ -178,7 +201,7 @@ export default function HalamanTugas() {
       await minta(`/api/plans/${planId}/tasks/${tugasDihapus.id}`, {
         method: "DELETE",
       });
-      toast("Tugas berhasil dihapus");
+      toast("Dihapus");
       setTugasDihapus(null);
       await muatTugas();
     } catch (err) {
@@ -254,6 +277,9 @@ export default function HalamanTugas() {
       if (kategoriPilihan !== "semua" && t.category !== kategoriPilihan) {
         return false;
       }
+      if (penugasanPilihan !== "semua" && (t.assignee ?? "") !== penugasanPilihan) {
+        return false;
+      }
       if (!tampilkanSelesai && saring !== "selesai" && t.status === "selesai") {
         return false;
       }
@@ -266,9 +292,14 @@ export default function HalamanTugas() {
       }
       return true;
     });
-  }, [semuaTugas, saring, kategoriPilihan, tampilkanSelesai, kataKunci]);
+  }, [semuaTugas, saring, kategoriPilihan, tampilkanSelesai, kataKunci, penugasanPilihan]);
 
   // Kelompokkan per waktu
+  const tugasTampil = useMemo(
+    () => tugasTersaring.slice(0, batasTugas),
+    [tugasTersaring, batasTugas],
+  );
+
   const kelompokTugas = useMemo(() => {
     const hasil: Record<KelompokWaktu, TugasLengkap[]> = {
       lewat: [],
@@ -278,12 +309,12 @@ export default function HalamanTugas() {
       selesai: [],
     };
 
-    for (const t of tugasTersaring) {
+    for (const t of tugasTampil) {
       const kel = kelompokkan(t.dueDate, t.status);
       hasil[kel].push(t);
     }
     return hasil;
-  }, [tugasTersaring]);
+  }, [tugasTampil]);
 
   if (memuatPlan || (planId && memuatTugas && !dataTugas)) {
     return <Kerangka baris={6} />;
@@ -312,6 +343,7 @@ export default function HalamanTugas() {
 
   return (
     <div className="rencana">
+      <h1 className="sr-only">Tugas</h1>
       <section className="rencana-hero">
         <span className="rencana-hias rencana-hias-kanan" aria-hidden="true">
           <IkonBunga size={96} />
@@ -328,19 +360,17 @@ export default function HalamanTugas() {
             Langkah Menuju Hari Bahagia
           </span>
           {teksMundur ? (
-            <span className="rencana-pil-kilau">
-              <span aria-hidden="true">✨</span> {teksMundur}
-            </span>
+            <span className="rencana-pil-kilau">{teksMundur}</span>
           ) : null}
         </div>
 
         <div className="rencana-hero-isi">
           <div className="rencana-hero-baris">
-            <h1 className="rencana-hero-angka">
+            <p className="rencana-hero-angka">
               Progres Persiapan: <span>{persenProgres}%</span>
-            </h1>
+            </p>
             <span className="rencana-hero-lencana">
-              {tugasSelesai} dari {totalTugas} Selesai 🌸
+              {tugasSelesai} dari {totalTugas} selesai
             </span>
           </div>
           <div className="rencana-bar">
@@ -348,23 +378,34 @@ export default function HalamanTugas() {
           </div>
           <p className="rencana-hero-catatan">
             <IkonHati size={16} />
-            Pelan tapi pasti, langkah menuju hari bahagiamu makin dekat!
+            Pelan tapi pasti, langkah menuju hari bahagiamu makin dekat.
           </p>
         </div>
       </section>
 
       <div className="rencana-aksi">
-        <button
-          type="button"
-          className="tombol tombol-sekunder"
-          onClick={() => setLembarTemplate(true)}
-        >
-          Muat template
-        </button>
-        <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
-          Tambah tugas
-        </button>
+        {bisaUbah ? (
+          <>
+            <button
+              type="button"
+              className="tombol tombol-sekunder"
+              onClick={() => setLembarTemplate(true)}
+            >
+              Muat template
+            </button>
+            <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
+              Tambah tugas
+            </button>
+          </>
+        ) : null}
       </div>
+
+      {dariPerangkat ? (
+        <p className="keterangan">
+          Data ini dibuka dari cadangan perangkat. Menambah atau mengubah tugas tidak bisa
+          dilakukan sampai ada koneksi.
+        </p>
+      ) : null}
 
       <TabRencana />
 
@@ -415,6 +456,20 @@ export default function HalamanTugas() {
             ))}
           </select>
 
+          <select
+            className="isian"
+            aria-label="Saring penanggung jawab"
+            value={penugasanPilihan}
+            onChange={(e) => setPenugasanPilihan(e.target.value)}
+          >
+            <option value="semua">Semua penanggung jawab</option>
+            {PENUGASAN.map((p) => (
+              <option key={p} value={p}>
+                {LABEL_PENUGASAN[p]}
+              </option>
+            ))}
+          </select>
+
           <button
             type="button"
             className="tombol tombol-sekunder"
@@ -429,22 +484,26 @@ export default function HalamanTugas() {
       {semuaTugas.length === 0 ? (
         <Kosong
           keadaan="Belum ada tugas."
-          jalanKeluar="Mulai dari yang paling dekat dengan tanggal, atau muat checklist bawaan."
+          jalanKeluar="Mulai dari yang paling dekat dengan tanggal."
         >
-          <button
-            type="button"
-            className="tombol tombol-utama"
-            onClick={() => setLembarTemplate(true)}
-          >
-            Muat checklist bawaan
-          </button>
-          <button type="button" className="tombol tombol-sekunder" onClick={bukaTambah}>
-            Tulis tugas sendiri
-          </button>
+          {bisaUbah ? (
+            <>
+              <button
+                type="button"
+                className="tombol tombol-utama"
+                onClick={() => setLembarTemplate(true)}
+              >
+                Muat checklist bawaan
+              </button>
+              <button type="button" className="tombol tombol-sekunder" onClick={bukaTambah}>
+                Tulis tugas sendiri
+              </button>
+            </>
+          ) : null}
         </Kosong>
       ) : tugasTersaring.length === 0 ? (
         <Kosong
-          keadaan="Tidak ada tugas yang cocok."
+          keadaan="Tidak ada yang cocok dengan pencarian itu."
           jalanKeluar="Coba bersihkan kata kunci atau pilih kategori lain."
         >
           <button
@@ -489,23 +548,36 @@ export default function HalamanTugas() {
                           onUbah={() => muatTugas()}
                           onBuka={() => bukaUbah(t)}
                         />
+                        {(() => {
+                          const pos = daftarPos.find((p) => p.id === t.budgetItemId);
+                          if (!pos) return null;
+                          return (
+                            <p className="keterangan keterangan-rapat">
+                              Nominal: <Rupiah nilai={pos.plannedAmount} /> ({pos.name})
+                            </p>
+                          );
+                        })()}
                       </div>
                       <div className="rencana-kartu-sisi">
                         <LencanaStatus tugas={t} kelompok={kel} />
-                        <button
-                          type="button"
-                          className="tombol tombol-sekunder tombol-kecil"
-                          onClick={() => bukaUbah(t)}
-                        >
-                          Ubah
-                        </button>
-                        <button
-                          type="button"
-                          className="tombol tombol-bahaya tombol-kecil"
-                          onClick={() => setTugasDihapus(t)}
-                        >
-                          Hapus
-                        </button>
+                        {bisaUbah ? (
+                          <>
+                            <button
+                              type="button"
+                              className="tombol tombol-sekunder tombol-kecil"
+                              onClick={() => bukaUbah(t)}
+                            >
+                              Ubah
+                            </button>
+                            <button
+                              type="button"
+                              className="tombol tombol-bahaya tombol-kecil"
+                              onClick={() => setTugasDihapus(t)}
+                            >
+                              Hapus
+                            </button>
+                          </>
+                        ) : null}
                       </div>
                     </article>
                   ))}
@@ -513,6 +585,15 @@ export default function HalamanTugas() {
               </section>
             );
           })}
+          {tugasTersaring.length > batasTugas ? (
+            <button
+              type="button"
+              className="tombol tombol-sekunder"
+              onClick={() => setBatasTugas((n) => n + 20)}
+            >
+              Muat lebih
+            </button>
+          ) : null}
         </div>
       )}
 
@@ -529,7 +610,7 @@ export default function HalamanTugas() {
               className="isian"
               type="text"
               required
-              placeholder="Contoh: Booking DP gedung acara"
+              placeholder="Misalnya: Booking dekorasi"
               value={formJudul}
               onChange={(e) => setFormJudul(e.target.value)}
             />
@@ -567,6 +648,20 @@ export default function HalamanTugas() {
             nilai={formPenugasan}
             opsi={PENUGASAN.map((p) => ({ nilai: p, label: LABEL_PENUGASAN[p] }))}
             onUbah={setFormPenugasan}
+          />
+
+          <Pilih
+            label="Nominal (pos anggaran)"
+            id="formPos"
+            nilai={formPosId}
+            onUbah={setFormPosId}
+            opsi={[
+              { nilai: "", label: "Tanpa nominal" },
+              ...daftarPos.map((p) => ({
+                nilai: p.id,
+                label: `${p.name} - ${rupiah(p.plannedAmount)}`,
+              })),
+            ]}
           />
 
           <Isian label="Catatan tambahan" id="formCatatan">
@@ -612,7 +707,7 @@ export default function HalamanTugas() {
           </p>
 
           <Pilih
-            label="Kategori checklist"
+            label="Kategori tugas"
             id="kategoriTemplate"
             nilai={kategoriTemplate}
             onUbah={(v) => setKategoriTemplate(v as KategoriTugas)}
@@ -642,23 +737,25 @@ export default function HalamanTugas() {
       {/* Dialog Konfirmasi Hapus */}
       <DialogKonfirmasi
         buka={Boolean(tugasDihapus)}
-        judul="Hapus tugas ini?"
-        isi={`Tugas "${tugasDihapus?.title ?? ""}" akan dihapus permanen.`}
-        tombolYa="Ya, hapus"
+        judul="Hapus tugas"
+        isi="Tugas ini akan dihapus dari daftar."
+        tombolYa="Hapus"
         sedangJalan={sedangHapus}
         onTutup={() => setTugasDihapus(null)}
         onYa={konfirmasiHapus}
       />
 
-      <button
-        type="button"
-        className="rencana-fab tanpa-cetak"
-        aria-label="Tambah tugas baru"
-        onClick={bukaTambah}
-      >
-        <IkonTambah size={18} />
-        Tambah Tugas Baru
-      </button>
+      {bisaUbah ? (
+        <button
+          type="button"
+          className="rencana-fab tanpa-cetak"
+          aria-label="Tambah tugas baru"
+          onClick={bukaTambah}
+        >
+          <IkonTambah size={18} />
+          Tambah Tugas Baru
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -666,18 +763,18 @@ export default function HalamanTugas() {
 /** Lencana status di kanan kartu tugas. Diambil dari data, bukan dari contoh. */
 function LencanaStatus({ tugas, kelompok }: { tugas: TugasLengkap; kelompok: KelompokWaktu }) {
   if (tugas.status === "selesai") {
-    return <span className="rencana-status" data-jenis="selesai">Selesai ✨</span>;
+    return <span className="rencana-status" data-jenis="selesai">Selesai</span>;
   }
   if (kelompok === "lewat") {
-    return <span className="rencana-status" data-jenis="lewat">Lewat tenggat</span>;
+    return <span className="rencana-status" data-jenis="lewat">Terlambat</span>;
   }
   if (tugas.priority === "tinggi") {
-    return <span className="rencana-status" data-jenis="tinggi">Tinggi 💕</span>;
+    return <span className="rencana-status" data-jenis="tinggi">Tinggi</span>;
   }
   if (!tugas.dueDate) {
     return <span className="rencana-status" data-jenis="redup">Belum ada tenggat</span>;
   }
-  return <span className="rencana-status" data-jenis="sedang">Sedang 🌸</span>;
+  return <span className="rencana-status" data-jenis="sedang">Sedang</span>;
 }
 
 /** Ikon bunga bergaya, dipakai sebagai hiasan kartu progres. */

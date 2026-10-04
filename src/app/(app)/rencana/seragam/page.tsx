@@ -4,12 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePlan } from "@/lib/use-plan";
 import { useMuat } from "@/lib/use-muat";
+import { useStatusLuring } from "@/lib/status-luring";
 import { TabRencana } from "@/components/tab-rencana";
 import { Kerangka, Kosong, Gagal } from "@/components/states";
 import { Lembar, DialogKonfirmasi, toast } from "@/components/toast";
 import { Isian, Pilih } from "@/components/field";
 import { Rupiah } from "@/components/rupiah";
-import { formatTanggalId } from "@/lib/format";
+import { formatTanggalId, rupiah } from "@/lib/format";
 import { minta, pesanGalat } from "@/lib/api-client";
 import {
   PEMILIK_BUSANA,
@@ -31,6 +32,9 @@ type Outfit = typeof outfits.$inferSelect;
 export default function HalamanSeragam() {
   const { plan, planId, memuat: memuatPlan, galat: galatPlan, muatUlang: muatPlan } = usePlan();
 
+  const { luring, dariPerangkat } = useStatusLuring();
+  const bisaUbah = !luring && !dariPerangkat;
+
   const {
     data,
     memuat: memuatOutfits,
@@ -49,6 +53,20 @@ export default function HalamanSeragam() {
     aktif: Boolean(planId),
   });
 
+  // Pos anggaran dibaca supaya tombol "Masukkan ke anggaran" bisa memutuskan
+  // memperbarui pos busana yang sudah ada atau membuat yang baru. Kalau tidak
+  // dibaca dulu, biaya busana bisa tercatat dua kali.
+  const {
+    data: dataAnggaran,
+    memuat: memuatAnggaran,
+    galat: galatAnggaran,
+    muatUlang: muatAnggaran,
+  } = useMuat<{
+    items: { id: string; name: string; category: string; plannedAmount: number }[];
+  }>(planId ? `/api/plans/${planId}/budget-items` : null, {
+    aktif: Boolean(planId),
+  });
+
   const [filterPemilik, setFilterPemilik] = useState<string>("semua");
   const [filterStatus, setFilterStatus] = useState<string>("semua");
 
@@ -58,6 +76,9 @@ export default function HalamanSeragam() {
 
   const [dihapus, setDihapus] = useState<Outfit | null>(null);
   const [sedangHapus, setSedangHapus] = useState(false);
+
+  const [bukaMasukkanAnggaran, setBukaMasukkanAnggaran] = useState(false);
+  const [sedangMasukkan, setSedangMasukkan] = useState(false);
 
   // Form states
   const [formNama, setFormNama] = useState("");
@@ -110,7 +131,7 @@ export default function HalamanSeragam() {
         method: "PATCH",
         body: { status: statusBaru },
       });
-      toast(`Status busana diubah jadi ${LABEL_STATUS_BUSANA[statusBaru]}`);
+      toast("Tersimpan");
       await muatOutfits();
     } catch (err) {
       toast(pesanGalat(err));
@@ -147,13 +168,13 @@ export default function HalamanSeragam() {
           method: "PATCH",
           body: payload,
         });
-        toast("Busana diperbarui");
+        toast("Tersimpan");
       } else {
         await minta(`/api/plans/${planId}/outfits`, {
           method: "POST",
           body: payload,
         });
-        toast("Busana ditambahkan");
+        toast("Tersimpan");
       }
 
       setLembarBuka(false);
@@ -172,7 +193,7 @@ export default function HalamanSeragam() {
       await minta(`/api/plans/${planId}/outfits/${dihapus.id}`, {
         method: "DELETE",
       });
-      toast("Busana dihapus");
+      toast("Dihapus");
       setDihapus(null);
       await muatOutfits();
     } catch (err) {
@@ -184,6 +205,51 @@ export default function HalamanSeragam() {
 
   const rawDaftar = data?.outfits ?? [];
   const summary = data?.summary;
+
+  // Total biaya busana datang dari server (jumlah estimatedCost semua barang),
+  // jadi angkanya sama dengan yang tampil di ringkasan.
+  const totalBiayaBusana = summary?.estimatedCost ?? 0;
+  // Pos busana dicari lewat kategori, bukan cuma nama. Pos berkategori busana
+  // dengan nama lain tetap dianggap pos yang sama, supaya biaya tidak tercatat
+  // dua kali.
+  const posBusana =
+    dataAnggaran?.items.find((p) => p.category === "busana") ?? null;
+  const anggaranSiap = !memuatAnggaran && !galatAnggaran;
+
+  /**
+   * Memasukkan total biaya busana ke pos anggaran berkategori busana.
+   * Nilai pos diganti, bukan ditambah, supaya menekan tombol dua kali tidak
+   * membuat biaya terhitung dobel.
+   */
+  async function masukkanKeAnggaran() {
+    if (!planId || totalBiayaBusana <= 0) return;
+    setSedangMasukkan(true);
+    try {
+      if (posBusana) {
+        await minta(`/api/plans/${planId}/budget-items/${posBusana.id}`, {
+          method: "PATCH",
+          body: { plannedAmount: totalBiayaBusana },
+        });
+        toast("Pos busana diperbarui");
+      } else {
+        await minta(`/api/plans/${planId}/budget-items`, {
+          method: "POST",
+          body: {
+            name: "Busana",
+            category: "busana",
+            plannedAmount: totalBiayaBusana,
+          },
+        });
+        toast("Pos busana dibuat");
+      }
+      setBukaMasukkanAnggaran(false);
+      await muatAnggaran();
+    } catch (err) {
+      toast(pesanGalat(err));
+    } finally {
+      setSedangMasukkan(false);
+    }
+  }
 
   const daftar = rawDaftar.filter((o) => {
     if (filterPemilik !== "semua" && o.owner !== filterPemilik) return false;
@@ -220,17 +286,26 @@ export default function HalamanSeragam() {
     <div className="tumpuk-sedang">
       <div className="kepala-halaman">
         <div>
-          <h1>Busana &amp; Seragam</h1>
+          <h1>Busana</h1>
           <p>Catatan ukuran, tenggat jahit, dan jadwal ambil baju pengantin serta keluarga.</p>
         </div>
         <div>
-          <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
-            + Tambah busana
-          </button>
+          {bisaUbah ? (
+            <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
+              Tambah barang
+            </button>
+          ) : null}
         </div>
       </div>
 
       <TabRencana />
+
+      {dariPerangkat ? (
+        <p className="keterangan">
+          Data ini dibuka dari cadangan perangkat. Menambah atau mengubah busana tidak bisa
+          dilakukan sampai ada koneksi.
+        </p>
+      ) : null}
 
       {summary && summary.total > 0 ? (
         <div className="rekap">
@@ -254,9 +329,53 @@ export default function HalamanSeragam() {
             <span className="rekap-nilai rekap-nilai-kecil">
               <Rupiah nilai={summary.estimatedCost} />
             </span>
-            <span className="rekap-label">Perkiraan biaya</span>
+            <span className="rekap-label">Total biaya busana</span>
           </div>
         </div>
+      ) : null}
+
+      {summary && summary.total > 0 ? (
+        <section className="kartu tumpuk-rapat">
+          <div className="bagian-kepala">
+            <h2 className="label-bagian">Biaya busana dan anggaran</h2>
+          </div>
+          <div className="baris">
+            <span className="baris-isi">Total biaya busana</span>
+            <strong className="angka">
+              <Rupiah nilai={summary.estimatedCost} />
+            </strong>
+          </div>
+          <p className="keterangan">
+            {posBusana ? (
+              <>
+                Pos anggaran &ldquo;{posBusana.name}&rdquo; sekarang berisi{" "}
+                <Rupiah nilai={posBusana.plannedAmount} />. Tombol di bawah mengganti nilainya
+                dengan total di atas, bukan menambah, supaya tidak terhitung dua kali.
+              </>
+            ) : anggaranSiap ? (
+              "Belum ada pos anggaran berkategori busana. Tombol di bawah membuat pos baru bernama Busana."
+            ) : galatAnggaran ? (
+              "Daftar anggaran gagal dimuat, jadi pos busana belum bisa diperiksa. Coba muat ulang halaman."
+            ) : (
+              "Sedang memeriksa pos anggaran yang ada."
+            )}
+          </p>
+          {bisaUbah ? (
+            <button
+              type="button"
+              className="tombol tombol-utama"
+              disabled={!anggaranSiap || summary.estimatedCost <= 0 || sedangMasukkan}
+              onClick={() => setBukaMasukkanAnggaran(true)}
+            >
+              {posBusana ? "Perbarui pos Busana" : "Buat pos Busana"}
+            </button>
+          ) : null}
+          {summary.estimatedCost <= 0 ? (
+            <p className="keterangan">
+              Isi perkiraan biaya tiap barang dulu supaya totalnya ada.
+            </p>
+          ) : null}
+        </section>
       ) : null}
 
       {/* Filter Bar */}
@@ -301,21 +420,31 @@ export default function HalamanSeragam() {
 
       {rawDaftar.length === 0 ? (
         <Kosong
-          keadaan="Belum ada catatan busana atau seragam."
-          jalanKeluar="Catat kebaya pengantin, beskap bapak, seragam bridesmaid, atau crew."
+          keadaan="Belum ada barang busana."
+          jalanKeluar="Tambahkan baju yang perlu dijahit atau disewa."
         >
-          <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
-            Tambah busana pertama
-          </button>
+          {bisaUbah ? (
+            <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
+              Tambah barang
+            </button>
+          ) : null}
         </Kosong>
       ) : daftar.length === 0 ? (
         <Kosong
-          keadaan="Tidak ada busana yang sesuai filter."
+          keadaan="Tidak ada yang cocok dengan pencarian itu."
           jalanKeluar="Coba ubah pilihan pemilik atau status di atas."
         />
       ) : (
         <div className="tumpuk-rapat">
-          {daftar.map((o) => {
+          {PEMILIK_BUSANA.map((p) => {
+            const anggota = daftar.filter((o) => o.owner === p);
+            if (anggota.length === 0) return null;
+            return (
+              <section key={p} className="tumpuk-rapat">
+                <h2 className="label-bagian">
+                  {LABEL_PEMILIK_BUSANA[p]} ({anggota.length} barang)
+                </h2>
+                {anggota.map((o) => {
             const statusBusana = o.status as StatusBusana;
             const pemilikBusana = o.owner as PemilikBusana;
 
@@ -334,22 +463,28 @@ export default function HalamanSeragam() {
                       </span>
 
                       {/* Dropdown status cepat */}
-                      <label className="sr-only" htmlFor={`status-${o.id}`}>
-                        Ubah status busana
-                      </label>
-                      <select
-                        id={`status-${o.id}`}
-                        className="isian isian-mini"
-                        data-siap={statusBusana === "siap" ? "ya" : "tidak"}
-                        value={o.status}
-                        onChange={(e) => ubahStatusCepat(o, e.target.value as StatusBusana)}
-                      >
-                        {STATUS_BUSANA.map((s) => (
-                          <option key={s} value={s}>
-                            {LABEL_STATUS_BUSANA[s]}
-                          </option>
-                        ))}
-                      </select>
+                      {bisaUbah ? (
+                        <>
+                          <label className="sr-only" htmlFor={`status-${o.id}`}>
+                            Ubah status busana
+                          </label>
+                          <select
+                            id={`status-${o.id}`}
+                            className="isian isian-mini"
+                            data-siap={statusBusana === "siap" ? "ya" : "tidak"}
+                            value={o.status}
+                            onChange={(e) => ubahStatusCepat(o, e.target.value as StatusBusana)}
+                          >
+                            {STATUS_BUSANA.map((s) => (
+                              <option key={s} value={s}>
+                                {LABEL_STATUS_BUSANA[s]}
+                              </option>
+                            ))}
+                          </select>
+                        </>
+                      ) : (
+                        <span className="lencana">{LABEL_STATUS_BUSANA[statusBusana]}</span>
+                      )}
 
                       {o.estimatedCost ? (
                         <span className="lencana lencana-aksen">
@@ -360,20 +495,24 @@ export default function HalamanSeragam() {
                   </div>
 
                   <div className="aksi-baris">
-                    <button
-                      type="button"
-                      className="tombol tombol-sekunder tombol-kecil"
-                      onClick={() => bukaUbah(o)}
-                    >
-                      Ubah
-                    </button>
-                    <button
-                      type="button"
-                      className="tombol tombol-bahaya tombol-kecil"
-                      onClick={() => setDihapus(o)}
-                    >
-                      Hapus
-                    </button>
+                    {bisaUbah ? (
+                      <>
+                        <button
+                          type="button"
+                          className="tombol tombol-sekunder tombol-kecil"
+                          onClick={() => bukaUbah(o)}
+                        >
+                          Ubah
+                        </button>
+                        <button
+                          type="button"
+                          className="tombol tombol-bahaya tombol-kecil"
+                          onClick={() => setDihapus(o)}
+                        >
+                          Hapus
+                        </button>
+                      </>
+                    ) : null}
                   </div>
                 </div>
 
@@ -405,6 +544,9 @@ export default function HalamanSeragam() {
                 )}
               </article>
             );
+                })}
+              </section>
+            );
           })}
         </div>
       )}
@@ -412,7 +554,7 @@ export default function HalamanSeragam() {
       {/* Lembar Tambah / Ubah */}
       <Lembar
         buka={lembarBuka}
-        judul={diedit ? "Ubah data busana" : "Tambah busana baru"}
+        judul={diedit ? "Ubah data busana" : "Tambah barang"}
         onTutup={() => setLembarBuka(false)}
       >
         <form onSubmit={simpan} noValidate className="tumpuk-sedang">
@@ -517,12 +659,28 @@ export default function HalamanSeragam() {
       {/* Dialog Konfirmasi Hapus */}
       <DialogKonfirmasi
         buka={Boolean(dihapus)}
-        judul="Hapus catatan busana ini?"
+        judul="Hapus barang busana"
         isi={`Busana "${dihapus?.itemName ?? ""}" akan dihapus dari rencana.`}
-        tombolYa="Ya, hapus"
+        tombolYa="Hapus"
         sedangJalan={sedangHapus}
         onTutup={() => setDihapus(null)}
         onYa={konfirmasiHapus}
+      />
+
+      {/* Konfirmasi pemasukan biaya busana ke anggaran. Nilainya diganti,
+          bukan ditambah, supaya menekan tombol dua kali tidak menggandakan. */}
+      <DialogKonfirmasi
+        buka={bukaMasukkanAnggaran}
+        judul="Masukkan biaya busana ke anggaran"
+        isi={
+          posBusana
+            ? `Pos anggaran "${posBusana.name}" akan diisi ${rupiah(totalBiayaBusana)}. Nilainya diganti, bukan ditambah, supaya tidak terhitung dua kali.`
+            : `Pos anggaran baru bernama "Busana" akan dibuat dengan nilai ${rupiah(totalBiayaBusana)}.`
+        }
+        tombolYa={posBusana ? "Ganti nilai" : "Buat pos"}
+        sedangJalan={sedangMasukkan}
+        onTutup={() => setBukaMasukkanAnggaran(false)}
+        onYa={masukkanKeAnggaran}
       />
     </div>
   );

@@ -14,6 +14,7 @@ import {
 import { hitungMundur, selisihHari, tanggalPanjangDari } from "./format";
 import { kelompokkan } from "./plan";
 import { LABEL_KATEGORI_UANG } from "./konstanta";
+import { ringkasTamu, type PerSisiTamu } from "./tamu";
 
 /**
  * Semua angka laporan dihitung di sini dan tidak disimpan di mana pun.
@@ -34,6 +35,23 @@ export type PosLaporan = {
   planned: number;
   paid: number;
   remaining: number;
+};
+
+/**
+ * Satu vendor untuk bagian laporan. docs/16 bagian 2 menyebut "Vendor: yang
+ * belum lunas" sebagai isi laporan, jadi barisnya perlu, bukan cuma jumlahnya.
+ * `tagihan` diambil dari pos anggaran yang ditunjuk vendor, bukan field
+ * terpisah, supaya angkanya tidak bisa berbeda dengan halaman Anggaran.
+ */
+export type VendorLaporan = {
+  id: string;
+  nama: string;
+  kategori: string;
+  labelKategori: string;
+  tagihan: number;
+  dibayar: number;
+  sisa: number;
+  sudahLunas: boolean;
 };
 
 export type Laporan = {
@@ -66,10 +84,14 @@ export type Laporan = {
   tamu: {
     baris: number;
     orang: number;
+    hadir: number;
+    tidakHadir: number;
     kursi: number;
+    porsi: number;
     belumKonfirmasi: number;
     belumDiundang: number;
     perKategori: { kategori: string; orang: number; baris: number }[];
+    perSisi: PerSisiTamu;
   };
   rundown: {
     total: number;
@@ -83,6 +105,7 @@ export type Laporan = {
     belumLunas: number;
     totalTagihan: number;
     totalDibayar: number;
+    daftar: VendorLaporan[];
   };
   busana: {
     total: number;
@@ -118,7 +141,11 @@ export async function susunLaporan(planId: string): Promise<Laporan> {
         .orderBy(asc(tasks.dueDate), asc(tasks.sortOrder)),
       db.select().from(guests).where(eq(guests.planId, planId)),
       db
-        .select({ amount: payments.amount, vendorId: payments.vendorId })
+        .select({
+          amount: payments.amount,
+          vendorId: payments.vendorId,
+          isFinal: payments.isFinal,
+        })
         .from(payments)
         .where(eq(payments.planId, planId)),
       db.select().from(vendors).where(eq(vendors.planId, planId)),
@@ -137,8 +164,10 @@ export async function susunLaporan(planId: string): Promise<Laporan> {
 
   // Perhitungan pos anggaran dan pembayaran
   const paidPerVendor = new Map<string, number>();
+  const finalPerVendor = new Set<string>();
   for (const p of semuaPembayaran) {
     paidPerVendor.set(p.vendorId, (paidPerVendor.get(p.vendorId) ?? 0) + p.amount);
+    if (p.isFinal) finalPerVendor.add(p.vendorId);
   }
 
   const paidPerPos = new Map<string | null, number>();
@@ -168,22 +197,34 @@ export async function susunLaporan(planId: string): Promise<Laporan> {
   const belum = semuaTugas.filter((t) => t.status !== "selesai");
   const hitungKelompok = (k: string) => belum.filter((t) => kelompokkan(t.dueDate, t.status) === k).length;
 
-  // Rekapitulasi tamu dan RSVP
-  const perKategoriPeta = new Map<string, { orang: number; baris: number }>();
-  for (const g of semuaTamu) {
-    const k = perKategoriPeta.get(g.category) ?? { orang: 0, baris: 0 };
-    k.orang += g.guestCount;
-    k.baris += 1;
-    perKategoriPeta.set(g.category, k);
-  }
+  // Rekapitulasi tamu dan konfirmasi hadir. Satu fungsi yang sama dengan
+  // endpoint /guests dan ringkasan Beranda, supaya angka di tiga layar tidak
+  // bisa berbeda.
+  const rekapTamu = ringkasTamu(semuaTamu);
 
-  const kursi = semuaTamu
-    .filter((g) => g.rsvpStatus === "hadir")
-    .reduce((n, g) => n + g.guestCount, 0);
-
-  // Status pembayaran vendor
+  // Status pembayaran vendor, per baris. Diminta docs/16 bagian 2 ("Vendor:
+  // yang belum lunas"), jadi jumlah saja tidak cukup.
   const totalTagihanVendor = pos.reduce((n, p) => n + p.plannedAmount, 0);
-  const belumLunas = semuaVendor.filter((v) => (paidPerVendor.get(v.id) ?? 0) < 1).length;
+  const posPerId = new Map(pos.map((p) => [p.id, p]));
+  const vendorDaftar: VendorLaporan[] = semuaVendor.map((v) => {
+    const tagihan = v.budgetItemId ? (posPerId.get(v.budgetItemId)?.plannedAmount ?? 0) : 0;
+    const dibayar = paidPerVendor.get(v.id) ?? 0;
+    return {
+      id: v.id,
+      nama: v.name,
+      kategori: v.category,
+      labelKategori:
+        LABEL_KATEGORI_UANG[v.category as keyof typeof LABEL_KATEGORI_UANG] ?? "Lainnya",
+      tagihan,
+      dibayar,
+      sisa: tagihan - dibayar,
+      // Lunas kalau ada pembayaran yang ditandai pelunasan akhir, atau
+      // pembayaran sudah menutup tagihan. Vendor tanpa tagihan dan tanpa
+      // pembayaran tetap dihitung belum lunas.
+      sudahLunas: finalPerVendor.has(v.id) || (tagihan > 0 && dibayar >= tagihan),
+    };
+  });
+  const belumLunas = vendorDaftar.filter((v) => !v.sudahLunas).length;
 
   // Jadwal akhir acara
   const akhirRundown = semuaRundown.length
@@ -197,8 +238,6 @@ export async function susunLaporan(planId: string): Promise<Laporan> {
   // tanggal di plan, karena itu yang dipakai hitung mundur di Beranda juga.
   const hariOf = semuaMilestone.find((m) => m.isDayOf) ?? null;
   const tanggalBesar = hariOf?.eventDate ?? plan?.weddingDate ?? null;
-
-  const jumlahOrang = semuaTamu.reduce((n, g) => n + g.guestCount, 0);
 
   return {
     dibuatPada: new Date().toISOString(),
@@ -239,16 +278,21 @@ export async function susunLaporan(planId: string): Promise<Laporan> {
         })),
     },
     tamu: {
-      baris: semuaTamu.length,
-      orang: jumlahOrang,
-      kursi,
-      belumKonfirmasi: semuaTamu
-        .filter((g) => g.rsvpStatus === "belum")
-        .reduce((n, g) => n + g.guestCount, 0),
-      belumDiundang: semuaTamu.filter((g) => g.invitedAt === null).length,
-      perKategori: [...perKategoriPeta.entries()]
-        .map(([kategori, v]) => ({ kategori, orang: v.orang, baris: v.baris }))
-        .sort((a, b) => b.orang - a.orang),
+      baris: rekapTamu.baris,
+      orang: rekapTamu.orang,
+      hadir: rekapTamu.hadir,
+      tidakHadir: rekapTamu.tidakHadir,
+      // Kursi dan porsi memakai angka yang sama dari ringkasTamu: tamu pasti
+      // hadir ditambah yang belum menjawab. Tamu yang menolak tidak dihitung.
+      kursi: rekapTamu.kursi,
+      porsi: rekapTamu.porsi,
+      belumKonfirmasi: rekapTamu.belumKonfirmasi,
+      // Satuan mengikuti Beranda dan endpoint /guests: orang, bukan baris.
+      // Dulu di sini dihitung baris, jadi angka laporan berbeda dari angka di
+      // dua layar lain untuk data yang sama.
+      belumDiundang: rekapTamu.belumDiundang,
+      perKategori: rekapTamu.perKategori,
+      perSisi: rekapTamu.perSisi,
     },
     rundown: {
       total: semuaRundown.length,
@@ -268,6 +312,7 @@ export async function susunLaporan(planId: string): Promise<Laporan> {
       belumLunas,
       totalTagihan: totalTagihanVendor,
       totalDibayar: paid,
+      daftar: vendorDaftar,
     },
     busana: {
       total: semuaBusana.length,

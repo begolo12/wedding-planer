@@ -1,10 +1,13 @@
+import { normalkanNomorWa } from "./format";
+
 /**
  * Pembaca daftar tamu yang ditempel dari WhatsApp atau Excel.
  *
  * Yang ditangani:
  * - Satu tamu per baris
  * - Format "Ahmad, 3" atau "Ahmad 3" atau "Ahmad\t3"
- * - Nomor HP yang kebetulan menempel di nama
+ * - Nomor HP yang kebetulan menempel di nama, dipisah dan dinormalkan supaya
+ *   bisa langsung dipakai untuk tautan WhatsApp
  * - Baris yang isinya cuma angka (biasanya nomor urut dari Excel) dibuang
  *
  * Yang tidak dilakukan: menebak kategori. Kategori dipilih orangnya, karena
@@ -15,13 +18,15 @@
 export type BarisTamu = {
   name: string;
   guestCount: number;
+  /** Nomor WhatsApp dalam bentuk 628xx, sudah siap untuk wa.me. */
+  phone: string | null;
   /** Kenapa baris ini perlu dilihat lagi. Kosong berarti aman. */
   catatan: string | null;
   /** Nama ini sudah ada di daftar, jadi tidak akan dibuat dua kali. */
   kembar: boolean;
 };
 
-const NOMOR_HP = /^(\+?62|0)8\d{7,12}$/;
+const NOMOR_DI_NAMA = /(?:\+?62|0)?[\s-]*8[\d\s-]{7,}\d/;
 
 /**
  * Pisahkan nama dan jumlah orang.
@@ -66,14 +71,27 @@ export function bacaDaftarTamu(teks: string, namaSudahAda: string[] = []): Baris
 
     let catatan: string | null = null;
     let namaFinal = nama;
+    let phone: string | null = null;
 
     // Nomor HP yang ikut di baris yang sama dipisah, karena kalau tidak,
     // nomornya jadi bagian nama dan tidak bisa dipakai untuk kirim undangan.
-    const bagian = nama.split(/[\s,;]+/);
-    const nomor = bagian.find((b) => NOMOR_HP.test(b.replace(/[\s-]/g, "")));
-    if (nomor && bagian.length > 1) {
-      namaFinal = bagian.filter((b) => b !== nomor).join(" ").replace(/[,\s;:]+$/, "").trim();
-      catatan = "Nomor HP ikut terbaca, cek dulu sebelum disimpan.";
+    // Nomor dicari sebagai satu kesatuan yang boleh berisi spasi atau tanda
+    // hubung, karena orang menulisnya dalam beberapa bentuk sekaligus.
+    const cocokNomor = NOMOR_DI_NAMA.exec(nama);
+    if (cocokNomor) {
+      const nomorBersih = normalkanNomorWa(cocokNomor[0]);
+      const sisa = nama
+        .replace(cocokNomor[0], " ")
+        .replace(/\s+/g, " ")
+        .replace(/^[\s,;:]+|[\s,;:]+$/g, "")
+        .trim();
+      // Hanya dipisah kalau masih ada nama selain nomornya. Baris yang isinya
+      // cuma nomor bukan tamu, dan nomornya tidak berguna tanpa nama.
+      if (nomorBersih && sisa) {
+        namaFinal = sisa;
+        phone = nomorBersih;
+        catatan = "Nomor HP ikut terbaca dan akan disimpan, cek dulu.";
+      }
     }
 
     if (!namaFinal) {
@@ -91,6 +109,7 @@ export function bacaDaftarTamu(teks: string, namaSudahAda: string[] = []): Baris
       // Tanpa angka, satu orang. Menebak lebih dari satu akan melebihkan
       // hitungan kursi, dan kursi yang dipesan tidak bisa dikembalikan.
       guestCount: jumlah ?? 1,
+      phone,
       catatan,
       kembar,
     });

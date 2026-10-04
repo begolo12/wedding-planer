@@ -3,7 +3,7 @@ import { and, asc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { budgetItems, payments, vendors } from "@/db/schema";
 import { bacaJson, bungkus, idUuid, tidakDitemukan } from "@/lib/galat";
-import { konteksPlan } from "@/lib/api";
+import { konteksPlan, pastikanPosAnggaran } from "@/lib/api";
 import { skemaVendorUbah } from "@/lib/skema";
 
 type Params = { params: Promise<{ planId: string; vendorId: string }> };
@@ -64,6 +64,9 @@ export const PATCH = bungkus(async (req: Request, { params }: Params) => {
   await ambil(planId, vendorId);
 
   const isi = skemaVendorUbah.parse(await bacaJson(req));
+
+  // Sama seperti create: pos anggaran yang ditunjuk harus milik plan ini.
+  if (isi.budgetItemId) await pastikanPosAnggaran(planId, isi.budgetItemId);
 
   const [baris] = await db
     .update(vendors)

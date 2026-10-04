@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePlan } from "@/lib/use-plan";
 import { useMuat } from "@/lib/use-muat";
+import { useStatusLuring } from "@/lib/status-luring";
 import { Kerangka, Kosong, Gagal } from "@/components/states";
 import { Lembar, DialogKonfirmasi, toast } from "@/components/toast";
 import { Isian, Pilih } from "@/components/field";
@@ -11,11 +12,15 @@ import { minta, pesanGalat } from "@/lib/api-client";
 import {
   KATEGORI_TAMU,
   STATUS_HADIR,
+  SISI_TAMU,
   type KategoriTamu,
   type StatusHadir,
+  type SisiTamu,
   LABEL_KATEGORI_TAMU,
   LABEL_STATUS_HADIR,
+  LABEL_SISI_TAMU,
 } from "@/lib/konstanta";
+import { tanggalPendekDari, normalkanNomorWa } from "@/lib/format";
 import type { guests } from "@/db/schema";
 
 type Guest = typeof guests.$inferSelect;
@@ -26,13 +31,16 @@ type RingkasMeja = { meja: string | null; baris: number; orang: number };
 type RingkasanTamu = {
   baris: number;
   orang: number;
+  hadir: number;
   kursi: number;
+  porsi: number;
   tidakHadir: number;
   belumKonfirmasi: number;
   belumDiundang: number;
-  perkiraanMaksimal: number;
+  belumDiundangBaris: number;
   perKategori: RingkasKategori[];
   perMeja: RingkasMeja[];
+  perSisi: { pria: number; wanita: number; bersama: number };
 };
 
 type IsiTamu = { guests: Guest[]; summary: RingkasanTamu };
@@ -44,7 +52,7 @@ type IsiTamu = { guests: Guest[]; summary: RingkasanTamu };
  *
  * Susunan mengikuti `docs/stitch_cute_wedding_planner/daftar_tamu_rsvp`.
  * Tiga hal dari rancangan itu sengaja tidak dipakai:
- * - Tombol "Bagikan Link RSVP" tidak dibuat. Belum ada portal undangan
+ * - Tombol "Bagikan tautan konfirmasi hadir" tidak dibuat. Belum ada portal undangan
  *   publik, jadi tombolnya akan jadi tombol mati.
  * - Angka di rancangan tidak dipakai. Semua angka dihitung dari rencana
  *   yang sedang dibuka.
@@ -54,14 +62,22 @@ type IsiTamu = { guests: Guest[]; summary: RingkasanTamu };
 export default function HalamanTamu() {
   const { plan, planId, memuat: memuatPlan, galat: galatPlan, muatUlang: muatPlan } = usePlan();
 
+  const { luring, dariPerangkat } = useStatusLuring();
+  const bisaUbah = !luring && !dariPerangkat;
+
   const [cari, setCari] = useState("");
   const [filterKategori, setFilterKategori] = useState<string>("semua");
   const [filterRsvp, setFilterRsvp] = useState<string>("semua");
+  const [filterSisi, setFilterSisi] = useState<string>("semua");
+  const [filterUndangan, setFilterUndangan] = useState<string>("semua");
+  const [batasTamu, setBatasTamu] = useState(20);
 
   // Build query string
   const queryParams = new URLSearchParams();
   if (filterKategori !== "semua") queryParams.set("category", filterKategori);
   if (filterRsvp !== "semua") queryParams.set("rsvpStatus", filterRsvp);
+  if (filterSisi !== "semua") queryParams.set("sisi", filterSisi);
+  if (filterUndangan !== "semua") queryParams.set("undangan", filterUndangan);
   if (cari.trim()) queryParams.set("search", cari.trim());
 
   const urlApi = planId
@@ -83,12 +99,14 @@ export default function HalamanTamu() {
 
   const [dihapus, setDihapus] = useState<Guest | null>(null);
   const [sedangHapus, setSedangHapus] = useState(false);
+  const [konfirmasiUndangan, setKonfirmasiUndangan] = useState(false);
+  const [sedangTandai, setSedangTandai] = useState(false);
 
   // Form states
   const [formNama, setFormNama] = useState("");
   const [formHp, setFormHp] = useState("");
   const [formKategori, setFormKategori] = useState<KategoriTamu>("teman");
-  const [formSisi, setFormSisi] = useState("");
+  const [formSisi, setFormSisi] = useState<SisiTamu | "">("");
   const [formRsvp, setFormRsvp] = useState<StatusHadir>("belum");
   const [formJumlah, setFormJumlah] = useState(1);
   const [formMeja, setFormMeja] = useState("");
@@ -118,7 +136,9 @@ export default function HalamanTamu() {
         ? (t.category as KategoriTamu)
         : "lainnya",
     );
-    setFormSisi(t.side ?? "");
+    setFormSisi(
+      t.side && SISI_TAMU.includes(t.side as SisiTamu) ? (t.side as SisiTamu) : "",
+    );
     setFormRsvp(
       STATUS_HADIR.includes(t.rsvpStatus as StatusHadir)
         ? (t.rsvpStatus as StatusHadir)
@@ -137,11 +157,7 @@ export default function HalamanTamu() {
       await minta(`/api/plans/${planId}/guests/${t.id}`, {
         method: "POST",
       });
-      toast(
-        t.invitedAt
-          ? "Status undangan diubah jadi belum dikirim"
-          : "Undangan ditandai sudah dikirim",
-      );
+      toast("Tersimpan");
       await muatTamu();
     } catch (err) {
       toast(pesanGalat(err));
@@ -155,7 +171,7 @@ export default function HalamanTamu() {
         method: "PATCH",
         body: { rsvpStatus: status },
       });
-      toast(`Kehadiran diubah jadi ${LABEL_STATUS_HADIR[status]}`);
+      toast("Kehadiran diubah");
       await muatTamu();
     } catch (err) {
       toast(pesanGalat(err));
@@ -184,7 +200,7 @@ export default function HalamanTamu() {
         name: formNama.trim(),
         phone: formHp.trim() || null,
         category: formKategori,
-        side: formSisi.trim() || null,
+        side: formSisi || null,
         rsvpStatus: formRsvp,
         guestCount: formJumlah,
         tableName: formMeja.trim() || null,
@@ -196,13 +212,13 @@ export default function HalamanTamu() {
           method: "PATCH",
           body: payload,
         });
-        toast("Data tamu diperbarui");
+        toast("Tersimpan");
       } else {
         await minta(`/api/plans/${planId}/guests`, {
           method: "POST",
           body: payload,
         });
-        toast("Tamu berhasil ditambahkan");
+        toast("Tersimpan");
       }
 
       setLembarBuka(false);
@@ -221,7 +237,7 @@ export default function HalamanTamu() {
       await minta(`/api/plans/${planId}/guests/${dihapus.id}`, {
         method: "DELETE",
       });
-      toast("Tamu dihapus dari daftar");
+      toast("Dihapus");
       setDihapus(null);
       await muatTamu();
     } catch (err) {
@@ -231,14 +247,39 @@ export default function HalamanTamu() {
     }
   }
 
+  /**
+   * Menandai semua baris yang belum punya tanggal undangan sebagai terkirim.
+   * Endpoint-nya hanya mengisi yang masih kosong, jadi menekan dua kali tidak
+   * menimpa tanggal kirim yang sudah dicatat.
+   */
+  async function tandaiUndanganTerkirim() {
+    if (!planId) return;
+    setSedangTandai(true);
+    try {
+      const hasil = await minta<{ updated: number }>(
+        `/api/plans/${planId}/guests/undangan`,
+        { method: "POST", body: { semua: true } },
+      );
+      toast(`${hasil.updated} baris ditandai terkirim`);
+      setKonfirmasiUndangan(false);
+      await muatTamu();
+    } catch (err) {
+      toast(pesanGalat(err));
+    } finally {
+      setSedangTandai(false);
+    }
+  }
+
   const rawGuests = data?.guests ?? [];
+  const tamuTampil = rawGuests.slice(0, batasTamu);
   const summary = data?.summary;
 
   // Persentase konfirmasi hadir dihitung dari data nyata. Pembaginya jumlah
   // orang yang diundang, bukan jumlah baris, supaya satu keluarga besar
-  // berbobot sesuai jumlah orangnya.
+  // berbobot sesuai jumlah orangnya. Yang dihitung cuma yang sudah pasti hadir;
+  // belum konfirmasi dan tidak hadir tidak ikut.
   const persenHadir =
-    summary && summary.orang > 0 ? Math.round((summary.kursi / summary.orang) * 100) : 0;
+    summary && summary.orang > 0 ? Math.round((summary.hadir / summary.orang) * 100) : 0;
 
   // Chip kategori. Angkanya dari server supaya tidak ikut berubah saat
   // daftar sedang disaring.
@@ -294,19 +335,30 @@ export default function HalamanTamu() {
     <div className="tamu">
       {/* Judul halaman dibaca pembaca layar saja, supaya susunan layar tetap
           rapat seperti rancangan tanpa kehilangan penanda halaman. */}
-      <h1 className="sr-only">Daftar Tamu</h1>
+      <h1 className="sr-only">Tamu</h1>
 
       {/* Aksi cepat di paling atas */}
       <div className="tamu-aksi">
-        <button type="button" className="tamu-aksi-tombol tamu-aksi-utama" onClick={bukaTambah}>
-          <IkonTambahTamu size={20} />
-          Tamu Baru
-        </button>
-        <Link className="tamu-aksi-tombol tamu-aksi-sekunder" href="/tamu/impor">
-          <IkonTempel size={20} />
-          Tempel daftar
-        </Link>
+        {bisaUbah ? (
+          <>
+            <button type="button" className="tamu-aksi-tombol tamu-aksi-utama" onClick={bukaTambah}>
+              <IkonTambahTamu size={20} />
+              Tambah tamu
+            </button>
+            <Link className="tamu-aksi-tombol tamu-aksi-sekunder" href="/tamu/impor">
+              <IkonTempel size={20} />
+              Tempel daftar
+            </Link>
+          </>
+        ) : null}
       </div>
+
+      {dariPerangkat ? (
+        <p className="keterangan">
+          Data ini dibuka dari cadangan perangkat. Menambah atau mengubah tamu tidak bisa
+          dilakukan sampai ada koneksi.
+        </p>
+      ) : null}
 
       {/* Ringkasan tamu */}
       {summary && summary.baris > 0 ? (
@@ -317,15 +369,14 @@ export default function HalamanTamu() {
                 <span className="tamu-hero-ikon" aria-hidden="true">
                   <IkonUndangan size={16} />
                 </span>
-                <span className="tamu-hero-label">Total undangan terdata</span>
+                <span className="tamu-hero-label">Total tamu terdata</span>
               </div>
               <div className="tamu-hero-baris">
                 <span className="tamu-hero-angka">{summary.orang}</span>
                 <span className="tamu-hero-satuan">Orang</span>
               </div>
               <p className="tamu-hero-ket">
-                {summary.baris} undangan. Kalau semua hadir, {summary.perkiraanMaksimal} kursi
-                dipakai.
+                {summary.baris} undangan, {summary.hadir} orang sudah pasti hadir.
               </p>
             </div>
 
@@ -353,27 +404,38 @@ export default function HalamanTamu() {
             </div>
           </div>
 
+          <div className="rekap rekap-dua">
+            <div className="rekap-item">
+              <span className="rekap-nilai">{summary.porsi}</span>
+              <span className="rekap-label">Perkiraan porsi katering</span>
+            </div>
+            <div className="rekap-item">
+              <span className="rekap-nilai">{summary.kursi}</span>
+              <span className="rekap-label">Kursi yang perlu disiapkan</span>
+            </div>
+          </div>
+
           <div className="tamu-tri">
             <div className="tamu-tri-kotak">
               <span className="tamu-tri-ikon tamu-tri-hadir" aria-hidden="true">
                 <IkonSenang size={16} />
               </span>
-              <span className="tamu-tri-angka">{summary.kursi}</span>
-              <span className="tamu-tri-label">Hadir</span>
+              <span className="tamu-tri-angka">{summary.hadir}</span>
+              <span className="tamu-tri-label">Sudah pasti hadir</span>
             </div>
             <div className="tamu-tri-kotak">
               <span className="tamu-tri-ikon tamu-tri-ragu" aria-hidden="true">
                 <IkonJamPasir size={16} />
               </span>
               <span className="tamu-tri-angka">{summary.belumKonfirmasi}</span>
-              <span className="tamu-tri-label">Ragu</span>
+              <span className="tamu-tri-label">Belum konfirmasi</span>
             </div>
             <div className="tamu-tri-kotak">
               <span className="tamu-tri-ikon tamu-tri-tidak" aria-hidden="true">
                 <IkonSedih size={16} />
               </span>
               <span className="tamu-tri-angka">{summary.tidakHadir}</span>
-              <span className="tamu-tri-label">Berhalangan</span>
+              <span className="tamu-tri-label">Tidak hadir</span>
             </div>
           </div>
         </div>
@@ -408,6 +470,37 @@ export default function HalamanTamu() {
           </select>
         </div>
 
+        <div className="tamu-cari-baris">
+          <label className="sr-only" htmlFor="filterSisi">
+            Saring sisi keluarga
+          </label>
+          <select
+            id="filterSisi"
+            className="isian tamu-pilih"
+            value={filterSisi}
+            onChange={(e) => setFilterSisi(e.target.value)}
+          >
+            <option value="semua">Semua pihak</option>
+            <option value="pria">{LABEL_SISI_TAMU.pria}</option>
+            <option value="wanita">{LABEL_SISI_TAMU.wanita}</option>
+            <option value="bersama">{LABEL_SISI_TAMU.lainnya}</option>
+          </select>
+
+          <label className="sr-only" htmlFor="filterUndangan">
+            Saring status undangan
+          </label>
+          <select
+            id="filterUndangan"
+            className="isian tamu-pilih"
+            value={filterUndangan}
+            onChange={(e) => setFilterUndangan(e.target.value)}
+          >
+            <option value="semua">Semua undangan</option>
+            <option value="sudah">Undangan sudah dikirim</option>
+            <option value="belum">Belum dikirim</option>
+          </select>
+        </div>
+
         {/* Chip kategori, angkanya dari server */}
         <div className="tamu-chip-baris" role="group" aria-label="Saring kategori tamu">
           {chipKategori.map((c) => (
@@ -428,35 +521,56 @@ export default function HalamanTamu() {
 
       {/* Daftar tamu */}
       {rawGuests.length === 0 ? (
-        <Kosong
-          keadaan="Belum ada data tamu undangan."
-          jalanKeluar="Tambah satu per satu atau tempel langsung daftar tamu dari WhatsApp / spreadsheet."
-        >
-          <Link className="tombol tombol-utama" href="/tamu/impor">
-            Tempel daftar (Impor)
-          </Link>
-          <button type="button" className="tombol tombol-sekunder" onClick={bukaTambah}>
-            Tambah satu tamu
-          </button>
-        </Kosong>
+        summary && summary.baris > 0 ? (
+          <Kosong
+            keadaan="Tidak ada yang cocok dengan pencarian itu."
+            jalanKeluar="Ubah kata kunci atau kosongkan saringan untuk melihat semua tamu."
+          />
+        ) : (
+          <Kosong
+            keadaan="Belum ada tamu."
+            jalanKeluar="Tambahkan nama satu per satu, atau tempel dari daftar yang sudah ada."
+          >
+            {bisaUbah ? (
+              <>
+                <Link className="tombol tombol-utama" href="/tamu/impor">
+                  Tempel daftar
+                </Link>
+                <button type="button" className="tombol tombol-sekunder" onClick={bukaTambah}>
+                  Tambah satu tamu
+                </button>
+              </>
+            ) : null}
+          </Kosong>
+        )
       ) : (
         <>
-          <p className="tamu-jumlah">{rawGuests.length} tamu ditampilkan</p>
+          <p className="tamu-jumlah">
+            {tamuTampil.length} dari {rawGuests.length} undangan ditampilkan
+          </p>
 
           <div className="tamu-daftar">
-            {rawGuests.map((t) => {
-              const kategori = t.category as KategoriTamu;
-              const statusRsvp = t.rsvpStatus as StatusHadir;
-              const sudahDikirim = Boolean(t.invitedAt);
-
+            {KATEGORI_TAMU.map((k) => {
+              const anggota = tamuTampil.filter((t) => t.category === k);
+              if (anggota.length === 0) return null;
               return (
+                <section key={k} className="tumpuk-rapat">
+                  <h2 className="label-bagian">
+                    {LABEL_KATEGORI_TAMU[k]} ({anggota.length} undangan)
+                  </h2>
+                  {anggota.map((t) => {
+                    const statusRsvp = t.rsvpStatus as StatusHadir;
+                    const sudahDikirim = Boolean(t.invitedAt);
+                    const wa = normalkanNomorWa(t.phone);
+
+                    return (
                 <article key={t.id} className="tamu-kartu">
                   <div className="tamu-kartu-atas">
                     <div className="tamu-kartu-teks">
                       <h2 className="tamu-kartu-judul">{t.name}</h2>
                       <div className="tamu-kartu-chip">
                         <span className="tamu-chip-kecil">
-                          {LABEL_KATEGORI_TAMU[kategori] ?? t.category}
+                          {LABEL_KATEGORI_TAMU[k] ?? t.category}
                         </span>
                         <span className="tamu-chip-kecil">
                           {t.guestCount} orang
@@ -464,59 +578,88 @@ export default function HalamanTamu() {
                         {t.tableName ? (
                           <span className="tamu-chip-kecil">Meja {t.tableName}</span>
                         ) : null}
-                        {t.side ? <span className="tamu-chip-kecil">{t.side}</span> : null}
+                        {t.side ? (
+                          <span className="tamu-chip-kecil">
+                            {LABEL_SISI_TAMU[t.side as SisiTamu] ?? t.side}
+                          </span>
+                        ) : null}
+                        <span className="tamu-chip-kecil">
+                          {t.invitedAt
+                            ? `Undangan ${tanggalPendekDari(t.invitedAt)}`
+                            : "Belum diundang"}
+                        </span>
                       </div>
                     </div>
                     <div className="tamu-kartu-aksi">
-                      <button
-                        type="button"
-                        className="tombol tombol-sekunder tamu-tombol-kecil"
-                        onClick={() => bukaUbah(t)}
-                      >
-                        Ubah
-                      </button>
-                      <button
-                        type="button"
-                        className="tombol tombol-sekunder tamu-tombol-kecil tamu-tombol-hapus"
-                        onClick={() => setDihapus(t)}
-                      >
-                        Hapus
-                      </button>
+                      {bisaUbah ? (
+                        <>
+                          <button
+                            type="button"
+                            className="tombol tombol-sekunder tamu-tombol-kecil"
+                            onClick={() => bukaUbah(t)}
+                          >
+                            Ubah
+                          </button>
+                          <button
+                            type="button"
+                            className="tombol tombol-sekunder tamu-tombol-kecil tamu-tombol-hapus"
+                            onClick={() => setDihapus(t)}
+                          >
+                            Hapus
+                          </button>
+                        </>
+                      ) : null}
                     </div>
                   </div>
 
                   {t.notes ? <p className="tamu-kartu-catatan">{t.notes}</p> : null}
 
                   <div className="tamu-kartu-bawah">
-                    <div className="tamu-rsvp-grup">
-                      {STATUS_HADIR.map((s) => (
-                        <button
-                          key={s}
-                          type="button"
-                          className="tamu-rsvp-opsi"
-                          data-status={s}
-                          data-aktif={statusRsvp === s ? "ya" : "tidak"}
-                          aria-pressed={statusRsvp === s}
-                          onClick={() => ubahRsvpCepat(t, s)}
-                        >
-                          {LABEL_STATUS_HADIR[s]}
-                        </button>
-                      ))}
-                    </div>
+                    {bisaUbah ? (
+                      <div className="tamu-rsvp-grup">
+                        {STATUS_HADIR.map((s) => (
+                          <button
+                            key={s}
+                            type="button"
+                            className="tamu-rsvp-opsi"
+                            data-status={s}
+                            data-aktif={statusRsvp === s ? "ya" : "tidak"}
+                            aria-pressed={statusRsvp === s}
+                            onClick={() => ubahRsvpCepat(t, s)}
+                          >
+                            {LABEL_STATUS_HADIR[s]}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="keterangan">
+                        {LABEL_STATUS_HADIR[statusRsvp]} •{" "}
+                        {sudahDikirim
+                          ? `Undangan ${tanggalPendekDari(t.invitedAt)}`
+                          : "Belum diundang"}
+                      </span>
+                    )}
 
                     <div className="tamu-kartu-tautan">
-                      <button
-                        type="button"
-                        className="tombol tombol-sekunder tamu-tombol-kecil"
-                        data-kirim={sudahDikirim ? "ya" : "tidak"}
-                        onClick={() => toggleUndangan(t)}
-                      >
-                        {sudahDikirim ? "Undangan terkirim" : "Belum diundang"}
-                      </button>
-                      {t.phone ? (
+                      {bisaUbah ? (
+                        <button
+                          type="button"
+                          className="tombol tombol-sekunder tamu-tombol-kecil"
+                          data-kirim={sudahDikirim ? "ya" : "tidak"}
+                          aria-label={
+                            sudahDikirim
+                              ? `Batalkan tanda undangan terkirim untuk ${t.name}`
+                              : `Tandai undangan terkirim untuk ${t.name}`
+                          }
+                          onClick={() => toggleUndangan(t)}
+                        >
+                          {sudahDikirim ? "Batalkan kirim" : "Tandai terkirim"}
+                        </button>
+                      ) : null}
+                      {wa ? (
                         <a
                           className="tombol tombol-sekunder tamu-tombol-kecil"
-                          href={`https://wa.me/${t.phone.replace(/\D/g, "")}`}
+                          href={`https://wa.me/${wa}`}
                           target="_blank"
                           rel="noreferrer"
                         >
@@ -526,9 +669,21 @@ export default function HalamanTamu() {
                     </div>
                   </div>
                 </article>
+                    );
+                  })}
+                </section>
               );
             })}
           </div>
+          {rawGuests.length > batasTamu ? (
+            <button
+              type="button"
+              className="tombol tombol-sekunder"
+              onClick={() => setBatasTamu((n) => n + 20)}
+            >
+              Muat lebih
+            </button>
+          ) : null}
         </>
       )}
 
@@ -566,28 +721,39 @@ export default function HalamanTamu() {
         </span>
         <div>
           <span className="tamu-tips-judul">
-            {summary && summary.belumDiundang > 0
-              ? `${summary.belumDiundang} orang belum dikirimi undangan`
-              : "Semua undangan sudah dikirim"}
+            {summary && summary.belumDiundangBaris > 0
+              ? `${summary.belumDiundangBaris} undangan belum ditandai terkirim`
+              : "Semua undangan sudah ditandai terkirim"}
           </span>
           <p className="tamu-tips-teks">
-            {summary && summary.belumDiundang > 0
-              ? "Tandai undangan lewat tombol di tiap kartu setelah benar-benar dikirim, supaya hitungan kursi tetap akurat."
+            {summary && summary.belumDiundangBaris > 0
+              ? "Tandai undangan lewat tombol di tiap kartu setelah benar-benar dikirim, atau pakai tombol borongan di samping, supaya hitungan porsi dan kursi tetap akurat."
               : "Berikutnya tinggal memantau konfirmasi kehadiran sampai hari pernikahan."}
           </p>
         </div>
+        {bisaUbah && summary && summary.belumDiundangBaris > 0 ? (
+          <button
+            type="button"
+            className="tombol tombol-sekunder"
+            onClick={() => setKonfirmasiUndangan(true)}
+          >
+            Tandai semua undangan terkirim
+          </button>
+        ) : null}
       </div>
 
       {/* Tombol tambah melayang */}
-      <button
-        type="button"
-        className="tamu-fab tanpa-cetak"
-        aria-label="Tambah satu tamu baru"
-        onClick={bukaTambah}
-      >
-        <IkonTambahTamu size={18} />
-        Tamu Baru
-      </button>
+      {bisaUbah ? (
+        <button
+          type="button"
+          className="tamu-fab tanpa-cetak"
+          aria-label="Tambah satu tamu baru"
+          onClick={bukaTambah}
+        >
+          <IkonTambahTamu size={18} />
+          Tambah tamu
+        </button>
+      ) : null}
 
       {/* Lembar Tambah / Ubah Tamu */}
       <Lembar
@@ -602,7 +768,7 @@ export default function HalamanTamu() {
               className="isian"
               type="text"
               required
-              placeholder="Contoh: Bpk. Bambang & Keluarga"
+              placeholder="Nama lengkap tamu"
               value={formNama}
               onChange={(e) => setFormNama(e.target.value)}
             />
@@ -646,21 +812,19 @@ export default function HalamanTamu() {
               />
             </Isian>
 
-            <Isian label="Pihak / Sisi keluarga" id="formSisi">
-              <input
-                id="formSisi"
-                className="isian"
-                type="text"
-                placeholder="Contoh: Pria / Wanita / Bersama"
-                value={formSisi}
-                onChange={(e) => setFormSisi(e.target.value)}
-              />
-            </Isian>
+            <Pilih
+              label="Pihak / Sisi keluarga"
+              id="formSisi"
+              nilai={formSisi}
+              onUbah={(v) => setFormSisi(v as SisiTamu | "")}
+              kosong
+              opsi={SISI_TAMU.map((s) => ({ nilai: s, label: LABEL_SISI_TAMU[s] }))}
+            />
           </div>
 
           <div className="isian-baris isian-baris-2">
             <Pilih
-              label="Status kehadiran (RSVP)"
+              label="Status kehadiran"
               id="formRsvp"
               nilai={formRsvp}
               onUbah={(v) => setFormRsvp(v as StatusHadir)}
@@ -715,12 +879,23 @@ export default function HalamanTamu() {
       {/* Dialog Konfirmasi Hapus */}
       <DialogKonfirmasi
         buka={Boolean(dihapus)}
-        judul="Hapus tamu ini?"
-        isi={`Tamu "${dihapus?.name ?? ""}" akan dihapus dari daftar undangan.`}
-        tombolYa="Ya, hapus"
+        judul="Hapus tamu"
+        isi="Nama ini akan hilang dari daftar tamu."
+        tombolYa="Hapus"
         sedangJalan={sedangHapus}
         onTutup={() => setDihapus(null)}
         onYa={konfirmasiHapus}
+      />
+
+      {/* Konfirmasi tandai undangan borongan */}
+      <DialogKonfirmasi
+        buka={konfirmasiUndangan}
+        judul="Tandai undangan terkirim"
+        isi={`${summary?.belumDiundangBaris ?? 0} undangan yang belum punya tanggal kirim akan ditandai terkirim hari ini. Baris yang sudah pernah ditandai tidak diubah.`}
+        tombolYa="Ya, tandai semua"
+        sedangJalan={sedangTandai}
+        onTutup={() => setKonfirmasiUndangan(false)}
+        onYa={tandaiUndanganTerkirim}
       />
     </div>
   );

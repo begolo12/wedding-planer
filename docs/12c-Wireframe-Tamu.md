@@ -275,6 +275,17 @@ Daftar tamu adalah data yang paling sering dibuka tanpa sinyal, karena yang data
 
 ---
 
+### Keputusan yang ditunda
+
+Dua elemen di bagian 4 dan 5 tidak dibangun di Fase 1, dengan alasan masing-masing:
+
+| Elemen | Keputusan | Alasan | Yang dibutuhkan kalau nanti dibangun |
+|---|---|---|---|
+| Kado atau angpau di detail tamu | Tidak dibangun | Tabel `guests` tidak punya kolom untuk kado atau angpau. Menambah kolom berarti perubahan skema dan migrasi, dan itu di luar Fase 1 | Kolom integer nullable di `guests`, lalu satu field di form tamu |
+| Layar Meja dengan denah atau daftar kursi | Tidak dibangun | `docs/03-Data-Model.md` bagian 8 memutuskan meja di Fase 1 hanya nama meja sebagai teks, tanpa tabel meja terpisah. Yang tersedia di layar Tamu sekarang cuma ringkasan sebaran meja | Tabel `tables` dan relasi kursi, plus layar denah. Itu Fase 2 |
+
+---
+
 ## 7. Aturan jumlah tamu
 
 | Aturan | Kenapa |

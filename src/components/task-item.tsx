@@ -4,7 +4,7 @@ import { useState } from "react";
 import { minta, pesanGalat } from "@/lib/api-client";
 import { toast } from "./toast";
 import { LABEL_PRIORITAS, LABEL_PENUGASAN, type Prioritas, type Penugasan } from "@/lib/konstanta";
-import { tanggalPendekDari } from "@/lib/format";
+import { tanggalPendekDari, sudahLewat } from "@/lib/format";
 
 /**
  * Satu baris tugas dengan tombol centang.
@@ -71,8 +71,7 @@ export function TaskItem({
     }
   }
 
-  const lewat =
-    !selesai && tugas.dueDate ? new Date(`${tugas.dueDate}T00:00:00`) < new Date() : false;
+  const lewat = !selesai && sudahLewat(tugas.dueDate);
 
   return (
     <div className="tugas" data-selesai={selesai ? "ya" : undefined}>

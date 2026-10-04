@@ -95,6 +95,9 @@ export const milestones = pgTable(
     eventTime: time("event_time"),
     type: text("type").notNull().default("lainnya"),
     isDayOf: boolean("is_day_of").notNull().default(false),
+    // Tautan undangan digital untuk acara ini, dari docs/02b-Tamu.md bagian
+    // 06. Nullable karena banyak acara tidak punya undangan sendiri.
+    invitationUrl: text("invitation_url"),
     notes: text("notes"),
     sortOrder: integer("sort_order").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

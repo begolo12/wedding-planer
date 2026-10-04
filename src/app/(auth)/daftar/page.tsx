@@ -7,6 +7,7 @@ import { signUp } from "@/lib/auth-client";
 import { minta } from "@/lib/api-client";
 import { PesanGalat } from "@/components/states";
 import { IsianSandi } from "@/components/field";
+import { NAMA_PRODUK } from "@/lib/konstanta";
 
 /**
  * Daftar akun.
@@ -17,10 +18,10 @@ import { IsianSandi } from "@/components/field";
  * rencana pertama lewat /api/plans supaya namanya tidak hilang dan
  * langsung muncul di kepala aplikasi.
  *
- * Tombol masuk lewat Google dan tautan "Syarat dan Kebijakan Manis" tidak
- * dipasang: penyedia masuk Google belum dikonfigurasi di tahap ini dan
- * halaman syarat belum ada. Tombol dan tautan yang tidak berfungsi lebih
- * buruk daripada tidak ada.
+ * Tombol masuk lewat Google tidak dipasang: penyedia masuk Google belum
+ * dikonfigurasi di tahap ini. Tombol yang tidak berfungsi lebih buruk
+ * daripada tidak ada. Tautan kebijakan privasi mengarah ke halaman /kebijakan
+ * yang bisa dibuka tanpa masuk.
  */
 export default function HalamanDaftar() {
   const router = useRouter();
@@ -43,7 +44,7 @@ export default function HalamanDaftar() {
     }
 
     if (!setuju) {
-      setGalat("Centang dulu persetujuan syarat dan kebijakan.");
+      setGalat("Centang dulu persetujuan kebijakan privasi.");
       return;
     }
 
@@ -238,8 +239,11 @@ export default function HalamanDaftar() {
             </svg>
           </span>
           <span className="auth-syarat-teks">
-            Saya &amp; pasangan setuju dengan <strong>Syarat &amp; Kebijakan Manis</strong> Hari
-            Besar {"\ud83d\udc8c"}
+            Saya &amp; pasangan setuju dengan{" "}
+            <Link className="tautan-kalimat" href="/kebijakan">
+              Kebijakan Privasi
+            </Link>{" "}
+            {NAMA_PRODUK}
           </span>
         </label>
 
@@ -256,7 +260,7 @@ export default function HalamanDaftar() {
               Sedang membuat akun...
             </span>
           ) : (
-            "Buat Akun Pernikahan Kami \ud83c\udf38"
+            "Buat Akun Pernikahan Kami"
           )}
         </button>
       </form>
@@ -264,7 +268,7 @@ export default function HalamanDaftar() {
       <p className="auth-kaki">
         Sudah punya akun?{" "}
         <Link className="tautan-kalimat" href="/masuk">
-          Masuk di sini {"\ud83d\udc95"}
+          Masuk di sini
         </Link>
       </p>
     </>

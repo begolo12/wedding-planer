@@ -10,8 +10,8 @@ Aplikasi ini harus tetap berguna di tempat sinyal jelek. Di perkawinan di Indone
 
 | Field | Nilai | Alasan |
 |---|---|---|
-| `name` | `Aisyah & Bagas` | Nama plan bawaan, diganti setelah user mengisinya |
-| `short_name` | `Aisyah` | Maksimal 12 karakter agar tidak terpotong di home screen |
+| `name` | `Rapi Nikah` | Nama produk dari `NAMA_PRODUK`. Nama plan yang sebenarnya diisi pengguna setelah mendaftar |
+| `short_name` | `Rapi Nikah` | Nama produk dari `NAMA_PRODUK_PENDEK`. Maksimal 12 karakter agar tidak terpotong di home screen |
 | `start_url` | `/` | Selalu ke Beranda, bukan halaman terakhir yang dibuka |
 | `display` | `standalone` | Tanpa address bar, terasa seperti aplikasi biasa |
 | `background_color` | `#FFFDF9` | Sama dengan base palette agar tidak ada kedipan putih |
@@ -69,6 +69,16 @@ Halaman luring bukan `error.html` generik. Isinya menjelaskan aplikasi masih bis
 
 Baca saja saat luring berarti data tampil dari cache, tapi tombol tambah disembunyikan, bukan diklik dan gagal. Tombol yang tidak bisa bekerja lebih baik disembunyikan.
 
+Aturan yang dipakai di layar data saat `dariPerangkat` bernilai true:
+
+| Jenis kontrol | Saat data dari perangkat | Alasan |
+|---|---|---|
+| Tambah data baru (tugas, tamu, pos anggaran, vendor, acara rundown, pengumuman, busana) | Disembunyikan | Form baru butuh memuat pilihan yang belum tentu ada cadangannya, dan menambah tanpa server tidak bisa dikonfirmasi |
+| Ubah lewat form penuh dan hapus | Disembunyikan | Sama dengan di atas: butuh data pendukung dan konfirmasi |
+| Centang tugas selesai di `TaskItem` | Tetap tampil | Ini pengecualian yang disengaja. `01-PRD.md` bagian 5 UC-03 justru mengharuskan menandai tugas selesai saat luring bisa diantrekan, jadi mematikannya akan mematikan use case inti. Perubahannya masuk antrean IndexedDB dan terkirim saat sinyal kembali |
+
+Centang tugas adalah satu-satunya pengecualian. Perubahan kecil yang hanya membalik satu nilai pada data yang sudah dimuat boleh masuk antrean; menambah data baru tidak, karena hasilnya tidak bisa ditampilkan sebelum server menerima.
+
 ---
 
 ## Antrean luring
@@ -112,14 +122,24 @@ Batas 200 item. Kalau lewat, item tertua dibuang dan user diberi tahu. Alasannya
 
 ## Konflik saat sinkron
 
-Kalau server mengembalikan `409`, client menampilkan dialog dengan dua pilihan: pakai versi server atau pakai versi lokal. Gaya kalimatnya:
+Keputusan yang berlaku sekarang: `last-write-wins` tanpa audit trail. `01-PRD.md` bagian 4.2 menyebut solusinya "last write wins dengan audit trail", tapi audit trail belum dibangun, jadi yang berlaku hanya `last-write-wins`. `04-API-Contract.md` tidak punya kode `CONFLICT` di jalur tulis.
 
-| Opsi | Contoh teks |
+Dialog `409` dengan dua pilihan (pakai versi server atau pakai versi lokal) belum dibangun. Alasannya:
+
+| Alasan | Keterangan |
 |---|---|
-| Pakai versi server | "Tugas ini sudah diubah di perangkat lain. Pakai versi yang terbaru?" |
-| Pakai versi lokal | "Simpan perubahan dari perangkat ini" |
+| Belum ada masalah nyata | Belum ada dua pengguna yang mengedit data yang sama di waktu yang sama |
+| Jalur konflik belum ada | Tidak ada endpoint tulis yang membalas `409`, jadi dialog tidak punya pemicu |
+| Antrean luring sudah menahan kegagalan | Balasan 4xx ditahan dan alasannya dicatat, bukan dibuang diam-diam |
 
-`last-write-wins` tidak dipakai. Alasannya, kalau pasangan dan istrinya edit tugas yang sama di perangkat berbeda, menimpa tanpa bertanya berarti salah satu kehilangan datanya tanpa sadari.
+Keterbatasan yang harus ditulis jujur: kalau dua perangkat mengedit data yang sama, yang terkirim terakhir menang, dan yang lebih dulu bisa hilang tanpa pemberitahuan. Audit trail juga belum ada.
+
+Ditangguhkan dan akan ditinjau ulang kalau salah satu ini terjadi:
+
+- Ada laporan pengguna bahwa suntingannya hilang setelah terkirim.
+- Jumlah pengguna yang berbagi satu plan dengan orang lain naik, sehingga sunting bersamaan jadi mungkin.
+
+Rencana fiturnya tetap tercatat: kalau nanti dibangun, dialognya menawarkan "pakai versi server" atau "pakai versi lokal", dan `last-write-wins` tidak dipakai lagi.
 
 ---
 

@@ -3,7 +3,7 @@ import { and, asc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { budgetItems, payments, vendors } from "@/db/schema";
 import { bacaJson, bungkus } from "@/lib/galat";
-import { cariParam, konteksPlan } from "@/lib/api";
+import { cariParam, konteksPlan, pastikanPosAnggaran } from "@/lib/api";
 import { skemaVendor } from "@/lib/skema";
 
 type Params = { params: Promise<{ planId: string }> };
@@ -81,6 +81,11 @@ export const POST = bungkus(async (req: Request, { params }: Params) => {
 
   const isi = skemaVendor.parse(await bacaJson(req));
 
+  // Pos anggaran yang ditunjuk harus milik plan ini. Tanpa ini, uuid yang
+  // tidak ada berakhir jadi 500 dari foreign key, dan uuid milik plan lain
+  // bisa tertaut diam-diam.
+  if (isi.budgetItemId) await pastikanPosAnggaran(planId, isi.budgetItemId);
+
   const [baris] = await db
     .insert(vendors)
     .values({
@@ -89,6 +94,8 @@ export const POST = bungkus(async (req: Request, { params }: Params) => {
       category: isi.category,
       budgetItemId: isi.budgetItemId ?? null,
       contactName: isi.contactName ?? null,
+      // Nomor WhatsApp sudah dinormalkan ke 628xx oleh skema; tidak ada
+      // normalisasi kedua di route.
       phone: isi.phone ?? null,
       address: isi.address ?? null,
       status: isi.status,

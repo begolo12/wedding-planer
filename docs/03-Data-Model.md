@@ -1,6 +1,6 @@
 ﻿# 03. Data Model
 
-Skema untuk PostgreSQL, ditulis dengan sintaks Drizzle. Semua entity punya `userId` supaya scoping per pasangan tidak perlu logika tambahan.
+Skema untuk PostgreSQL, ditulis dengan sintaks Drizzle. Scoping per pasangan lewat `plans.userId`. Tabel anak menyimpan `planId`, bukan `userId`, jadi satu pemeriksaan kepemilikan plan sudah menutup semua tabel turunannya.
 
 ---
 
@@ -8,7 +8,7 @@ Skema untuk PostgreSQL, ditulis dengan sintaks Drizzle. Semua entity punya `user
 
 | Konvensi | Nilai | Alasan |
 |---|---|---|
-| Primary key | `uuid` | Dihasilkan di sisi aplikasi, tidak bergantung urutan database |
+| Primary key | `uuid` | Dihasilkan database lewat `defaultRandom()` (gen_random_uuid), jadi tidak bergantung urutan insert |
 | Waktu | `timestamptz` | Semua tanggal di Asia/Jakarta, tapi penyimpanan selalu UTC |
 | Uang | `integer` dalam rupiah penuh | Tidak ada pecahan sen dalam transaksi, dan `float` menghasilkan galat pembulatan yang sulit dilacak |
 | Hapus lembut | `deletedAt`, nullable | Data plan tidak pernah dihapus permanen, karena kesalahan hapus tidak bisa dikembalikan |
@@ -88,6 +88,7 @@ Index: `(planId, eventDate)`.
 | `status` | `text` | Enum: `belum`, `selesai` |
 | `priority` | `text` | Enum: `rendah`, `sedang`, `tinggi` |
 | `assignee` | `text`, nullable | Enum: `saya`, `pasangan`, `keluarga` |
+| `budgetItemId` | `uuid`, nullable | FK ke `budget_items`, set null. Menautkan tugas ke pos anggaran |
 | `notes` | `text`, nullable | |
 | `sortOrder` | `integer` | Urutan dalam kategori |
 | `completedAt` | `timestamptz`, nullable | |
@@ -124,6 +125,7 @@ Tugas tanpa tenggat tidak diindeks bersama yang bertenggat, karena kondisi `dueD
 |---|---|---|
 | `id` | `uuid` | PK |
 | `planId` | `uuid` | FK |
+| `budgetItemId` | `uuid`, nullable | FK ke `budget_items`, set null |
 | `name` | `text` | Nama vendor atau usaha |
 | `category` | `text` | Enum sama dengan `budget_items` |
 | `contactName` | `text`, nullable | |
@@ -133,7 +135,7 @@ Tugas tanpa tenggat tidak diindeks bersama yang bertenggat, karena kondisi `dueD
 | `notes` | `text`, nullable | Berisi hasil negosiasi dan termin |
 | `createdAt` | `timestamptz` | |
 
-Foreign key nullable ke `budget_items`, jadi kolomnya tidak ditulis di tabel di atas. Alasannya, pos anggaran sudah dibahas di bagian anggaran, dan tidak semua vendor punya pos anggaran. Vendor yang belum ada pos anggarannya tetap tercatat, supaya tidak hilang saat baru mencari.
+`budgetItemId` nullable karena tidak semua vendor punya pos anggaran. Vendor yang belum ada pos anggarannya tetap tercatat, supaya tidak hilang saat baru mencari.
 
 ---
 
@@ -216,7 +218,7 @@ Index: `(planId, startTime)`.
 
 Index: `(planId, isPinned, publishedAt)`.
 
-`shareToken` di-generate dengan `crypto.randomUUID()`, di-index unik, dan tidak pernah ditampilkan penuh di halaman. Tautan yang dibagikan memuat token, bukan `planId`.
+`shareToken` di-generate dengan `buatToken()` dari `src/lib/tautan.ts` (randomBytes 18 lalu base64url), di-index unik, dan tidak pernah ditampilkan penuh di halaman. Tautan yang dibagikan memuat token, bukan `planId`.
 
 ---
 
@@ -237,6 +239,25 @@ Index: `(planId, isPinned, publishedAt)`.
 
 ---
 
+## 12. share_links (tautan baca-saja)
+
+Tabel ini tidak ada di draf awal, padahal kode memakainya untuk semua tautan baca-saja (`/bagikan/[token]`). Dimiliki plan, bukan orang, supaya akses keluarga tidak hilang saat pasangan berganti tangan.
+
+| Kolom | Tipe | Catatan |
+|---|---|---|
+| `id` | `uuid` | PK |
+| `planId` | `uuid` | FK ke `plans`, cascade |
+| `token` | `text` | Unik, nilai acak dari `buatToken()` |
+| `label` | `text` | Nama penerima, default `Keluarga` |
+| `target` | `text` | Isi yang dibuka, default `keluarga`. `laporan` untuk tautan dari halaman Laporan |
+| `createdAt` | `timestamptz` | |
+
+Index: `share_links_plan_idx` pada `(planId)`, dan `share_links_token_idx` unik pada `(token)`.
+
+Batas lima tautan per plan dari `16-Laporan-dan-Bagikan.md`.
+
+---
+
 ## Relasi
 
 ```
@@ -253,9 +274,9 @@ users
       â””â”€â”€ outfits
 ```
 
-Semua tabel anak cascade delete dari `plans`. Semua tabel anak cascade delete dari `users`.
+Semua tabel anak cascade delete dari `plans`. Tidak ada cascade kedua dari `users`; tabel anak cukup dihapus lewat `plans`.
 
-Yang tidak punya relasi ke tabel lain: `vendors` ke `budget_items` (nullable, tidak ada di kode di atas karena ditulis di bagian anggaran). Kalau nanti ditambahkan, buat nullable.
+`plans` juga punya `share_links` untuk tautan baca-saja. Diagram di atas tidak digambar ulang, tapi setiap tabel di dokumen ini adalah anak langsung `plans` kecuali `payments` yang juga menunjuk `vendors`.
 
 ---
 

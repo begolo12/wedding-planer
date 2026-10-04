@@ -1,5 +1,5 @@
 /*
- * Service worker untuk Hari Besar.
+ * Service worker untuk Rapi Nikah.
  *
  * Ditulis tangan, bukan pakai Workbox. Alasannya bukan soal ukuran berkas,
  * tapi soal berapa banyak yang perlu dipahami orang berikutnya. Strategi di
@@ -13,6 +13,10 @@
  */
 
 const VERSI = "v2";
+// Awalan "haribesar-" sengaja dipertahankan walau nama produk sekarang
+// "Rapi Nikah". Menggantinya akan membuang cache luring yang sudah ada di
+// perangkat pengguna, padahal nama cache tidak pernah terlihat pengguna.
+// Alasannya juga ditulis di CHANGELOG.md 0.14.0.
 const CACHE_HALAMAN = `haribesar-halaman-${VERSI}`;
 const CACHE_ASET = `haribesar-aset-${VERSI}`;
 const CACHE_FONT = `haribesar-font-${VERSI}`;

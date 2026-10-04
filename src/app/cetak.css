@@ -2,12 +2,20 @@
   --cetak-garis: #b9b2a9;
 }
 
+/* Kaki halaman cetak tidak tampil di layar. Isinya nama rencana dan tanggal
+   cetak, bukan nomor halaman otomatis. Keputusan lengkapnya ada di
+   docs/16-Laporan-dan-Bagikan.md bagian 5. */
+.cetak-kaki {
+  display: none;
+}
+
 /* Aturan cetak dari docs/16-Laporan-dan-Bagikan.md.
    Semua yang tidak berguna di kertas disembunyikan, bukan diperkecil. */
 @media print {
   @page {
     size: A4;
-    margin: 16mm 14mm;
+    /* docs/16 bagian 5 dan docs/12e: margin 20mm, ukuran tetap A4. */
+    margin: 20mm;
   }
 
   .tanpa-cetak {
@@ -67,6 +75,22 @@
     gap: 8mm;
     border-bottom: 0.3pt solid var(--cetak-garis);
     padding: 1.4mm 0;
+  }
+
+  /* Kaki halaman diulang tiap halaman oleh peramban karena posisinya tetap.
+     Nomor halaman otomatis tidak bisa dibuat lewat CSS, jadi tidak dipakai. */
+  .cetak-kaki {
+    display: flex;
+    justify-content: space-between;
+    gap: 8mm;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-top: 0.3pt solid var(--cetak-garis);
+    padding-top: 1.5mm;
+    font-size: 9pt;
+    color: #000000;
   }
 
   .bar,

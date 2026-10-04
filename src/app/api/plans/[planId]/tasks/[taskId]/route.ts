@@ -3,7 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { tasks } from "@/db/schema";
 import { bungkus, bacaJson, idUuid, tidakDitemukan } from "@/lib/galat";
-import { konteksPlan } from "@/lib/api";
+import { konteksPlan, pastikanPosAnggaran } from "@/lib/api";
 import { skemaTugasUbah } from "@/lib/skema";
 
 type Params = { params: Promise<{ planId: string; taskId: string }> };
@@ -29,6 +29,9 @@ export const PATCH = bungkus(async (req: Request, { params }: Params) => {
   await ambilTugas(planId, taskId);
 
   const isi = skemaTugasUbah.parse(await bacaJson(req));
+
+  // Sama seperti create: pos anggaran yang ditunjuk harus milik plan ini.
+  if (isi.budgetItemId) await pastikanPosAnggaran(planId, isi.budgetItemId);
 
   // completedAt diisi saat status berubah jadi selesai, dan dikosongkan lagi
   // kalau dibuka. Tanpa ini, tugas yang dibuka ulang tetap terlihat selesai

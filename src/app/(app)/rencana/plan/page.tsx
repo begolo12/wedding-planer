@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { usePlan } from "@/lib/use-plan";
+import { useStatusLuring } from "@/lib/status-luring";
 import { TabRencana } from "@/components/tab-rencana";
 import { Kerangka, Kosong, Gagal } from "@/components/states";
 import { Lembar, DialogKonfirmasi, toast } from "@/components/toast";
 import { Isian, Pilih } from "@/components/field";
 import { minta, pesanGalat } from "@/lib/api-client";
 import { STATUS_PLAN, type StatusPlan, LABEL_STATUS_PLAN } from "@/lib/konstanta";
-import { tanggalPanjangDari } from "@/lib/format";
+import { tanggalPanjangDari, tanggalPendekDari } from "@/lib/format";
 
 /**
  * Layar Pengaturan Rencana Pernikahan.
@@ -16,6 +17,9 @@ import { tanggalPanjangDari } from "@/lib/format";
  */
 export default function HalamanPlan() {
   const { plan, planId, memuat, galat, muatUlang, daftarPlan, pilihPlan } = usePlan();
+
+  const { luring, dariPerangkat } = useStatusLuring();
+  const bisaUbah = !luring && !dariPerangkat;
 
   // State form edit
   const [partnerName, setPartnerName] = useState("");
@@ -72,7 +76,7 @@ export default function HalamanPlan() {
           notes: notes.trim() || null,
         },
       });
-      toast("Rencana pernikahan berhasil disimpan");
+      toast("Tersimpan");
       await muatUlang();
     } catch (err) {
       setFormGalat(pesanGalat(err));
@@ -101,7 +105,7 @@ export default function HalamanPlan() {
         },
       });
 
-      toast("Rencana baru berhasil dibuat");
+      toast("Tersimpan");
       setBukaBaru(false);
       setBaruPartner("");
       setBaruTanggal("");
@@ -122,7 +126,7 @@ export default function HalamanPlan() {
       await minta(`/api/plans/${planId}`, {
         method: "DELETE",
       });
-      toast("Rencana pernikahan berhasil dihapus");
+      toast("Dihapus");
       setBukaHapus(false);
       await muatUlang();
     } catch (err) {
@@ -148,18 +152,27 @@ export default function HalamanPlan() {
           <p>Kelola data nama pasangan, tanggal utama, dan status persiapan.</p>
         </div>
         <div>
-          <button
-            type="button"
-            className="tombol tombol-sekunder"
-            onClick={() => {
-              setBukaBaru(true);
-              setGalatBaru(null);
-            }}
-          >
-            + Rencana baru
-          </button>
+          {bisaUbah ? (
+            <button
+              type="button"
+              className="tombol tombol-sekunder"
+              onClick={() => {
+                setBukaBaru(true);
+                setGalatBaru(null);
+              }}
+            >
+              + Rencana baru
+            </button>
+          ) : null}
         </div>
       </div>
+
+      {dariPerangkat ? (
+        <p className="keterangan">
+          Data ini dibuka dari cadangan perangkat. Mengubah data rencana tidak bisa dilakukan
+          sampai ada koneksi.
+        </p>
+      ) : null}
 
       <TabRencana />
 
@@ -175,7 +188,7 @@ export default function HalamanPlan() {
                 className={`tombol tombol-kecil ${p.id === planId ? "tombol-utama" : "tombol-sekunder"}`}
                 onClick={() => pilihPlan(p.id)}
               >
-                {p.partnerName} {p.weddingDate ? `(${p.weddingDate})` : ""}
+                {p.partnerName} {p.weddingDate ? `(${tanggalPendekDari(p.weddingDate)})` : ""}
               </button>
             ))}
           </div>
@@ -187,13 +200,15 @@ export default function HalamanPlan() {
           keadaan="Belum ada rencana pernikahan."
           jalanKeluar="Buat rencana pernikahan pertamamu untuk mulai mencatat tugas, anggaran, dan vendor."
         >
-          <button
-            type="button"
-            className="tombol tombol-utama"
-            onClick={() => setBukaBaru(true)}
-          >
-            Buat rencana sekarang
-          </button>
+          {bisaUbah ? (
+            <button
+              type="button"
+              className="tombol tombol-utama"
+              onClick={() => setBukaBaru(true)}
+            >
+              Buat rencana sekarang
+            </button>
+          ) : null}
         </Kosong>
       ) : (
         <div className="rencana-plan">
@@ -253,20 +268,24 @@ export default function HalamanPlan() {
             </Isian>
 
             <div className="bagian-kepala">
-              <button
-                type="button"
-                className="tombol tombol-bahaya"
-                onClick={() => setBukaHapus(true)}
-              >
-                Hapus rencana
-              </button>
-              <button
-                type="submit"
-                className="tombol tombol-utama"
-                disabled={sedangSimpan}
-              >
-                {sedangSimpan ? "Menyimpan..." : "Simpan perubahan"}
-              </button>
+              {bisaUbah ? (
+                <>
+                  <button
+                    type="button"
+                    className="tombol tombol-bahaya"
+                    onClick={() => setBukaHapus(true)}
+                  >
+                    Hapus rencana
+                  </button>
+                  <button
+                    type="submit"
+                    className="tombol tombol-utama"
+                    disabled={sedangSimpan}
+                  >
+                    {sedangSimpan ? "Menyimpan..." : "Simpan perubahan"}
+                  </button>
+                </>
+              ) : null}
             </div>
           </form>
         </div>
@@ -338,9 +357,9 @@ export default function HalamanPlan() {
       {/* Dialog Konfirmasi Hapus Rencana */}
       <DialogKonfirmasi
         buka={bukaHapus}
-        judul="Hapus rencana pernikahan ini?"
+        judul="Hapus rencana"
         isi={`Rencana "${plan?.partnerName ?? ""}" beserta seluruh data tugas, anggaran, tamu, dan rundown di dalamnya akan dihapus.`}
-        tombolYa="Ya, hapus rencana"
+        tombolYa="Hapus"
         sedangJalan={sedangHapus}
         onTutup={() => setBukaHapus(false)}
         onYa={handleHapus}

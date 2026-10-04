@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { usePlan } from "@/lib/use-plan";
 import { useMuat } from "@/lib/use-muat";
+import { useStatusLuring } from "@/lib/status-luring";
 import { Kerangka, Kosong, Gagal } from "@/components/states";
 import { Lembar, DialogKonfirmasi, toast } from "@/components/toast";
 import { Isian, Pilih } from "@/components/field";
@@ -21,7 +22,7 @@ import {
   type MetodeBayar,
   LABEL_METODE_BAYAR,
 } from "@/lib/konstanta";
-import { tanggalPanjangDari } from "@/lib/format";
+import { tanggalPanjangDari, hariIni, normalkanNomorWa } from "@/lib/format";
 
 type VendorDetail = {
   id: string;
@@ -60,6 +61,9 @@ export default function HalamanDetailVendor() {
 
   const { plan, planId, memuat: memuatPlan, galat: galatPlan } = usePlan();
 
+  const { luring, dariPerangkat } = useStatusLuring();
+  const bisaUbah = !luring && !dariPerangkat;
+
   const {
     data,
     memuat: memuatData,
@@ -73,9 +77,7 @@ export default function HalamanDetailVendor() {
   // Lembar Catat Pembayaran
   const [bukaBayar, setBukaBayar] = useState(false);
   const [bayarJumlah, setBayarJumlah] = useState("");
-  const [bayarTanggal, setBayarTanggal] = useState(
-    new Date().toISOString().slice(0, 10),
-  );
+  const [bayarTanggal, setBayarTanggal] = useState(hariIni());
   const [bayarMetode, setBayarMetode] = useState<MetodeBayar>("transfer");
   const [bayarLunas, setBayarLunas] = useState(false);
   const [bayarCatatan, setBayarCatatan] = useState("");
@@ -148,7 +150,7 @@ export default function HalamanDetailVendor() {
         },
       });
 
-      toast("Data vendor diperbarui");
+      toast("Tersimpan");
       setBukaUbahVendor(false);
       await muatUlang();
     } catch (err) {
@@ -187,7 +189,7 @@ export default function HalamanDetailVendor() {
         },
       });
 
-      toast("Pembayaran berhasil dicatat");
+      toast("Tersimpan");
       setBukaBayar(false);
       setBayarJumlah("");
       setBayarLunas(false);
@@ -208,7 +210,7 @@ export default function HalamanDetailVendor() {
         `/api/plans/${planId}/vendors/${vendorId}/payments/${hapusBayarId}`,
         { method: "DELETE" },
       );
-      toast("Catatan pembayaran dihapus");
+      toast("Dihapus");
       setHapusBayarId(null);
       await muatUlang();
     } catch (err) {
@@ -225,7 +227,7 @@ export default function HalamanDetailVendor() {
       await minta(`/api/plans/${planId}/vendors/${vendorId}`, {
         method: "DELETE",
       });
-      toast("Vendor berhasil dihapus");
+      toast("Dihapus");
       router.push("/rencana/vendor");
     } catch (err) {
       toast(pesanGalat(err));
@@ -284,30 +286,41 @@ export default function HalamanDetailVendor() {
         </div>
 
         <div className="aksi-baris">
-          <button
-            type="button"
-            className="tombol tombol-sekunder"
-            onClick={() => mulaiUbahVendor(vendor)}
-          >
-            Ubah info
-          </button>
-          <button
-            type="button"
-            className="tombol tombol-utama"
-            onClick={() => {
-              setBayarJumlah("");
-              setBayarTanggal(new Date().toISOString().slice(0, 10));
-              setBayarMetode("transfer");
-              setBayarLunas(false);
-              setBayarCatatan("");
-              setGalatBayar(null);
-              setBukaBayar(true);
-            }}
-          >
-            + Catat bayar
-          </button>
+          {bisaUbah ? (
+            <>
+              <button
+                type="button"
+                className="tombol tombol-sekunder"
+                onClick={() => mulaiUbahVendor(vendor)}
+              >
+                Ubah info
+              </button>
+              <button
+                type="button"
+                className="tombol tombol-utama"
+                onClick={() => {
+                  setBayarJumlah("");
+                  setBayarTanggal(hariIni());
+                  setBayarMetode("transfer");
+                  setBayarLunas(false);
+                  setBayarCatatan("");
+                  setGalatBayar(null);
+                  setBukaBayar(true);
+                }}
+              >
+                Catat pembayaran
+              </button>
+            </>
+          ) : null}
         </div>
       </div>
+
+      {dariPerangkat ? (
+        <p className="keterangan">
+          Data ini dibuka dari cadangan perangkat. Menambah atau mengubah data vendor tidak bisa
+          dilakukan sampai ada koneksi.
+        </p>
+      ) : null}
 
       {/* Ringkasan Finansial Vendor */}
       <div className="rekap">
@@ -352,10 +365,10 @@ export default function HalamanDetailVendor() {
             <span className="keterangan keterangan-rapat">
               Nomor WhatsApp / Telepon
             </span>
-            {vendor.phone ? (
+            {vendor.phone && normalkanNomorWa(vendor.phone) ? (
               <a
                 className="tautan-kalimat"
-                href={`https://wa.me/${vendor.phone.replace(/[^0-9]/g, "")}`}
+                href={`https://wa.me/${normalkanNomorWa(vendor.phone)}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -383,13 +396,15 @@ export default function HalamanDetailVendor() {
           ) : null}
 
           <div className="kartu-kaki">
-            <button
-              type="button"
-              className="tombol tombol-bahaya tombol-lebar"
-              onClick={() => setBukaHapusVendor(true)}
-            >
-              Hapus vendor ini
-            </button>
+            {bisaUbah ? (
+              <button
+                type="button"
+                className="tombol tombol-bahaya tombol-lebar"
+                onClick={() => setBukaHapusVendor(true)}
+              >
+                Hapus vendor ini
+              </button>
+            ) : null}
           </div>
         </div>
 
@@ -397,27 +412,29 @@ export default function HalamanDetailVendor() {
         <div className="kartu tumpuk-sedang">
           <div className="bagian-kepala">
             <h2>Riwayat Pembayaran</h2>
-            <button
-              type="button"
-              className="tombol tombol-sekunder tombol-kecil"
-              onClick={() => {
-                setBayarJumlah("");
-                setBayarTanggal(new Date().toISOString().slice(0, 10));
-                setBayarMetode("transfer");
-                setBayarLunas(false);
-                setBayarCatatan("");
-                setGalatBayar(null);
-                setBukaBayar(true);
-              }}
-            >
-              + Catat bayar
-            </button>
+            {bisaUbah ? (
+              <button
+                type="button"
+                className="tombol tombol-sekunder tombol-kecil"
+                onClick={() => {
+                  setBayarJumlah("");
+                  setBayarTanggal(hariIni());
+                  setBayarMetode("transfer");
+                  setBayarLunas(false);
+                  setBayarCatatan("");
+                  setGalatBayar(null);
+                  setBukaBayar(true);
+                }}
+              >
+                Catat pembayaran
+              </button>
+            ) : null}
           </div>
 
           {payments.length === 0 ? (
             <Kosong
-              keadaan="Belum ada riwayat pembayaran."
-              jalanKeluar="Catat uang muka (DP) atau cicilan pertama untuk vendor ini."
+              keadaan="Belum ada pembayaran untuk vendor ini."
+              jalanKeluar="Catat DP pertama di sini."
             />
           ) : (
             <div className="tumpuk-rapat">
@@ -444,13 +461,15 @@ export default function HalamanDetailVendor() {
                     </span>
                   </div>
 
-                  <button
-                    type="button"
-                    className="tombol tombol-bahaya tombol-kecil"
-                    onClick={() => setHapusBayarId(p.id)}
-                  >
-                    Hapus
-                  </button>
+                  {bisaUbah ? (
+                    <button
+                      type="button"
+                      className="tombol tombol-bahaya tombol-kecil"
+                      onClick={() => setHapusBayarId(p.id)}
+                    >
+                      Hapus
+                    </button>
+                  ) : null}
                 </div>
               ))}
             </div>
@@ -498,21 +517,16 @@ export default function HalamanDetailVendor() {
             opsi={METODE_BAYAR.map((m) => ({ nilai: m, label: LABEL_METODE_BAYAR[m] }))}
           />
 
-          <div className="isian-grup">
-            <label className="pilih-kartu">
-              <input
-                type="checkbox"
-                checked={bayarLunas}
-                onChange={(e) => setBayarLunas(e.target.checked)}
-              />
-              <span className="pilih-kartu-isi">
-                <span className="pilih-kartu-judul">Tandai sebagai pelunasan akhir</span>
-                <span className="pilih-kartu-ket">
-                  Sisa tagihan akan dihitung nol dan vendor ditandai lunas.
-                </span>
-              </span>
-            </label>
-          </div>
+          <Pilih
+            label="Tahap"
+            id="bayarTahap"
+            nilai={bayarLunas ? "pelunasan" : "dp"}
+            onUbah={(v) => setBayarLunas(v === "pelunasan")}
+            opsi={[
+              { nilai: "dp", label: "DP" },
+              { nilai: "pelunasan", label: "Pelunasan" },
+            ]}
+          />
 
           <Isian label="Catatan atau keterangan" id="bayarCatatan">
             <input
@@ -640,9 +654,9 @@ export default function HalamanDetailVendor() {
       {/* Dialog Konfirmasi Hapus Pembayaran */}
       <DialogKonfirmasi
         buka={Boolean(hapusBayarId)}
-        judul="Hapus catatan pembayaran?"
-        isi="Catatan pembayaran ini akan dihapus dari histori dan sisa tagihan akan disesuaikan."
-        tombolYa="Ya, hapus"
+        judul="Hapus catatan pembayaran"
+        isi="Jumlah yang sudah tercatat akan berubah."
+        tombolYa="Hapus"
         sedangJalan={sedangHapusBayar}
         onTutup={() => setHapusBayarId(null)}
         onYa={konfirmasiHapusBayar}
@@ -651,9 +665,9 @@ export default function HalamanDetailVendor() {
       {/* Dialog Konfirmasi Hapus Vendor */}
       <DialogKonfirmasi
         buka={bukaHapusVendor}
-        judul="Hapus vendor ini?"
+        judul="Hapus vendor"
         isi={`Vendor "${vendor.name}" beserta seluruh histori pembayarannya akan dihapus.`}
-        tombolYa="Ya, hapus vendor"
+        tombolYa="Hapus"
         sedangJalan={sedangHapusVendor}
         onTutup={() => setBukaHapusVendor(false)}
         onYa={konfirmasiHapusVendor}

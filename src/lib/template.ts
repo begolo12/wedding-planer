@@ -101,6 +101,8 @@ export const TEMPLATE_POS: { name: string; category: string }[] = [
   { name: "Dokumentasi", category: "dokumentasi" },
   { name: "Adat", category: "adat" },
   { name: "Transport", category: "transport" },
+  { name: "Administrasi KUA", category: "administrasi" },
+  { name: "Berkas dan akta", category: "administrasi" },
   { name: "Lainnya", category: "lainnya" },
 ];
 

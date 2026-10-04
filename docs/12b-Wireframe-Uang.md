@@ -133,8 +133,6 @@ Sisa yang sudah dihitung sebelum menyimpan membuat orang tahu pos ini hampir hab
 
 Inisial di depan adalah huruf pertama kategori, jadi yang tampil satu huruf saja, bukan nama panjang yang memakan tempat.
 
-Inisial di depan adalah huruf pertama kategori, jadi yang muncul satu huruf saja, bukan nama panjang yang memakan tempat.
-
 ---
 
 ## 4. Detail vendor

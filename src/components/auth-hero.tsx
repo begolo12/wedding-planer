@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { Merek } from "@/components/merek";
+import { NAMA_PRODUK } from "@/lib/konstanta";
 
 /**
  * Kepala layar auth: badge, lambang, dan sapaan.
@@ -9,7 +10,7 @@ import { Merek } from "@/components/merek";
  * Layar "Masuk" dan "Daftar" di proyek Stitch punya kepala yang berbeda, jadi
  * komponen ini memilih versinya dari alamat halaman yang sedang dibuka, bukan
  * dari satu teks bersama. Isi tiap versi diambil apa adanya dari layar Stitch
- * yang bersangkutan, hanya nama produk yang tetap "Hari Besar".
+ * yang bersangkutan, hanya nama produk dari `NAMA_PRODUK` yang tetap sama.
  *
  * Ikon hiasan (bunga kecil di sudut lambang, percikan di badge) dibuat sendiri
  * sebagai SVG sebaris, bukan mengambil font ikon. Alasannya supaya tidak ada
@@ -53,7 +54,7 @@ export function AuthHero() {
           Langkah Pertama Menuju Selamanya
         </span>
 
-        <h2 className="auth-sapaan auth-sapaan-besar">Mulai Kisah Bahagiamu 💍</h2>
+        <h2 className="auth-sapaan auth-sapaan-besar">Mulai Kisah Bahagiamu</h2>
         <p className="auth-sapaan-sub">
           Daftarkan rencanamu dan wujudkan pernikahan impian berdua.
         </p>
@@ -76,8 +77,10 @@ export function AuthHero() {
             </svg>
           </span>
           <span className="auth-pita-teks">
-            <span className="auth-pita-judul">{"\u2728"} 100% Gratis &amp; Bebas Stres</span>
-            <span className="auth-pita-sub">Merencanakan hari bahagia kalian bersama Hari Besar.</span>
+            <span className="auth-pita-judul">100% Gratis &amp; Bebas Stres</span>
+            <span className="auth-pita-sub">
+              Merencanakan hari bahagia kalian bersama {NAMA_PRODUK}.
+            </span>
           </span>
         </div>
       </div>
@@ -131,7 +134,7 @@ export function AuthHero() {
 
       <h2 className="auth-sapaan">
         Selamat Datang Kembali,{" "}
-        <span className="auth-sapaan-aksen">Lovebirds! {"\ud83d\udc95"}</span>
+        <span className="auth-sapaan-aksen">Lovebirds!</span>
       </h2>
       <p className="auth-sapaan-sub">
         Lanjutkan persiapan hari bahagiamu bersama pasangan tercinta

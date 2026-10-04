@@ -12,6 +12,9 @@ export type Pengguna = {
   image: string | null;
 };
 
+/** Satu baris `plans` seperti yang dikembalikan query. */
+export type Plan = typeof plans.$inferSelect;
+
 /** Sesi sekarang, atau null. Tidak melempar, karena dipakai juga di layout. */
 export async function sesiSekarang(): Promise<Pengguna | null> {
   const sesi = await auth.api.getSession({ headers: await headers() });
@@ -32,7 +35,7 @@ export async function wajibMasuk(): Promise<Pengguna> {
  * diperiksa, jadi route lain tinggal memanggilnya dan tidak bisa lupa.
  * Plan yang sudah dihapus lembut dianggap tidak ada.
  */
-export async function planMilikSaya(planId: string, pengguna: Pengguna) {
+export async function planMilikSaya(planId: string, pengguna: Pengguna): Promise<Plan> {
   // Plan yang id-nya bukan UUID sudah pasti tidak ada, dan menanyakan nilai
   // seperti itu ke Postgres berakhir jadi 500. Pola UUID yang sama dipakai
   // idUuid untuk semua id anak, jadi pemeriksaannya satu bahasa.

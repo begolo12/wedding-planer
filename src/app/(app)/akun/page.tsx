@@ -3,12 +3,15 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSession, signOut } from "@/lib/auth-client";
+import { useSession, signOut, deleteUser } from "@/lib/auth-client";
 import { usePlan, type Plan } from "@/lib/use-plan";
-import { Kerangka, Gagal } from "@/components/states";
-import { toast } from "@/components/toast";
+import { useMuat } from "@/lib/use-muat";
+import { useStatusLuring } from "@/lib/status-luring";
+import { Kerangka, Gagal, PesanGalat } from "@/components/states";
+import { Lembar, toast } from "@/components/toast";
 import { minta, pesanGalat } from "@/lib/api-client";
-import { tanggalPanjangDari, selisihHari } from "@/lib/format";
+import { tanggalPanjangDari, selisihHari, hariIni } from "@/lib/format";
+import { tanggalHariBesar } from "@/lib/plan";
 import { LABEL_STATUS_PLAN, STATUS_PLAN, type StatusPlan } from "@/lib/konstanta";
 
 type PilihanTema = "terang" | "gelap" | "sistem";
@@ -46,6 +49,18 @@ export default function HalamanAkun() {
     pilihPlan,
   } = usePlan();
 
+  const { luring, dariPerangkat } = useStatusLuring();
+  const bisaUbah = !luring && !dariPerangkat;
+
+  // Tanggal hari-H diambil dari milestone yang ditandai, sama seperti Beranda
+  // dan Laporan. Kalau hanya membaca plan.weddingDate, angka hitung mundur di
+  // Akun bisa berbeda dengan layar lain saat hari-H diubah lewat tanggal penting.
+  const { data: dataMilestone, memuat: memuatMilestone, galat: galatMilestone } = useMuat<{
+    milestones: { eventDate: string; isDayOf: boolean }[];
+  }>(planId ? `/api/plans/${planId}/milestones` : null, {
+    aktif: Boolean(planId),
+  });
+
   const [tema, setTema] = useState<PilihanTema>("sistem");
   const [online, setOnline] = useState(true);
   const [sedangKeluar, setSedangKeluar] = useState(false);
@@ -58,6 +73,11 @@ export default function HalamanAkun() {
   const [statusPilihan, setStatusPilihan] = useState<StatusPlan>("perencanaan");
   const [sedangSimpan, setSedangSimpan] = useState(false);
   const [formGalat, setFormGalat] = useState<string | null>(null);
+
+  const [bukaHapusAkun, setBukaHapusAkun] = useState(false);
+  const [sandiHapus, setSandiHapus] = useState("");
+  const [sedangHapusAkun, setSedangHapusAkun] = useState(false);
+  const [galatHapusAkun, setGalatHapusAkun] = useState<string | null>(null);
 
   useEffect(() => {
     if (!plan) return;
@@ -104,8 +124,8 @@ export default function HalamanAkun() {
     }
   }
 
-  async function simpanDasar(e: React.FormEvent) {
-    e.preventDefault();
+  async function simpanDasar(e?: React.FormEvent) {
+    e?.preventDefault();
     if (!planId || sedangSimpan) return;
 
     if (!namaPasangan.trim()) {
@@ -147,6 +167,32 @@ export default function HalamanAkun() {
     }
   }
 
+  async function konfirmasiHapusAkun(e: React.FormEvent) {
+    e.preventDefault();
+    if (sedangHapusAkun) return;
+    if (!sandiHapus) {
+      setGalatHapusAkun("Masukkan kata sandi untuk mengonfirmasi.");
+      return;
+    }
+    setSedangHapusAkun(true);
+    setGalatHapusAkun(null);
+    try {
+      const hasil = await deleteUser({ password: sandiHapus });
+      if (hasil.error) {
+        setGalatHapusAkun(
+          hasil.error.message ?? "Kata sandi salah, akun belum dihapus.",
+        );
+        return;
+      }
+      router.replace("/masuk");
+      router.refresh();
+    } catch (err) {
+      setGalatHapusAkun(pesanGalat(err));
+    } finally {
+      setSedangHapusAkun(false);
+    }
+  }
+
   async function unduhCadanganJson() {
     if (!planId) {
       toast("Pilih rencana aktif terlebih dahulu");
@@ -155,25 +201,18 @@ export default function HalamanAkun() {
 
     setSedangUnduh(true);
     try {
-      const dataLaporan = await minta<{ report: unknown }>(`/api/plans/${planId}/report`);
-      const dataOverview = await minta<{ overview: unknown }>(`/api/plans/${planId}/overview`);
+      // /ekspor mengembalikan baris apa adanya, termasuk nama dan nomor tamu,
+      // beda dari ringkasan yang cuma punya agregat. Itu yang dipakai hak
+      // unduh data pribadi di docs/08-NFR.md.
+      const data = await minta<{ ekspor: unknown }>(`/api/plans/${planId}/ekspor`);
 
-      const berkasCadangan = {
-        ekspor: "Pernikahan Plan",
-        versi: 1,
-        tanggalEkspor: new Date().toISOString(),
-        plan: plan,
-        overview: dataOverview.overview,
-        laporan: dataLaporan.report,
-      };
-
-      const blob = new Blob([JSON.stringify(berkasCadangan, null, 2)], {
+      const blob = new Blob([JSON.stringify(data.ekspor, null, 2)], {
         type: "application/json",
       });
       const url = URL.createObjectURL(blob);
       const tautan = document.createElement("a");
       tautan.href = url;
-      tautan.download = `cadangan-pernikahan-${plan?.partnerName?.replace(/\s+/g, "-").toLowerCase() || "plan"}-${new Date().toISOString().slice(0, 10)}.json`;
+      tautan.download = `cadangan-pernikahan-${plan?.partnerName?.replace(/\s+/g, "-").toLowerCase() || "plan"}-${hariIni()}.json`;
       document.body.appendChild(tautan);
       tautan.click();
       document.body.removeChild(tautan);
@@ -187,7 +226,12 @@ export default function HalamanAkun() {
     }
   }
 
-  if (memuatSesi || memuatPlan) {
+  if (
+    memuatSesi ||
+    memuatPlan ||
+    memuatMilestone ||
+    (planId && !dataMilestone && !galatMilestone)
+  ) {
     return <Kerangka baris={6} />;
   }
 
@@ -200,8 +244,16 @@ export default function HalamanAkun() {
     pengguna?.name?.charAt(0) || pengguna?.email?.charAt(0) || "U";
 
   // Hitung mundur ditulis dari tanggal yang benar benar tersimpan, bukan dari
-  // angka yang dipatok di markup. Tanpa tanggal, pilnya tidak ditampilkan.
-  const hari = selisihHari(plan?.weddingDate);
+  // angka yang dipatok di markup. Aturan tanggalnya sama dengan Beranda dan
+  // Laporan: milestone hari-H menang atas tanggal pernikahan di plan.
+  const hariOf = dataMilestone?.milestones.find((m) => m.isDayOf) ?? null;
+  const hariBesar = plan
+    ? tanggalHariBesar({
+        weddingDate: plan.weddingDate,
+        isDayOfDate: hariOf?.eventDate ?? null,
+      })
+    : null;
+  const hari = selisihHari(hariBesar);
   const teksMundur =
     hari === null
       ? null
@@ -224,7 +276,7 @@ export default function HalamanAkun() {
         <p className="akun-sapa-teks">
           Semua pengaturan akun dan rencana ada di satu tempat.
         </p>
-        {plan?.weddingDate ? (
+        {hariBesar ? (
           <span className="akun-sapa-lencana">{hari !== null && hari > 0 ? `H-${hari}` : hari === 0 ? "Hari ini" : "Sudah lewat"}</span>
         ) : null}
       </div>
@@ -254,9 +306,11 @@ export default function HalamanAkun() {
             Buat rencana pernikahan pertamamu supaya data dasar, anggaran, dan
             daftar tamu bisa diisi.
           </p>
-          <Link className="akun-tombol akun-tombol-utama" href="/rencana/plan">
-            Buat rencana sekarang
-          </Link>
+          {bisaUbah ? (
+            <Link className="akun-tombol akun-tombol-utama" href="/rencana/plan">
+              Buat rencana sekarang
+            </Link>
+          ) : null}
         </section>
       ) : (
         <>
@@ -338,9 +392,11 @@ export default function HalamanAkun() {
                 <h2>Rencana Pernikahan</h2>
                 <p>Pilih rencana aktif atau tambah rencana baru.</p>
               </div>
-              <Link className="akun-tombol akun-tombol-sekunder" href="/rencana/plan">
-                + Rencana baru
-              </Link>
+              {bisaUbah ? (
+                <Link className="akun-tombol akun-tombol-sekunder" href="/rencana/plan">
+                  + Rencana baru
+                </Link>
+              ) : null}
             </div>
 
             <div className="akun-rencana-daftar">
@@ -377,9 +433,11 @@ export default function HalamanAkun() {
                           Jadikan aktif
                         </button>
                       ) : null}
-                      <Link className="akun-tombol akun-tombol-sekunder" href="/rencana/plan">
-                        Kelola rincian
-                      </Link>
+                      {bisaUbah ? (
+                        <Link className="akun-tombol akun-tombol-sekunder" href="/rencana/plan">
+                          Kelola rincian
+                        </Link>
+                      ) : null}
                     </div>
                   </div>
                 );
@@ -404,7 +462,6 @@ export default function HalamanAkun() {
             data-aktif={tema === "terang" ? "ya" : undefined}
             onClick={() => gantiTema("terang")}
           >
-            <span aria-hidden="true">{"\u2600\uFE0F"}</span>
             <span className="akun-tema-teks">
               <strong>Mode Terang</strong>
               <small>Selalu cerah</small>
@@ -416,7 +473,6 @@ export default function HalamanAkun() {
             data-aktif={tema === "gelap" ? "ya" : undefined}
             onClick={() => gantiTema("gelap")}
           >
-            <span aria-hidden="true">{"\u{1F319}"}</span>
             <span className="akun-tema-teks">
               <strong>Mode Gelap</strong>
               <small>Nyaman saat malam</small>
@@ -428,7 +484,6 @@ export default function HalamanAkun() {
             data-aktif={tema === "sistem" ? "ya" : undefined}
             onClick={() => gantiTema("sistem")}
           >
-            <span aria-hidden="true">{"\u{1F4F1}"}</span>
             <span className="akun-tema-teks">
               <strong>Mengikuti Sistem</strong>
               <small>Ikut pengaturan perangkat</small>
@@ -441,7 +496,10 @@ export default function HalamanAkun() {
         <div className="akun-kepala">
           <div>
             <h2>Cadangan Data Mandiri</h2>
-            <p>Unduh seluruh data rencana ke berkas JSON supaya kamu selalu punya salinannya.</p>
+            <p>
+              Unduh seluruh data rencanamu, termasuk nama dan nomor tamu, ke satu berkas JSON
+              supaya kamu selalu punya salinannya.
+            </p>
           </div>
         </div>
         <button
@@ -490,11 +548,43 @@ export default function HalamanAkun() {
         </p>
       </div>
 
-      <div className="akun-aksi">
-        {plan ? (
+      <section className="akun-kartu">
+        <div className="akun-kepala">
+          <div>
+            <h2>Hapus akun</h2>
+            <p>
+              Menghapus akun akan menghapus seluruh rencana dan data di dalamnya. Tindakan
+              ini tidak bisa dibatalkan.
+            </p>
+          </div>
+        </div>
+        {bisaUbah ? (
           <button
-            type="submit"
-            form="formAkun"
+            type="button"
+            className="akun-tombol akun-tombol-sekunder"
+            onClick={() => {
+              setSandiHapus("");
+              setGalatHapusAkun(null);
+              setBukaHapusAkun(true);
+            }}
+          >
+            Hapus akun
+          </button>
+        ) : null}
+      </section>
+
+      {dariPerangkat ? (
+        <p className="keterangan">
+          Data ini dibuka dari cadangan perangkat. Mengubah data akun dan rencana tidak bisa
+          dilakukan sampai ada koneksi.
+        </p>
+      ) : null}
+
+      <div className="akun-aksi">
+        {plan && bisaUbah ? (
+          <button
+            type="button"
+            onClick={() => simpanDasar()}
             className="akun-tombol akun-tombol-utama akun-aksi-utama"
             disabled={sedangSimpan}
           >
@@ -506,6 +596,47 @@ export default function HalamanAkun() {
           Atur rincian lengkap di Rencana
         </Link>
       </div>
+
+      <Lembar
+        buka={bukaHapusAkun}
+        judul="Hapus akun"
+        onTutup={() => setBukaHapusAkun(false)}
+      >
+        <form onSubmit={konfirmasiHapusAkun} noValidate className="tumpuk-sedang">
+          <p className="keterangan">
+            Semua rencana dan data kamu akan dihapus permanen. Masukkan kata sandi untuk
+            mengonfirmasi.
+          </p>
+          {galatHapusAkun ? <PesanGalat teks={galatHapusAkun} /> : null}
+          <label className="keterangan" htmlFor="sandiHapusAkun">
+            Kata sandi
+          </label>
+          <input
+            id="sandiHapusAkun"
+            className="isian"
+            type="password"
+            autoComplete="current-password"
+            value={sandiHapus}
+            onChange={(e) => setSandiHapus(e.target.value)}
+          />
+          <div className="dialog-tombol">
+            <button
+              type="button"
+              className="tombol tombol-sekunder"
+              onClick={() => setBukaHapusAkun(false)}
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              className="tombol tombol-bahaya"
+              disabled={sedangHapusAkun}
+            >
+              {sedangHapusAkun ? "Menghapus..." : "Hapus akun"}
+            </button>
+          </div>
+        </form>
+      </Lembar>
     </div>
   );
 }

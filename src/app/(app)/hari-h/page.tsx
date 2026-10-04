@@ -4,25 +4,19 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePlan } from "@/lib/use-plan";
 import { useMuat } from "@/lib/use-muat";
+import { useStatusLuring } from "@/lib/status-luring";
 import { Kerangka, Kosong, Gagal } from "@/components/states";
 import { Lembar, DialogKonfirmasi, toast } from "@/components/toast";
-import { Isian } from "@/components/field";
+import { Isian, Pilih } from "@/components/field";
 import { minta, pesanGalat } from "@/lib/api-client";
 import { hitungMundur, jamSelesai, hariIni } from "@/lib/format";
+import { ZONA } from "@/lib/konstanta";
+import { TEMPLATE_RUNDOWN, NAMA_ADAT } from "@/lib/template";
 import type { rundownItems } from "@/db/schema";
 
 type RundownItem = typeof rundownItems.$inferSelect;
 
 type UkuranFont = "kecil" | "sedang" | "besar";
-
-const TEMPLATE_RUNDOWN_INDONESIA = [
-  { startTime: "06:00", durationMinutes: 60, title: "Persiapan & Rias Pengantin", location: "Kamar Rias / Hotel", picName: "MUA & Keluarga Inti", notes: "Pastikan sarapan pagi sudah disediakan untuk pengantin dan MUA." },
-  { startTime: "07:30", durationMinutes: 60, title: "Akad Nikah / Pemberkatan", location: "Masjid / Gereja / Venue", picName: "Penghulu / Pemuka Agama", notes: "Saksi nikah dan wali siap di tempat 15 menit sebelum acara." },
-  { startTime: "08:45", durationMinutes: 45, title: "Sungkeman & Foto Bersama Keluarga", location: "Pelaminan / Area Utama", picName: "MC & Fotografer", notes: "Utamakan orang tua, kakek/nenek, dan saudara kandung." },
-  { startTime: "10:00", durationMinutes: 120, title: "Resepsi & Ramah Tamah", location: "Grand Ballroom / Venue", picName: "WO / Koordinator Acara", notes: "Catering mulai siap saji, musik akustik mulai mengiringi." },
-  { startTime: "12:00", durationMinutes: 30, title: "Lempar Bunga & Sesi Foto Bebas", location: "Pelaminan", picName: "MC", notes: "Ajak seluruh sahabat dan tamu muda berkumpul di depan pelaminan." },
-  { startTime: "13:00", durationMinutes: 60, title: "Penutupan & Beres-Beres", location: "Venue Acara", picName: "Keluarga & Vendor", notes: "Cek barang bawaan keluarga, mahar, dan titipan kado sebelum pulang." },
-];
 
 /** Tiga tingkat ukuran huruf rundown. Dipakai juga sebagai tombol pengatur. */
 const UKURAN_FONT: { id: UkuranFont; label: string; tampil: string }[] = [
@@ -48,7 +42,7 @@ function menitDari(jam: string): number | null {
 /** Jam sekarang di zona Asia/Jakarta, "HH:MM". */
 function jamSekarangWib(): string {
   return new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Asia/Jakarta",
+    timeZone: ZONA,
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
@@ -99,6 +93,9 @@ function idAcaraSekarang(items: RundownItem[], jam: string): string | null {
 export default function HalamanHariH() {
   const { plan, planId, memuat: memuatPlan, galat: galatPlan, muatUlang: muatPlan } = usePlan();
 
+  const { luring, dariPerangkat } = useStatusLuring();
+  const bisaUbah = !luring && !dariPerangkat;
+
   const urlApi = planId ? `/api/plans/${planId}/rundown` : null;
   const {
     data,
@@ -138,6 +135,7 @@ export default function HalamanHariH() {
   const [dihapus, setDihapus] = useState<RundownItem | null>(null);
   const [sedangHapus, setSedangHapus] = useState(false);
   const [sedangPasangTemplate, setSedangPasangTemplate] = useState(false);
+  const [adat, setAdat] = useState<string>(NAMA_ADAT[0] ?? "Muslim");
 
   // Form state
   const FORM_KOSONG = {
@@ -210,13 +208,13 @@ export default function HalamanHariH() {
           method: "PATCH",
           body: payload,
         });
-        toast("Acara rundown diperbarui");
+        toast("Tersimpan");
       } else {
         await minta(`/api/plans/${planId}/rundown`, {
           method: "POST",
           body: payload,
         });
-        toast("Acara baru ditambahkan ke rundown");
+        toast("Tersimpan");
       }
 
       setLembarBuka(false);
@@ -232,13 +230,13 @@ export default function HalamanHariH() {
     if (!planId) return;
     setSedangPasangTemplate(true);
     try {
-      for (const item of TEMPLATE_RUNDOWN_INDONESIA) {
+      for (const item of TEMPLATE_RUNDOWN[adat] ?? []) {
         await minta(`/api/plans/${planId}/rundown`, {
           method: "POST",
           body: item,
         });
       }
-      toast("Template rundown standar berhasil dipasang");
+      toast("Tersimpan");
       await muatRundown();
     } catch (err) {
       toast(pesanGalat(err));
@@ -254,7 +252,7 @@ export default function HalamanHariH() {
       await minta(`/api/plans/${planId}/rundown/${dihapus.id}`, {
         method: "DELETE",
       });
-      toast("Acara dihapus dari rundown");
+      toast("Dihapus");
       setDihapus(null);
       await muatRundown();
     } catch (err) {
@@ -358,7 +356,7 @@ export default function HalamanHariH() {
   // hook tidak boleh dipasang setelah baris pengembalian awal di atas.
   const idSekarang = hariIniAcara ? idAcaraSekarang(items, jamSekarang) : null;
 
-  const jumlahAcaraPokok = TEMPLATE_RUNDOWN_INDONESIA.length;
+  const jumlahAcaraPokok = (TEMPLATE_RUNDOWN[adat] ?? []).length;
   const persenPokok = Math.min(
     100,
     Math.round((items.length / jumlahAcaraPokok) * 100),
@@ -366,7 +364,7 @@ export default function HalamanHariH() {
 
   return (
     <div className="hari-h">
-      <h1 className="sr-only">Rundown Hari-H</h1>
+      <h1 className="sr-only">Rundown acara</h1>
 
       <section className="hari-h-ringkas">
         <div className="hari-h-ringkas-atas">
@@ -399,8 +397,8 @@ export default function HalamanHariH() {
       </section>
 
       <p className="hari-h-catatan-luring">
-        <strong>Siap dibuka tanpa sinyal.</strong> Susunan ini tersimpan di perangkat, jadi
-        tetap terbaca di lokasi acara meski jaringan hilang.
+        Halaman ini yang paling sering dibutuhkan di lokasi acara, jadi buka sekali sebelum
+        berangkat.
       </p>
 
       <section className="hari-h-alat tanpa-cetak">
@@ -445,39 +443,59 @@ export default function HalamanHariH() {
               </button>
             </>
           ) : null}
-          <button
-            type="button"
-            className="hari-h-tombol hari-h-tombol-utama"
-            onClick={bukaTambah}
-          >
-            <IkonTambah />
-            Tambah acara
-          </button>
+          {bisaUbah ? (
+            <button
+              type="button"
+              className="hari-h-tombol hari-h-tombol-utama"
+              onClick={bukaTambah}
+            >
+              <IkonTambah />
+              Tambah acara
+            </button>
+          ) : null}
         </div>
       </section>
+
+      {dariPerangkat ? (
+        <p className="keterangan">
+          Data ini dibuka dari cadangan perangkat. Menambah atau mengubah rundown tidak bisa
+          dilakukan sampai ada koneksi.
+        </p>
+      ) : null}
 
       {/* Daftar Acara Rundown */}
       {items.length === 0 ? (
         <Kosong
-          keadaan="Susunan rundown masih kosong."
-          jalanKeluar="Susun urutan acara satu per satu, atau pasang paket template acara pernikahan Indonesia standar."
+          keadaan="Belum ada acara."
+          jalanKeluar="Tambahkan susunan acara, dari persiapan sampai acaranya selesai."
         >
           <div className="hari-h-kosong-aksi">
-            <button
-              type="button"
-              className="hari-h-tombol hari-h-tombol-utama"
-              disabled={sedangPasangTemplate}
-              onClick={pasangTemplateStandar}
-            >
-              {sedangPasangTemplate ? "Memasang..." : "Pakai template rundown Indonesia"}
-            </button>
-            <button
-              type="button"
-              className="hari-h-tombol hari-h-tombol-halus"
-              onClick={bukaTambah}
-            >
-              Buat manual dari awal
-            </button>
+            {bisaUbah ? (
+              <>
+                <Pilih
+                  label="Versi rundown"
+                  id="adatRundown"
+                  nilai={adat}
+                  onUbah={setAdat}
+                  opsi={NAMA_ADAT.map((n) => ({ nilai: n, label: n }))}
+                />
+                <button
+                  type="button"
+                  className="hari-h-tombol hari-h-tombol-utama"
+                  disabled={sedangPasangTemplate}
+                  onClick={pasangTemplateStandar}
+                >
+                  {sedangPasangTemplate ? "Memasang..." : "Pakai template rundown"}
+                </button>
+                <button
+                  type="button"
+                  className="hari-h-tombol hari-h-tombol-halus"
+                  onClick={bukaTambah}
+                >
+                  Buat manual dari awal
+                </button>
+              </>
+            ) : null}
           </div>
         </Kosong>
       ) : (
@@ -558,20 +576,24 @@ export default function HalamanHariH() {
                   </div>
 
                   <div className="hari-h-acara-aksi">
-                    <button
-                      type="button"
-                      className="hari-h-tombol hari-h-tombol-halus"
-                      onClick={() => bukaUbah(item)}
-                    >
-                      Ubah
-                    </button>
-                    <button
-                      type="button"
-                      className="hari-h-tombol hari-h-tombol-halus hari-h-tombol-bahaya"
-                      onClick={() => setDihapus(item)}
-                    >
-                      Hapus
-                    </button>
+                    {bisaUbah ? (
+                      <>
+                        <button
+                          type="button"
+                          className="hari-h-tombol hari-h-tombol-halus"
+                          onClick={() => bukaUbah(item)}
+                        >
+                          Ubah
+                        </button>
+                        <button
+                          type="button"
+                          className="hari-h-tombol hari-h-tombol-halus hari-h-tombol-bahaya"
+                          onClick={() => setDihapus(item)}
+                        >
+                          Hapus
+                        </button>
+                      </>
+                    ) : null}
                   </div>
                 </li>
               );
@@ -604,9 +626,8 @@ export default function HalamanHariH() {
               <input
                 id="formJam"
                 className="isian"
-                type="text"
+                type="time"
                 required
-                placeholder="07:30"
                 value={form.jam}
                 onChange={(e) => aturField("jam", e.target.value)}
               />
@@ -684,9 +705,9 @@ export default function HalamanHariH() {
       {/* Dialog Konfirmasi Hapus */}
       <DialogKonfirmasi
         buka={Boolean(dihapus)}
-        judul="Hapus acara ini?"
+        judul="Hapus acara"
         isi={`Acara "${dihapus?.title ?? ""}" jam ${dihapus?.startTime ?? ""} akan dihapus dari rundown.`}
-        tombolYa="Ya, hapus"
+        tombolYa="Hapus"
         sedangJalan={sedangHapus}
         onTutup={() => setDihapus(null)}
         onYa={konfirmasiHapus}

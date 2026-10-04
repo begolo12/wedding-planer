@@ -31,5 +31,11 @@ skills-lock.json
 .playwright-mcp
 .vercel
 
+# keluaran Playwright: jejak, tangkapan layar, laporan sekali pakai
+test-results
+playwright-report
+blob-report
+playwright/.cache
+
 # hasil audit sekali pakai
 anti-slop

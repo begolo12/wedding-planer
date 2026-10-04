@@ -1,5 +1,21 @@
 "use client";
 
+import { Gagal } from "@/components/states";
+
+/**
+ * Batas error paling luar. Dipakai kalau layout root sendiri gagal, jadi
+ * komponen ini harus merender <html> dan <body> sendiri.
+ *
+ * Bentuk pesannya memakai komponen `Gagal` yang sama dengan
+ * `src/app/error.tsx` supaya pengguna melihat layar yang sama, bukan dua
+ * gaya galat yang berbeda.
+ *
+ * Gaya inline di bawah ini sengaja ditulis ulang seadanya: global-error
+ * menggantikan layout root, dan `globals.css` tidak dijamin ikut termuat saat
+ * root gagal. Tanpa gaya cadangan ini, layar bisa tampil tanpa warna dan
+ * tanpa jarak, dan pesannya jadi sulit dibaca. Warnanya sama dengan token
+ * di `globals.css`, bukan warna baru.
+ */
 export default function GlobalError({
   reset,
 }: {
@@ -12,31 +28,15 @@ export default function GlobalError({
         style={{
           margin: 0,
           padding: "48px 16px",
-          fontFamily: "system-ui, -apple-system, sans-serif",
           background: "#fffdf9",
           color: "#4a3b43",
+          fontFamily: "system-ui, -apple-system, sans-serif",
+          fontSize: "16px",
+          lineHeight: 1.5,
         }}
       >
-        <div style={{ maxWidth: 480, margin: "0 auto", textAlign: "center" }}>
-          <h1 style={{ fontSize: "1.5rem" }}>Aplikasi mengalami kendala</h1>
-          <p style={{ color: "#72666b", margin: "12px 0 24px" }}>
-            Terjadi masalah saat memuat aplikasi. Muat ulang halaman untuk melanjutkan.
-          </p>
-          <button
-            type="button"
-            onClick={() => reset()}
-            style={{
-              padding: "12px 24px",
-              background: "#ffb7c5",
-              color: "#4a3b43",
-              border: 0,
-              borderRadius: 9999,
-              cursor: "pointer",
-              fontWeight: 600,
-            }}
-          >
-            Muat ulang
-          </button>
+        <div style={{ maxWidth: 480, margin: "0 auto" }}>
+          <Gagal apa="Aplikasi" onCoba={reset} />
         </div>
       </body>
     </html>

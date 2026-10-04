@@ -20,6 +20,7 @@ export const KATEGORI_UANG = [
   "dokumentasi",
   "adat",
   "transport",
+  "administrasi",
   "lainnya",
 ] as const;
 export type KategoriUang = (typeof KATEGORI_UANG)[number];
@@ -32,6 +33,7 @@ export const LABEL_KATEGORI_UANG: Record<KategoriUang, string> = {
   dokumentasi: "Dokumentasi",
   adat: "Adat",
   transport: "Transport",
+  administrasi: "Administrasi",
   lainnya: "Lainnya",
 };
 
@@ -52,6 +54,21 @@ export const LABEL_KATEGORI_TAMU: Record<KategoriTamu, string> = {
   kerja: "Kerja",
   anak: "Anak",
   lainnya: "Lainnya",
+};
+
+/**
+ * Sisi tamu menurut docs/02b-Tamu.md bagian 05. Nilai `lainnya` ditampilkan
+ * sebagai "Bersama" karena di layar orang berpikir "tamu kedua pihak", bukan
+ * "lainnya". Nilai lama di database yang tidak termasuk tiga ini dibaca
+ * kembali sebagai `lainnya` supaya data lama tidak membuat layar rusak.
+ */
+export const SISI_TAMU = ["pria", "wanita", "lainnya"] as const;
+export type SisiTamu = (typeof SISI_TAMU)[number];
+
+export const LABEL_SISI_TAMU: Record<SisiTamu, string> = {
+  pria: "Pihak pria",
+  wanita: "Pihak wanita",
+  lainnya: "Bersama",
 };
 
 export const JENIS_TANGGAL = [
@@ -100,7 +117,7 @@ export const LABEL_STATUS_VENDOR: Record<StatusVendor, string> = {
   selesai: "Selesai",
 };
 
-export const METODE_BAYAR = ["transfer", "tunai", "kartu", "ewallet"] as const;
+export const METODE_BAYAR = ["transfer", "tunai", "kartu", "ewallet", "qris"] as const;
 export type MetodeBayar = (typeof METODE_BAYAR)[number];
 
 export const LABEL_METODE_BAYAR: Record<MetodeBayar, string> = {
@@ -108,6 +125,7 @@ export const LABEL_METODE_BAYAR: Record<MetodeBayar, string> = {
   tunai: "Tunai",
   kartu: "Kartu",
   ewallet: "E-wallet",
+  qris: "QRIS",
 };
 
 export const STATUS_HADIR = ["belum", "hadir", "tidak"] as const;
@@ -170,17 +188,32 @@ export const ZONA = "Asia/Jakarta";
 /**
  * Nama produk. Ini satu-satunya tempat nama ditulis.
  *
- * Semula isinya nama pasangan contoh. Sekarang sudah netral supaya cocok
- * untuk semua orang, bukan cuma satu pasangan. Semua yang menampilkan nama
- * produk (judul halaman, manifest, nama sesi) harus baca dari sini, bukan
- * menulis ulang. Kalau nama diganti lagi, cuma baris ini yang berubah.
+ * Diputuskan "Rapi Nikah" pada 2026-10-04. Alasan singkat: berbahasa
+ * Indonesia, netral untuk semua agama dan adat, 10 karakter sehingga aman
+ * untuk `short_name` (dibatasi 12), dan langsung menyebut inti produk:
+ * catatan yang rapi dan pernikahan. Saat dipilih, tidak ada merek lain
+ * dengan nama ini, dan domain rapinikah.id serta rapinikah.com belum
+ * terdaftar. Riwayat lengkapnya ada di `CHANGELOG.md` 0.14.0.
+ *
+ * Semua yang menampilkan nama produk (judul halaman, manifest, nama sesi)
+ * harus baca dari sini, bukan menulis ulang. Kalau nama diganti lagi, cuma
+ * baris ini yang berubah.
+ *
+ * Nama di kunci perangkat sengaja TIDAK ikut berubah, dan itu keputusan
+ * tetap: database IndexedDB "haribesar-luring" dan "haribesar-baca", kunci
+ * localStorage "haribesar-tema", "haribesar-email-ingat", dan
+ * "haribesar-install-ditolak", nama cache service worker "haribesar-*", dan
+ * nama event "haribesar-toast". Menggantinya membuat data pengguna yang
+ * sudah ada tidak terbaca lagi dan cache luring terbuang, padahal nama kunci
+ * itu tidak pernah terlihat pengguna. Alasannya juga ditulis di
+ * `CHANGELOG.md` 0.14.0.
  *
  * Batas `short_name` di manifest adalah 12 karakter, jadi jangan lewat.
  */
-export const NAMA_PRODUK = "Hari Besar";
+export const NAMA_PRODUK = "Rapi Nikah";
 
 /** Nama pendek untuk layar utama HP dan nama tab browser. 10 karakter. */
-export const NAMA_PRODUK_PENDEK = "Hari Besar";
+export const NAMA_PRODUK_PENDEK = "Rapi Nikah";
 
 export const BATAS_TAUTAN = 5;
 export const BATAS_TEKS_WA = 800;

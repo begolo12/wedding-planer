@@ -121,9 +121,9 @@ Halaman yang dibuka oleh orang tua dan saudara. Tidak ada login, tidak ada tombo
 |[ Buka di peta ]                |
 |                                |
 +--------------------------------+
-|DRESS CODE                      |
+|KODE BUSANA                     |
 |                                |
-|Priama                          |
+|Pria                            |
 |[ gambar ]                      |
 |Baju adat, warna                |
 |                                |
@@ -155,7 +155,7 @@ Tautan punya kunci yang panjangnya cukup supaya tidak ditebak, dan tidak punya k
 +--------------------------------+
 |TAMU                            |
 |                                |
-|Priama  [ gambar ]              |
+|Pria  [ gambar ]              |
 |Baju adat, warna                |
 |                                |
 |Wanita  [ gambar ]              |
@@ -173,6 +173,20 @@ Tautan punya kunci yang panjangnya cukup supaya tidak ditebak, dan tidak punya k
 Tampilannya sama persis dengan yang muncul di info untuk keluarga, tapi di sini bisa diedit.
 
 Ada satu tombol bagikan, dan tombol itu memakai tautan yang sudah ada di bagian 3. Tidak ada cara kedua.
+
+---
+
+### Keputusan yang ditunda
+
+Dua elemen di atas belum dibangun karena datanya tidak ada di skema, bukan karena lupa:
+
+| Elemen | Keputusan | Alasan | Yang dibutuhkan kalau nanti dibangun |
+|---|---|---|---|
+| Tombol "Buka di peta" per lokasi | Tidak dibangun | Milestone (`milestones`) tidak punya kolom alamat atau koordinat, dan rundown hanya punya nama lokasi sebagai teks. Tautan peta butuh alamat lengkap supaya berguna | Kolom alamat di `milestones` atau `rundown_items`, lalu tautan `https://maps.google.com/?q=` |
+| Blok kode busana dengan gambar | Tidak dibangun | Tabel `outfits` menyimpan nama barang, status, dan catatan, tanpa field gambar atau warna terstruktur. Gambar juga belum punya tempat penyimpanan | Kolom warna atau gambar di `outfits` dan object storage untuk berkas gambar |
+| Tombol "Bagikan ke keluarga" di Seragam | Tidak dibangun | Tautan baca-saja publik hanya punya dua target, pengumuman dan laporan, sesuai `16-Laporan-dan-Bagikan.md` bagian 4. Seragam tidak punya halaman publik sendiri. Menambah target ketiga berarti jalur data baru, dan itu belum diminta | Target `seragam` di `share_links`, plus tampilan baca-saja untuk busana |
+
+Yang sudah dibangun di tautan publik: jadwal dari `report.jadwal` dan rundown dari `report.rundown.item` termasuk lokasinya.
 
 ---
 

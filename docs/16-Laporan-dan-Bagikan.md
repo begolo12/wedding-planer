@@ -28,7 +28,7 @@ Laporan dijaga dari lima sumber data, tidak lebih:
 | Hitung mundur | plans | Selisih tanggal dengan hari ini |
 | Ringkasan uang | budget categories | Total, terpakai, sisa |
 | Tugas | tasks | Selesai, wajib minggu ini, lewat |
-| Tamu | guests | Jumlah orang, kursi, belum kena undangan |
+| Tamu | guests | Jumlah orang, porsi katering, kursi, per pihak |
 | Rundown | rundown items | Item hari ini |
 | Vendor | vendors, payments | Yang belum lunas |
 
@@ -90,6 +90,8 @@ Tidak ada pustaka berbagi. Yang dipakai:
 
 Tautan `wa.me` sudah didukung semua WhatsApp, HP maupun desktop. Yang dikirim ke server cuma teksnya, tidak ada kontak yang diunggah.
 
+Karena kontak dipilih di WhatsApp, aplikasi tidak menyediakan pemilih penerima sendiri. Blok "Tamu kepada" yang muncul di `12e-Wireframe-Laporan.md` bagian 2 tidak dibangun, dan itu keputusan, bukan kelalaian: daftar kontak keluarga tidak perlu disimpan di server, dan pilihan kontak sudah ada di WhatsApp.
+
 ### Batas
 
 | Batas | Nilai | Kenapa |
@@ -121,7 +123,7 @@ Yang berubah cuma satu: tautan yang dibuat dari halaman Laporan otomatis mengara
 
 | Tautan | Isi |
 |---|---|
-| Info untuk Keluarga | Jadwal, lokasi, dress code |
+| Info untuk Keluarga | Jadwal, lokasi, kode busana |
 | Laporan | Semua isi laporan |
 
 ### Tautan milik plan
@@ -142,7 +144,7 @@ Kalau nanti dibutuhkan masa berlaku, tambahkan field nullable, dan jangan mengub
 
 PDF dibuat lewat dialog cetak bawaan browser atau sistem, dengan CSS `@media print`. Tidak ada pustaka.
 
-Ini menjawab lima pertanyaan di [`06-Stack-dan-Batas.md`](06-Stack-dan-Batas.md) bagian 5:
+Ini menjawab lima pertanyaan di [`06-Stack-dan-Batas.md`](06-Stack-dan-Batas.md) bagian 4:
 
 | Pertanyaan | Jawaban |
 |---|---|
@@ -171,7 +173,7 @@ Yang hilang dengan cara ini adalah pilihan seperti nomor halaman otomatis dan da
 | Isi halaman sama persis dengan layar | Kalau beda, orang percaya salah |
 | Warna teks minimal hitam | Sering dicetak hitam putih di fotokopi |
 | Tidak ada elemen yang terpotong | Kotak yang terpotong bikin orang salah baca |
-| Nomor halaman di kaki | Kertas yang tercecer masih urut |
+| Kaki halaman berisi nama pasangan dan tanggal cetak | Kertas yang tercecer masih tahu ini laporan siapa dan kapan dicetak |
 | Margin 20mm | Kebanyakan printer rumah punya margin itu |
 
 ### Ukuran kertas
@@ -184,6 +186,14 @@ Kalau di luar A4 ada yang terpotong, kolom yang panjang dikecilkan supaya muat, 
 
 Font aplikasi dipakai apa adanya, tidak ada font khusus cetak. Kalau_report dicetak dengan font lain, bentuk halaman di layar dan di kertas jadi berbeda, dan itu membingungkan.
 
+### Kaki halaman, bukan nomor halaman otomatis
+
+Kaki setiap halaman berisi nama pasangan dan tanggal cetak. Nomor halaman otomatis tidak dibuat, karena CSS `@media print` tidak bisa menomori halaman sendiri. Menambah penghitung lewat JavaScript berarti menambah skrip yang harus dirawat hanya untuk tiga halaman, dan itu tidak sebanding.
+
+Bagian 5 dan bagian 6 dulu tampak bertentangan: satu meminta "nomor halaman di kaki", satu menulis "nomor halaman otomatis tidak ada". Yang berlaku adalah keputusan ini: tidak ada nomor halaman otomatis, dan yang ada di kaki adalah nama pasangan dan tanggal cetak. Satu elemen tetap di halaman Laporan diulang peramban di setiap halaman cetak.
+
+Kaki manual ini sama dengan yang sudah digambar di `12e-Wireframe-Laporan.md` bagian 4 ("Dicetak dari rencana Aisyah & Bagas"), jadi tiga dokumen sekarang sepakat.
+
 ---
 
 ## 6. Yang tidak ada
@@ -192,7 +202,7 @@ Font aplikasi dipakai apa adanya, tidak ada font khusus cetak. Kalau_report dice
 |---|---|
 | Grafik di PDF | Yang perlu dijawab sudah dijawab tabel |
 | Pilihan ukuran kertas | A4 cukup, dan pilihan lain menambah pekerjaan tanpa pengguna |
-| Nomor halaman otomatis | Tiga halaman, dan kawatinya manual |
+| Nomor halaman otomatis | Tidak bisa dibuat lewat CSS saja, dan tiga halaman tidak butuh |
 | Daftar isi | Tiga halaman, daftar isi lebih panjang dari isinya |
 | Menyimpan riwayat laporan | Yang disimpan sudah bisa diunduh |
 | Laporan sebagai gambar | Watermark dan tidak bisa dibaca mesin |

@@ -7,6 +7,8 @@ import { Kerangka } from "@/components/states";
 import { BudgetBar } from "@/components/budget-bar";
 import { Rupiah } from "@/components/rupiah";
 import type { Laporan } from "@/lib/laporan";
+import { LABEL_AUDIEN, type Audien } from "@/lib/konstanta";
+import { tanggalPanjangDari } from "@/lib/format";
 
 type ResponBagikan = {
   tipe: "laporan" | "pengumuman";
@@ -118,7 +120,7 @@ export default function HalamanBagikanPublik({
         <article className="kartu tumpuk-sedang">
           <h1>{p.title}</h1>
           <p className="keterangan">
-            Ditujukan untuk <strong>{p.audience}</strong>
+            Ditujukan untuk <strong>{LABEL_AUDIEN[p.audience as Audien] ?? p.audience}</strong>
             {p.publishedAt ? ` • ${new Date(p.publishedAt).toLocaleDateString("id-ID")}` : ""}
           </p>
           <p className="bagikan-teks">{p.body}</p>
@@ -260,6 +262,24 @@ export default function HalamanBagikanPublik({
             </div>
           </section>
         </div>
+
+        {/* Jadwal Acara (tanggal penting) */}
+        {rep.jadwal.length > 0 ? (
+          <section className="kartu tumpuk-sedang">
+            <h2>Jadwal Acara</h2>
+            <div className="bagikan-acara">
+              {rep.jadwal.map((j) => (
+                <div key={j.id} className="bagikan-acara-baris">
+                  <span className="bagikan-acara-jam">{tanggalPanjangDari(j.eventDate)}</span>
+                  <div className="bagikan-acara-isi">
+                    <div className="bagikan-acara-judul">{j.title}</div>
+                    <div className="bagikan-acara-ket">{j.type}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         {/* Rundown Jadwal Acara */}
         <section className="kartu tumpuk-sedang">

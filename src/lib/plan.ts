@@ -1,5 +1,5 @@
-import { NAMA_PRODUK, ZONA } from "./konstanta";
-import { hitungMundur, selisihHari } from "./format";
+import { NAMA_PRODUK } from "./konstanta";
+import { akhirMingguIni, hitungMundur, selisihHari } from "./format";
 
 /**
  * Aturan plan yang dipakai di lebih dari satu tempat ditulis di sini.
@@ -49,20 +49,7 @@ export function kelompokkan(tanggal: string | null, status: string): KelompokWak
   if (selisih === null) return "tanpaTenggat";
   if (selisih < 0) return "lewat";
   if (selisih === 0) return "hariIni";
-  return tanggal <= akhirMinggu() ? "mingguIni" : "tanpaTenggat";
-}
-
-/** Tanggal Minggu di minggu yang sedang berjalan, bentuk `2026-06-30`. */
-function akhirMinggu(): string {
-  const d = new Date();
-  const geser = d.getDay() === 0 ? 0 : 7 - d.getDay();
-  d.setDate(d.getDate() + geser);
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: ZONA,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(d);
+  return tanggal <= akhirMingguIni() ? "mingguIni" : "tanpaTenggat";
 }
 
 export const LABEL_KELOMPOK: Record<KelompokWaktu, string> = {

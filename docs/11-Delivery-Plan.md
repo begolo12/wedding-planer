@@ -44,7 +44,7 @@ Urutannya bukan pilihan gaya. Data dulu, tampilan belakangan. Layar yang dibuat 
 | 7 | Tanggal penting, `reminderDays`, dan hitung mundur di server | Sprint 1 |
 | 8 | Tugas, template bawaan, saring, urutan manual, tombol selesai | Sprint 2 |
 | 9 | Anggaran, total dihitung di server, penanda lewat batas | Sprint 3 |
-| 10 | Vendor, pembayaran, riwayat, unggah bukti transfer | Sprint 4 |
+| 10 | Vendor, pembayaran, riwayat | Sprint 4. Unggah bukti transfer ditunda ke Fase 3, lihat `17-Rencana-Build.md` bagian 11 |
 | 11 | Tamu, tempel dari teks dengan pratinjau, porsi dan kursi | Sprint 5 |
 | 12 | Rundown, enam template adat, ganti template tanpa kehilangan suntingan | Sprint 6 |
 | 13 | Info untuk keluarga dan tautan baca-saja | Sprint 7 |
@@ -146,7 +146,7 @@ Estimasi: 25 hari
 | CRUD vendor |
 | Tambah pembayaran dari detail vendor |
 | Riwayat pembayaran |
-| Unggah bukti transfer |
+| Unggah bukti transfer (ditunda ke Fase 3, lihat `17-Rencana-Build.md` bagian 11) |
 | Layar Vendor dan Pembayaran |
 
 ### Sprint 5. Tamu (3 hari)
@@ -335,7 +335,7 @@ Semua keputusan di dokumen ini diambil sendiri karena belum ada jawaban. Berikut
 
 | Keputusan | Dokumen | Kalau berubah |
 |---|---|---|
-| Nama produk "Aisyah & Bagas" | `DESIGN.md` | Ganti di satu tempat, palette dan font tidak berubah |
+| Nama produk "Rapi Nikah" | `DESIGN.md` | Nama ditulis satu kali di `NAMA_PRODUK` (`src/lib/konstanta.ts`). Menggantinya tidak mengubah palette dan font |
 | Tidak ada marketplace vendor | `01-PRD.md` | Menambah beberapa bulan |
 | Tidak ada payment gateway | `01-PRD.md` | Menambah pembayaran sungguhan, bukan catatan |
 | Monolit Next.js | `06-Stack-dan-Batas.md` | Mengubah seluruh rencana kerja |

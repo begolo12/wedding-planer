@@ -23,6 +23,9 @@ Istilah di bawah ini sudah jadi bahasa sehari-hari di Indonesia.
 | Pengantin | Pasangan yang menikah |
 | Crew | Orang yang membantu jalannya acara |
 | Akad nikah | Akad pernikahan secara agama |
+| Porsi katering | Jumlah orang yang perlu makanan |
+| QRIS | Cara bayar dengan memindai kode QR |
+| Administrasi | Pos anggaran untuk biaya surat, akta, dan pengurusan |
 
 ---
 
@@ -33,6 +36,10 @@ Istilah teknis dari bahasa Inggris diterjemahkan, karena tidak dikenal orang awa
 | Dipakai di aplikasi | Bukan | Alasan |
 |---|---|---|
 | Kehadiran | RSVP | Kebanyakan orang Indonesia menjawab lewat WhatsApp, jadi kata konfirmasi lebih sering dipakai |
+| Konfirmasi hadir | RSVP | Sama artinya dengan Kehadiran, dipakai saat butuh kalimat penuh di judul dan label |
+| Audiens | Audien | Bentuk baku di kamus, dan penerimanya memang lebih dari satu kelompok |
+| Kode busana | Dress code | Bahasa Indonesia, sesuai prinsip istilah Indonesia di `02-Domain-Spec.md` |
+| Tautan baca-saja | Read-only link | "Tautan" menggantikan "link", sesuai bagian 7 dokumen ini |
 | Tamu | Guest | Sudah jadi bahasa sehari-hari |
 | Rundown acara | Run sheet | Sudah jadi bahasa sehari-hari |
 | Kontrak | Legal docs | Orang awam lebih mudah paham kata kontrak |
@@ -74,6 +81,9 @@ Istilah di bawah ini tidak diterjemahkan, karena memang istilah kerja yang dipak
 | `durationMinutes` | Estimasi durasi | rundown_items |
 | `picName` | Penanggung jawab | rundown_items |
 | `shareToken` | Token unik untuk tautan baca saja | announcements |
+| `side` | Sisi keluarga tamu: pria, wanita, atau lainnya | guests |
+| `invitedAt` | Kapan undangan dikirim, kosong berarti belum | guests |
+| `invitationUrl` | Tautan undangan digital per acara | milestones |
 
 ---
 
@@ -93,6 +103,10 @@ Aplikasi ini hanya dipakai di Indonesia, jadi tidak ada terjemahan ke bahasa lai
 | Pembayaran dan pos anggaran | Pembayaran menyimpan uang yang benar-benar keluar. Pos anggaran menyimpan rencana. |
 | Kehadiran dan jumlah tamu | Kehadiran berarti apakah dia datang. Jumlah tamu berarti berapa orang yang ikut. |
 | Undangan dan tamu | Undangan yang dikirim. Tamu yang ada di daftar. |
+| Orang, kursi, dan undangan | Undangan satu baris tamu, boleh mewakili beberapa orang. Orang jumlah jiwa di semua baris. Kursi dan porsi jumlah orang yang perlu dilayani. |
+| Hadir, belum konfirmasi, dan tidak hadir | Hadir berarti sudah menyatakan datang. Belum konfirmasi berarti belum menjawab. Tidak hadir berarti sudah menyatakan tidak datang. |
+| Porsi katering dan kursi | Dua angka ini sengaja sama: orang yang sudah pasti hadir ditambah yang belum menjawab. Tamu yang sudah menyatakan tidak hadir tidak dihitung. |
+| Pihak pria, pihak wanita, dan bersama | Sisi keluarga tamu. Nilai lama yang tidak dikenal dan yang belum diisi dibaca sebagai bersama. |
 
 ---
 
@@ -109,10 +123,34 @@ Aplikasi ini hanya dipakai di Indonesia, jadi tidak ada terjemahan ke bahasa lai
 | Submit | Simpan |
 | Approve | Setujui |
 | Reject | Tolak |
+| Checklist | Tugas atau daftar tugas |
+| Audien | Audiens |
+| RSVP | Konfirmasi hadir |
+| Dress code | Kode busana |
+| Link | Tautan |
+| Database | Daftar, data, atau catatan |
 
 ---
 
-## 8. Alasan penulisan dokumen ini
+## 8. Satuan angka tamu
+
+Satu angka hanya boleh punya satu satuan di semua layar. Empat satuan ini dipakai:
+
+| Satuan | Arti | Dipakai untuk |
+|---|---|---|
+| Undangan | Satu baris tamu. Satu undangan bisa mewakili beberapa orang | Jumlah baris di daftar tamu |
+| Orang | Jumlah jiwa di semua baris, termasuk yang belum dan tidak hadir | Total tamu |
+| Hadir | Jumlah orang yang sudah menyatakan hadir | Garis bawah konfirmasi |
+| Belum konfirmasi | Jumlah orang yang belum menjawab | Yang masih menggantung |
+| Tidak hadir | Jumlah orang yang sudah menyatakan tidak datang | Yang pasti tidak ikut |
+| Kursi | Hadir ditambah belum konfirmasi | Tempat duduk yang perlu disiapkan |
+| Porsi | Hadir ditambah belum konfirmasi | Makanan yang perlu dipesan |
+
+Kursi dan porsi sengaja memakai angka yang sama: dua-duanya menjawab berapa orang yang perlu dilayani. Tamu yang sudah menyatakan tidak hadir tidak dihitung di keduanya. Angka "kalau semua hadir" tidak dipakai lagi karena dulu ikut menghitung tamu yang sudah menolak.
+
+---
+
+## 9. Alasan penulisan dokumen ini
 
 Tiga alasan:
 

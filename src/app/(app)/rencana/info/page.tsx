@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePlan } from "@/lib/use-plan";
 import { useMuat } from "@/lib/use-muat";
+import { useStatusLuring } from "@/lib/status-luring";
 import { TabRencana } from "@/components/tab-rencana";
 import { Kerangka, Kosong, Gagal } from "@/components/states";
 import { Lembar, DialogKonfirmasi, toast } from "@/components/toast";
@@ -21,6 +22,9 @@ type Announcement = typeof announcements.$inferSelect;
  */
 export default function HalamanInfo() {
   const { plan, planId, memuat: memuatPlan, galat: galatPlan, muatUlang: muatPlan } = usePlan();
+
+  const { luring, dariPerangkat } = useStatusLuring();
+  const bisaUbah = !luring && !dariPerangkat;
 
   const {
     data,
@@ -40,6 +44,9 @@ export default function HalamanInfo() {
 
   const [dihapus, setDihapus] = useState<Announcement | null>(null);
   const [sedangHapus, setSedangHapus] = useState(false);
+
+  const [dicabut, setDicabut] = useState<Announcement | null>(null);
+  const [sedangCabut, setSedangCabut] = useState(false);
 
   // Form states
   const [formJudul, setFormJudul] = useState("");
@@ -103,13 +110,13 @@ export default function HalamanInfo() {
           method: "PATCH",
           body: payload,
         });
-        toast("Pengumuman diperbarui");
+        toast("Tersimpan");
       } else {
         await minta(`/api/plans/${planId}/announcements`, {
           method: "POST",
           body: payload,
         });
-        toast("Pengumuman ditambahkan");
+        toast("Tersimpan");
       }
 
       setLembarBuka(false);
@@ -128,7 +135,7 @@ export default function HalamanInfo() {
       await minta(`/api/plans/${planId}/announcements/${dihapus.id}`, {
         method: "DELETE",
       });
-      toast("Pengumuman dihapus");
+      toast("Dihapus");
       setDihapus(null);
       await muatInfo();
     } catch (err) {
@@ -138,11 +145,29 @@ export default function HalamanInfo() {
     }
   }
 
+  async function konfirmasiCabut() {
+    if (!planId || !dicabut) return;
+    setSedangCabut(true);
+    try {
+      await minta(`/api/plans/${planId}/announcements/${dicabut.id}/share`, {
+        method: "POST",
+        body: { rotate: true },
+      });
+      toast("Tersimpan");
+      setDicabut(null);
+      await muatInfo();
+    } catch (err) {
+      toast(pesanGalat(err));
+    } finally {
+      setSedangCabut(false);
+    }
+  }
+
   function salinTautan(token: string) {
     if (typeof window === "undefined") return;
     const url = `${window.location.origin}/bagikan/${token}`;
     navigator.clipboard.writeText(url);
-    toast("Tautan publik berhasil disalin");
+    toast("Tautan tersalin");
   }
 
   function bagikanWhatsApp(a: Announcement) {
@@ -182,15 +207,24 @@ export default function HalamanInfo() {
     <div className="tumpuk-sedang">
       <div className="kepala-halaman">
         <div>
-          <h1>Briefing &amp; Informasi</h1>
+          <h1>Info untuk keluarga</h1>
           <p>Catatan penting untuk keluarga besar, panitia acara, dan vendor hari-H.</p>
         </div>
         <div>
-          <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
-            + Buat pengumuman
-          </button>
+          {bisaUbah ? (
+            <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
+              Tambah pengumuman
+            </button>
+          ) : null}
         </div>
       </div>
+
+      {dariPerangkat ? (
+        <p className="keterangan">
+          Data ini dibuka dari cadangan perangkat. Menambah atau mengubah pengumuman tidak bisa
+          dilakukan sampai ada koneksi.
+        </p>
+      ) : null}
 
       <TabRencana />
 
@@ -215,12 +249,14 @@ export default function HalamanInfo() {
 
       {daftar.length === 0 ? (
         <Kosong
-          keadaan="Belum ada informasi briefing."
-          jalanKeluar="Tulis petunjuk parkir, panduan seragam, atau jadwal kumpul keluarga."
+          keadaan="Belum ada pengumuman."
+          jalanKeluar="Tulis satu pengumuman yang perlu dibaca semua orang."
         >
-          <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
-            Buat pengumuman
-          </button>
+          {bisaUbah ? (
+            <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
+              Tambah pengumuman
+            </button>
+          ) : null}
         </Kosong>
       ) : (
         <div className="tumpuk-rapat">
@@ -235,10 +271,10 @@ export default function HalamanInfo() {
                   <div className="aksi-baris">
                     <h2>{a.title}</h2>
                     {a.isPinned ? (
-                      <span className="lencana lencana-aksen">📌 Disematkan</span>
+                      <span className="lencana lencana-aksen">Disematkan</span>
                     ) : null}
                     <span className="lencana">
-                      Audien: {LABEL_AUDIEN[a.audience as Audien] ?? a.audience}
+                      Audiens: {LABEL_AUDIEN[a.audience as Audien] ?? a.audience}
                     </span>
                     {!a.publishedAt ? <span className="lencana">Draf</span> : null}
                   </div>
@@ -261,20 +297,33 @@ export default function HalamanInfo() {
                       Salin tautan
                     </button>
                   ) : null}
-                  <button
-                    type="button"
-                    className="tombol tombol-sekunder tombol-kecil"
-                    onClick={() => bukaUbah(a)}
-                  >
-                    Ubah
-                  </button>
-                  <button
-                    type="button"
-                    className="tombol tombol-bahaya tombol-kecil"
-                    onClick={() => setDihapus(a)}
-                  >
-                    Hapus
-                  </button>
+                  {bisaUbah && a.shareToken ? (
+                    <button
+                      type="button"
+                      className="tombol tombol-bahaya tombol-kecil"
+                      onClick={() => setDicabut(a)}
+                    >
+                      Cabut tautan
+                    </button>
+                  ) : null}
+                  {bisaUbah ? (
+                    <>
+                      <button
+                        type="button"
+                        className="tombol tombol-sekunder tombol-kecil"
+                        onClick={() => bukaUbah(a)}
+                      >
+                        Ubah
+                      </button>
+                      <button
+                        type="button"
+                        className="tombol tombol-bahaya tombol-kecil"
+                        onClick={() => setDihapus(a)}
+                      >
+                        Hapus
+                      </button>
+                    </>
+                  ) : null}
                 </div>
               </div>
 
@@ -284,10 +333,20 @@ export default function HalamanInfo() {
         </div>
       )}
 
+      <DialogKonfirmasi
+        buka={Boolean(dicabut)}
+        judul="Cabut tautan pengumuman"
+        isi="Tautan lama tidak bisa dibuka lagi. Tautan baru dibuat untuk dibagikan ulang."
+        tombolYa="Cabut"
+        sedangJalan={sedangCabut}
+        onTutup={() => setDicabut(null)}
+        onYa={konfirmasiCabut}
+      />
+
       {/* Lembar Tambah / Ubah */}
       <Lembar
         buka={lembarBuka}
-        judul={diedit ? "Ubah pengumuman" : "Buat pengumuman baru"}
+        judul={diedit ? "Ubah pengumuman" : "Tambah pengumuman"}
         onTutup={() => setLembarBuka(false)}
       >
         <form onSubmit={simpan} noValidate className="tumpuk-sedang">
@@ -304,7 +363,7 @@ export default function HalamanInfo() {
           </Isian>
 
           <Pilih
-            label="Target penerima (audien)"
+            label="Target penerima (audiens)"
             id="formAudien"
             nilai={formAudien}
             onUbah={(v) => setFormAudien(v as Audien)}
@@ -317,7 +376,7 @@ export default function HalamanInfo() {
               className="isian"
               rows={6}
               required
-              placeholder="Tuliskan detail informasi, jam kehadiran, aturan dresscode, dll."
+              placeholder="Tuliskan detail informasi, jam kehadiran, aturan kode busana, dll."
               value={formIsi}
               onChange={(e) => setFormIsi(e.target.value)}
             />
@@ -371,9 +430,9 @@ export default function HalamanInfo() {
       {/* Dialog Konfirmasi Hapus */}
       <DialogKonfirmasi
         buka={Boolean(dihapus)}
-        judul="Hapus pengumuman ini?"
+        judul="Hapus pengumuman"
         isi={`Pengumuman "${dihapus?.title ?? ""}" akan dihapus.`}
-        tombolYa="Ya, hapus"
+        tombolYa="Hapus"
         sedangJalan={sedangHapus}
         onTutup={() => setDihapus(null)}
         onYa={konfirmasiHapus}

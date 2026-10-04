@@ -270,22 +270,22 @@ Tidak memblokir produksi, tetapi kalau tidak diperbaiki, dokumen akan dipercaya 
 
 ---
 
-## 15. Urutan pengerjaan
+## 15. Status pengerjaan per story
 
-Satu story satu kali jalan, dan tiap story berakhir dengan aplikasi yang masih jalan.
+Tabel ini status, bukan lagi rencana. Tiap status diambil dari bukti yang bisa dibuka, bukan dari perasaan sudah selesai.
 
-| # | Story | Prioritas | Selesai kalau |
-|---|---|---|---|
-| 1 | Perbaiki `generateId` | P0 | Daftar sampai ke Beranda di browser, dan plan bisa dibuat |
-| 2 | Batas halaman | P0 | `error.tsx`, `global-error.tsx`, `not-found.tsx`, dua `loading.tsx`, dan dua `error.tsx` ada, dan build hijau |
-| 3 | Antrean luring | P0 | 401 tidak dihitung terkirim, pembuangan kelihatan, dan pita luring muncul saat data luring |
-| 4 | Migrasi database | P0 | `src/db/migrations` ter-commit, `db:migrate` jalan, dan `db:check` hijau |
-| 5 | Koneksi database | P0 | `prepare: false` ada, dan aplikasi masih bisa membuat plan lewat browser |
-| 6 | Rate limit | P0 | Daftar enam kali dalam satu jam mendapat 429 dengan `RATE_LIMITED` |
-| 7 | Security headers | P1 | `curl -I` ke `/beranda` memuat lima header, dan PWA masih jalan |
-| 8 | Test otomatis | P1 | `npm test` hijau, dan test alur luring membuktikan urutan antrean |
-| 9 | Perbaikan kontrak | P1 | `share/{token}` menjawab `error.code`, dan `share-text` memakai skema Zod |
-| 10 | Keselarasan dokumen | P3 | Tidak ada rujukan yang bertentangan, dan `CHANGELOG.md` ditulis |
+| # | Story | Prioritas | Status | Bukti | Sisa pekerjaan |
+|---|---|---|---|---|---|
+| 1 | Perbaiki `generateId` | P0 | Selesai | `src/lib/auth.ts` memakai `advanced.database.generateId: "uuid"`; pendaftaran lewat browser terbukti di e2e Playwright alur utama | Tidak ada |
+| 2 | Batas halaman | P0 | Selesai | `src/app/error.tsx`, `src/app/global-error.tsx` (memakai komponen `Gagal` dan gaya inline cadangan), `src/app/not-found.tsx`, satu `src/app/(app)/loading.tsx`, dan `src/app/(app)/error.tsx` | Tidak ada |
+| 3 | Antrean luring | P0 | Selesai | 4xx tidak dihitung terkirim, 401 menahan item, batas 500 dan jumlah yang dibuang dilaporkan, tulis tanpa respons ikut diantrekan, dan baca luring per perangkat (cache IndexedDB per `planId`, batas 50 tugas dan 50 tamu, rundown dan anggaran penuh) dengan pita "Menampilkan data dari perangkat". Tombol tambah/ubah/hapus disembunyikan saat luring. Bukti: tiga perubahan saat luring sampai ke server dengan urutan sama; e2e membuktikan isi object store antrean 1 lalu 3 lalu 0 | Tidak ada |
+| 4 | Migrasi database | P0 | Selesai | `src/db/migrations/0000_open_outlaw_kid.sql` (15 tabel) ter-commit; `package.json` punya `db:migrate` dan `db:check`; `npm run db:check` menjawab "Everything's fine"; `db:migrate` dijalankan ke database sementara `wedding_uji_20261004` dan menjawab "migrations applied successfully", 15 tabel terbentuk termasuk `users`, `plans`, `payments`, lalu database sementara itu di-DROP dan `DATABASE_URL` (database `wedding_planer`) tidak pernah jadi target migrasi | Tidak ada |
+| 5 | Koneksi database | P0 | Selesai di kode | `prepare: false` dan `ssl: "require"` untuk host bukan localhost | Jalur ssl remote belum teruji runtime karena `DATABASE_URL` di mesin ini localhost |
+| 6 | Rate limit | P0 | Selesai | better-auth bawaan untuk sign-up 5 per jam per IP dan sign-in 10 per 15 menit per IP, badan 429 diterjemahkan ke bentuk standar; `src/lib/batas.ts` untuk POST plans 30 per jam per pengguna dan POST payments 60 per jam per pengguna. Terukur: percobaan sign-in ke-11 menjawab 429 dengan `X-Retry-After` 900 dan `{"error":{"code":"RATE_LIMITED"}}`; POST `/api/plans` 30 kali pertama menjawab 422, percobaan ke-31 menjawab 429 dengan `{"error":{"code":"RATE_LIMITED"}}` dan header `X-Retry-After`, tanpa satu pun plan dibuat | 429 untuk POST payments belum diukur |
+| 7 | Security headers | P1 | Selesai | Lima header terkirim tanpa CSP | Tidak ada |
+| 8 | Test otomatis | P1 | Selesai | Vitest 9 berkas 89 test hijau (format, plan, skema, status-luring, cache-baca, api-client-luring, batas laju, integrasi kepemilikan plan, integrasi laporan); Playwright 5 spec hijau di port 3100 (alur utama, alur luring, batas laju plans, hapus akun, kontrak share-text) | Tanpa `TEST_DATABASE_URL`, test integrasi memakai database pengembangan dan tiap test membuat lalu menghapus datanya sendiri |
+| 9 | Perbaikan kontrak | P1 | Selesai | `/api/public/share/{token}` menjawab `{"error":{"code":"NOT_FOUND"}}` (terukur 404); POST `report/share-text` memakai `skemaBagikanTeks` dengan field `variant`, `message`, `linkId` | Tidak ada |
+| 10 | Keselarasan dokumen | P3 | Selesai | Daftar berkasnya ada di laporan pekerja dokumen | Tidak ada |
 
 Story 2 sampai 6 tidak menambah satu pun pustaka. Story 7 dan 8 menambah Vitest dan Playwright, keduanya sudah disebut di `06-Stack-dan-Batas.md` bagian 3.
 
@@ -308,16 +308,101 @@ Story 2 sampai 6 tidak menambah satu pun pustaka. Story 7 dan 8 menambah Vitest 
 
 ## 17. Ukuran berhasil
 
-Ukuran berhasil ditulis lebih dulu supaya tidak melebar tanpa arah.
+Ukuran di bawah sudah diukur, kecuali baris yang ditandai belum di bagian 18.
 
 | Ukuran | Angka | Cara diukur |
 |---|---|---|
-| Pendaftaran berhasil | 100 persen dari percobaan yang sah | Dijalankan lewat browser, bukan lewat API langsung |
-| Pencatatan plan berhasil | Daftar sampai pembayaran tercatat, tanpa satu pun langkah yang diam-diam gagal | Dijalankan lewat browser |
-| Antrean luring tidak kehilangan data | Tidak ada item yang hilang tanpa pemberitahuan | Uji luring: tiga perubahan sampai ke server utuh |
-| Bentuk tabel bisa dijelaskan tanpa membuka database | Bisa | `src/db/migrations` ter-commit, dan `docs/03-Data-Model.md` cocok |
-| Build dan tipe | Hijau | `npm run lint` dan `npm run build` |
-| Kontras | Semua pasangan warna minimal 4.5:1 | Diukur, bukan dibaca dari kode |
-| Test | Hijau | `npm test` |
+| Pendaftaran lewat browser | Ya, berhasil | e2e Playwright alur utama |
+| Plan sampai pembayaran | Ya, Rp 5.000.000 | e2e Playwright alur utama |
+| Antrean luring tidak kehilangan data | Ya, 3 perubahan terkirim berurutan; isi object store antrean 1 lalu 3 lalu 0 | e2e alur luring |
+| Bentuk tabel bisa dijelaskan tanpa membuka database | Ya | Migrasi ter-commit, dan `docs/03-Data-Model.md` sudah dilengkapi |
+| Build dan tipe | Hijau | `npm run lint`, 89 test, `npm run build` 56 rute |
+| Kontras | 0 gagal di terang dan gelap; rasio terburuk 4,55 di terang dan 5,35 di gelap | Diukur di 17 rute pada 390 dan 1440 px |
+| Test | 89 test hijau, plus 5 e2e hijau | Vitest dan Playwright |
+| Migrasi dari nol | 15 tabel terbentuk, "migrations applied successfully" | `db:migrate` ke database sementara `wedding_uji_20261004`, lalu di-DROP |
+| Batas laju endpoint plan | 30 kali 422, percobaan ke-31 429 dengan `X-Retry-After` | Diukur lewat request, tanpa plan yang dibuat |
+| Tanpa geser horizontal | Tidak ada geser di 360, 390, dan 1440 px | Diukur lewat browser |
+| Tombol tanpa handler | 0 di 17 rute | Diukur lewat browser |
+| Gradasi | 1, turun dari 20 | Diukur, sesuai `DESIGN.md` bagian 5 |
+| Emoji di UI | 0 | Diukur, sesuai `DESIGN.md` bagian 8 |
+| PDF laporan | 2 halaman | Diukur (target paling banyak 3) |
+| Manifest dan ikon | Manifest dan 3 ikon menjawab 200 | Diukur lewat request |
+| Service worker | Mengontrol halaman | Diukur lewat browser |
 
-Kalau ada satu baris di tabel ini yang tidak bisa dipastikan, aplikasi belum siap produksi, dan itu ditulis apa adanya di bagian atas dokumen ini, bukan disembunyikan.
+---
+
+## 18. Celah yang belum selesai
+
+Celah di bawah disengaja belum dikerjakan, atau sudah selesai di kode tapi belum teruji. Tiap baris punya alasan.
+
+| Celah | Alasan | Yang dibutuhkan |
+|---|---|---|
+| Deploy produksi, database produksi, backup, dan pemantauan | Belum ada target deploy yang dipilih, dan `DATABASE_URL` di mesin ini masih localhost. Env produksi `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`, `DATABASE_URL`, dan `DATABASE_URL_UNPOOLED` belum dipasang | Pilihan platform, lalu env produksi diisi |
+| Lighthouse dan Core Web Vitals | Belum diukur karena belum ada target deploy untuk diukur | Deploy, lalu ukur |
+| Screen reader dan jalur keyboard penuh | Belum diuji. Keyboard dasar jalan, tapi seluruh alur belum dijalankan tanpa tetikus | Uji manual, lalu catat |
+| Jalur ssl remote | Host remote belum tersedia, dan `DATABASE_URL` di mesin ini localhost | Koneksi remote untuk uji ssl |
+| Dialog konflik 409 | Tidak dibangun karena `01-PRD.md` bagian 4.2 memutuskan last-write-wins. Sudah dicatat di `07-PWA.md` | Data nyata yang menunjukkan sunting bersamaan |
+| Unggah bukti transfer, pengingat tugas, ekspor PDF daftar tamu | Ditunda, dan sudah tercatat di `17-Rencana-Build.md` bagian 11 | Object storage, izin Notification, dan kolom pendukung |
+| Kado/angpau, meja/denah, peta, kode busana, tombol bagikan busana | Tidak dibangun karena butuh kolom atau endpoint baru. Sudah ditulis di `12c`, `12d`, dan `12e`. Istilah "dress code" sudah diganti "kode busana" di layar, tapi blok gambarnya tetap belum ada | Perubahan skema atau endpoint |
+| Lupa kata sandi dan verifikasi surel | Tetap P2, butuh penyedia surel | Penyedia surel dan keputusan lima pertanyaan |
+| Hapus akun | Sudah diuji lewat e2e: akun hilang dari database, sesi hilang, dan diarahkan ke `/masuk` | Tidak ada untuk akun dengan kata sandi |
+| Akun tanpa kata sandi (khusus Google) | Hapus akun butuh konfirmasi kata sandi, sedangkan akun Google tidak punya kata sandi | Cara konfirmasi lain untuk akun tanpa kata sandi |
+| 429 untuk POST payments | Kodenya ada, tapi belum diukur jumlah percobaannya | Uji terukur per endpoint |
+| Kursi hanya angka yang perlu disiapkan, integrasi sewa kursi tidak dibangun | Angka kursi dihitung dari tamu hadir ditambah yang belum menjawab (`src/lib/tamu.ts:98,108-109`). Pemilik produk memutuskan 4 Oktober 2026 bahwa integrasi sewa kursi tidak dibangun, dan kursi tetap dicatat sebagai vendor biasa | Tidak ada untuk Fase 1. Ditinjau ulang kalau pemilik produk mengubah keputusan |
+| QRIS hanya label metode pembayaran | `qris` ada di `METODE_BAYAR` (`src/lib/konstanta.ts:120,128`), tapi tidak ada gerbang pembayaran, jadi tidak ada uang yang benar-benar berpindah lewat aplikasi | Gerbang pembayaran, atau keputusan bahwa label ini memang cuma penanda |
+| Tautan undangan disimpan dan ditandai terkirim secara manual | `invitationUrl` disimpan per acara (`src/db/schema.ts:100`) dan `invitedAt` ditandai borongan (`src/app/api/plans/[planId]/guests/undangan/route.ts:27-38`), tapi aplikasi tidak mengirim undangan | Penyedia kirim pesan, atau keputusan bahwa penandaan manual sudah cukup |
+| Porsi tidak menambah cadangan otomatis di atas jumlah orang | Pemilik produk memutuskan 4 Oktober 2026 bahwa angka `porsi` tetap dihitung dari orang yang perlu dilayani (`src/lib/tamu.ts:98,108-109`), karena besaran cadangan berbeda antar vendor, menu, dan jumlah anak | Tidak ada. Pemilik rencana yang menyesuaikan saat memesan |
+| Kontak halaman kebijakan memakai halaman Issues repositori sebagai kanal sementara | Pemilik produk memutuskan 4 Oktober 2026 memakai kanal yang benar-benar ada, yaitu halaman Issues `github.com/begolo12/wedding-planer/issues` (`src/app/kebijakan/page.tsx`), sampai ada surel resmi | Surel resmi atau kanal kontak jangka panjang, lihat `docs/08-NFR.md` bagian Privasi |
+| Retensi akun 24 bulan belum punya pengingat surel | Kebijakan retensi tertulis di `docs/08-NFR.md` bagian Privasi, tapi pengingat surel belum ada karena surel masih Fase 2 | Penyedia surel, lihat bagian 11 |
+
+---
+
+## 19. Keputusan pemilik produk yang sudah diambil
+
+Empat keputusan diambil pemilik produk pada 4 Oktober 2026. Berikut satu baris ringkas tiap keputusan, dengan rujukan ke bagian yang lebih rinci.
+
+| Keputusan | Isi | Alasan | Rujukan |
+|---|---|---|---|
+| Cadangan porsi katering | Tidak ada cadangan otomatis di atas jumlah orang. Angka porsi tetap dihitung dari orang yang perlu dilayani, yaitu tamu hadir ditambah yang belum konfirmasi | Besaran cadangan berbeda antar vendor, menu, dan jumlah anak, jadi aplikasi tidak mengarang persentase, dan pemilik rencana yang menyesuaikan saat memesan | `docs/02b-Tamu.md` bagian keputusan porsi dan kursi, `docs/05-IA-dan-Layar.md` bagian 10, komentar di `src/lib/tamu.ts`, dan bagian 18 dokumen ini |
+| Integrasi sewa kursi | Tidak dibangun. Kursi tetap dicatat sebagai vendor biasa, dan angka kursi tetap tampil sebagai perkiraan kebutuhan | `docs/01-PRD.md` bagian 4.2 menolak marketplace vendor | `docs/02b-Tamu.md` bagian keputusan porsi dan kursi, dan bagian 18 dokumen ini |
+| Kontak halaman kebijakan | Memakai halaman Issues repositori `github.com/begolo12/wedding-planer/issues` sebagai kanal sementara sampai ada surel resmi | Kanal itu benar-benar ada, terverifikasi lewat `git remote -v`, dan surel resmi belum dipublikasikan | `docs/08-NFR.md` bagian Privasi, `src/app/kebijakan/page.tsx`, dan bagian 18 dokumen ini |
+| Harga dan model bisnis | Fase 1 gratis, tanpa iklan dan tanpa fitur berbayar. Model bisnis ditinjau lagi setelah ada pengguna nyata | `docs/01-PRD.md` bagian 3.1 menulis pengguna tidak akan membayar sebelum mencoba, dan belum ada pengguna nyata | `docs/01-PRD.md` bagian 7.1 |
+
+Catatan: daftar celah di bagian 18 disetujui apa adanya. Rilis ditentukan pemilik produk, bukan pekerja.
+
+---
+
+## 20. Kesesuaian Indonesia
+
+Ringkasan kebutuhan orang Indonesia yang sudah dijawab kode, dengan bukti berkas:baris, plus yang masih terbuka. Dasarnya audit di `.audit/laporan-indonesia.md`.
+
+### 20.1 Sudah dijawab kode
+
+| Kebutuhan orang Indonesia | Bukti |
+|---|---|
+| Waktu dan tanggal Asia/Jakarta | `src/lib/konstanta.ts:186` (`ZONA`), `src/lib/format.ts:273` (`hariIni`) dan `:283` (`awalHariJakarta`); dipakai di `src/app/(app)/hari-h/page.tsx:45`, `src/app/(app)/rencana/tanggal/page.tsx:31-33`, `src/app/(app)/rencana/vendor/[vendorId]/page.tsx:80,303,421` |
+| Rupiah Indonesia penuh, termasuk bentuk singkat untuk kolom isian | `src/lib/format.ts:99` (`rupiah`) dan `:108` (`rupiahPolos`), dipakai `src/components/field.tsx:145` |
+| Nomor WhatsApp Indonesia jadi tautan `wa.me` yang benar | `src/lib/format.ts:245` (`normalkanNomorWa`), transform di `src/lib/skema.ts:95-105`, tautan di `src/app/(app)/tamu/page.tsx:656`, `src/app/(app)/rencana/vendor/page.tsx:339`, `src/app/(app)/rencana/vendor/[vendorId]/page.tsx:371` |
+| Porsi katering dan kursi yang perlu disiapkan | `src/lib/tamu.ts:98,108-109` (hadir ditambah belum konfirmasi), tampil di `src/app/(app)/tamu/page.tsx:406-415`, `src/app/(app)/laporan/page.tsx:257-266`, `src/app/(app)/beranda/page.tsx:315` |
+| Sisi tamu enum dengan saringan dan rincian per pihak | `src/lib/konstanta.ts:65`, hitung di `src/lib/tamu.ts:89-91,117`, saringan di `src/app/api/plans/[planId]/guests/route.ts:49-61` dan `src/app/(app)/tamu/page.tsx:474-501`, rincian di `src/app/(app)/laporan/page.tsx:296-310` |
+| Tautan undangan per acara | `src/db/schema.ts:100`, simpan di `src/app/api/plans/[planId]/milestones/route.ts:48`, form dan tampilan di `src/app/(app)/rencana/tanggal/page.tsx:314-324,420-433` |
+| Filter dan penandaan undangan terkirim | Filter `undangan` di `src/app/api/plans/[planId]/guests/route.ts:62`, borongan di `src/app/api/plans/[planId]/guests/undangan/route.ts:27-38`, layar di `src/app/(app)/tamu/page.tsx:489-501,887-889` |
+| Ekspor data pribadi lengkap | `src/app/api/plans/[planId]/ekspor/route.ts:29-80`, tombol di `src/app/(app)/akun/page.tsx:207` |
+| Kategori anggaran Administrasi | `src/lib/konstanta.ts:23,36`, warna kesembilan di `src/app/(app)/anggaran/page.tsx:60-70` |
+| Metode bayar QRIS | `src/lib/konstanta.ts:120,128`, pilihan di `src/app/(app)/rencana/vendor/[vendorId]/page.tsx:517` |
+| Istilah Indonesia dan glosarium | `docs/02-Domain-Spec.md:22`, `docs/15-Glosarium.md`, label di `src/lib/konstanta.ts:131` |
+| Margin cetak 20mm dengan kaki halaman | `src/app/cetak.css:16,18` dan `:82` (`.cetak-kaki`), dipakai `src/app/(app)/laporan/page.tsx:99,473-475` |
+| Halaman kebijakan privasi | `src/app/kebijakan/page.tsx`, ditautkan dari `src/app/(auth)/daftar/page.tsx:243` |
+| Biaya busana masuk anggaran | Tombol di `src/app/(app)/rencana/seragam/page.tsx:224-252,337-379`, memakai `src/app/api/plans/[planId]/budget-items` |
+| Tugas jatuh tempo hari ini tidak lagi dianggap lewat | `src/components/task-item.tsx:74` memakai `sudahLewat` dari `src/lib/format.ts:288` |
+
+### 20.2 Yang belum
+
+| Belum | Bukti |
+|---|---|
+| Kursi cuma angka yang perlu disiapkan, integrasi sewa kursi tidak dibangun (keputusan 4 Oktober 2026) | `src/lib/tamu.ts:108-109`, tidak ada endpoint vendor kursi |
+| QRIS cuma label, bukan gerbang bayar | `src/lib/konstanta.ts:128` |
+| Undangan disimpan dan ditandai manual, bukan pengiriman otomatis | `src/app/api/plans/[planId]/guests/undangan/route.ts:27-38` |
+| Porsi tidak menambah cadangan otomatis di atas jumlah orang (keputusan 4 Oktober 2026) | `src/lib/tamu.ts:98`, lihat bagian 19 |
+| Kontak halaman kebijakan memakai halaman Issues repositori sebagai kanal sementara (keputusan 4 Oktober 2026) | `src/app/kebijakan/page.tsx` |
+| Retensi akun 24 bulan belum punya pengingat surel | `docs/08-NFR.md` bagian Privasi |

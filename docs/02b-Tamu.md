@@ -17,7 +17,7 @@ Tiga modul di sini, dan dua di antaranya masih masuk Fase 2. Semuanya berawal da
 | `rsvpStatus` | enum | `belum`, `hadir`, `tidak` |
 | `guestCount` | angka | Jumlah orang yang datang, tidak selalu satu |
 | `invitedAt` | tanggal | Kapan undangan dikirim |
-| `tableId` | relasi | Meja yang dipakai, opsional |
+| `tableName` | teks | Nama meja, opsional |
 | `notes` | teks | Diet, alergi, alasan tidak hadir |
 
 ### Kategori tamu
@@ -35,14 +35,25 @@ Tiga modul di sini, dan dua di antaranya masih masuk Fase 2. Semuanya berawal da
 
 Keputusan "siapa yang diundang" hampir selalu lebih sulit daripada "bisa tidak diundang". Yang paling sering ditanyakan pasangan adalah berapa total kursi yang perlu disewa venue, dan berapa porsi katering yang harus dipesan. Dua angka itu harus turun dari daftar tamu ini, bukan dihitung manual.
 
+### Keputusan porsi dan kursi
+
+Pemilik produk menetapkan dua hal ini pada 4 Oktober 2026. Alasannya ditulis supaya tidak perlu ditebak lagi.
+
+| Keputusan | Isi | Alasan |
+|---|---|---|
+| Cadangan porsi katering | Tidak ada cadangan otomatis di atas jumlah orang. Angka porsi tetap dihitung dari orang yang perlu dilayani, yaitu tamu yang sudah pasti hadir ditambah yang belum konfirmasi | Besaran cadangan berbeda antar vendor, menu, dan jumlah anak, jadi aplikasi tidak mengarang persentase. Pemilik rencana yang menyesuaikan saat memesan |
+| Integrasi sewa kursi | Tidak dibangun. Kursi tetap bisa dicatat sebagai vendor biasa, dan angka kursi tetap tampil sebagai perkiraan kebutuhan | `01-PRD.md` bagian 4.2 menolak marketplace vendor, jadi aplikasi tidak mengelola pesanan kursi |
+
+Pemutus: pemilik produk. Tanggal: 4 Oktober 2026. Rinciannya ada di `18-Rencana-Produksi-dan-Pemakaian-Harian.md` bagian 18 dan 19.
+
 ### Versi minimal
 
-- [ ] Tambah, edit, hapus tamu, satu per satu maupun sekaligus dari daftar yang ditempel
-- [ ] Saring berdasarkan kategori, status kehadiran, dan sisi
-- [ ] Total kursi dan estimasi porsi katering terhitung otomatis
-- [ ] Impor dari spreadsheet satu kolom, jadi pasangan tidak perlu input manual
-- [ ] Tandai kehadiran cepat, satu tap per tamu
-- [ ] Diurutkan berdasarkan nama, dengan pencarian yang bekerja di HP
+- [x] Tambah, edit, hapus tamu, satu per satu maupun sekaligus dari daftar yang ditempel
+- [x] Saring berdasarkan kategori, status kehadiran, dan sisi
+- [x] Total kursi dan estimasi porsi katering terhitung otomatis
+- [x] Impor dari spreadsheet satu kolom, jadi pasangan tidak perlu input manual
+- [x] Tandai kehadiran cepat, satu tap per tamu
+- [x] Diurutkan berdasarkan nama, dengan pencarian yang bekerja di HP
 
 ---
 
@@ -52,11 +63,11 @@ Sudah ada di Fase 1 secara manual: pasangan menulis sendiri alamat undangan digi
 
 **Alasannya** builder undangan butuh penyimpanan template, editor, hosting gambar, dan pembagian tautan. Itu biaya besar dan bukan inti masalah yang paling mendesak.
 
-Yang perlu ada di Fase 1 saja:
+Yang sudah ada di Fase 1:
 
-- [ ] Kolom URL undangan per acara, untuk pasangan paste tautan yang sudah mereka buat
-- [ ] Daftar tamu yang sudah dikirim undangan, dengan tanggal dikirim
-- [ ] Filter tamu berdasarkan "sudah dikirim" dan "belum dikirim", supaya tidak ada yang terlewat
+- [x] Kolom URL undangan per acara, untuk pasangan paste tautan yang sudah mereka buat
+- [x] Daftar tamu yang sudah dikirim undangan, dengan tanggal dikirim
+- [x] Filter tamu berdasarkan "sudah dikirim" dan "belum dikirim", supaya tidak ada yang terlewat
 
 ---
 

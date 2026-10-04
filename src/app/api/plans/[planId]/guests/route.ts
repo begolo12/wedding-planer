@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
-import { and, asc, eq, or, sql } from "drizzle-orm";
+import { and, asc, eq, isNotNull, isNull, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { guests } from "@/db/schema";
-import { bacaJson, bungkus } from "@/lib/galat";
+import { bacaJson, bungkus, tidakValid } from "@/lib/galat";
 import { cariParam, konteksPlan } from "@/lib/api";
+import { ringkasTamu, sisiDikenal } from "@/lib/tamu";
 import { skemaTamu } from "@/lib/skema";
 
 type Params = { params: Promise<{ planId: string }> };
@@ -31,6 +32,8 @@ export const GET = bungkus(async (req: Request, { params }: Params) => {
   const kategori = cariParam(url, "category");
   const rsvp = cariParam(url, "rsvpStatus");
   const cari = cariParam(url, "search");
+  const sisi = cariParam(url, "sisi");
+  const undangan = cariParam(url, "undangan");
 
   const saringan = [eq(guests.planId, planId)];
   if (kategori) saringan.push(eq(guests.category, kategori));
@@ -43,6 +46,28 @@ export const GET = bungkus(async (req: Request, { params }: Params) => {
       or(sql`lower(${guests.name}) like ${pola}`, sql`${guests.phone} like ${pola}`)!,
     );
   }
+  if (sisi) {
+    if (sisi === "pria" || sisi === "wanita") {
+      saringan.push(eq(guests.side, sisi));
+    } else if (sisi === "lainnya" || sisi === "bersama") {
+      // "Bersama" mencakup nilai `lainnya`, baris lama yang tidak dikenal, dan
+      // baris yang belum diisi sisinya, sama seperti rekap perSisi.bersama.
+      saringan.push(sql`(${guests.side} is null or ${guests.side} not in ('pria','wanita'))`);
+    } else {
+      throw tidakValid("Sisi tamu tidak dikenal.", {
+        sisi: "Pilih pria, wanita, atau lainnya.",
+      });
+    }
+  }
+  if (undangan) {
+    if (undangan === "sudah") saringan.push(isNotNull(guests.invitedAt));
+    else if (undangan === "belum") saringan.push(isNull(guests.invitedAt));
+    else {
+      throw tidakValid("Filter undangan tidak dikenal.", {
+        undangan: "Pilih sudah atau belum.",
+      });
+    }
+  }
 
   const daftar = await db
     .select()
@@ -51,62 +76,32 @@ export const GET = bungkus(async (req: Request, { params }: Params) => {
     .orderBy(asc(guests.name))
     .limit(500);
 
-  // Rekap selalu dihitung dari seluruh tamu, bukan dari hasil pencarian.
-  // Kalau dihitung dari hasil pencarian, angkanya berubah saat orang mengetik
-  // dan itu menyesatkan.
-  const [rekap] = await db
+  // Rekap selalu dihitung dari seluruh tamu, bukan dari hasil saringan. Kalau
+  // dihitung dari hasil saringan, angkanya berubah saat orang mengetik dan itu
+  // menyesatkan. Perhitungannya memakai fungsi yang sama dengan Beranda dan
+  // Laporan, jadi mustahil ada dua angka berbeda untuk data yang sama.
+  const semuaTamu = await db
     .select({
-      total: sql<number>`count(*)::int`,
-      orang: sql<number>`coalesce(sum(${guests.guestCount}), 0)::int`,
-      hadir: sql<number>`coalesce(sum(case when ${guests.rsvpStatus} = 'hadir' then ${guests.guestCount} else 0 end), 0)::int`,
-      tidakHadir: sql<number>`coalesce(sum(case when ${guests.rsvpStatus} = 'tidak' then ${guests.guestCount} else 0 end), 0)::int`,
-      belumKonfirmasi: sql<number>`coalesce(sum(case when ${guests.rsvpStatus} = 'belum' then ${guests.guestCount} else 0 end), 0)::int`,
-      belumDiundang: sql<number>`coalesce(sum(case when ${guests.invitedAt} is null then ${guests.guestCount} else 0 end), 0)::int`,
+      category: guests.category,
+      side: guests.side,
+      rsvpStatus: guests.rsvpStatus,
+      guestCount: guests.guestCount,
+      tableName: guests.tableName,
+      invitedAt: guests.invitedAt,
     })
     .from(guests)
     .where(eq(guests.planId, planId));
 
-  // Jumlah undangan per kategori, dipakai oleh chip saringan di layar tamu.
-  // Dihitung di server karena chip perlu angkanya sebelum diklik, dan angka
-  // yang dihitung dari hasil saringan akan berubah setiap kali difilter.
-  const perKategori = await db
-    .select({
-      kategori: guests.category,
-      baris: sql<number>`count(*)::int`,
-      orang: sql<number>`coalesce(sum(${guests.guestCount}), 0)::int`,
-    })
-    .from(guests)
-    .where(eq(guests.planId, planId))
-    .groupBy(guests.category);
-
-  // Sebaran undangan per meja. Yang belum dialokasikan ikut, supaya pasangan
-  // tahu berapa yang masih menggantung.
-  const perMeja = await db
-    .select({
-      meja: guests.tableName,
-      baris: sql<number>`count(*)::int`,
-      orang: sql<number>`coalesce(sum(${guests.guestCount}), 0)::int`,
-    })
-    .from(guests)
-    .where(eq(guests.planId, planId))
-    .groupBy(guests.tableName)
-    .orderBy(asc(guests.tableName));
+  const rekap = ringkasTamu(semuaTamu);
 
   return NextResponse.json({
-    guests: daftar,
-    summary: {
-      baris: rekap?.total ?? 0,
-      orang: rekap?.orang ?? 0,
-      kursi: rekap?.hadir ?? 0,
-      tidakHadir: rekap?.tidakHadir ?? 0,
-      belumKonfirmasi: rekap?.belumKonfirmasi ?? 0,
-      belumDiundang: rekap?.belumDiundang ?? 0,
-      // Tabungan: jumlah orang kalau semua yang belum konfirmasi akhirnya
-      // datang. Ini angka yang dipakai untuk memesan kursi cadangan.
-      perkiraanMaksimal: rekap?.orang ?? 0,
-      perKategori,
-      perMeja,
-    },
+    // Nilai sisi lama yang tidak dikenal dibaca sebagai "lainnya" supaya layar
+    // tidak menampilkan teks bebas dari data lama.
+    guests: daftar.map((g) => ({
+      ...g,
+      side: sisiDikenal(g.side) ?? (g.side ? "lainnya" : null),
+    })),
+    summary: rekap,
   });
 });
 
@@ -121,6 +116,8 @@ export const POST = bungkus(async (req: Request, { params }: Params) => {
     .values({
       planId,
       name: isi.name,
+      // Nomor sudah dinormalkan ke 628xx oleh skema (satu aturan untuk tamu
+      // dan vendor), jadi tidak ada normalisasi kedua di sini.
       phone: isi.phone ?? null,
       category: isi.category,
       side: isi.side ?? null,

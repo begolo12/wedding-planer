@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { payments, vendors } from "@/db/schema";
 import { bacaJson, bungkus, idUuid, tidakDitemukan } from "@/lib/galat";
 import { konteksPlan } from "@/lib/api";
+import { batasi } from "@/lib/batas";
 import { skemaPembayaran } from "@/lib/skema";
 
 type Params = { params: Promise<{ planId: string; vendorId: string }> };
@@ -43,8 +44,12 @@ export const GET = bungkus(async (_req: Request, { params }: Params) => {
  */
 export const POST = bungkus(async (req: Request, { params }: Params) => {
   const { planId, vendorId } = await params;
-  await konteksPlan(planId);
+  const { pengguna } = await konteksPlan(planId);
   await vendorMilikSaya(planId, vendorId);
+
+  // 60 permintaan per jam per pengguna (docs/18 bagian 7). Satu orang tidak
+  // butuh lebih dari itu untuk mencatat pembayaran.
+  batasi(`payments:${pengguna.id}`, 60, 60 * 60);
 
   const isi = skemaPembayaran.parse(await bacaJson(req));
 

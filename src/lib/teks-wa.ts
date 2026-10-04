@@ -1,4 +1,4 @@
-import { rupiah } from "./format";
+import { rupiah, tanggalPendekDari } from "./format";
 import { BATAS_TEKS_WA } from "./konstanta";
 import type { Laporan } from "./laporan";
 
@@ -28,6 +28,18 @@ export type HasilTeks = {
 
 function baris(...teks: (string | null | undefined | false)[]): string[] {
   return teks.filter((t): t is string => Boolean(t && String(t).trim()));
+}
+
+/**
+ * Tautan `wa.me` untuk membagikan teks ke kontak mana pun.
+ *
+ * `encodeURIComponent` dipakai supaya baris baru jadi `%0A`, ampersand tidak
+ * memotong query, dan karakter non-ASCII dienkode UTF-8. Kalau baris baru
+ * dikirim apa adanya, WhatsApp bisa menggabungkan dua baris dan nominal
+ * terbaca menyambung dengan label berikutnya.
+ */
+export function tautanWa(teks: string): string {
+  return `https://wa.me/?text=${encodeURIComponent(teks)}`;
 }
 
 /** "371 hari lagi" atau "hari ini", tanpa mengulang kata yang sama. */
@@ -78,7 +90,10 @@ export function susunTeksBagikan(
 
   const bagianTamu = baris(
     "Tamu",
-    `${m.orang} orang, ${m.kursi} kursi${m.belumKonfirmasi > 0 ? `, ${m.belumKonfirmasi} belum konfirmasi` : ""}`,
+    `${m.orang} orang, ${m.hadir} sudah konfirmasi${m.belumKonfirmasi > 0 ? `, ${m.belumKonfirmasi} belum konfirmasi` : ""}${m.tidakHadir > 0 ? `, ${m.tidakHadir} tidak hadir` : ""}`,
+    // Porsi dan kursi sengaja angka yang sama: tamu yang sudah pasti hadir
+    // ditambah yang belum menjawab, karena dua pertanyaan itu artinya sama.
+    `Perkiraan porsi katering ${m.porsi}, kursi yang perlu disiapkan ${m.kursi}`,
   );
 
   const kaki = tautan ? [`Lebih lengkap di tautan: ${tautan}`] : [];
@@ -133,7 +148,11 @@ export function susunTeksBagikan(
     : [];
 
   const bagianJadwal = laporan.jadwal.length
-    ? ["", "Jadwal", ...laporan.jadwal.slice(0, 5).map((j) => `${j.eventDate}: ${j.title}`)]
+    ? [
+        "",
+        "Jadwal",
+        ...laporan.jadwal.slice(0, 5).map((j) => `${tanggalPendekDari(j.eventDate)}: ${j.title}`),
+      ]
     : [];
 
   return rapikan(

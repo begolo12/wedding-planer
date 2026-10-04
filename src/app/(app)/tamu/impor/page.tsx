@@ -18,7 +18,7 @@ import type { BarisTamu } from "@/lib/impor-tamu";
 /**
  * Layar Impor / Tempel Daftar Tamu.
  * Membaca salinan teks dari WhatsApp atau Excel, menampilkannya dalam pratinjau,
- * lalu menyimpannya ke database tanpa membuat duplikasi baris kembar.
+ * lalu menyimpannya ke daftar tamu tanpa membuat baris kembar.
  */
 export default function HalamanImporTamu() {
   const router = useRouter();
@@ -164,11 +164,11 @@ export default function HalamanImporTamu() {
 
       <div className="kepala-halaman">
         <div>
-          <h1>Tempel Daftar Tamu</h1>
+          <h1>Tempel daftar tamu</h1>
           <p>
             {langkah === 1
               ? "Langkah 1 dari 2: Tempel teks nama tamu dari WhatsApp, catatan HP, atau Excel."
-              : "Langkah 2 dari 2: Periksa nama yang terdeteksi sebelum disimpan ke database."}
+              : "Langkah 2 dari 2: Periksa nama yang terdeteksi sebelum disimpan ke daftar tamu."}
           </p>
         </div>
       </div>
@@ -202,6 +202,10 @@ export default function HalamanImporTamu() {
               onChange={(e) => setTeks(e.target.value)}
             />
           </Isian>
+
+          <p className="keterangan">
+            {teks.split("\n").filter((b) => b.trim()).length} baris terbaca
+          </p>
 
           <div className="dialog-tombol">
             <Link className="tombol tombol-sekunder" href="/tamu">
@@ -301,7 +305,7 @@ export default function HalamanImporTamu() {
               onClick={simpanHasil}
             >
               {sedangSimpan
-                ? "Menyimpan ke database..."
+                ? "Menyimpan ke daftar tamu..."
                 : `Simpan ${dipilih.size} tamu ke daftar`}
             </button>
           </div>

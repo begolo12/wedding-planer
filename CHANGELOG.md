@@ -27,6 +27,89 @@ Aturan singkat:
 | Tulis alasan kalau tidak jelas | Pembaca versi berikutnya tidak perlu menebak |
 | Tambah entri baru di atas | Yang terbaru selalu di paling atas |
 
+## [0.15.1] - 4 Oktober 2026
+
+### Ubah
+
+- Empat keputusan produk dicatat di dokumen (cadangan porsi katering, integrasi sewa kursi, kontak halaman kebijakan, dan harga serta model bisnis), dan kontak halaman kebijakan memakai kanal yang sudah ada. Tidak ada perubahan perilaku aplikasi lain
+
+## [0.15.0] - 4 Oktober 2026
+
+Putaran ini menutup kebutuhan pengguna Indonesia yang ditemukan saat audit: perhitungan waktu dan uang, nomor WhatsApp, rekap porsi dan kursi, sisi tamu, undangan, ekspor data, serta dua nilai baru di daftar pilihan.
+
+### Tambah
+
+- Porsi katering dan kursi yang perlu disiapkan muncul di rekap Tamu, Beranda, Laporan, dan teks WhatsApp. Keduanya memakai angka yang sama, yaitu orang yang sudah pasti hadir ditambah yang belum konfirmasi, karena dua pertanyaan itu artinya sama: berapa orang yang perlu dilayani. Tamu yang sudah menyatakan tidak hadir tidak dihitung
+- Jumlah baris yang belum diundang (`belumDiundangBaris`) di rekap Tamu, karena tombol tandai undangan terkirim bekerja per baris sedangkan jumlah orang bisa berbeda
+- Sisi tamu pria, wanita, dan lainnya, lengkap dengan saringan `?sisi=` dan rincian orang per pihak pria, pihak wanita, dan bersama. Data lama yang bukan salah satu nilai itu dibaca sebagai bersama supaya layar tidak rusak
+- Tautan undangan per acara (`invitationUrl`) pada tanggal penting, hanya http atau https, lewat migrasi 0001 yang menambah kolom `invitation_url`
+- Filter `?undangan=sudah` dan `?undangan=belum` pada daftar tamu, serta penandaan undangan terkirim secara borongan lewat `POST /api/plans/{planId}/guests/undangan`. Tanggal undangan memakai awal hari menurut Asia/Jakarta
+- Endpoint `GET /api/plans/{planId}/ekspor` yang mengembalikan seluruh data plan dan turunannya, termasuk nama dan nomor tamu, untuk memenuhi hak unduh data pribadi di dokumen NFR
+- Kategori anggaran Administrasi dengan pos bawaan Administrasi KUA dan Berkas dan akta
+- Metode bayar QRIS, karena vendor kecil seperti katering dan dekorasi banyak yang hanya menerima pembayaran lewat kode QR
+- Margin cetak 20mm dan kaki halaman berisi nama rencana dan tanggal cetak
+- Halaman kebijakan privasi yang bisa dibuka tanpa masuk
+- Tombol memasukkan total biaya busana ke pos anggaran, supaya biaya seragam tidak perlu diinput dua kali
+
+### Ubah
+
+- Semua perhitungan hari, hitung mundur, batas minggu, dan lewat tenggat dipatok ke zona Asia/Jakarta, bukan zona proses server
+- Nomor WhatsApp tamu dan vendor disimpan dalam bentuk internasional 628xx sehingga tautan wa.me langsung mengenali nomornya. Nomor yang tidak dikenali ditolak 422 dengan pesan yang bisa dibaca, bukan disimpan salah
+- Istilah asing diganti mengikuti glosarium yang diperbarui: RSVP menjadi konfirmasi hadir, dress code menjadi kode busana, dan link menjadi tautan
+
+### Perbaiki
+
+- Hitung mundur dan penanda lewat tenggat tidak lagi bergeser satu hari di server UTC. Sebelumnya, antara pukul 00.00 dan 07.00 WIB, tugas yang jatuh tempo hari ini terbaca besok
+- Pembacaan nominal rupiah menerima bentuk yang ditulis orang Indonesia, termasuk 4,5jt, 2 juta, 500rb, 1.500.000,50, dan Rp 4.500.000,-. Sebelumnya 4,5jt terbaca 45, sehingga anggaran bisa meleset seratus kali
+- Tanggal tahun 0000 ditolak sebagai 422, bukan berakhir jadi galat server 500 dari database
+- Tugas yang jatuh tempo hari ini tidak lagi dianggap lewat
+- Teks WhatsApp menulis tanggal jadwal dalam bahasa Indonesia, bukan bentuk mentah, dan memuat baris porsi katering serta kursi
+
+## [0.14.0] - 4 Oktober 2026
+
+Perubahan identitas produk. Nama yang terlihat pengguna ikut berganti, jadi ini naik versi minor sendiri.
+
+### Ubah
+
+- Nama produk diganti dari "Hari Besar" menjadi "Rapi Nikah". Alasannya: berbahasa Indonesia dan langsung dimengerti, netral untuk semua agama dan adat, 10 karakter sehingga aman untuk `short_name` PWA (batas 12), dan menyebut inti produk ("rapi" = catatan tidak tercecer, "nikah" = pernikahan). Saat dipilih, tidak ada merek lain yang ditemukan memakai nama ini, dan domain `rapinikah.id` serta `rapinikah.com` belum punya catatan DNS (belum terdaftar) saat diperiksa
+- Nama produk lama hanya diganti di satu konstanta, `NAMA_PRODUK` dan `NAMA_PRODUK_PENDEK` di `src/lib/konstanta.ts`. Manifest PWA, judul tab, tombol masuk, chip merek, dan nama sesi membaca dari konstanta itu. Tiga tempat yang dulu menulis nama sendiri (layout auth, halaman masuk, dan kepala auth `AuthHero`) sekarang ikut membaca konstanta, supaya nama benar-benar punya satu sumber
+- Versi naik dari 0.13.0 ke 0.14.0
+
+### Catatan
+
+- Nama lama sengaja tetap dipakai di kunci perangkat, bukan karena kelewat: database IndexedDB `haribesar-luring` dan `haribesar-baca`, kunci localStorage `haribesar-tema`, `haribesar-email-ingat`, dan `haribesar-install-ditolak`, nama cache service worker `haribesar-halaman-*`, `haribesar-aset-*`, `haribesar-font-*`, serta nama event `haribesar-toast`. Alasannya, menggantinya membuat data pengguna yang sudah ada (antrean luring, tema, email yang diingat, cache luring) tidak terbaca lagi atau terbuang, padahal nama kunci itu tidak pernah terlihat pengguna. Kunci tema lama `aisyah-theme` juga masih dibaca sekali seperti sebelumnya
+- Dokumen yang menyebut nama produk ikut diperbarui: `DESIGN.md`, `docs/01-PRD.md`, `docs/07-PWA.md`, `docs/11-Delivery-Plan.md`, `docs/13-Rencana-Kerja.md`, `docs/14-Naskah-Teks.md`, `docs/18-Rencana-Produksi-dan-Pemakaian-Harian.md`, dan `README.md`
+
+## [0.13.0] - 4 Oktober 2026
+
+Aplikasi sekarang bisa dibaca saat luring dari cadangan perangkat, dan pekerjaan produksi (batas laju, header keamanan, migrasi, test) ikut masuk. Yang berubah ke pengguna ditulis lebih dulu.
+
+### Tambah
+
+- Baca luring per perangkat: data yang pernah dibuka tetap terbaca tanpa koneksi, pita "Menampilkan data dari perangkat" muncul, dan tombol tambah/ubah/hapus disembunyikan selama luring supaya tidak ada tombol yang diklik lalu gagal. Alasannya ada di `docs/07-PWA.md`
+- Hapus akun dari halaman Akun, dengan dialog konfirmasi dan kata sandi
+- Batas laju untuk masuk, daftar, membuat rencana, dan mencatat pembayaran, supaya satu orang tidak bisa membanjiri server
+- Lima header keamanan, tanpa CSP. Alasannya ada di `docs/18-Rencana-Produksi-dan-Pemakaian-Harian.md` bagian 8
+- Migrasi Drizzle ter-commit di `src/db/migrations`, supaya bentuk tabel bisa ditinjau lewat diff
+- Test Vitest dan Playwright untuk alur utama dan alur luring
+- Cache baca dan antrean luring dipisah ke balik antarmuka yang bisa diuji: `src/lib/cache-baca.ts`, `src/lib/penyimpanan-antrean.ts`, `src/lib/status-luring.ts`, `src/lib/batas.ts`
+
+### Ubah
+
+- Satuan "undangan belum dikirim" di Laporan diseragamkan ke orang, sama dengan halaman Tamu
+- Daftar tugas dan daftar tamu punya pencarian dan tombol "Muat lebih" 20 baris sekali
+- Gradasi dikurangi dari 20 menjadi 1, sesuai `DESIGN.md` bagian 5
+- Nama produk di manifest PWA mengikuti `NAMA_PRODUK`, jadi "Hari Besar" ikut berubah kalau namanya diganti
+- Versi naik dari 0.12.1 ke 0.13.0
+
+### Perbaiki
+
+- `report/share-text` dan tautan publik `/bagikan/{token}` memakai bentuk error dan skema yang sama dengan endpoint lain, jadi client bisa membaca `error.code`
+- Skema PATCH tidak lagi mengisi nilai bawaan saat sebagian kolom diubah. Sebelumnya mengubah nama tamu ikut mereset status kehadiran dan jumlah orangnya
+- Halaman error dan 404 memakai komponen yang sama, dan `global-error` tetap terbaca kalau `globals.css` tidak ikut termuat
+- Emoji di UI dihapus dan kontras diperbaiki, sesuai `DESIGN.md` bagian 7 dan 8
+- 429 dari batas laju aplikasi sendiri sekarang mengirim header `X-Retry-After`; sebelumnya hanya 429 bawaan pustaka autentikasi yang membawanya
+
 ## [0.12.1] - 4 Oktober 2026
 
 Id dari alamat dan tanggal atau jam dari isian yang bentuknya benar tapi isinya tidak masuk akal sampai ke database dan ditolak di sana. Yang keluar ke pengguna bukan pesan yang bisa dibaca, tapi `500 INTERNAL_ERROR`, padahal kontrak menjanjikan `404 NOT_FOUND` untuk data yang tidak ada dan `422 VALIDATION_ERROR` untuk isian yang salah. Semua jalur itu ditutup.

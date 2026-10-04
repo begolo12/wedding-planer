@@ -3,7 +3,7 @@ import { and, asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { tasks } from "@/db/schema";
 import { bungkus, bacaJson } from "@/lib/galat";
-import { cariParam, konteksPlan } from "@/lib/api";
+import { cariParam, konteksPlan, pastikanPosAnggaran } from "@/lib/api";
 import { skemaTugas } from "@/lib/skema";
 
 type Params = { params: Promise<{ planId: string }> };
@@ -42,6 +42,11 @@ export const POST = bungkus(async (req: Request, { params }: Params) => {
   await konteksPlan(planId);
 
   const isi = skemaTugas.parse(await bacaJson(req));
+
+  // Pos anggaran yang ditunjuk harus milik plan ini. Tanpa ini, uuid yang
+  // tidak ada berakhir jadi 500 dari foreign key, dan uuid milik plan lain
+  // bisa tertaut diam-diam.
+  if (isi.budgetItemId) await pastikanPosAnggaran(planId, isi.budgetItemId);
 
   const [tugas] = await db
     .insert(tasks)

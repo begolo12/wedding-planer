@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Merek } from "@/components/merek";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AuthHero } from "@/components/auth-hero";
+import { NAMA_PRODUK } from "@/lib/konstanta";
 
 /**
  * Kerangka layar masuk dan daftar. Susunannya mengikuti layar Stitch: kepala
@@ -29,11 +30,11 @@ export default function LayoutAuth({ children }: { children: ReactNode }) {
       <div className="auth-kontainer">
         <div className="auth-kepala">
           <header className="auth-navigasi-atas">
-            <Link href="/" className="auth-merek-chip" aria-label="Beranda Hari Besar">
+            <Link href="/" className="auth-merek-chip" aria-label={`Beranda ${NAMA_PRODUK}`}>
               <span className="auth-merek-ikon" aria-hidden="true">
                 <Merek ukuran={32} />
               </span>
-              <span className="auth-merek-nama">Hari Besar</span>
+              <span className="auth-merek-nama">{NAMA_PRODUK}</span>
             </Link>
             <ThemeToggle />
           </header>

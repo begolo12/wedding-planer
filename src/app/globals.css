@@ -840,6 +840,12 @@ textarea.isian {
   border-bottom-color: var(--color-marigold);
 }
 
+/* Sesi habis dan kiriman gagal. Nadanya bahaya supaya beda dari sekadar
+   luring, dan pesan plus tombolnya sudah menjelaskan sendiri. */
+.pita-luring[data-nada="bahaya"] {
+  border-bottom-color: var(--color-bata);
+}
+
 /* Lencana status. Selalu punya teks, warna tidak pernah jadi satu-satunya penanda. */
 .lencana {
   display: inline-flex;
@@ -1155,7 +1161,9 @@ textarea.isian {
   box-shadow: var(--bayang-1);
 }
 
-/* Kartu bergradasi lembut untuk angka besar atau ajakan utama. */
+/* Kartu penekanan untuk angka besar atau ajakan utama. Isiannya netral saja,
+   bukan gradasi, karena DESIGN.md bagian 5 membolehkan gradasi hanya di hero
+   Beranda. */
 .kartu-aksen {
   display: flex;
   flex-direction: column;
@@ -1163,12 +1171,7 @@ textarea.isian {
   padding: clamp(18px, 4vw, 28px);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-lembar);
-  background: linear-gradient(
-    135deg,
-    var(--color-netral),
-    var(--color-kotak-abu),
-    var(--color-badge-latar)
-  );
+  background: var(--color-netral);
 }
 
 /* Deretan angka ringkas bergaya kartu, dipakai lintas layar. */
@@ -1801,12 +1804,7 @@ textarea.isian {
 .auth-lambang-glow {
   position: absolute;
   inset: -12px;
-  background: linear-gradient(
-    to top right,
-    rgb(255 183 197 / 40%) 0%,
-    var(--color-netral) 50%,
-    rgb(254 213 185 / 40%) 100%
-  );
+  background: var(--color-badge-latar);
   border-radius: var(--radius-pil);
   filter: blur(24px);
   opacity: 0.7;
@@ -2241,18 +2239,17 @@ textarea.isian {
   outline-offset: -2px;
 }
 
-/* Tombol kirim. Gradasinya memakai peach, blush, dan lilac yang semuanya
-   terang, dengan tulisan Rosy Charcoal. Versi Stitch memakai blush sampai
-   secondary gelap dengan tulisan putih, tapi blush terang gagal kontras 4.5:1
-   untuk tulisan putih. Warna tetap tiga yang sama, hanya urutannya dibalik
-   supaya tetap terbaca. */
+/* Tombol kirim. Isiannya blush penuh dengan tulisan Rosy Charcoal, jadi
+   rasionya 6,42:1, sama seperti tombol utama di layar lain. Gradasi dihapus
+   karena DESIGN.md bagian 5 membolehkan gradasi hanya di hero Beranda. Hover
+   memakai peredupan, bukan warna lain, supaya kontrasnya tidak berubah. */
 .auth-tombol-kirim {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   min-height: 48px;
-  background: linear-gradient(135deg, #ffd6ba 0%, #ffb7c5 50%, #e8d7f1 100%);
+  background: var(--color-terracotta);
   color: var(--color-di-atas-blush);
   font-size: var(--text-base);
   font-weight: 600;
@@ -2260,23 +2257,23 @@ textarea.isian {
 }
 
 .auth-tombol-kirim:hover:not(:disabled) {
-  background: linear-gradient(135deg, #ffcba8 0%, #ffa8b8 50%, #dcc9e9 100%);
+  filter: brightness(0.96);
 }
 
-/* Tombol layar "Daftar" memakai susunan warna Stitch sendiri: blush, pink,
-   peach. Tulisannya Rosy Charcoal tua, sama alasannya dengan tombol masuk,
-   supaya tetap lolos kontras 4.5:1. Dua layar jadi punya tombol yang beda
-   tanpa salah satu jadi tidak terbaca. */
+/* Tombol layar "Daftar". Sebelumnya memakai gradasi blush ke peach dengan
+   tulisan aksen gelap. Di mode gelap tulisan itu berubah jadi blush terang di
+   atas gradasi blush, dan rasionya jatuh ke 1:1. Sekarang isiannya blush penuh
+   dengan tulisan Rosy Charcoal yang nilainya sama di dua mode, jadi 6,42:1. */
 .auth-tombol-daftar {
-  background: linear-gradient(135deg, #ffb7c5 0%, #fbb3c1 50%, #fed5b9 100%);
-  color: var(--color-aksen-gelap);
+  background: var(--color-terracotta);
+  color: var(--color-di-atas-blush);
   font-size: var(--text-base);
   font-weight: 700;
   border: none;
 }
 
 .auth-tombol-daftar:hover:not(:disabled) {
-  background: linear-gradient(135deg, #ffa8b8 0%, #f7a5b4 50%, #fbc9a9 100%);
+  filter: brightness(0.96);
 }
 
 .auth-loading-teks {
@@ -2974,7 +2971,7 @@ textarea.isian {
   flex-direction: column;
   gap: 16px;
   padding: 20px;
-  background: linear-gradient(135deg, var(--color-netral), var(--color-kotak-abu));
+  background: var(--color-netral);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-lembar);
 }
@@ -3427,7 +3424,7 @@ textarea.isian {
   align-items: flex-start;
   gap: 12px;
   padding: 16px;
-  background: linear-gradient(135deg, var(--color-kotak-abu), var(--color-netral));
+  background: var(--color-netral);
   border-radius: var(--radius-kartu);
 }
 
@@ -3468,8 +3465,8 @@ textarea.isian {
   padding: 0 20px;
   border: 0;
   border-radius: var(--radius-pil);
-  background: linear-gradient(90deg, var(--color-terracotta), var(--color-badge-latar));
-  color: var(--color-badge-teks);
+  background: var(--color-terracotta);
+  color: var(--color-di-atas-blush);
   font-weight: 700;
   font-size: var(--text-kecil);
   cursor: pointer;
@@ -3565,14 +3562,16 @@ textarea.isian {
   }
 }
 
-/* Hero hitung mundur. Cahaya latar sengaja ditaruh di belakang isi. */
+/* Hero hitung mundur. Ini satu-satunya gradasi di aplikasi, sesuai DESIGN.md
+   bagian 5: 135 derajat dari Blush Silk ke Warm Peach. Cahaya latar sengaja
+   ditaruh di belakang isi. */
 .beranda-hero {
   position: relative;
   overflow: hidden;
   padding: clamp(20px, 4vw, 36px);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-lembar);
-  background: linear-gradient(135deg, var(--color-netral), var(--color-kotak-abu));
+  background: linear-gradient(135deg, var(--color-netral), var(--color-badge-latar));
 }
 
 .beranda-cahaya {
@@ -3954,11 +3953,11 @@ textarea.isian {
 }
 
 .beranda-bar-utama {
-  background: linear-gradient(90deg, var(--color-marigold), var(--color-terracotta));
+  background: var(--color-marigold);
 }
 
 .beranda-bar-kedua {
-  background: linear-gradient(90deg, var(--color-badge-teks), var(--color-badge-latar));
+  background: var(--color-terracotta);
 }
 
 .beranda-kartu-catatan {
@@ -4057,7 +4056,7 @@ textarea.isian {
 }
 
 .beranda-pil-redup {
-  background: var(--color-kotak-abu);
+  background: var(--color-netral);
   color: var(--color-muted);
 }
 
@@ -4279,7 +4278,7 @@ textarea.isian {
   padding: 20px;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-kartu);
-  background: linear-gradient(135deg, var(--color-netral), var(--color-badge-latar));
+  background: var(--color-netral);
 }
 
 .beranda-catatan-kepala {
@@ -4345,12 +4344,7 @@ textarea.isian {
   padding: clamp(20px, 4vw, 32px);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-lembar);
-  background: linear-gradient(
-    135deg,
-    var(--color-netral),
-    var(--color-kotak-abu),
-    var(--color-badge-latar)
-  );
+  background: var(--color-netral);
 }
 
 .rencana-hias {
@@ -4468,12 +4462,7 @@ textarea.isian {
 .rencana-bar-isi {
   height: 100%;
   border-radius: var(--radius-pil);
-  background: linear-gradient(
-    90deg,
-    var(--color-terracotta),
-    var(--color-marigold),
-    var(--color-primary)
-  );
+  background: var(--color-marigold);
   transition: width 0.7s ease;
 }
 
@@ -4621,7 +4610,7 @@ textarea.isian {
 .rencana-kelompok-lencana {
   padding: 4px 12px;
   border-radius: var(--radius-pil);
-  background: var(--color-kotak-abu);
+  background: var(--color-netral);
   color: var(--color-muted);
   font-size: var(--text-mini);
   font-weight: 700;
@@ -4692,7 +4681,7 @@ textarea.isian {
   font-size: var(--text-mini);
   font-weight: 700;
   white-space: nowrap;
-  background: var(--color-kotak-abu);
+  background: var(--color-netral);
   color: var(--color-muted);
 }
 
@@ -4729,8 +4718,8 @@ textarea.isian {
   padding: 0 20px;
   border: none;
   border-radius: var(--radius-pil);
-  background: linear-gradient(90deg, var(--color-terracotta), var(--color-badge-latar));
-  color: var(--color-badge-teks);
+  background: var(--color-terracotta);
+  color: var(--color-di-atas-blush);
   font-family: var(--font-judul);
   font-size: var(--text-kecil);
   font-weight: 700;
@@ -4819,7 +4808,7 @@ textarea.isian {
   position: relative;
   overflow: hidden;
   border-radius: var(--radius-lembar);
-  background: linear-gradient(135deg, var(--color-netral), var(--color-kotak-abu), var(--color-badge-latar));
+  background: var(--color-netral);
   border: 1px solid var(--color-line);
   padding: 20px;
   display: flex;
@@ -5334,7 +5323,7 @@ textarea.isian {
   gap: 12px;
   padding: 16px;
   border-radius: var(--radius-kartu);
-  background: linear-gradient(135deg, var(--color-badge-latar), var(--color-kotak-abu));
+  background: var(--color-netral);
   border: 1px solid var(--color-line);
 }
 
@@ -5378,8 +5367,8 @@ textarea.isian {
   padding: 0 20px;
   border: none;
   border-radius: var(--radius-pil);
-  background: linear-gradient(90deg, var(--color-terracotta), var(--color-badge-latar));
-  color: var(--color-badge-teks);
+  background: var(--color-terracotta);
+  color: var(--color-di-atas-blush);
   font-family: var(--font-judul);
   font-size: var(--text-kecil);
   font-weight: 700;
@@ -6068,12 +6057,7 @@ textarea.isian {
   padding: clamp(18px, 4vw, 28px);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-lembar);
-  background: linear-gradient(
-    135deg,
-    var(--color-netral),
-    var(--color-kotak-abu),
-    var(--color-badge-latar)
-  );
+  background: var(--color-netral);
 }
 
 .hari-h-ringkas-atas {

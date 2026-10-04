@@ -78,8 +78,10 @@ Semua warna punya pasangan dark, bukan sekadar dibalik. Warna accent di dark mod
 | Password | Hash dengan scrypt (default Better Auth) |
 | Sesi | Cookie httpOnly, sameSite lax, secure di produksi |
 | Sesi kedaluwarsa | 30 hari |
-| Verifikasi email | Wajib sebelum bisa membuat plan |
-| Reset password | Via email, token sekali pakai |
+| Verifikasi email | Tidak dibangun di Fase 1, masuk P2 |
+| Reset password | Tidak dibangun di Fase 1, masuk P2 |
+
+Verifikasi email dan reset password butuh penyedia surel. Itu keputusan lima pertanyaan dari `06-Stack-dan-Batas.md`, dan belum ada masalah nyata yang menyalakannya. Keputusan dan alasannya ada di `18-Rencana-Produksi-dan-Pemakaian-Harian.md` bagian 11, dan dokumen ini mengikuti keputusan itu supaya tidak ada dua janji yang berbeda.
 
 ### Otorisasi
 
@@ -92,25 +94,32 @@ Pemeriksaan satu tanpa yang lain membuka celah. Data diambil berdasarkan `id` sa
 
 ### Unggah file
 
-| Aspek | Aturan |
-|---|---|
-| Ukuran maksimum | 5MB untuk bukti transfer |
-| Format | Hanya `image/jpeg` dan `image/png` |
-| Nama file | Di-generate ulang, nama asli tidak dipakai |
-| Penyimpanan | Nama acak di object storage, bukan di path asli |
-| Konten | Divalidasi dari isi file, bukan dari header |
+Tidak dibangun di Fase 1. `proofImageKey` ada di skema `payments`, tapi tidak ada handler unggah, tidak ada object storage, dan tidak ada halaman yang mengirim file. Ini sudah dicatat sebagai belum dibangun di `17-Rencana-Build.md` bagian 11, dan dipindahkan ke sana sebagai ganti janji di dokumen ini.
+
+| Aspek | Aturan | Alasan belum dibangun |
+|---|---|---|
+| Ukuran maksimum | 5MB kalau nanti dibangun | Butuh object storage, dan itu menambah vendor baru |
+| Format | Hanya `image/jpeg` dan `image/png` | Validasi isi file butuh pustaka atau inspeksi manual |
+| Nama file | Di-generate ulang, nama asli tidak dipakai | Tidak ada berkas yang disimpan, jadi belum berlaku |
+| Penyimpanan | Nama acak di object storage, bukan di path asli | Object storage belum dipilih |
+| Konten | Divalidasi dari isi file, bukan dari header | Butuh inspeksi isi berkas, masuk Fase 3 |
+
+Bukti pembayaran diinput sebagai nama berkas, bukan dari kamera. Keputusan ini tertulis di `18-Rencana-Produksi-dan-Pemakaian-Harian.md` bagian 8.
 
 ### Rate limit
 
+Batas yang berlaku ada di `18-Rencana-Produksi-dan-Pemakaian-Harian.md` bagian 7. Dokumen ini tidak mengulang angkanya sebagai sumber kedua, supaya tidak ada dua daftar batas yang berbeda. Empat endpoint yang dibatasi:
+
 | Endpoint | Batas |
 |---|---|
-| Login | 10 percobaan per 15 menit per IP |
-| Register | 5 per jam per IP |
-| Share link | 30 request per menit per token |
-| API umum | 120 request per menit per user |
-| Upload | 20 file per jam per user |
+| `POST /api/auth/sign-up/email` | 5 permintaan per jam per alamat IP |
+| `POST /api/auth/sign-in/email` | 10 permintaan per 15 menit per alamat IP |
+| `POST /api/plans` | 30 permintaan per jam per pengguna |
+| `POST /api/plans/{id}/vendors/{id}/payments` | 60 permintaan per jam per pengguna |
 
-Rate limit memakai token bucket, bukan counter sederhana. Alasannya, counter sederhana menahan pengguna yang pemakaiannya naik-turun, sementara token bucket menyimpan rata-rata.
+Cara yang dipakai adalah map in memory di `globalThis`, bukan token bucket. Alasannya, satu instance belum butuh distribusi, dan map sederhana lebih mudah dipahami orang berikutnya. Keterbatasannya jujur: batas ini hilang saat proses restart dan tidak dibagi antar instance.
+
+Batas untuk share link, API umum, dan upload dihapus dari dokumen ini. Alasannya, upload tidak dibangun di Fase 1, dan dua batas lain belum ada implementasinya. Menulis batas yang belum dipakai membuat dokumen menjanjikan yang tidak ada.
 
 ---
 
@@ -128,7 +137,8 @@ Undang-Undang Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi, disingkat UU
 | Nama pasangan, pasangan, tamu | Fungsi inti | Wajib |
 | Tanggal wedding | Fungsi inti | Wajib |
 | Nominal pembayaran | Fungsi inti | Wajib |
-| Foto bukti transfer | Fungsi inti | Wajib |
+
+Foto bukti transfer tidak ada di daftar ini karena unggah berkas belum dibangun di Fase 1. Kolom `proofImageKey` ada di skema, tapi belum ada yang mengisinya.
 
 Tidak ada data yang dikumpulkan untuk keperluan iklan. Tidak ada analytics pihak ketiga. Tidak ada pixel.
 
@@ -144,9 +154,13 @@ Tidak ada data yang dikumpulkan untuk keperluan iklan. Tidak ada analytics pihak
 
 Hapus akun menghapus `users` dan semua `plans` beserta turunannya. Karena cascade sudah diatur di foreign key, tidak perlu kode penghapusan manual. Satu query sudah cukup.
 
+Halaman `/kebijakan` bisa dibuka tanpa masuk dan memuat isi bagian ini dalam bahasa sehari-hari: data yang dikumpulkan, bahwa tidak ada iklan dan pelacak pihak ketiga, hak pengguna menurut UU PDP, retensi, dan cara menghubungi pemilik produk. Halaman itu yang dirujuk oleh centang persetujuan di layar Daftar.
+
+Kanal kontak yang dipakai halaman `/kebijakan` sekarang adalah halaman Issues repositori `github.com/begolo12/wedding-planer/issues`. Keputusan pemilik produk 4 Oktober 2026 memakai kanal yang benar-benar ada, dan ini kanal sementara sampai ada surel resmi khusus privasi. Kalau surel resmi tersedia, halaman itu dan bagian ini diperbarui.
+
 ### Retensi
 
-Akun yang tidak aktif selama 24 bulan dihapus otomatis, dengan pengingat email 30 hari sebelumnya.
+Akun yang tidak aktif selama 24 bulan dihapus otomatis, dengan pengingat email 30 hari sebelumnya. Pengingat email belum ada karena surel baru masuk P2 (lihat `18-Rencana-Produksi-dan-Pemakaian-Harian.md` bagian 11).
 
 **Batas ini dipilih karena satu rencana perbaikan berlangsung kurang dari satu tahun.** Akun yang masih ada setelah dua tahun kemungkinan besar sudah tidak terpakai, dan menyimpan data pribadi orang yang sudah tidak ada hubungannya selama itu tidak wajar.
 
@@ -155,7 +169,8 @@ Akun yang tidak aktif selama 24 bulan dihapus otomatis, dengan pengingat email 3
 | Cookie | Tujuan | Jenis |
 |---|---|---|
 | Session | Menyimpan login | Fungsional, wajib |
-| `aisyah-theme` | Menyimpan pilihan tema | Fungsional, wajib |
+
+Pilihan tema tidak disimpan di cookie, tapi di `localStorage` dengan kunci `haribesar-tema`. Alasannya, tema hanya dibutuhkan browser dan tidak perlu dikirim ke server, jadi cookie akan menambah bobot setiap request tanpa manfaat. Skrip di `src/app/layout.tsx` membaca kunci ini sebelum React jalan supaya tidak ada kilatan warna, dan `src/components/theme-toggle.tsx` menulisnya. Kunci lama `aisyah-theme` masih dibaca sekali lalu dihapus supaya pilihan tema orang tidak hilang.
 
 Tidak ada cookie iklan, tidak ada cookie pelacak, tidak ada pihak ketiga. Kalau ini berubah, itu perubahan kebijakan yang perlu ditulis di sini.
 
@@ -183,27 +198,15 @@ Fitur yang wajib punya fallback: service worker, IndexedDB, dan `clamp()`. Ketig
 | Yang dipantau | Alat | Alasan |
 |---|---|---|
 | Error server | Log ke stdout, dikirim ke aggregator log | Standar di platform hosting |
-| Error client | Diterima server, disimpan di tabel `client_errors` | Tidak perlu alat pihak ketiga |
+| Error client | Belum dibangun di Fase 1 | Tabel `client_errors` belum ada di skema, dan belum ada route yang menerima laporan dari browser |
 | Response time | Log satu baris per request | Cukup untuk melihat regresi |
-| Health check | `GET /api/health`, cek koneksi database | Dipakai platform untuk memutuskan |
+| Health check | `GET /api/kesehatan` | Tidak menyentuh database. Kalau endpoint ini ikut membaca database, satu gangguan database akan terbaca sebagai "sedang luring" di semua perangkat, walau internetnya baik |
 
 **Sentry dan alat serupa tidak dipakai di Fase 1.** Alasannya, satu produk dengan beberapa ribu pengguna belum butuh sistem pemantauan kelas besar, dan menambah vendor berarti menambah biaya dan satu hal yang harus dipercaya.
 
 Kalau jumlah error tidak bisa dibaca dari log biasa, itu tanda aplikasinya belum cukup jelas, bukan tanda perlu alat yang lebih besar.
 
-Tabel `client_errors`:
-
-| Kolom | Isi |
-|---|---|
-| `id` | UUID |
-| `userId` | FK, nullable untuk error sebelum login |
-| `message` | Pesan galat, dibatasi 500 karakter |
-| `stack` | Stack trace, nullable |
-| `url` | URL tempat galat terjadi |
-| `userAgent` | User agent, nullable |
-| `createdAt` | Waktu |
-
-Data ini tidak pernah ditampilkan ke user, dan bisa dihapus user bersama akunnya.
+Tabel `client_errors` yang dulu direncanakan (id, userId, message, stack, url, userAgent, createdAt) tidak dibuat di Fase 1. Alasannya, belum ada pelapor error di client dan belum ada kebutuhan nyata yang membenarkan satu tabel baru. Rencananya dicatat di sini supaya bentuknya tidak perlu dipikirkan ulang kalau nanti dibutuhkan.
 
 ---
 
@@ -212,11 +215,14 @@ Data ini tidak pernah ditampilkan ke user, dan bisa dihapus user bersama akunnya
 | Yang tidak ada | Alasan |
 |---|---|
 | Multi-region | Mayoritas pengguna di satu negara, satu region cukup |
-| CDN untuk gambar | Gambar hanya bukti transfer, jumlahnya sedikit |
-| Rate limiting terdistribusi | Satu instance, in-memory token bucket cukup |
+| CDN untuk gambar | Gambar hanya bukti transfer, dan unggah bukti belum dibangun |
+| Rate limiting terdistribusi | Satu instance, map in memory cukup |
 | Auto-scaling sederhana | Traffic di hari-H memang tidak merata, jadi scaling sederhana sudah cukup |
 | Multi-region backup | Backup lokal cukup, restore diuji bulanan |
 | Cakupan test yang wajar | Yang penting jalur kritis, menulis test untuk setiap getter tidak ada gunanya |
+| Unggah bukti transfer | Butuh object storage, dan itu vendor baru. Kolomnya sudah ada, unggahnya belum. Masuk Fase 3, lihat `17-Rencana-Build.md` bagian 11 |
+| Tabel `client_errors` | Belum ada pelapor error di client. Satu tabel baru belum dibenarkan sebelum ada masalah nyata |
+| Verifikasi email dan reset password | Butuh penyedia surel, dan belum ada masalah nyata yang menyalakannya. Masuk P2, lihat `18-Rencana-Produksi-dan-Pemakaian-Harian.md` bagian 11 |
 
 ---
 
@@ -226,14 +232,19 @@ Apa yang harus diukur sebelum rilis, dan apa yang boleh ditunda:
 
 | Item | Kapan | Status |
 |---|---|---|
+| Kontras teks, terang dan gelap | Sebelum rilis | Sudah diukur. 0 gagal, rasio terburuk 4,55 di terang dan 5,35 di gelap, diukur di 17 rute pada 390 dan 1440 px |
+| Lebar 360px tanpa geser horizontal | Sebelum rilis | Sudah diukur. Tidak ada geser di 360, 390, dan 1440 px |
+| Dark mode per halaman | Sebelum rilis | Sudah diukur. 0 gagal kontras di mode gelap |
+| Tombol tanpa handler | Sebelum rilis | Sudah diukur. 0 di 17 rute |
+| PDF laporan | Sebelum rilis | Sudah diukur. 2 halaman, target paling banyak 3 |
+| Emoji di UI | Sebelum rilis | Sudah diukur. 0, sesuai `DESIGN.md` bagian 8 |
 | Lighthouse semua halaman | Sebelum rilis | Belum diukur |
 | LCP di 3G | Sebelum rilis | Belum diukur |
 | Uji keyboard penuh | Sebelum rilis | Belum diuji |
 | Uji dengan screen reader | Sebelum rilis | Belum diuji |
-| Dark mode per halaman | Sebelum rilis | Belum diuji |
 | Install PWA di iOS dan Android | Sebelum rilis | Belum diuji |
 | Uji luring di desa bersinyal lemah | Sebelum rilis | Belum diuji |
 | Uji beban | Setelah rilis | Belum diukur |
 | Field data Core Web Vitals | Setelah rilis | Belum ada |
 
-Semua baris terakhir ditulis "belum", karena memang belum ada aplikasinya untuk diukur. Kalau tabel ini diisi dengan angka sebelum aplikasi ada, itu karangan.
+Baris yang masih "belum" memang belum diukur, dan tidak diisi perkiraan. Alasannya ada di `18-Rencana-Produksi-dan-Pemakaian-Harian.md` bagian 18.

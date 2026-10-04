@@ -1,4 +1,4 @@
-# DESIGN.md: Hari Besar Wedding Planner
+# DESIGN.md: Rapi Nikah Wedding Planner
 
 Status: v2.0, arah "Blushing Romance". Arah ini menggantikan usulan sage dan terracotta di v1.0. Rujukannya adalah proyek desain "Cute Wedding Planner" di Google Stitch, dan hasilnya sudah diterapkan ke `src/app/globals.css`.
 
@@ -22,7 +22,7 @@ DESIGN.md ini ada, jadi dokumen ini bukan "draft tanpa arah". Keputusan di bawah
 
 ### Nama produk
 
-`Hari Besar` adalah nama produk. Nama pasangan yang sebenar diambil dari akun pengguna, bukan ditulis di dokumen ini atau di kode.
+`Rapi Nikah` adalah nama produk. Nama pasangan yang sebenar diambil dari akun pengguna, bukan ditulis di dokumen ini atau di kode.
 
 ### Suara (voice)
 
@@ -76,7 +76,7 @@ Nama token lama dipertahankan walau artinya bergeser, karena sekitar 130 pemakai
 
 Mode gelap adalah fitur, bukan jadwal. Alasannya: banyak pasangan yang sudah punya anak kecil akan menyiapkan wedding sebagian besar di malam hari, saat anak sudah tidur.
 
-Toggle: tombol di header, state disimpan di `localStorage`, dengan key `haribesar-tema`. Saat app dibuka lagi, state dibaca sebelum render supaya tidak ada kilatan warna.
+Toggle: tombol di header, state disimpan di `localStorage`, dengan key `haribesar-tema`. Nama kunci itu sengaja dipertahankan walau nama produk kini `Rapi Nikah`, supaya pilihan tema pengguna lama tidak hilang; kunci perangkat tidak terlihat pengguna dan tidak ikut berganti kalau nama produk berganti. Saat app dibuka lagi, state dibaca sebelum render supaya tidak ada kilatan warna.
 
 ---
 
@@ -239,6 +239,7 @@ Antislop tidak melarang teknik secara daftar, tapi menanyakan "itu melayani apa?
 | Blush tidak pernah jadi teks | Di kanvas terang hanya `1,61:1`, gagal sebagai teks kecil | 2026-10-01 |
 | Nama token lama dipertahankan | Mengganti nama berarti menyentuh 20 berkas tanpa perubahan tampilan | 2026-10-01 |
 | Tidak ada testimonial di Fase 1 | Belum ada customer real, testimonial palsu merusak kepercayaan lebih banyak daripada tidak ada | 2026-09-30 |
+| Nama produk `Rapi Nikah` | Berbahasa Indonesia, netral untuk semua agama dan adat, 10 karakter sehingga aman untuk nama pendek PWA, dan terhubung ke inti produk ("rapi" = catatan tidak tercecer). Kandidat dan pemeriksaannya ada di `CHANGELOG.md` 0.14.0 | 2026-10-04 |
 
 ---
 

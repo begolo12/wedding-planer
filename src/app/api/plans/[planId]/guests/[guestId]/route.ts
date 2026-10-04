@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { guests } from "@/db/schema";
 import { bacaJson, bungkus, idUuid, tidakDitemukan } from "@/lib/galat";
 import { konteksPlan } from "@/lib/api";
+import { awalHariJakarta } from "@/lib/format";
 import { skemaTamuUbah } from "@/lib/skema";
 
 type Params = { params: Promise<{ planId: string; guestId: string }> };
@@ -36,7 +37,9 @@ export const PATCH = bungkus(async (req: Request, { params }: Params) => {
 
   const tambahan: Record<string, unknown> = {};
   if (isi.rsvpStatus && isi.rsvpStatus !== "belum" && !tamu.invitedAt) {
-    tambahan.invitedAt = new Date();
+    // Tanggal undangan memakai awal hari menurut Asia/Jakarta, sama dengan
+    // endpoint borongan, supaya tanggalnya pasti tanggal pengguna.
+    tambahan.invitedAt = awalHariJakarta();
   }
 
   const [baris] = await db
@@ -56,7 +59,7 @@ export const POST = bungkus(async (req: Request, { params }: Params) => {
 
   const [baris] = await db
     .update(guests)
-    .set({ invitedAt: tamu.invitedAt ? null : new Date() })
+    .set({ invitedAt: tamu.invitedAt ? null : awalHariJakarta() })
     .where(and(eq(guests.planId, planId), eq(guests.id, guestId)))
     .returning();
 

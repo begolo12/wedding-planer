@@ -1,8 +1,8 @@
-# PRD: Aisyah & Bagas Wedding Planner
+# PRD: Rapi Nikah Wedding Planner
 
 Versi 1.0. Tanggal 2026-09-30. Status: draft untuk review pemilik proyek.
 
-Nama "Aisyah & Bagas" pada dokumen ini adalah placeholder nama pasangan. Nama produk resmi belum ditentukan, lihat `DESIGN.md` bagian 2.
+Nama produk adalah "Rapi Nikah", dan itu satu-satunya tempat nama produk ditulis di kode (`NAMA_PRODUK` di `src/lib/konstanta.ts`). Nama "Aisyah & Bagas" yang muncul di contoh layar, wireframe, dan teks contoh adalah nama pasangan pemakai, bukan nama produk. Nama pasangan sebenarnya diisi pengguna saat membuat rencana.
 
 ---
 
@@ -70,9 +70,9 @@ Bukan pengganti semua alat. Tapi tempat tunggal yang bisa dibuka pagi hari untuk
 
 Tiga hal ini saja. Kalau harus memotong, potong yang lain, bukan ketiga hal ini.
 
-1. **Timeline tugas** dengan tanggal jatuh tempo dan pengingat
+1. **Timeline tugas** dengan tanggal jatuh tempo. Pengingat lokal belum dibangun di Fase 1, lihat `17-Rencana-Build.md` bagian 11
 2. **Anggaran dan pembayaran vendor** dengan total yang selalu terlihat
-3. **Daftar tamu** dengan data lokal Indonesia dan ekspor ke PDF
+3. **Daftar tamu** dengan data lokal Indonesia. Ekspor daftar tamu ke PDF belum dibangun di Fase 1; yang tersedia adalah cetak laporan keadaan, aturannya di `16-Laporan-dan-Bagikan.md`
 
 Pendukung yang wajib ada karena tidak bisa dipisah dari tiga hal di atas:
 
@@ -130,13 +130,15 @@ Bagian ini sama pentingnya dengan scope. Setiap item di sini ada alasannya.
 - **Sukses:** perubahan tersimpan dan tersinkron otomatis saat sinyal kembali
 - **Gagal yang harus ditangani:** pengguna menambah tugas baru saat offline lalu aplikasi menimpa data yang ada
 
-### UC-04: Menambah data tamu dari afar
+### UC-04: Keluarga membaca info acara dari jauh
 
 - **Pelaku:** keluarga atau organizer keluarga
-- **Pemicu:** mendapat link undangan dari pasangan
-- **Alur:** buka link, isi nama dan jumlah tamu, kirim
-- **Sukses:** pasangan melihat data baru tanpa perlu mengetik ulang
-- **Gagal yang harus ditangani:** orang salah mengetik nama, dan pasangan tidak bisa mengoreksinya
+- **Pemicu:** mendapat tautan baca-saja dari pasangan
+- **Alur:** buka tautan, lihat jadwal, lokasi, dan informasi acara
+- **Sukses:** keluarga tahu info terbaru tanpa perlu akun baru
+- **Gagal yang harus ditangani:** tautan tidak bisa dibuka, atau halaman kosong tanpa penjelasan
+
+Catatan: UC ini dulu menulis keluarga "isi nama dan jumlah tamu, kirim". Fitur itu tidak dibangun dan tidak masuk scope, sesuai bagian 4.2 yang menyatakan "Aplikasi tamu untuk RSVP online" tidak ada di Fase 1. Tautan bersifat baca-saja, seperti tertulis di `05-IA-dan-Layar.md` bagian 12 dan `10-Epik-dan-Story.md` story E6.4.
 
 ### UC-05: Menjaga budget tetap dalam jalur
 
@@ -189,14 +191,24 @@ Detail di `docs/08-NFR.md`. Ringkasnya:
 
 ---
 
-## 7. Keputusan yang belum diambil
+## 7. Keputusan produk
+
+### 7.1 Keputusan yang sudah diambil
+
+| Keputusan | Isi | Alasan | Tanggal | Pemutus |
+|---|---|---|---|---|
+| Harga dan model bisnis | Fase 1 gratis, tanpa iklan dan tanpa fitur berbayar | Bagian 3.1 menulis pengguna tidak akan membayar sebelum mencoba, dan belum ada pengguna nyata | 4 Oktober 2026 | Pemilik produk |
+
+Model bisnis ditinjau lagi setelah ada pengguna nyata. Sampai itu terjadi, tidak ada paket berbayar dan tidak ada fitur yang dikunci di balik bayaran. Keputusan yang lebih rinci ada di `18-Rencana-Produksi-dan-Pemakaian-Harian.md` bagian 19.
+
+### 7.2 Keputusan yang belum diambil
 
 Bagian ini sengaja ada. Setiap item di sini butuh keputusan pemilik proyek sebelum coding dimulai.
 
+Nama produk sudah diputuskan, yaitu "Rapi Nikah" (lihat `CHANGELOG.md` 0.14.0), jadi baris itu tidak lagi ada di daftar di bawah.
+
 | Keputusan | Opsi | Kenapa ini penting | Kapan harus diputuskan |
 |---|---|---|---|
-| Nama produk | Belum ada | Nama ada di URL, di title, di ikon PWA | Sebelum mulai coding |
-| Harga langganan | Gratis dulu, atau ada paket berbayar | Menentukan apakah ada Features-fitur yang perlu paywall | Sebelum mulai coding |
 | Detail Hari-H | Tanggal, jam, alamat lokasi | Semua reminder bergantung pada ini | Saat langkah pertama |
 | Sumber data untuk kalender | Milik sendiri, atau pustaka pihak ketiga | Pustaka pihak ketiga menambah dependensi | Saat implementasi kalender |
 | Metode pembayaran yang didukung | Transfer manual saja, atau plus e-wallet | Tidak ada payment gateway di Fase 1 | Saat implementasi budget |
@@ -213,7 +225,7 @@ Fase 1 selesai kalau semua ini benar:
 - [ ] Semua tugas punya tanggal jatuh tempo, dan tugas lewat ditandai berbeda secara visual
 - [ ] Total budget, sudah terbayar, dan sisa bisa dilihat di satu layar
 - [ ] Pembayaran vendor bisa dicatat dan totalnya langsung berubah
-- [ ] Daftar tamu bisa ditambah, diedit, dihapus, dan diekspor ke PDF
+- [ ] Daftar tamu bisa ditambah, diedit, dan dihapus. Ekspor daftar tamu ke PDF belum dibangun, jadi baris ini belum bisa dicentang penuh
 - [ ] Aplikasi bisa dipasang ke layar utama di Android dan iOS
 - [ ] Aplikasi tetap membuka tugas, budget, dan daftar tamu saat offline
 - [ ] Aplikasi bisa dipakai di lebar 360px tanpa ada elemen yang keluar dari layar

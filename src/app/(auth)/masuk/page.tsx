@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { signIn } from "@/lib/auth-client";
 import { PesanGalat } from "@/components/states";
 import { IsianSandi } from "@/components/field";
+import { NAMA_PRODUK } from "@/lib/konstanta";
 
 /**
  * Masuk pakai email dan kata sandi.
@@ -128,7 +129,7 @@ export default function HalamanMasuk() {
               autoCorrect="off"
               spellCheck={false}
               autoComplete="email"
-              placeholder="contoh: romeo.juliet@haribesar.id"
+              placeholder="contoh: romeo.juliet@rapinikah.id"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -179,7 +180,7 @@ export default function HalamanMasuk() {
               Sedang masuk...
             </span>
           ) : (
-            "Masuk ke Hari Besar"
+            `Masuk ke ${NAMA_PRODUK}`
           )}
         </button>
       </form>
@@ -187,7 +188,7 @@ export default function HalamanMasuk() {
       <p className="auth-kaki">
         Belum punya akun?{" "}
         <Link className="tautan-kalimat" href="/daftar">
-          Daftar Sekarang {"\ud83c\udf38"}
+          Daftar Sekarang
         </Link>
       </p>
     </>

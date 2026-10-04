@@ -71,6 +71,22 @@ export const auth = betterAuth({
     minPasswordLength: 8,
     autoSignIn: true,
   },
+  // Hak "Tarik persetujuan: Hapus akun" dari docs/08 bagian Privasi dan
+  // docs/13 tahap 3 nomor 11.
+  //
+  // Jalur yang dipilih: pengguna mengetik kata sandinya sendiri, lalu akun
+  // langsung dihapus. Bukan tautan verifikasi surel, karena pengiriman surel
+  // ditunda ke P2 (docs/18 bagian 11) dan belum ada penyedia surel. Karena
+  // `sendDeleteAccountVerification` tidak diisi, Better Auth memverifikasi
+  // kata sandi lalu menghapus akun, sesi, dan cookies sesi saat itu juga.
+  //
+  // Semua data turunan ikut terhapus lewat cascade foreign key yang sudah ada
+  // di src/db/schema.ts (plans, tasks, guests, payments, dan seterusnya).
+  user: {
+    deleteUser: {
+      enabled: true,
+    },
+  },
   socialProviders: googleAda
     ? {
         google: {
@@ -83,6 +99,27 @@ export const auth = betterAuth({
     expiresIn: TIGA_PULUH_HARI,
     updateAge: 60 * 60 * 24,
     cookieCache: { enabled: true, maxAge: 5 * 60 },
+  },
+  // Batas laju memakai bawaan Better Auth 1.7, bukan helper sendiri, karena
+  // pustakanya sudah mengirim 429 sebelum handler dijalankan dan kuncinya
+  // sudah dihitung per alamat IP. Menulis ulang di route cuma menambah satu
+  // sistem kedua untuk masalah yang sama. docs/18 bagian 7 memutuskan angka
+  // untuk dua endpoint ini.
+  rateLimit: {
+    // Bawaan pustakanya cuma aktif di produksi. Dinyalakan di sini supaya
+    // syarat selesai story 6 (daftar enam kali dalam satu jam mendapat 429)
+    // bisa diperiksa di mode dev, bukan cuma setelah naik produksi.
+    enabled: true,
+    window: 60,
+    max: 300,
+    customRules: {
+      // 5 permintaan per jam per alamat IP. Mendaftarkan banyak akun tidak
+      // pernah punya alasan yang sah.
+      "/sign-up/email": { window: 60 * 60, max: 5 },
+      // 10 permintaan per 15 menit per alamat IP. Untuk mendeteksi tebakan
+      // kata sandi tanpa menahan orang yang salah ketik dua kali.
+      "/sign-in/email": { window: 15 * 60, max: 10 },
+    },
   },
   advanced: {
     // Better Auth membuat id sendiri dengan 32 huruf. Kolom id di sini bertipe

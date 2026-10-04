@@ -4,12 +4,14 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { usePlan } from "@/lib/use-plan";
 import { useMuat } from "@/lib/use-muat";
+import { useStatusLuring } from "@/lib/status-luring";
 import { TabRencana } from "@/components/tab-rencana";
 import { Kerangka, Kosong, Gagal } from "@/components/states";
 import { Lembar, toast } from "@/components/toast";
 import { Isian, Pilih } from "@/components/field";
 import { Rupiah } from "@/components/rupiah";
 import { minta, pesanGalat } from "@/lib/api-client";
+import { normalkanNomorWa } from "@/lib/format";
 import {
   STATUS_VENDOR,
   type StatusVendor,
@@ -42,6 +44,9 @@ type VendorItem = {
  */
 export default function HalamanVendor() {
   const { plan, planId, memuat: memuatPlan, galat: galatPlan, muatUlang: muatPlan } = usePlan();
+
+  const { luring, dariPerangkat } = useStatusLuring();
+  const bisaUbah = !luring && !dariPerangkat;
 
   const {
     data,
@@ -107,7 +112,7 @@ export default function HalamanVendor() {
         },
       });
 
-      toast("Vendor berhasil ditambahkan");
+      toast("Tersimpan");
       setLembarBuka(false);
       await muatVendor();
     } catch (err) {
@@ -180,17 +185,26 @@ export default function HalamanVendor() {
     <div className="tumpuk-sedang">
       <div className="kepala-halaman">
         <div>
-          <h1>Vendor Pernikahan</h1>
+          <h1>Vendor</h1>
           <p>Daftar rekanan vendor, status kesepakatan, dan pencatatan pembayaran.</p>
         </div>
         <div>
-          <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
-            + Tambah vendor
-          </button>
+          {bisaUbah ? (
+            <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
+              + Tambah vendor
+            </button>
+          ) : null}
         </div>
       </div>
 
       <TabRencana />
+
+      {dariPerangkat ? (
+        <p className="keterangan">
+          Data ini dibuka dari cadangan perangkat. Menambah atau mengubah vendor tidak bisa
+          dilakukan sampai ada koneksi.
+        </p>
+      ) : null}
 
       {/* Ringkasan Keuangan Vendor */}
       {vendors.length > 0 ? (
@@ -274,17 +288,19 @@ export default function HalamanVendor() {
       {/* Daftar Vendor */}
       {daftarTersaring.length === 0 ? (
         <Kosong
-          keadaan={vendors.length === 0 ? "Belum ada vendor terdaftar." : "Tidak ada vendor yang cocok dengan filter."}
+          keadaan={vendors.length === 0 ? "Belum ada vendor." : "Tidak ada yang cocok dengan pencarian itu."}
           jalanKeluar={
             vendors.length === 0
-              ? "Catat vendor gedung, katering, foto, atau rias pengantin kamu."
+              ? "Tambahkan vendor yang sudah kamu tanda tangani."
               : "Coba ubah kata kunci atau saringan kategori."
           }
         >
           {vendors.length === 0 ? (
-            <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
-              Tambah vendor
-            </button>
+            bisaUbah ? (
+              <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
+                Tambah vendor
+              </button>
+            ) : null
           ) : null}
         </Kosong>
       ) : (
@@ -317,10 +333,10 @@ export default function HalamanVendor() {
                         Kontak: {v.contactName}
                       </span>
                     ) : null}
-                    {v.phone ? (
+                    {v.phone && normalkanNomorWa(v.phone) ? (
                       <a
                         className="tautan-kalimat"
-                        href={`https://wa.me/${v.phone.replace(/[^0-9]/g, "")}`}
+                        href={`https://wa.me/${normalkanNomorWa(v.phone)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -387,7 +403,7 @@ export default function HalamanVendor() {
               className="isian"
               type="text"
               required
-              placeholder="Contoh: Sanggar Rias Melati, Catering Berkah"
+              placeholder="Nama vendor"
               value={formNama}
               onChange={(e) => setFormNama(e.target.value)}
             />

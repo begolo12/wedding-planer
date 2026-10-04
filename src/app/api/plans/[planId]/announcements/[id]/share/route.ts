@@ -5,6 +5,7 @@ import { announcements } from "@/db/schema";
 import { bacaJson, bungkus, idUuid, tidakDitemukan } from "@/lib/galat";
 import { konteksPlan } from "@/lib/api";
 import { buatToken, urlTautan } from "@/lib/tautan";
+import { skemaBagikanPengumuman } from "@/lib/skema";
 
 type Params = { params: Promise<{ planId: string; id: string }> };
 
@@ -35,10 +36,13 @@ export const POST = bungkus(async (req: Request, { params }: Params) => {
     .limit(1);
   if (!baris) throw tidakDitemukan("Pengumuman");
 
-  const isi = (await bacaJson(req).catch(() => ({}))) as { rotate?: boolean };
+  // `rotate` harus boolean sungguhan. Dulu nilainya di-cast, jadi string apa
+  // pun yang dikirim client dianggap benar dan kunci tautan berganti tanpa
+  // diminta, yang mematikan tautan yang sudah disebar ke keluarga.
+  const isi = skemaBagikanPengumuman.parse(await bacaJson(req));
 
   let token = baris.shareToken;
-  if (isi?.rotate) {
+  if (isi.rotate) {
     token = buatToken();
     await db
       .update(announcements)
@@ -50,7 +54,7 @@ export const POST = bungkus(async (req: Request, { params }: Params) => {
 
   return NextResponse.json({
     url: urlTautan(token),
-    rotated: Boolean(isi?.rotate),
+    rotated: isi.rotate,
     published: baris.publishedAt !== null,
   });
 });

@@ -4,6 +4,7 @@ import { budgetItems, guests, milestones, payments, plans, tasks, vendors } from
 import { kelompokkan, tanggalHariBesar, type KelompokWaktu } from "./plan";
 import { belumSelesai } from "./server-plan";
 import { hitungMundur, selisihHari } from "./format";
+import { ringkasTamu } from "./tamu";
 
 /**
  * Semua angka Beranda dihitung di satu tempat. Layar Beranda dan endpoint
@@ -50,13 +51,16 @@ export type RingkasanPlan = {
   jumlahVendor: number;
   /** Tiga vendor pertama, untuk kartu "Vendor Utama". */
   vendorUtama: VendorRingkas[];
-  /** Ringkasan tamu untuk kartu "Konfirmasi Tamu". Kursi = jumlah orang pada
-   * tamu berstatus hadir, orang = perkiraan kursi kalau semua yang belum
-   * menjawab ikut hadir. */
+  /** Ringkasan tamu untuk kartu "Konfirmasi Tamu". Kursi dan porsi memakai
+   * angka yang sama: orang yang sudah pasti hadir ditambah yang belum
+   * menjawab, karena dua pertanyaan itu sama, berapa orang yang perlu
+   * dilayani. Tamu yang sudah menolak tidak dihitung. */
   tamu: {
     baris: number;
     orang: number;
+    hadir: number;
     kursi: number;
+    porsi: number;
     tidakHadir: number;
     belumKonfirmasi: number;
     belumDiundang: number;
@@ -75,7 +79,7 @@ export async function ringkasanPlan(planId: string): Promise<RingkasanPlan> {
   const [plan] = await db.select().from(plans).where(eq(plans.id, planId)).limit(1);
 
   // Semua query di bawah punya filter planId, sesuai aturan AGENTS.md bagian 5.
-  const [semuaTugas, posAnggaran, semuaPembayaran, daftarMilestone, daftarVendor, ringkasTamu] =
+  const [semuaTugas, posAnggaran, semuaPembayaran, daftarMilestone, daftarVendor, barisTamu] =
     await Promise.all([
       db
         .select({
@@ -124,20 +128,23 @@ export async function ringkasanPlan(planId: string): Promise<RingkasanPlan> {
         .from(vendors)
         .where(eq(vendors.planId, planId))
         .orderBy(asc(vendors.name)),
-      // Satu agregat untuk seluruh tamu, sama seperti endpoint /guests, supaya
-      // angka kartu Beranda tidak mungkin berbeda dengan halaman Tamu.
+      // Seluruh baris tamu diambil, lalu rekap dihitung oleh fungsi yang sama
+      // dengan endpoint /guests dan Laporan (src/lib/tamu.ts). Satu perhitungan
+      // berarti angka kartu Beranda tidak bisa berbeda dengan halaman Tamu.
       db
         .select({
-          baris: sql<number>`count(*)::int`,
-          orang: sql<number>`coalesce(sum(${guests.guestCount}), 0)::int`,
-          kursi: sql<number>`coalesce(sum(case when ${guests.rsvpStatus} = 'hadir' then ${guests.guestCount} else 0 end), 0)::int`,
-          tidakHadir: sql<number>`coalesce(sum(case when ${guests.rsvpStatus} = 'tidak' then ${guests.guestCount} else 0 end), 0)::int`,
-          belumKonfirmasi: sql<number>`coalesce(sum(case when ${guests.rsvpStatus} = 'belum' then ${guests.guestCount} else 0 end), 0)::int`,
-          belumDiundang: sql<number>`coalesce(sum(case when ${guests.invitedAt} is null then ${guests.guestCount} else 0 end), 0)::int`,
+          category: guests.category,
+          side: guests.side,
+          rsvpStatus: guests.rsvpStatus,
+          guestCount: guests.guestCount,
+          tableName: guests.tableName,
+          invitedAt: guests.invitedAt,
         })
         .from(guests)
         .where(eq(guests.planId, planId)),
     ]);
+
+  const rekapTamu = ringkasTamu(barisTamu);
 
   // Milestone yang ditandai hari-H lebih dipercaya daripada tanggal di plan.
   const hariOf = daftarMilestone.find((m) => m.isDayOf) ?? null;
@@ -217,12 +224,14 @@ export async function ringkasanPlan(planId: string): Promise<RingkasanPlan> {
       status: v.status,
     })),
     tamu: {
-      baris: ringkasTamu[0]?.baris ?? 0,
-      orang: ringkasTamu[0]?.orang ?? 0,
-      kursi: ringkasTamu[0]?.kursi ?? 0,
-      tidakHadir: ringkasTamu[0]?.tidakHadir ?? 0,
-      belumKonfirmasi: ringkasTamu[0]?.belumKonfirmasi ?? 0,
-      belumDiundang: ringkasTamu[0]?.belumDiundang ?? 0,
+      baris: rekapTamu.baris,
+      orang: rekapTamu.orang,
+      hadir: rekapTamu.hadir,
+      kursi: rekapTamu.kursi,
+      porsi: rekapTamu.porsi,
+      tidakHadir: rekapTamu.tidakHadir,
+      belumKonfirmasi: rekapTamu.belumKonfirmasi,
+      belumDiundang: rekapTamu.belumDiundang,
     },
     tanggalBerikut: berikut
       ? {

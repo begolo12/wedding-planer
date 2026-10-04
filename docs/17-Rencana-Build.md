@@ -36,7 +36,7 @@ Keputusan lain yang belum ada di dokumen, dan ditulis di sini supaya tidak jadi 
 
 | Keputusan | Alasan |
 |---|---|
-| Tautan baca-saja memakai awalan `/l/` | Satu awalan untuk semua penerima tautan. Dipisah dari `(app)` supaya tidak kena navigasi aplikasi dan tidak butuh sesi |
+| Tautan baca-saja memakai awalan `/bagikan/` | Satu awalan untuk semua penerima tautan. Dipisah dari `(app)` supaya tidak kena navigasi aplikasi dan tidak butuh sesi. Awalan lama `/l/` tetap ada sebagai pengalih supaya tautan yang sudah beredar tidak mati |
 | Google OAuth dibiarkan nonaktif kalau kunci tidak ada | Kunci Google tidak disimpan di repo. Tombolnya disembunyikan, bukan ditampilkan lalu gagal, sesuai aturan tobol mati di `05-IA-dan-Layar.md` bagian 14 |
 | Template tugas dan template rundown disimpan di kode, bukan di database | Isinya berubah jarang, tidak perlu diedit pengguna, dan tidak menambah tabel yang harus dijaga |
 | Angka `reminderDays` di `02a` tidak dibangun di build ini | Pengingat lokal butuh Notification API dan izin pengguna. Masuk Fase 3, dicatat di bagian 11 |
@@ -100,8 +100,8 @@ Sepuluh langkah. Tiap langkah berakhir dengan aplikasi yang masih jalan, karena 
 
 | | |
 |---|---|
-| Berkas | `src/app/api/plans/[planId]/rundown/route.ts`, `src/app/api/plans/[planId]/rundown/[id]/route.ts`, `src/app/api/plans/[planId]/announcements/route.ts`, `src/app/api/plans/[planId]/announcements/[id]/route.ts`, `src/app/api/plans/[planId]/announcements/[id]/share/route.ts`, `src/app/api/plans/[planId]/outfits/route.ts`, `src/app/api/plans/[planId]/outfits/[id]/route.ts`, `src/app/(app)/hari-h/page.tsx`, `src/app/(app)/rencana/info/page.tsx`, `src/app/(app)/rencana/seragam/page.tsx`, `src/app/l/[token]/page.tsx` |
-| Selesai kalau | Rundown urut jam, font bisa dibesar dan tersimpan di perangkat, halaman `/l/` terbaca tanpa sesi dan tanpa satu pun tombol yang mengubah data |
+| Berkas | `src/app/api/plans/[planId]/rundown/route.ts`, `src/app/api/plans/[planId]/rundown/[id]/route.ts`, `src/app/api/plans/[planId]/announcements/route.ts`, `src/app/api/plans/[planId]/announcements/[id]/route.ts`, `src/app/api/plans/[planId]/announcements/[id]/share/route.ts`, `src/app/api/plans/[planId]/outfits/route.ts`, `src/app/api/plans/[planId]/outfits/[id]/route.ts`, `src/app/(app)/hari-h/page.tsx`, `src/app/(app)/rencana/info/page.tsx`, `src/app/(app)/rencana/seragam/page.tsx`, `src/app/bagikan/[token]/page.tsx`, `src/app/l/[token]/page.tsx` |
+| Selesai kalau | Rundown urut jam, font bisa dibesar dan tersimpan di perangkat, halaman `/bagikan/` terbaca tanpa sesi dan tanpa satu pun tombol yang mengubah data |
 
 ### Langkah 9. Laporan, bagikan, cetak
 
@@ -149,7 +149,8 @@ src/
 │   │   ├── laporan/page.tsx
 │   │   ├── laporan/bagikan/page.tsx
 │   │   └── akun/page.tsx
-│   ├── l/[token]/page.tsx      halaman baca, tanpa sesi
+│   ├── bagikan/[token]/page.tsx  halaman baca-saja publik, tanpa sesi
+│   ├── l/[token]/page.tsx      pengalih lama ke /bagikan/[token]
 │   ├── luring/page.tsx         halaman saat tanpa sinyal
 │   └── api/
 │       ├── auth/[...all]/route.ts
@@ -178,6 +179,7 @@ src/
 │   ├── jadwal.ts               pengelompokan tugas per waktu
 │   ├── template.ts             template tugas, rundown, dan pos anggaran
 │   ├── teks-wa.ts              penyusun teks WhatsApp, satu fungsi
+│   ├── tautan.ts               buatToken dan urlTautan (/bagikan/)
 │   └── luring.ts               antrean IndexedDB
 └── public/
     ├── sw.js                   service worker tulis tangan
@@ -250,7 +252,9 @@ Bentuk folder bukan peraturan produk. Yang tidak boleh berubah: setiap kueri men
 | Laporan | `/laporan` | `(app)/laporan/page.tsx` |
 | Bagikan laporan | `/laporan/bagikan` | `(app)/laporan/bagikan/page.tsx` |
 | Akun | `/akun` | `(app)/akun/page.tsx` |
-| Baca tautan | `/l/[token]` | `l/[token]/page.tsx` |
+| Baca tautan | `/bagikan/[token]` | `bagikan/[token]/page.tsx` |
+| Baca tautan (awalan lama) | `/l/[token]` | `l/[token]/page.tsx`, pengalih ke `/bagikan/[token]` |
+| Cara pasang aplikasi | `/aplikasi` | `aplikasi/page.tsx` |
 | Luring | `/luring` | `luring/page.tsx` |
 
 ---
@@ -263,7 +267,7 @@ Tabel dibuat dalam urutan ini, karena ada foreign key.
 |---|---|---|
 | 1 | `users`, `session`, `account`, `verification` | Better Auth, ditulis manual di `schema.ts` |
 | 2 | `plans` | FK ke `users` |
-| 3 | `milestones`, `tasks`, `budget_items`, `vendors`, `guests`, `rundown_items`, `announcements`, `outfits` | FK ke `plans` |
+| 3 | `milestones`, `tasks`, `budget_items`, `vendors`, `guests`, `rundown_items`, `announcements`, `outfits`, `share_links` | FK ke `plans` |
 | 4 | `payments` | FK ke `plans` dan `vendors` |
 
 Cascade hanya dari `plans` ke tabel anak. Tidak ada cascade kedua ke `users`, sesuai aturan di [`03-Data-Model.md`](03-Data-Model.md).

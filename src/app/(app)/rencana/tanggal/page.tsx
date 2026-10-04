@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePlan } from "@/lib/use-plan";
 import { useMuat } from "@/lib/use-muat";
+import { useStatusLuring } from "@/lib/status-luring";
 import { TabRencana } from "@/components/tab-rencana";
 import { Kerangka, Kosong, Gagal } from "@/components/states";
 import { Lembar, DialogKonfirmasi, toast } from "@/components/toast";
@@ -14,10 +15,26 @@ import {
   type JenisTanggal,
   LABEL_JENIS_TANGGAL,
 } from "@/lib/konstanta";
-import { tanggalPanjangDari, selisihHari } from "@/lib/format";
+import { tanggalPanjangDari, selisihHari, hariIni } from "@/lib/format";
 import type { milestones } from "@/db/schema";
 
 type Milestone = typeof milestones.$inferSelect;
+
+/** Kelompok tampilan daftar tanggal penting, urut dari yang paling dekat. */
+type GrupTanggal = "bulanIni" | "akanDatang" | "sudahLewat";
+
+function grupTanggal(tanggal: string): GrupTanggal {
+  const selisih = selisihHari(tanggal);
+  if (selisih !== null && selisih < 0) return "sudahLewat";
+  // Bulan dibandingkan dari tanggal Jakarta, bukan dari jam lokal peramban,
+  // supaya pukul 00.00 sampai 07.00 WIB tidak terbaca sebagai bulan lalu.
+  const [tahun, bulan] = tanggal.split("-");
+  const [tahunKini, bulanKini] = hariIni().split("-");
+  if (tahun === tahunKini && bulan === bulanKini) {
+    return "bulanIni";
+  }
+  return "akanDatang";
+}
 
 /**
  * Layar Tanggal Penting.
@@ -25,6 +42,9 @@ type Milestone = typeof milestones.$inferSelect;
  */
 export default function HalamanTanggal() {
   const { plan, planId, memuat: memuatPlan, galat: galatPlan, muatUlang: muatPlan } = usePlan();
+
+  const { luring, dariPerangkat } = useStatusLuring();
+  const bisaUbah = !luring && !dariPerangkat;
 
   const {
     data,
@@ -42,6 +62,7 @@ export default function HalamanTanggal() {
 
   const [dihapus, setDihapus] = useState<Milestone | null>(null);
   const [sedangHapus, setSedangHapus] = useState(false);
+  const [cariTanggal, setCariTanggal] = useState("");
 
   // Form states
   const [formJudul, setFormJudul] = useState("");
@@ -49,6 +70,7 @@ export default function HalamanTanggal() {
   const [formJam, setFormJam] = useState("");
   const [formJenis, setFormJenis] = useState<JenisTanggal>("akad");
   const [formHariH, setFormHariH] = useState(false);
+  const [formTautan, setFormTautan] = useState("");
   const [formCatatan, setFormCatatan] = useState("");
   const [formGalat, setFormGalat] = useState<string | null>(null);
 
@@ -59,6 +81,7 @@ export default function HalamanTanggal() {
     setFormJam("");
     setFormJenis("akad");
     setFormHariH(false);
+    setFormTautan("");
     setFormCatatan("");
     setFormGalat(null);
     setLembarBuka(true);
@@ -75,6 +98,7 @@ export default function HalamanTanggal() {
         : "akad",
     );
     setFormHariH(m.isDayOf ?? false);
+    setFormTautan(m.invitationUrl ?? "");
     setFormCatatan(m.notes ?? "");
     setFormGalat(null);
     setLembarBuka(true);
@@ -92,6 +116,10 @@ export default function HalamanTanggal() {
       setFormGalat("Tanggal acara wajib diisi.");
       return;
     }
+    if (formTautan.trim() && !/^https?:\/\//i.test(formTautan.trim())) {
+      setFormGalat("Tautan undangan harus dimulai dengan http:// atau https://.");
+      return;
+    }
 
     setSedangSimpan(true);
     setFormGalat(null);
@@ -103,6 +131,7 @@ export default function HalamanTanggal() {
         eventTime: formJam.trim() || null,
         type: formJenis,
         isDayOf: formHariH,
+        invitationUrl: formTautan.trim() || null,
         notes: formCatatan.trim() || null,
         sortOrder: 0,
       };
@@ -112,13 +141,13 @@ export default function HalamanTanggal() {
           method: "PATCH",
           body: payload,
         });
-        toast("Tanggal penting diperbarui");
+        toast("Tersimpan");
       } else {
         await minta(`/api/plans/${planId}/milestones`, {
           method: "POST",
           body: payload,
         });
-        toast("Tanggal penting ditambahkan");
+        toast("Tersimpan");
       }
 
       setLembarBuka(false);
@@ -137,7 +166,7 @@ export default function HalamanTanggal() {
       await minta(`/api/plans/${planId}/milestones/${dihapus.id}`, {
         method: "DELETE",
       });
-      toast("Tanggal berhasil dihapus");
+      toast("Dihapus");
       setDihapus(null);
       await muatMilestone();
     } catch (err) {
@@ -174,6 +203,12 @@ export default function HalamanTanggal() {
     return <Gagal apa="Daftar tanggal penting" onCoba={muatMilestone} />;
   }
 
+  const tersaring = daftar.filter((m) =>
+    cariTanggal.trim()
+      ? m.title.toLowerCase().includes(cariTanggal.trim().toLowerCase())
+      : true,
+  );
+
   return (
     <div className="tumpuk-sedang">
       <div className="kepala-halaman">
@@ -182,11 +217,20 @@ export default function HalamanTanggal() {
           <p>Tentukan tanggal akad, resepsi, dan rangkaian acara pernikahan.</p>
         </div>
         <div>
-          <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
-            Tambah tanggal
-          </button>
+          {bisaUbah ? (
+            <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
+              Tambah tanggal
+            </button>
+          ) : null}
         </div>
       </div>
+
+      {dariPerangkat ? (
+        <p className="keterangan">
+          Data ini dibuka dari cadangan perangkat. Menambah atau mengubah tanggal tidak bisa
+          dilakukan sampai ada koneksi.
+        </p>
+      ) : null}
 
       <TabRencana />
 
@@ -195,68 +239,120 @@ export default function HalamanTanggal() {
           keadaan="Belum ada tanggal penting."
           jalanKeluar="Tambahkan tanggal akad nikah atau resepsi untuk mengaktifkan hitung mundur di Beranda."
         >
-          <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
-            Tambah tanggal
-          </button>
+          {bisaUbah ? (
+            <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
+              Tambah tanggal
+            </button>
+          ) : null}
         </Kosong>
       ) : (
-        <div className="tumpuk-rapat">
-          {daftar.map((m) => {
-            const selisih = selisihHari(m.eventDate);
-            const statusHari =
-              selisih === null
-                ? ""
-                : selisih === 0
-                  ? "Hari ini"
-                  : selisih < 0
-                    ? `${Math.abs(selisih)} hari lalu`
-                    : `${selisih} hari lagi`;
+        <div className="tumpuk-sedang">
+          <input
+            className="isian"
+            type="search"
+            placeholder="Cari tanggal penting..."
+            aria-label="Cari tanggal penting"
+            value={cariTanggal}
+            onChange={(e) => setCariTanggal(e.target.value)}
+          />
 
-            return (
-              <article
-                key={m.id}
-                className="kartu tumpuk-rapat"
-                data-sorot={m.isDayOf ? "ya" : undefined}
-              >
-                <div className="bagian-kepala">
-                  <div className="tumpuk-rapat isi-lentur">
-                    <div className="aksi-baris">
-                      <h2>{m.title}</h2>
-                      {m.isDayOf ? <span className="lencana lencana-aksen">Hari-H Utama</span> : null}
-                      <span className="lencana">
-                        {LABEL_JENIS_TANGGAL[m.type as JenisTanggal] ?? m.type}
-                      </span>
-                    </div>
+          {tersaring.length === 0 ? (
+            <Kosong
+              keadaan="Tidak ada yang cocok dengan pencarian itu."
+              jalanKeluar="Coba periksa kata kunci."
+            />
+          ) : (
+            (
+              [
+                { id: "bulanIni", judul: "Bulan ini" },
+                { id: "akanDatang", judul: "Akan datang" },
+                { id: "sudahLewat", judul: "Sudah lewat" },
+              ] as { id: GrupTanggal; judul: string }[]
+            ).map((grup) => {
+              const isi = tersaring.filter((m) => grupTanggal(m.eventDate) === grup.id);
+              if (isi.length === 0) return null;
+              return (
+                <section key={grup.id} className="tumpuk-rapat">
+                  <h2 className="label-bagian">{grup.judul}</h2>
+                  {isi.map((m) => {
+                    const selisih = selisihHari(m.eventDate);
+                    const statusHari =
+                      selisih === null
+                        ? ""
+                        : selisih === 0
+                          ? "Hari ini"
+                          : selisih < 0
+                            ? `${Math.abs(selisih)} hari lalu`
+                            : `${selisih} hari lagi`;
 
-                    <p className="paragraf-rapat">
-                      {tanggalPanjangDari(m.eventDate)}
-                      {m.eventTime ? ` • Jam ${m.eventTime}` : ""}
-                      {statusHari ? ` (${statusHari})` : ""}
-                    </p>
+                    return (
+                      <article
+                        key={m.id}
+                        className="kartu tumpuk-rapat"
+                        data-sorot={m.isDayOf ? "ya" : undefined}
+                      >
+                        <div className="bagian-kepala">
+                          <div className="tumpuk-rapat isi-lentur">
+                            <div className="aksi-baris">
+                              <h2>{m.title}</h2>
+                              {m.isDayOf ? (
+                                <span className="lencana lencana-aksen">Hari-H Utama</span>
+                              ) : null}
+                              <span className="lencana">
+                                {LABEL_JENIS_TANGGAL[m.type as JenisTanggal] ?? m.type}
+                              </span>
+                            </div>
 
-                    {m.notes ? <p className="keterangan">{m.notes}</p> : null}
-                  </div>
+                            <p className="paragraf-rapat">
+                              {tanggalPanjangDari(m.eventDate)}
+                              {m.eventTime ? ` • Jam ${m.eventTime}` : ""}
+                              {statusHari ? ` (${statusHari})` : ""}
+                            </p>
 
-                  <div className="aksi-baris">
-                    <button
-                      type="button"
-                      className="tombol tombol-sekunder tombol-kecil"
-                      onClick={() => bukaUbah(m)}
-                    >
-                      Ubah
-                    </button>
-                    <button
-                      type="button"
-                      className="tombol tombol-bahaya tombol-kecil"
-                      onClick={() => setDihapus(m)}
-                    >
-                      Hapus
-                    </button>
-                  </div>
-                </div>
-              </article>
-            );
-          })}
+                            {m.notes ? <p className="keterangan">{m.notes}</p> : null}
+
+                            {m.invitationUrl ? (
+                              <p className="keterangan">
+                                <a
+                                  className="tautan-kalimat"
+                                  href={m.invitationUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  Buka tautan undangan
+                                </a>
+                              </p>
+                            ) : null}
+                          </div>
+
+                          <div className="aksi-baris">
+                            {bisaUbah ? (
+                              <>
+                                <button
+                                  type="button"
+                                  className="tombol tombol-sekunder tombol-kecil"
+                                  onClick={() => bukaUbah(m)}
+                                >
+                                  Ubah
+                                </button>
+                                <button
+                                  type="button"
+                                  className="tombol tombol-bahaya tombol-kecil"
+                                  onClick={() => setDihapus(m)}
+                                >
+                                  Hapus
+                                </button>
+                              </>
+                            ) : null}
+                          </div>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </section>
+              );
+            })
+          )}
         </div>
       )}
 
@@ -321,6 +417,21 @@ export default function HalamanTanggal() {
             </div>
           </label>
 
+          <Isian
+            label="Tautan undangan (opsional)"
+            id="formTautan"
+            petunjuk="Mulai dengan http:// atau https://."
+          >
+            <input
+              id="formTautan"
+              className="isian"
+              type="url"
+              placeholder="https://undangan.example/aisyah-bagas"
+              value={formTautan}
+              onChange={(e) => setFormTautan(e.target.value)}
+            />
+          </Isian>
+
           <Isian label="Catatan atau lokasi" id="formCatatan">
             <textarea
               id="formCatatan"
@@ -354,9 +465,9 @@ export default function HalamanTanggal() {
       {/* Dialog Konfirmasi Hapus */}
       <DialogKonfirmasi
         buka={Boolean(dihapus)}
-        judul="Hapus tanggal penting ini?"
+        judul="Hapus tanggal penting"
         isi={`Tanggal "${dihapus?.title ?? ""}" akan dihapus dari rencana.`}
-        tombolYa="Ya, hapus"
+        tombolYa="Hapus"
         sedangJalan={sedangHapus}
         onTutup={() => setDihapus(null)}
         onYa={konfirmasiHapus}

@@ -128,7 +128,7 @@ export default function HalamanBagikanLaporan() {
           },
         },
       );
-      toast("Tautan baca-saja dibuat");
+      toast("Tersimpan");
       setLembarBuka(false);
       setLabelTautanBaru("");
       await muatLinks();
@@ -146,7 +146,7 @@ export default function HalamanBagikanLaporan() {
       await minta(`/api/plans/${planId}/report/links/${id}`, {
         method: "DELETE",
       });
-      toast("Tautan dicabut");
+      toast("Dihapus");
       if (tautanIdDipilih === id) {
         setTautanIdDipilih("");
       }
@@ -190,7 +190,7 @@ export default function HalamanBagikanLaporan() {
 
       <div className="kepala-halaman">
         <div>
-          <h1>Bagikan ke WhatsApp</h1>
+          <h1>Bagikan laporan</h1>
           <p>
             Kirim laporan keadaan sekarang langsung ke kontak atau grup WhatsApp keluarga.
           </p>
@@ -212,7 +212,7 @@ export default function HalamanBagikanLaporan() {
                   onChange={() => setVarian("ringkas")}
                 />
                 <div className="pilih-kartu-isi">
-                  <div className="pilih-kartu-judul">Ringkasan singkat</div>
+                  <div className="pilih-kartu-judul">Bagikan ringkas</div>
                   <div className="pilih-kartu-ket">
                     Sekitar 12 baris: uang, tugas, dan tamu. Cocok untuk dikirim ke orang tua.
                   </div>
@@ -227,7 +227,7 @@ export default function HalamanBagikanLaporan() {
                   onChange={() => setVarian("lengkap")}
                 />
                 <div className="pilih-kartu-isi">
-                  <div className="pilih-kartu-judul">Laporan lengkap</div>
+                  <div className="pilih-kartu-judul">Bagikan lengkap</div>
                   <div className="pilih-kartu-ket">
                     Termasuk rincian pos anggaran dan jadwal rundown. Cocok untuk pasangan dan panitia inti.
                   </div>
@@ -242,7 +242,7 @@ export default function HalamanBagikanLaporan() {
                   onChange={() => setVarian("tautan")}
                 />
                 <div className="pilih-kartu-isi">
-                  <div className="pilih-kartu-judul">Tautan saja</div>
+                  <div className="pilih-kartu-judul">Bagikan tautan</div>
                   <div className="pilih-kartu-ket">
                     Paling ringkas, hanya pesan pembuka dan tautan baca-saja.
                   </div>
@@ -252,18 +252,18 @@ export default function HalamanBagikanLaporan() {
           </section>
 
           <section className="kartu tumpuk-rapat">
-            <h2>Pesan Pembuka (Opsional)</h2>
+            <h2>Pesan tambahan</h2>
             <Isian
-              label="Kalimat sapaan sebelum ringkasan angka"
+              label="Pesan tambahan"
               id="pesanSapaan"
-              bantuan="Angka dan tanggal disusun otomatis dari database dan tidak dapat diubah agar tetap akurat."
+              bantuan="Angka dan tanggal sudah dikunci."
             >
               <textarea
                 id="pesanSapaan"
                 className="isian"
                 rows={3}
                 maxLength={400}
-                placeholder="Contoh: Assalamu'alaikum Bapak dan Ibu, berikut perkembangan persiapan pernikahan kami per hari ini."
+                placeholder="Misalnya: Tolong dicek bagian uang"
                 value={pesan}
                 onChange={(e) => setPesan(e.target.value)}
               />
@@ -336,7 +336,7 @@ export default function HalamanBagikanLaporan() {
               </div>
             ) : (
               <p className="keterangan">
-                Belum ada tautan publik. Buat satu untuk menyertakan link baca-saja.
+                Belum ada tautan publik. Buat satu untuk menyertakan tautan baca-saja.
               </p>
             )}
           </section>
@@ -346,7 +346,7 @@ export default function HalamanBagikanLaporan() {
         <div className="tumpuk-sedang">
           <section className="kartu tumpuk-rapat">
             <div className="bagian-kepala">
-              <h2>Pratinjau Teks WhatsApp</h2>
+              <h2>Yang akan dikirim</h2>
               <span
                 className="angka penghitung"
                 data-nada={panjangTeks > batasTeks ? "bahaya" : undefined}

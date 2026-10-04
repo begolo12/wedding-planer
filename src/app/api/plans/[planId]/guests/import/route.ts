@@ -5,14 +5,14 @@ import { db } from "@/db";
 import { guests } from "@/db/schema";
 import { bacaJson, bungkus, tidakValid } from "@/lib/galat";
 import { konteksPlan } from "@/lib/api";
-import { skemaImporTamu } from "@/lib/skema";
+import { skemaImporTamu, bendera } from "@/lib/skema";
 import { bacaDaftarTamu } from "@/lib/impor-tamu";
 
 type Params = { params: Promise<{ planId: string }> };
 
 const skemaLanjutan = skemaImporTamu.extend({
   /** Kalau true, hanya membaca dan tidak menyimpan apa pun. */
-  previewOnly: z.coerce.boolean().default(false),
+  previewOnly: bendera(),
   /** Baris yang dicentang di pratinjau. Kosong berarti semua yang aman. */
   pilih: z.array(z.string()).optional(),
 });
@@ -64,6 +64,7 @@ export const POST = bungkus(async (req: Request, { params }: Params) => {
       akanDibuat.map((b) => ({
         planId,
         name: b.name,
+        phone: b.phone,
         category: isi.category,
         rsvpStatus: "belum",
         guestCount: b.guestCount,

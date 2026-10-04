@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePlan } from "@/lib/use-plan";
 import { useMuat } from "@/lib/use-muat";
+import { useStatusLuring } from "@/lib/status-luring";
 import { Kerangka, Kosong, Gagal } from "@/components/states";
 import { Lembar, DialogKonfirmasi, toast } from "@/components/toast";
 import { Isian, Pilih } from "@/components/field";
@@ -64,6 +65,7 @@ const WARNA_SEBARAN = [
   "var(--color-sage)",
   "var(--color-line)",
   "var(--color-kotak-abu)",
+  "var(--color-badge-teks)",
   "var(--color-netral)",
 ];
 
@@ -140,6 +142,9 @@ const POS_BAWAAN_INDONESIA: Array<{
  */
 export default function HalamanAnggaran() {
   const { plan, planId, memuat: memuatPlan, galat: galatPlan, muatUlang: muatPlan } = usePlan();
+
+  const { luring, dariPerangkat } = useStatusLuring();
+  const bisaUbah = !luring && !dariPerangkat;
 
   const {
     data,
@@ -226,13 +231,13 @@ export default function HalamanAnggaran() {
           method: "PATCH",
           body: payload,
         });
-        toast("Pos anggaran diperbarui");
+        toast("Tersimpan");
       } else {
         await minta(`/api/plans/${planId}/budget-items`, {
           method: "POST",
           body: payload,
         });
-        toast("Pos anggaran ditambahkan");
+        toast("Tersimpan");
       }
 
       setLembarBuka(false);
@@ -251,7 +256,7 @@ export default function HalamanAnggaran() {
       await minta(`/api/plans/${planId}/budget-items/${dihapus.id}`, {
         method: "DELETE",
       });
-      toast("Pos anggaran dihapus");
+      toast("Dihapus");
       setDihapus(null);
       await muatAnggaran();
     } catch (err) {
@@ -271,7 +276,7 @@ export default function HalamanAnggaran() {
           body: pos,
         });
       }
-      toast("Pos anggaran bawaan berhasil dipasang");
+      toast("Tersimpan");
       await muatAnggaran();
     } catch (err) {
       toast(pesanGalat(err));
@@ -351,12 +356,13 @@ export default function HalamanAnggaran() {
 
   return (
     <div className="anggaran">
+      <h1 className="sr-only">Anggaran</h1>
       {/* Sapa dan hitung mundur */}
       <div className="anggaran-sapa">
         <span className="anggaran-sapa-ikon" aria-hidden="true">
           <IkonKilau size={16} />
         </span>
-        <span className="anggaran-sapa-teks">Semua pos anggaranmu tersusun rapi di sini!</span>
+        <span className="anggaran-sapa-teks">Semua pos anggaranmu tersusun rapi di sini.</span>
         {teksHari ? <span className="anggaran-hitung">{teksHari}</span> : null}
       </div>
 
@@ -380,7 +386,7 @@ export default function HalamanAnggaran() {
           <div className="anggaran-hero-baris">
             <span className="anggaran-hero-angka">{rupiah(totals.planned)}</span>
             <span className="anggaran-pil-status" data-lewat={lewatBatas ? "ya" : "tidak"}>
-              {lewatBatas ? "Lewat batas 💔" : "Aman! 💖"}
+              {lewatBatas ? "Lewat batas" : "Aman"}
             </span>
           </div>
 
@@ -450,21 +456,32 @@ export default function HalamanAnggaran() {
 
       {/* Aksi cepat */}
       <div className="anggaran-aksi">
-        <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
-          <IkonTambah size={18} />
-          Tambah pos
-        </button>
-        {rawItems.length === 0 ? (
-          <button
-            type="button"
-            className="tombol tombol-sekunder"
-            disabled={sedangMuatBawaan}
-            onClick={pasangPosBawaan}
-          >
-            {sedangMuatBawaan ? "Memasang..." : "Muat pos bawaan"}
-          </button>
+        {bisaUbah ? (
+          <>
+            <button type="button" className="tombol tombol-utama" onClick={bukaTambah}>
+              <IkonTambah size={18} />
+              Tambah pos
+            </button>
+            {rawItems.length === 0 ? (
+              <button
+                type="button"
+                className="tombol tombol-sekunder"
+                disabled={sedangMuatBawaan}
+                onClick={pasangPosBawaan}
+              >
+                {sedangMuatBawaan ? "Memasang..." : "Muat pos bawaan"}
+              </button>
+            ) : null}
+          </>
         ) : null}
       </div>
+
+      {dariPerangkat ? (
+        <p className="keterangan">
+          Data ini dibuka dari cadangan perangkat. Menambah atau mengubah pos anggaran tidak
+          bisa dilakukan sampai ada koneksi.
+        </p>
+      ) : null}
 
       {/* Tab daftar pos dan rincian pengeluaran */}
       <div className="anggaran-tab" role="tablist" aria-label="Bagian anggaran">
@@ -527,23 +544,27 @@ export default function HalamanAnggaran() {
           {rawItems.length === 0 ? (
             <Kosong
               keadaan="Belum ada pos anggaran."
-              jalanKeluar="Pasang pos bawaan pernikahan Indonesia atau buat pos sendiri."
+              jalanKeluar="Tambahkan dulu total yang sudah direncanakan, lalu isi pembayarannya."
             >
-              <button
-                type="button"
-                className="tombol tombol-utama"
-                disabled={sedangMuatBawaan}
-                onClick={pasangPosBawaan}
-              >
-                {sedangMuatBawaan ? "Memasang..." : "Muat pos bawaan"}
-              </button>
-              <button type="button" className="tombol tombol-sekunder" onClick={bukaTambah}>
-                Tulis pos sendiri
-              </button>
+              {bisaUbah ? (
+                <>
+                  <button
+                    type="button"
+                    className="tombol tombol-utama"
+                    disabled={sedangMuatBawaan}
+                    onClick={pasangPosBawaan}
+                  >
+                    {sedangMuatBawaan ? "Memasang..." : "Muat pos bawaan"}
+                  </button>
+                  <button type="button" className="tombol tombol-sekunder" onClick={bukaTambah}>
+                    Tulis pos sendiri
+                  </button>
+                </>
+              ) : null}
             </Kosong>
           ) : items.length === 0 ? (
             <Kosong
-              keadaan="Tidak ada pos yang cocok dengan pencarian."
+              keadaan="Tidak ada yang cocok dengan pencarian itu."
               jalanKeluar="Coba periksa kata kunci atau ubah filter kategori."
             />
           ) : (
@@ -567,26 +588,32 @@ export default function HalamanAnggaran() {
                           </span>
                           {item.overBudget ? (
                             <span className="anggaran-chip anggaran-chip-bata">Lewat batas</span>
+                          ) : item.paidAmount >= item.plannedAmount && item.plannedAmount > 0 ? (
+                            <span className="anggaran-chip">Lunas</span>
                           ) : null}
                         </div>
                         {item.notes ? <p className="anggaran-kartu-catatan">{item.notes}</p> : null}
                       </div>
 
                       <div className="anggaran-kartu-aksi">
-                        <button
-                          type="button"
-                          className="tombol tombol-sekunder anggaran-tombol-kecil"
-                          onClick={() => bukaUbah(item)}
-                        >
-                          Ubah
-                        </button>
-                        <button
-                          type="button"
-                          className="tombol tombol-sekunder anggaran-tombol-kecil anggaran-tombol-hapus"
-                          onClick={() => setDihapus(item)}
-                        >
-                          Hapus
-                        </button>
+                        {bisaUbah ? (
+                          <>
+                            <button
+                              type="button"
+                              className="tombol tombol-sekunder anggaran-tombol-kecil"
+                              onClick={() => bukaUbah(item)}
+                            >
+                              Ubah
+                            </button>
+                            <button
+                              type="button"
+                              className="tombol tombol-sekunder anggaran-tombol-kecil anggaran-tombol-hapus"
+                              onClick={() => setDihapus(item)}
+                            >
+                              Hapus
+                            </button>
+                          </>
+                        ) : null}
                       </div>
                     </div>
 
@@ -736,18 +763,19 @@ export default function HalamanAnggaran() {
             />
           </Isian>
 
-          {/* Sisa preview jika mengubah pos yang sudah ada pembayarannya */}
-          {diedit && diedit.paidAmount > 0 && formBatas && (
+          {/* Pratinjau sisa. Untuk pos baru, terpakai selalu nol. */}
+          {formBatas ? (
             <div className="kotak-catatan">
               <div>
-                <strong>Sudah terpakai dari vendor:</strong> {rupiah(diedit.paidAmount)}
+                <strong>Sudah terpakai dari vendor:</strong>{" "}
+                {rupiah(diedit ? diedit.paidAmount : 0)}
               </div>
               <div>
-                <strong>Perkiraan sisa baru:</strong>{" "}
-                {rupiah(parseInt(formBatas || "0", 10) - diedit.paidAmount)}
+                <strong>Perkiraan sisa:</strong>{" "}
+                {rupiah(parseInt(formBatas || "0", 10) - (diedit ? diedit.paidAmount : 0))}
               </div>
             </div>
-          )}
+          ) : null}
 
           <div className="dialog-tombol">
             <button
@@ -767,23 +795,25 @@ export default function HalamanAnggaran() {
       {/* Dialog Konfirmasi Hapus */}
       <DialogKonfirmasi
         buka={Boolean(dihapus)}
-        judul="Hapus pos anggaran ini?"
+        judul="Hapus pos anggaran"
         isi={`Pos "${dihapus?.name ?? ""}" akan dihapus. Vendor yang tertaut tidak akan terhapus, tetapi tidak lagi masuk ke hitungan pos ini.`}
-        tombolYa="Ya, hapus"
+        tombolYa="Hapus"
         sedangJalan={sedangHapus}
         onTutup={() => setDihapus(null)}
         onYa={konfirmasiHapus}
       />
 
-      <button
-        type="button"
-        className="anggaran-fab tanpa-cetak"
-        aria-label="Tambah pos anggaran baru"
-        onClick={bukaTambah}
-      >
-        <IkonTambah size={18} />
-        Tambah Pos Baru
-      </button>
+      {bisaUbah ? (
+        <button
+          type="button"
+          className="anggaran-fab tanpa-cetak"
+          aria-label="Tambah pos anggaran baru"
+          onClick={bukaTambah}
+        >
+          <IkonTambah size={18} />
+          Tambah Pos Baru
+        </button>
+      ) : null}
     </div>
   );
 }

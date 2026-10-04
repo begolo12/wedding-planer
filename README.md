@@ -67,7 +67,7 @@ Aplikasi untuk pasangan yang sedang menyiapkan pernikahan, dipakai di HP dan lap
 | PDF | Dialog cetak bawaan dengan CSS `@media print` |
 | Deployment | Vercel, region `sin1`. Satu aplikasi, satu database |
 
-Alasannya ada di [`docs/06-Stack-dan-Batas.md`](docs/06-Stack-dan-Batas.md), termasuk enam belas teknologi yang ditolak dan alasannya, dan satu keputusan bahwa PDF tidak butuh pustaka.
+Alasannya ada di [`docs/06-Stack-dan-Batas.md`](docs/06-Stack-dan-Batas.md), termasuk tujuh belas teknologi yang ditolak dan alasannya, dan satu keputusan bahwa PDF tidak butuh pustaka.
 
 ---
 
@@ -117,7 +117,6 @@ Kalau mau langsung ke implementasi, urutannya lain: `AGENTS.md`, `DESIGN.md`, `0
 | Belum ada | Kenapa |
 |---|---|
 | Angka hasil pengukuran | Aplikasi sudah ada, tapi belum dipakai pengguna sungguhan. Lihat tabel di `08-NFR.md` |
-| Nama produk final | "Aisyah & Bagas" masih placeholder |
 | Harga dan model bisnis | Fase 1 gratis. Monetisasi dibahas setelah ada pengguna sungguhan |
 
-Tiga baris terakhir disengaja. Menulis angka hasil pengukuran sebelum ada pengguna sungguhan berarti mengarang data, dan itu tidak dilakukan di dokumen ini.
+Dua baris terakhir disengaja. Menulis angka hasil pengukuran sebelum ada pengguna sungguhan berarti mengarang data, dan itu tidak dilakukan di dokumen ini. Nama produk sudah diputuskan, yaitu "Rapi Nikah" (`NAMA_PRODUK` di `src/lib/konstanta.ts`), jadi baris itu tidak lagi ada di tabel.

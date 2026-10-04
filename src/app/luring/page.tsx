@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { TombolCoba } from "./tombol-coba";
 
 export const metadata: Metadata = {
   title: "Sedang tanpa koneksi",
@@ -46,11 +47,9 @@ export default function HalamanLuring() {
       </p>
 
       <div className="aksi-baris">
-        <Link className="tombol tombol-utama" href="/hari-h">
+        <TombolCoba />
+        <Link className="tombol tombol-sekunder" href="/hari-h">
           Buka rundown
-        </Link>
-        <Link className="tombol tombol-sekunder" href="/beranda">
-          Coba beranda
         </Link>
       </div>
 

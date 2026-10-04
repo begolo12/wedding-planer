@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
  *
  * Halaman `page.tsx` di folder ini adalah komponen klien, dan komponen klien
  * tidak boleh mengekspor `metadata`. Tanpa berkas ini, judul tab jatuh ke
- * judul bawaan di layout akar ("Beranda - Hari Besar"), jadi tabnya
+ * judul bawaan di layout akar ("Beranda - Rapi Nikah"), jadi tabnya
  * menyesatkan. Tata letak ini hanya menitipkan judul lalu meneruskan isi
  * apa adanya, tidak mengubah tampilan.
  */

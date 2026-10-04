@@ -101,6 +101,8 @@ Vendor yang belum lunas ada di laporan, bukan cuma di halaman vendor, karena "si
 
 Sekali ketuk, lalu pilih kontak. Dua layar, bukan satu.
 
+**Keputusan: tidak ada pemilih penerima di dalam aplikasi.** Wireframe di bawah sempat menampilkan blok "TAMU KEPADA" dengan satu nama orang tua, tapi itu tidak dibangun. `16-Laporan-dan-Bagikan.md` bagian 3 sudah memutuskan pengguna yang memilih kontak sendiri di WhatsApp lewat tautan `wa.me`, jadi pemilih penerima di dalam aplikasi akan menduplikasi pilihan yang sudah ada di WhatsApp, sekaligus menyimpan daftar kontak keluarga yang tidak perlu. Yang dikirim ke server cuma teksnya.
+
 ### Step 1, pilih isi
 
 ```text
@@ -139,7 +141,6 @@ Tiga pilihan isi, karena "seperti sekarang" punya tiga pembaca berbeda. Orang tu
 Tautan tidak punya masa berlaku. Kalau ada tanggal kedaluwarsa, ada yang gagal membuka di hari yang paling penting.
 
 ### Step 2, pratinjau teks
-
 ```text
 +--------------------------------+
 |< Bagikan               2 / 2   |

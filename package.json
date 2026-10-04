@@ -1,14 +1,19 @@
 {
   "name": "wedding-planer",
-  "version": "0.12.1",
+  "version": "0.15.1",
   "private": true,
   "scripts": {
     "dev": "node scripts/dev.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
     "db:push": "drizzle-kit push",
-    "db:generate": "drizzle-kit generate"
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:check": "drizzle-kit check"
   },
   "dependencies": {
     "@neon/config": "^1.8.3",
@@ -22,6 +27,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.6.3",
     "@types/react": "^19.3.0",
@@ -29,7 +35,8 @@
     "dotenv": "^18.0.4",
     "drizzle-kit": "^0.31.11",
     "tailwindcss": "^4.3.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.3"
   },
   "allowScripts": {
     "esbuild@0.18.20": true,

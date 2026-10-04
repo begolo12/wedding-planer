@@ -33,12 +33,23 @@ const STATUS: Record<KodeGalat, number> = {
 export class GalatAplikasi extends Error {
   kode: KodeGalat;
   fields?: Record<string, string>;
+  /**
+   * Berapa detik lagi boleh mencoba, kalau galatnya batas laju. Dikirim juga
+   * sebagai header `X-Retry-After` supaya client bisa menunggu tanpa menebak.
+   */
+  retryAfter?: number;
 
-  constructor(kode: KodeGalat, message: string, fields?: Record<string, string>) {
+  constructor(
+    kode: KodeGalat,
+    message: string,
+    fields?: Record<string, string>,
+    retryAfter?: number,
+  ) {
     super(message);
     this.name = "GalatAplikasi";
     this.kode = kode;
     this.fields = fields;
+    this.retryAfter = retryAfter;
   }
 }
 
@@ -78,9 +89,11 @@ function dariZod(err: ZodError): GalatAplikasi {
 /** Ubah galat apa pun jadi response dengan bentuk yang sama. */
 export function balasGalat(err: unknown) {
   if (err instanceof GalatAplikasi) {
+    // Batas laju menyertakan sisa waktunya, jadi client tidak perlu menebak.
+    const headers = err.retryAfter ? { "X-Retry-After": String(err.retryAfter) } : undefined;
     return NextResponse.json(
       { error: { code: err.kode, message: err.message, ...(err.fields ? { fields: err.fields } : {}) } },
-      { status: STATUS[err.kode] },
+      { status: STATUS[err.kode], headers },
     );
   }
 

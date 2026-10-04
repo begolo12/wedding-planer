@@ -1,7 +1,17 @@
 "use client";
 
+import { catatAntreanPenuh, catatHasilKirim } from "./status-luring";
+import { penyimpananAntrean, urutkanAntrean, type ItemAntrean } from "./penyimpanan-antrean";
+
+export type { ItemAntrean } from "./penyimpanan-antrean";
+
 /**
- * Deteksi luring dan antrean perubahan.
+ * Antrean perubahan saat luring.
+ *
+ * Penyimpanannya ada di `src/lib/penyimpanan-antrean.ts`, di balik antarmuka,
+ * supaya bisa diganti implementasi in-memory saat test di Node. Berkas ini
+ * yang mengatur aturannya: urutan kirim, batas antrean, dan kapan sebuah item
+ * dianggap gagal.
  *
  * `navigator.onLine` tidak dipakai sendirian karena browser sering bilang
  * online di Wi-Fi yang sudah tidak punya internet. Yang dipakai: cek kecil ke
@@ -12,161 +22,39 @@
  * yang berjalan diam-diam, karena itu memakai kuota data tanpa diminta.
  */
 
-const NAMA_DB = "haribesar-luring";
-const NAMA_DB_LAMA = "aisyah-luring";
-const VERSI_DB = 1;
-const NAMA_TABEL = "antrean";
-const BATAS_ANTREAN = 200;
-
-export type ItemAntrean = {
-  id: string;
-  method: string;
-  path: string;
-  body: string | null;
-  createdAt: number;
-  attempts: number;
-  lastError: string | null;
-};
-
-/**
- * Pindahkan antrean dari nama database lama ke nama baru.
- *
- * Nama database ikut nama produk. Kalau cuma diganti, antrean milik orang
- * yang sedang luring tertinggal di database lama dan tidak akan pernah dikirim
- * lagi. Perubahan pembayaran yang tidak terkirim itu hilang tanpa jejak, dan
- * catatan pembayaran yang hilang lebih buruk daripada aplikasi yang error.
- *
- * Yang lama dihapus setelah semua item tersalin, supaya kalau gagal di tengah
- * jalan tidak ada salinan yang tidak lengkap dan antrean asli masih utuh.
- */
-function pindahkanAntreanLama(): Promise<void> {
-  return new Promise((selesai) => {
-    let lama: IDBDatabase;
-    let permintaanLama: IDBOpenDBRequest;
-    try {
-      permintaanLama = indexedDB.open(NAMA_DB_LAMA, VERSI_DB);
-    } catch {
-      selesai();
-      return;
-    }
-    permintaanLama.onerror = () => selesai();
-    permintaanLama.onblocked = () => selesai();
-    permintaanLama.onsuccess = () => {
-      lama = permintaanLama.result;
-      if (!lama.objectStoreNames.contains(NAMA_TABEL)) {
-        lama.close();
-        selesai();
-        return;
-      }
-      const baca = lama.transaction(NAMA_TABEL, "readonly").objectStore(NAMA_TABEL);
-      const semua = baca.getAll();
-      semua.onsuccess = () => {
-        const isi = semua.result as ItemAntrean[];
-        lama.close();
-        if (isi.length === 0) {
-          selesai();
-          return;
-        }
-        salinLaluHapus(isi).then(selesai, () => selesai());
-      };
-      semua.onerror = () => {
-        lama.close();
-        selesai();
-      };
-    };
-  });
-}
-
-function salinLaluHapus(isi: ItemAntrean[]): Promise<void> {
-  return new Promise((selesai, gagal) => {
-    const permintaan = indexedDB.open(NAMA_DB, VERSI_DB);
-    permintaan.onupgradeneeded = () => {
-      const db = permintaan.result;
-      if (!db.objectStoreNames.contains(NAMA_TABEL)) {
-        const toko = db.createObjectStore(NAMA_TABEL, { keyPath: "id" });
-        toko.createIndex("createdAt", "createdAt");
-      }
-    };
-    permintaan.onerror = () => gagal(permintaan.error);
-    permintaan.onsuccess = () => {
-      const db = permintaan.result;
-      const trx = db.transaction(NAMA_TABEL, "readwrite");
-      const toko = trx.objectStore(NAMA_TABEL);
-      for (const item of isi) toko.put(item);
-      trx.oncomplete = () => {
-        db.close();
-        // Baru setelah selesai menulis, yang lama dihapus.
-        indexedDB.deleteDatabase(NAMA_DB_LAMA);
-        selesai();
-      };
-      trx.onerror = () => {
-        db.close();
-        gagal(trx.error);
-      };
-      trx.onabort = () => {
-        db.close();
-        gagal(trx.error);
-      };
-    };
-  });
-}
-
-function bukaDb(): Promise<IDBDatabase> {
-  return pindahkanAntreanLama().then(
-    () =>
-      new Promise<IDBDatabase>((selesai, gagal) => {
-        const permintaan = indexedDB.open(NAMA_DB, VERSI_DB);
-        permintaan.onupgradeneeded = () => {
-          const db = permintaan.result;
-          if (!db.objectStoreNames.contains(NAMA_TABEL)) {
-            const toko = db.createObjectStore(NAMA_TABEL, { keyPath: "id" });
-            toko.createIndex("createdAt", "createdAt");
-          }
-        };
-        permintaan.onsuccess = () => selesai(permintaan.result);
-        permintaan.onerror = () => gagal(permintaan.error);
-      }),
-  );
-}
-
-function jalan<T>(
-  mode: IDBTransactionMode,
-  aksi: (toko: IDBObjectStore) => IDBRequest<T>,
-): Promise<T> {
-  return bukaDb().then(
-    (db) =>
-      new Promise<T>((selesai, gagal) => {
-        const trx = db.transaction(NAMA_TABEL, mode);
-        const permintaan = aksi(trx.objectStore(NAMA_TABEL));
-        permintaan.onsuccess = () => selesai(permintaan.result);
-        permintaan.onerror = () => gagal(permintaan.error);
-        trx.oncomplete = () => db.close();
-      }),
-  );
-}
+// Batas 500 diputuskan di docs/18 bagian 4: batas 200 membuang perubahan
+// paling tua diam-diam, dan catatan pembayaran yang hilang tanpa pemberitahuan
+// lebih buruk daripada antrean yang lebih panjang. Yang dibuang tetap
+// dilaporkan lewat nilai balik simpanKeAntrean, bukan disembunyikan.
+const BATAS_ANTREAN = 500;
 
 /** Semua antrean, dari yang paling lama. Urutan ini yang dipakai saat kirim. */
 export async function daftarAntrean(): Promise<ItemAntrean[]> {
-  const semua = await jalan<ItemAntrean[]>("readonly", (toko) => toko.getAll());
-  return semua.sort((a, b) => a.createdAt - b.createdAt);
+  return urutkanAntrean(await penyimpananAntrean().daftar());
 }
 
 export async function jumlahAntrean(): Promise<number> {
-  return jalan<number>("readonly", (toko) => toko.count());
+  return penyimpananAntrean().hitung();
 }
 
 /**
  * Simpan satu perubahan yang gagal terkirim.
  *
- * Batasnya 200 item. Kalau lewat, yang paling tua dibuang dan orangnya diberi
- * tahu. Antrean yang membengkak tanpa batas memperlambat setiap pengiriman,
- * dan 200 perubahan luring sudah jauh melebihi yang realistis.
+ * Batasnya 500 item. Kalau lewat, yang paling tua dibuang dan pemanggilnya
+ * diberi tahu lewat `dibuang`. Antrean yang membengkak tanpa batas
+ * memperlambat setiap pengiriman, jadi batas tetap ada, tapi pembuangan
+ * sekarang kelihatan, bukan diam-diam.
  */
 export async function simpanKeAntrean(
   method: string,
   path: string,
   body: string | null,
 ): Promise<{ diterima: boolean; dibuang: number }> {
+  // Nomor urut diambil sebelum menyimpan, supaya dua perubahan yang tersimpan
+  // pada milidetik yang sama tetap terkirim sesuai urutan orang menekannya.
+  const sebelumnya = await daftarAntrean();
+  const urut = (sebelumnya[sebelumnya.length - 1]?.urut ?? 0) + 1;
+
   const isi: ItemAntrean = {
     id: crypto.randomUUID(),
     method,
@@ -175,9 +63,10 @@ export async function simpanKeAntrean(
     createdAt: Date.now(),
     attempts: 0,
     lastError: null,
+    urut,
   };
 
-  await jalan("readwrite", (toko) => toko.put(isi));
+  await penyimpananAntrean().simpan(isi);
 
   const semua = await daftarAntrean();
   let dibuang = 0;
@@ -188,11 +77,15 @@ export async function simpanKeAntrean(
     }
   }
 
+  // Diberitahukan ke layar lewat satu jalur data di src/lib/status-luring.ts,
+  // supaya pembuangan tidak pernah terjadi diam-diam.
+  catatAntreanPenuh(dibuang);
+
   return { diterima: dibuang === 0, dibuang };
 }
 
 export async function buangAntrean(id: string): Promise<void> {
-  await jalan("readwrite", (toko) => toko.delete(id));
+  await penyimpananAntrean().hapus(id);
 }
 
 /**
@@ -200,13 +93,34 @@ export async function buangAntrean(id: string): Promise<void> {
  *
  * Berhenti, bukan lanjut, karena urutannya bermakna: kalau orang menambah
  * lalu menghapus saat luring, hapus tidak boleh tiba sebelum tambah.
+ *
+ * Tiga keadaan yang dibedakan di sini, sesuai docs/18 bagian 4:
+ * - 2xx: terkirim, itemnya dibuang dari antrean.
+ * - 401: sesi habis. Antrean dihentikan dan itemnya ditahan, karena ini bisa
+ *   diperbaiki orangnya sendiri dengan masuk lagi. Dulu 401 dihitung terkirim,
+ *   jadi catatan pembayaran hilang padahal tidak pernah masuk server.
+ * - 4xx lain: server menolak isinya, dan mengulang tidak akan menolong.
+ *   Itemnya TIDAK dihitung terkirim dan TIDAK dibuang diam diam; alasannya
+ *   disimpan di `lastError` supaya bisa ditunjukkan ke pengguna.
  */
-export async function kirimAntrean(): Promise<{ terkirim: number; tersisa: number }> {
+export async function kirimAntrean(): Promise<{
+  terkirim: number;
+  tersisa: number;
+  gagal: number;
+  perluMasuk: boolean;
+}> {
   const semua = await daftarAntrean();
   let terkirim = 0;
+  let gagal = 0;
+  let perluMasuk = false;
+  let pesanGagal: string | null = null;
 
   for (const item of semua) {
-    if (item.attempts >= 5) continue;
+    if (item.attempts >= 5) {
+      gagal += 1;
+      pesanGagal = pesanGagal ?? item.lastError;
+      continue;
+    }
 
     try {
       const res = await fetch(item.path, {
@@ -216,29 +130,48 @@ export async function kirimAntrean(): Promise<{ terkirim: number; tersisa: numbe
         credentials: "same-origin",
       });
 
-      // 4xx berarti servernya sudah menjawab dan isinya tidak akan diterima
-      // walau diulang, jadi itemnya dibuang, bukan ditahan selamanya.
-      if (res.ok || (res.status >= 400 && res.status < 500)) {
+      if (res.ok) {
         await buangAntrean(item.id);
         terkirim += 1;
         continue;
       }
 
-      await naikkanPercobaan(item, `Server membalas ${res.status}.`);
+      if (res.status === 401) {
+        await naikkanPercobaan(
+          item,
+          "Sesi habis. Masuk lagi supaya perubahan ini bisa terkirim.",
+        );
+        perluMasuk = true;
+        break;
+      }
+
+      if (res.status >= 400 && res.status < 500) {
+        pesanGagal = `Server menolak perubahan ini (${res.status}).`;
+        await naikkanPercobaan(item, pesanGagal);
+        gagal += 1;
+        break;
+      }
+
+      pesanGagal = `Server membalas ${res.status}.`;
+      await naikkanPercobaan(item, pesanGagal);
+      gagal += 1;
       break;
     } catch {
-      await naikkanPercobaan(item, "Masih tidak ada koneksi.");
+      pesanGagal = "Masih tidak ada koneksi.";
+      await naikkanPercobaan(item, pesanGagal);
+      gagal += 1;
       break;
     }
   }
 
-  return { terkirim, tersisa: await jumlahAntrean() };
+  // Satu jalur data ke layar, lihat src/lib/status-luring.ts.
+  catatHasilKirim({ gagal, perluMasuk, pesanGagal });
+
+  return { terkirim, tersisa: await jumlahAntrean(), gagal, perluMasuk };
 }
 
 async function naikkanPercobaan(item: ItemAntrean, pesan: string): Promise<void> {
-  await jalan("readwrite", (toko) =>
-    toko.put({ ...item, attempts: item.attempts + 1, lastError: pesan }),
-  );
+  await penyimpananAntrean().simpan({ ...item, attempts: item.attempts + 1, lastError: pesan });
 }
 
 /** Cek koneksi sungguhan. `navigator.onLine` hanya jadi saringan pertama. */

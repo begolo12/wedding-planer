@@ -46,6 +46,7 @@ export const POST = bungkus(async (req: Request, { params }: Params) => {
       eventTime: isi.eventTime ?? null,
       type: isi.type,
       isDayOf: isi.isDayOf,
+      invitationUrl: isi.invitationUrl,
       notes: isi.notes ?? null,
       sortOrder: isi.sortOrder,
     })

@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { plans } from "@/db/schema";
 import { bungkus, bacaJson, belumMasuk } from "@/lib/galat";
 import { sesiSekarang } from "@/lib/sesi";
+import { batasi } from "@/lib/batas";
 import { skemaPlanBaru } from "@/lib/skema";
 
 /** Daftar plan milik pengguna. Diurutkan dari yang paling lama dibuat. */
@@ -27,6 +28,10 @@ export const GET = bungkus(async () => {
 export const POST = bungkus(async (req: Request) => {
   const pengguna = await sesiSekarang();
   if (!pengguna) throw belumMasuk();
+
+  // 30 permintaan per jam per pengguna (docs/18 bagian 7). Banyak tab terbuka
+  // bisa mengirim permintaan duplikat, dan tiap plan menambah baris.
+  batasi(`plans:${pengguna.id}`, 30, 60 * 60);
 
   const isi = skemaPlanBaru.parse(await bacaJson(req));
 

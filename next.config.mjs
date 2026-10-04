@@ -18,6 +18,52 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_APP_VERSION: version,
   },
+  /**
+   * Header keamanan untuk semua rute. Lima header ini diputuskan di
+   * docs/18-Rencana-Produksi-dan-Pemakaian-Harian.md bagian 8. CSP sengaja
+   * tidak ada: CSP yang terlalu ketat bisa merusak service worker dan inline
+   * style dari DESIGN.md, dan belum ada kejadian nyata yang perlu diblokir.
+   */
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            // Browser tidak menebak tipe berkas sendiri. Tanpa ini, berkas
+            // yang isinya teks bisa dijalankan sebagai script.
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            // Surel dan path lengkap tidak ikut terkirim ke pihak lain.
+            // Alamat share yang bocor lewat Referer bisa membuka laporan
+            // orang lain, jadi ini juga menjaga tautan baca-saja.
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+          {
+            // Tidak ada halaman aplikasi yang perlu dibuka di dalam frame.
+            // DENY lebih ketat dari SAMEORIGIN dan tidak merusak apa pun.
+            key: "X-Frame-Options",
+            value: "DENY",
+          },
+          {
+            // Tidak ada fitur yang memakai kamera, mikrofon, atau lokasi.
+            // Bukti pembayaran diinput sebagai nama berkas, bukan dari kamera.
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
+          {
+            // Hanya berlaku di HTTPS. Dua tahun, termasuk subdomain, supaya
+            // kunjungan berikutnya tidak bisa diturunkan ke HTTP.
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains",
+          },
+        ],
+      },
+    ];
+  },
   webpack: (config) => {
     config.resolve.alias["@"] = path.resolve(__dirname, "src");
     return config;

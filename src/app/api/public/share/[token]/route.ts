@@ -3,94 +3,91 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { shareLinks, announcements, plans } from "@/db/schema";
 import { susunLaporan } from "@/lib/laporan";
+import { GalatAplikasi, bungkus } from "@/lib/galat";
 
-export async function GET(
-  _request: Request,
-  props: { params: Promise<{ token: string }> },
-) {
-  try {
-    const { token } = await props.params;
+type Params = { params: Promise<{ token: string }> };
 
-    if (!token) {
-      return NextResponse.json(
-        { galat: "Token tautan diperlukan" },
-        { status: 400 },
+/**
+ * Isi tautan baca-saja. Tidak butuh login, karena yang dikirim tautannya
+ * memang bukan pengguna aplikasi.
+ *
+ * Semua galat di sini memakai bentuk standar docs/04-API-Contract.md, sama
+ * seperti endpoint lain. Bentuk `{ galat }` yang dulu dipakai di sini adalah
+ * satu-satunya jawaban yang tidak bisa dibaca client lewat `error.code`.
+ */
+export const GET = bungkus(async (_request: Request, { params }: Params) => {
+  const { token } = await params;
+
+  if (!token) {
+    throw new GalatAplikasi("NOT_FOUND", "Tautan tidak ditemukan.");
+  }
+
+  // 1. Cek di tabel share_links
+  const [link] = await db
+    .select()
+    .from(shareLinks)
+    .where(eq(shareLinks.token, token))
+    .limit(1);
+
+  if (link) {
+    const [plan] = await db
+      .select({
+        id: plans.id,
+        partnerName: plans.partnerName,
+        weddingDate: plans.weddingDate,
+        isDayOfDate: plans.isDayOfDate,
+      })
+      .from(plans)
+      .where(eq(plans.id, link.planId))
+      .limit(1);
+
+    if (!plan) {
+      throw new GalatAplikasi(
+        "NOT_FOUND",
+        "Rencana pernikahan tidak ditemukan atau telah dihapus.",
       );
     }
 
-    // 1. Cek di tabel share_links
-    const [link] = await db
-      .select()
-      .from(shareLinks)
-      .where(eq(shareLinks.token, token))
-      .limit(1);
+    const report = await susunLaporan(link.planId);
 
-    if (link) {
-      const [plan] = await db
-        .select({
-          id: plans.id,
-          partnerName: plans.partnerName,
-          weddingDate: plans.weddingDate,
-          isDayOfDate: plans.isDayOfDate,
-        })
-        .from(plans)
-        .where(eq(plans.id, link.planId))
-        .limit(1);
-
-      if (!plan) {
-        return NextResponse.json(
-          { galat: "Rencana pernikahan tidak ditemukan atau telah dihapus" },
-          { status: 404 },
-        );
-      }
-
-      const report = await susunLaporan(link.planId);
-
-      return NextResponse.json({
-        tipe: "laporan",
-        label: link.label,
-        target: link.target,
-        dibuatPada: link.createdAt,
-        plan,
-        report,
-      });
-    }
-
-    // 2. Cek di tabel announcements (pengumuman)
-    const [pengumuman] = await db
-      .select()
-      .from(announcements)
-      .where(eq(announcements.shareToken, token))
-      .limit(1);
-
-    if (pengumuman) {
-      const [plan] = await db
-        .select({
-          id: plans.id,
-          partnerName: plans.partnerName,
-          weddingDate: plans.weddingDate,
-          isDayOfDate: plans.isDayOfDate,
-        })
-        .from(plans)
-        .where(eq(plans.id, pengumuman.planId))
-        .limit(1);
-
-      return NextResponse.json({
-        tipe: "pengumuman",
-        plan,
-        announcement: pengumuman,
-      });
-    }
-
-    return NextResponse.json(
-      { galat: "Tautan tidak ditemukan atau sudah dicabut oleh pemilik rencana" },
-      { status: 404 },
-    );
-  } catch (err) {
-    console.error("Gagal membaca tautan publik:", err);
-    return NextResponse.json(
-      { galat: "Gagal memuat data tautan publik" },
-      { status: 500 },
-    );
+    return NextResponse.json({
+      tipe: "laporan",
+      label: link.label,
+      target: link.target,
+      dibuatPada: link.createdAt,
+      plan,
+      report,
+    });
   }
-}
+
+  // 2. Cek di tabel announcements (pengumuman)
+  const [pengumuman] = await db
+    .select()
+    .from(announcements)
+    .where(eq(announcements.shareToken, token))
+    .limit(1);
+
+  if (pengumuman) {
+    const [plan] = await db
+      .select({
+        id: plans.id,
+        partnerName: plans.partnerName,
+        weddingDate: plans.weddingDate,
+        isDayOfDate: plans.isDayOfDate,
+      })
+      .from(plans)
+      .where(eq(plans.id, pengumuman.planId))
+      .limit(1);
+
+    return NextResponse.json({
+      tipe: "pengumuman",
+      plan,
+      announcement: pengumuman,
+    });
+  }
+
+  throw new GalatAplikasi(
+    "NOT_FOUND",
+    "Tautan tidak ditemukan atau sudah dicabut oleh pemilik rencana.",
+  );
+});

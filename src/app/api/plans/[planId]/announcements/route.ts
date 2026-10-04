@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { announcements } from "@/db/schema";
-import { bacaJson, bungkus, tidakDitemukan, tidakValid } from "@/lib/galat";
+import { bacaJson, bungkus, tidakDitemukan } from "@/lib/galat";
 import { konteksPlan } from "@/lib/api";
-import { skemaPengumuman } from "@/lib/skema";
+import { skemaPengumuman, skemaTerbitPengumuman } from "@/lib/skema";
 import { buatToken } from "@/lib/tautan";
 
 type Params = { params: Promise<{ planId: string }> };
@@ -74,12 +74,10 @@ export const PATCH = bungkus(async (req: Request, { params }: Params) => {
   const { planId } = await params;
   await konteksPlan(planId);
 
-  const isi = (await bacaJson(req)) as { audience?: string; publishAll?: boolean };
-  if (!isi?.audience && !isi?.publishAll) {
-    throw tidakValid("Pilih audien atau terbitkan semua.", {
-      audience: "Isi audien, atau tandai terbitkan semua.",
-    });
-  }
+  // Body diperiksa skema, bukan di-cast. `audience` yang bukan salah satu
+  // nilai sah dulu diteruskan apa adanya ke query dan bisa jadi galat
+  // database 500, padahal kontraknya 422.
+  const isi = skemaTerbitPengumuman.parse(await bacaJson(req));
 
   const saringan = [eq(announcements.planId, planId)];
   if (isi.audience) saringan.push(eq(announcements.audience, isi.audience));

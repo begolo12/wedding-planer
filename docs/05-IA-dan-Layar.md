@@ -186,14 +186,24 @@ Tampilan detail vendor berisi daftar pembayaran, terurut dari yang terbaru. Di `
 
 **Tujuan**: tahu siapa yang hadir dan berapa porsi katering.
 
-Angka rekap di atas, lalu daftar tamu.
+Angka rekap di atas, lalu daftar tamu. Satu angka satu satuan: undangan untuk jumlah baris, orang untuk jumlah jiwa, kursi untuk tempat duduk, dan porsi untuk makanan.
 
 ```
-Total tamu        312 orang
-Sudah konfirmasi  258
-Belum konfirmasi   54
-Perkiraan porsi   312
+Total tamu                   312 orang
+Sudah pasti hadir            258 orang
+Belum konfirmasi              54 orang
+Tidak hadir                    0 orang
+Perkiraan porsi katering     312
+Kursi yang perlu disiapkan   312
 ```
+
+**Porsi dan kursi memakai angka yang sama**: tamu yang sudah pasti hadir ditambah yang belum menjawab. Tamu yang sudah menyatakan tidak hadir tidak ikut dihitung, karena dua pertanyaan itu sama-sama berarti berapa orang yang perlu dilayani.
+
+Aplikasi sengaja tidak menambahkan cadangan porsi di atas jumlah orang (keputusan pemilik produk, 4 Oktober 2026). Besaran cadangan berbeda antar vendor, menu, dan jumlah anak, jadi angka porsi tetap dihitung dari orang yang perlu dilayani, dan pemilik rencana yang menyesuaikan saat memesan. Alasannya lengkap ada di `02b-Tamu.md` bagian keputusan porsi dan kursi.
+
+Saringan yang ada: kategori, status kehadiran, sisi keluarga (pihak pria, pihak wanita, bersama), dan status undangan (sudah dikirim, belum dikirim). Chip kategori memakai angka dari server supaya tidak berubah saat daftar sedang disaring.
+
+Setiap baris menampilkan tanggal kirim undangan kalau sudah dikirim. Satu tombol "Tandai undangan terkirim" menandai semua baris yang belum punya tanggal, dengan konfirmasi yang menyebut berapa orang yang akan ditandai. Endpoint-nya hanya mengisi yang kosong, jadi tanggal kirim yang sudah dicatat tidak tertimpa.
 
 Daftar tamu dikelompokkan per kategori, dengan pencarian di atas yang selalu terlihat. Di `compact`, pencarian tidak ikut scroll, menempel di bawah bar filter.
 

@@ -147,7 +147,7 @@ Baris terakhir itu bukan bug kecil. Kalau sampai terlihat, yang lain menunggu sa
 
 Tiga pertanyaan yang sering muncul:
 
-**Nama produk apa?** Sekarang masih "Aisyah & Bagas". Mengganti nama tidak merusak apa pun, tapi harus diganti di semua tempat sekaligus.
+**Nama produk apa?** Nama produk yang dipakai sekarang adalah "Rapi Nikah", ditulis satu kali di `NAMA_PRODUK` (`src/lib/konstanta.ts`). "Aisyah & Bagas" di contoh layar adalah nama pasangan pemakai, bukan nama produk.
 
 **Harganya berapa?** Fase 1 gratis. Belum ada alasan untuk meminta bayaran karena belum ada pengguna yang bisa dites.
 
@@ -157,11 +157,9 @@ Tiga pertanyaan yang sering muncul:
 
 ## Kalau selesai
 
-Tidak ada terburu-buru pada hari terakhir. Setelah tahap 3:
+Tiga tahap sudah jalan. Angka yang bisa diukur sudah ditulis di `08-NFR.md`, dan yang belum diukur ditulis apa adanya di `18-Rencana-Produksi-dan-Pemakaian-Harian.md` bagian 18.
 
-1. Ukur semua angka di bagian pengukuran `08-NFR.md`
-2. Ganti semua "belum diukur" dengan angka yang benar
-3. Rilis versi 0.1.0
+1. Yang sudah diukur ada di `08-NFR.md` bagian "Rencana pengukuran": kontras, lebar 360px, dark mode, tombol tanpa handler, dan PDF
+2. Yang belum (Lighthouse, LCP, screen reader, keyboard penuh, install iOS, uji luring di desa, uji beban) tetap ditulis "belum", jangan diisi perkiraan
+3. Versi sekarang 0.14.0. Rilis produksi menunggu deploy, database produksi, dan backup, yang ketiganya belum ada
 4. Tulis di `CHANGELOG.md` apa yang berubah
-
-Kalau ada angka yang masih belum diukur setelah semua selesai, tulis "belum diukur" lagi. Jangan diisi dengan perkiraan.

@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePlan } from "@/lib/use-plan";
 import { useMuat } from "@/lib/use-muat";
 import { Kerangka, Kosong, Gagal } from "@/components/states";
 import { BudgetBar } from "@/components/budget-bar";
 import { Rupiah } from "@/components/rupiah";
-import { LABEL_KATEGORI_TAMU, type KategoriTamu } from "@/lib/konstanta";
+import { LABEL_KATEGORI_TAMU, NAMA_PRODUK, type KategoriTamu } from "@/lib/konstanta";
+import { tanggalPanjangDari, tanggalPendekDari } from "@/lib/format";
 import type { Laporan } from "@/lib/laporan";
 
 /**
@@ -28,6 +30,13 @@ export default function HalamanLaporan() {
   });
 
   const rep = data?.report;
+
+  // Tanggal cetak dipasang setelah halaman jalan supaya teks di render server
+  // dan di peramban tidak berbeda dan tidak memicu peringatan hidrasi.
+  const [tanggalCetak, setTanggalCetak] = useState("");
+  useEffect(() => {
+    setTanggalCetak(tanggalPanjangDari(new Date()));
+  }, []);
 
   if (memuatPlan || (planId && memuatLaporan && !rep)) {
     return <Kerangka baris={8} />;
@@ -56,13 +65,38 @@ export default function HalamanLaporan() {
 
   if (!rep) return null;
 
+  // Plan ada, tapi belum ada satu pun data yang bisa dilaporkan.
+  const laporanKosong =
+    rep.uang.jumlahPos === 0 &&
+    rep.tugas.total === 0 &&
+    rep.tamu.baris === 0 &&
+    rep.rundown.total === 0 &&
+    rep.vendor.total === 0 &&
+    rep.jadwal.length === 0;
+
+  if (laporanKosong) {
+    return (
+      <div className="laporan">
+        <h1 className="sr-only">Laporan</h1>
+        <Kosong
+          keadaan="Belum ada isi untuk dilaporkan."
+          jalanKeluar="Isi dulu tugas, anggaran, atau tamu, lalu laporan ini terisi sendiri dari data itu."
+        >
+          <Link className="tombol tombol-utama" href="/rencana">
+            Mulai isi rencana
+          </Link>
+        </Kosong>
+      </div>
+    );
+  }
+
   const adaPosLebih = rep.uang.pos.some((p) => p.remaining < 0);
 
   return (
     <div className="laporan">
       <div className="kepala-halaman">
         <div>
-          <h1>Laporan Keadaan</h1>
+          <h1 className="cetak-judul">Laporan</h1>
           <p>
             {rep.judul.namaPasangan ? `Pernikahan ${rep.judul.namaPasangan} • ` : ""}
             {rep.judul.tanggalTeks} ({rep.hitungMundur.teks})
@@ -74,7 +108,7 @@ export default function HalamanLaporan() {
             className="tombol tombol-sekunder"
             onClick={() => window.print()}
           >
-            Cetak PDF / Laporan
+            Cetak laporan
           </button>
           <Link className="tombol tombol-utama" href="/laporan/bagikan">
             Bagikan ke WhatsApp →
@@ -84,9 +118,9 @@ export default function HalamanLaporan() {
 
       <div className="tumpuk">
         {/* Bagian 1: Ringkasan Uang */}
-        <section className="kartu tumpuk-sedang">
+        <section className="cetak-halaman kartu tumpuk-sedang">
           <div className="bagian-kepala">
-            <h2>Ringkasan Anggaran & Keuangan</h2>
+            <h2 className="cetak-bagian">Uang</h2>
             <Link href="/anggaran" className="tautan-kalimat">
               Buka rincian anggaran →
             </Link>
@@ -158,20 +192,24 @@ export default function HalamanLaporan() {
         {/* Bagian 2: Dua Kolom (Tugas & Tamu) */}
         <div className="kisi-kartu">
           {/* Kolom Tugas */}
-          <section className="kartu tumpuk-rapat">
+          <section className="cetak-halaman kartu tumpuk-rapat">
             <div className="bagian-kepala">
-              <h2>Kesiapan Tugas</h2>
+              <h2 className="cetak-bagian">Tugas</h2>
               <Link href="/rencana" className="tautan-kalimat">
                 Ke daftar tugas →
               </Link>
             </div>
 
-            <div className="rekap rekap-dua">
+            <div className="rekap rekap-tiga">
               <div className="rekap-item">
                 <span className="rekap-nilai">
                   {rep.tugas.selesai} / {rep.tugas.total}
                 </span>
                 <span className="rekap-label">Tugas selesai</span>
+              </div>
+              <div className="rekap-item">
+                <span className="rekap-nilai">{rep.tugas.mingguIni}</span>
+                <span className="rekap-label">Harus minggu ini</span>
               </div>
               <div className="rekap-item">
                 <span
@@ -191,7 +229,11 @@ export default function HalamanLaporan() {
                   <div className="butir" key={t.id}>
                     <span className="butir-judul">{t.title}</span>
                     <span className="butir-ket">
-                      {t.assignee ? `PIC: ${t.assignee}` : t.dueDate ?? "tanpa tanggal"}
+                      {t.assignee
+                        ? `PIC: ${t.assignee}`
+                        : t.dueDate
+                          ? tanggalPendekDari(t.dueDate)
+                          : "tanpa tanggal"}
                     </span>
                   </div>
                 ))}
@@ -204,9 +246,9 @@ export default function HalamanLaporan() {
           </section>
 
           {/* Kolom Tamu */}
-          <section className="kartu tumpuk-rapat">
+          <section className="cetak-halaman kartu tumpuk-rapat">
             <div className="bagian-kepala">
-              <h2>Tamu & Undangan</h2>
+              <h2 className="cetak-bagian">Tamu</h2>
               <Link href="/tamu" className="tautan-kalimat">
                 Ke daftar tamu →
               </Link>
@@ -214,30 +256,58 @@ export default function HalamanLaporan() {
 
             <div className="rekap rekap-dua">
               <div className="rekap-item">
-                <span className="rekap-nilai">{rep.tamu.orang}</span>
-                <span className="rekap-label">Perkiraan hadir (orang)</span>
+                <span className="rekap-nilai">{rep.tamu.porsi}</span>
+                <span className="rekap-label">Perkiraan porsi katering</span>
               </div>
               <div className="rekap-item">
-                <span className="rekap-nilai teks-aksen">
-                  {rep.tamu.kursi}
-                </span>
-                <span className="rekap-label">Pasti hadir (kursi)</span>
+                <span className="rekap-nilai teks-aksen">{rep.tamu.kursi}</span>
+                <span className="rekap-label">Kursi perlu disiapkan</span>
               </div>
             </div>
 
             <div className="daftar">
               <div className="baris">
-                <span className="baris-isi">Belum konfirmasi RSVP</span>
+                <span className="baris-isi">Total tamu</span>
+                <strong className="angka">{rep.tamu.orang} orang</strong>
+              </div>
+              <div className="baris">
+                <span className="baris-isi">Sudah pasti hadir</span>
+                <strong className="angka teks-aksen">{rep.tamu.hadir} orang</strong>
+              </div>
+              <div className="baris">
+                <span className="baris-isi">Belum konfirmasi</span>
                 <strong className="angka">{rep.tamu.belumKonfirmasi} orang</strong>
               </div>
               <div className="baris">
-                <span className="baris-isi">Undangan belum dikirim</span>
+                <span className="baris-isi">Tidak hadir</span>
+                <strong className="angka">{rep.tamu.tidakHadir} orang</strong>
+              </div>
+              <div className="baris">
+                <span className="baris-isi">Tamu belum diundang</span>
                 <strong
                   className="angka"
                   data-nada={rep.tamu.belumDiundang > 0 ? "bahaya" : undefined}
                 >
-                  {rep.tamu.belumDiundang} undangan
+                  {rep.tamu.belumDiundang} orang
                 </strong>
+              </div>
+            </div>
+
+            <div className="tumpuk-rapat">
+              <span className="label-bagian">Rincian per Pihak</span>
+              <div className="aksi-baris">
+                <span className="lencana">
+                  Pihak pria
+                  <strong className="angka">{rep.tamu.perSisi.pria}</strong>
+                </span>
+                <span className="lencana">
+                  Pihak wanita
+                  <strong className="angka">{rep.tamu.perSisi.wanita}</strong>
+                </span>
+                <span className="lencana">
+                  Bersama
+                  <strong className="angka">{rep.tamu.perSisi.bersama}</strong>
+                </span>
               </div>
             </div>
 
@@ -260,9 +330,9 @@ export default function HalamanLaporan() {
         {/* Bagian 3: Rundown Hari-H & Vendor */}
         <div className="kisi-kartu">
           {/* Rundown Hari-H */}
-          <section className="kartu tumpuk-rapat">
+          <section className="cetak-halaman cetak-pisah kartu tumpuk-rapat">
             <div className="bagian-kepala">
-              <h2>Rundown Acara Hari-H</h2>
+              <h2 className="cetak-bagian">Rundown</h2>
               <Link href="/hari-h" className="tautan-kalimat">
                 Ke jadwal hari-H →
               </Link>
@@ -295,9 +365,9 @@ export default function HalamanLaporan() {
           </section>
 
           {/* Vendor & Seragam */}
-          <section className="kartu tumpuk-rapat">
+          <section className="cetak-halaman kartu tumpuk-rapat">
             <div className="bagian-kepala">
-              <h2>Vendor & Seragam</h2>
+              <h2 className="cetak-bagian">Vendor</h2>
               <Link href="/rencana/vendor" className="tautan-kalimat">
                 Ke daftar vendor →
               </Link>
@@ -341,6 +411,35 @@ export default function HalamanLaporan() {
                 </strong>
               </div>
             </div>
+
+            {rep.vendor.daftar.length > 0 ? (
+              <div className="tumpuk-rapat">
+                <span className="label-bagian">Vendor belum lunas</span>
+                {[...rep.vendor.daftar]
+                  .sort((a, b) => Number(a.sudahLunas) - Number(b.sudahLunas))
+                  .slice(0, 8)
+                  .map((v) => (
+                    <div className="butir" key={v.id}>
+                      <div className="butir-isi">
+                        <div className="butir-judul">{v.nama}</div>
+                        <div className="butir-ket">{v.labelKategori}</div>
+                      </div>
+                      <span
+                        className="angka"
+                        data-nada={v.sudahLunas ? undefined : "bahaya"}
+                      >
+                        {v.sudahLunas ? (
+                          "lunas"
+                        ) : (
+                          <>
+                            sisa <Rupiah nilai={v.sisa} />
+                          </>
+                        )}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            ) : null}
           </section>
         </div>
 
@@ -358,13 +457,22 @@ export default function HalamanLaporan() {
               className="tombol tombol-sekunder"
               onClick={() => window.print()}
             >
-              Cetak Dokumen
+              Cetak laporan
             </button>
             <Link className="tombol tombol-utama" href="/laporan/bagikan">
               Bagikan ke WhatsApp
             </Link>
           </div>
         </div>
+      </div>
+
+      {/* Kaki halaman cetak. Sebagian peramban mengulang elemen berposisi
+          tetap di setiap halaman, jadi satu elemen ini cukup. Nomor halaman
+          otomatis tidak mungkin lewat CSS saja, jadi yang dicetak adalah nama
+          rencana dan tanggal cetak, sesuai keputusan di docs/16 bagian 5. */}
+      <div className="cetak-kaki">
+        <span>Dicetak dari rencana {rep.judul.namaPasangan || NAMA_PRODUK}</span>
+        <span>{tanggalCetak}</span>
       </div>
     </div>
   );

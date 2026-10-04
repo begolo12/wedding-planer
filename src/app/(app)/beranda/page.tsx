@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePlan } from "@/lib/use-plan";
 import { useMuat } from "@/lib/use-muat";
+import { useStatusLuring } from "@/lib/status-luring";
 import type { RingkasanPlan } from "@/lib/ringkasan";
 import { Kerangka, Kosong, Gagal } from "@/components/states";
 import { TaskItem } from "@/components/task-item";
@@ -37,8 +38,18 @@ import { tanggalPanjangDari } from "@/lib/format";
  * unggah inspirasi, jadi tombolnya akan jadi tombol mati. Tempatnya dipakai
  * kartu "Tanggal Penting" yang datanya sudah ada.
  */
+type ItemRundown = {
+  id: string;
+  title: string;
+  startTime: string;
+  location: string | null;
+};
+
 export default function HalamanBeranda() {
   const { plan, planId, memuat: memuatPlan, galat: galatPlan, muatUlang: muatPlan } = usePlan();
+
+  const { luring, dariPerangkat } = useStatusLuring();
+  const bisaUbah = !luring && !dariPerangkat;
 
   const {
     data: ringkasan,
@@ -48,6 +59,14 @@ export default function HalamanBeranda() {
   } = useMuat<RingkasanPlan>(planId ? `/api/plans/${planId}/overview` : null, {
     aktif: Boolean(planId),
   });
+
+  // Rundown diambil terpisah karena /overview sengaja dibatasi lima sumber data.
+  // Kartunya hanya muncul kalau sudah ada acara, jadi tidak menambah state
+  // kosong kedua di Beranda yang tidak diatur docs/05 bagian 6.
+  const { data: dataRundown } = useMuat<{ rundown: ItemRundown[] }>(
+    planId ? `/api/plans/${planId}/rundown` : null,
+    { aktif: Boolean(planId) },
+  );
 
   if (memuatPlan || (planId && memuatRingkasan && !ringkasan)) {
     return <Kerangka baris={6} />;
@@ -97,7 +116,7 @@ export default function HalamanBeranda() {
     ? Math.round((jumlahTugas.selesai / jumlahTugas.total) * 100)
     : 0;
   const persenAnggaran = uang.planned ? Math.round((uang.paid / uang.planned) * 100) : 0;
-  const persenHadir = tamu.orang ? Math.round((tamu.kursi / tamu.orang) * 100) : 0;
+  const persenHadir = tamu.orang ? Math.round((tamu.hadir / tamu.orang) * 100) : 0;
   const tugasSisa = jumlahTugas.total - jumlahTugas.selesai;
   const mingguLagi = hariKe !== null && hariKe > 0 ? Math.floor(hariKe / 7) : null;
 
@@ -120,6 +139,7 @@ export default function HalamanBeranda() {
 
   return (
     <div className="beranda">
+      <h1 className="sr-only">Beranda</h1>
       <section className="beranda-hero">
         <span className="beranda-cahaya beranda-cahaya-kanan" aria-hidden="true" />
         <span className="beranda-cahaya beranda-cahaya-kiri" aria-hidden="true" />
@@ -129,7 +149,7 @@ export default function HalamanBeranda() {
               <IkonHati size={16} />
               Hitung Mundur Menuju Pelaminan
             </span>
-            <h1 className="beranda-sapa">{sapaan} 🌸</h1>
+            <p className="beranda-sapa">{sapaan}</p>
             <p className="beranda-tanggal">
               <IkonKalender size={20} />
               {hariBesar ? tanggalPanjangDari(hariBesar) : "Tanggal pernikahan belum ditentukan"}
@@ -149,63 +169,107 @@ export default function HalamanBeranda() {
             </span>
           </div>
 
-          <div className="beranda-mundur">
-            <div className="beranda-mundur-kotak">
-              <span className="beranda-mundur-besar">
-                {hariKe !== null ? (hariKe < 0 ? Math.abs(hariKe) : hariKe) : "?"}
-              </span>
-              <span className="beranda-mundur-kecil">
-                {hariKe !== null && hariKe < 0 ? "Hari Berlalu" : "Hari Lagi!"}
-              </span>
-            </div>
-            <div className="beranda-mundur-sisi">
-              <div className="beranda-mundur-grid">
-                <div className="beranda-mundur-sel">
-                  <span className="beranda-mundur-nilai">{mingguLagi ?? "-"}</span>
-                  <span className="beranda-mundur-sel-label">Minggu</span>
-                </div>
-                <div className="beranda-mundur-sel">
-                  <span className="beranda-mundur-nilai">{tugasSisa}</span>
-                  <span className="beranda-mundur-sel-label">Tugas Sisa</span>
-                </div>
+          {hariKe !== null ? (
+            <div className="beranda-mundur">
+              <div className="beranda-mundur-kotak">
+                <span className="beranda-mundur-besar">
+                  {hariKe < 0 ? Math.abs(hariKe) : hariKe}
+                </span>
+                <span className="beranda-mundur-kecil">
+                  {hariKe < 0 ? "Hari Berlalu" : "Hari Lagi"}
+                </span>
               </div>
-              <p className="beranda-mundur-pita">
-                {teksHitungMundur ?? "Menuju hari pernikahan"}
-              </p>
+              <div className="beranda-mundur-sisi">
+                <div className="beranda-mundur-grid">
+                  <div className="beranda-mundur-sel">
+                    <span className="beranda-mundur-nilai">{mingguLagi ?? "-"}</span>
+                    <span className="beranda-mundur-sel-label">Minggu</span>
+                  </div>
+                  <div className="beranda-mundur-sel">
+                    <span className="beranda-mundur-nilai">{tugasSisa}</span>
+                    <span className="beranda-mundur-sel-label">Tugas Sisa</span>
+                  </div>
+                </div>
+                <p className="beranda-mundur-pita">
+                  {teksHitungMundur ?? "Menuju hari pernikahan"}
+                </p>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="beranda-mundur">
+              <div className="beranda-mundur-sisi">
+                <p className="beranda-mundur-pita">Tanggal hari-H belum diisi.</p>
+                {bisaUbah ? (
+                  <Link className="beranda-kartu-tautan" href="/rencana/tanggal">
+                    Tambah tanggal akad
+                  </Link>
+                ) : null}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="beranda-aksi">
-          <Link className="beranda-aksi-pil beranda-aksi-utama" href="/rencana">
-            <IkonTambah size={18} />
-            Tambah Tugas
-          </Link>
-          <Link className="beranda-aksi-pil" href="/anggaran">
-            <IkonUang size={18} />
-            Catat Pengeluaran
-          </Link>
-          <Link className="beranda-aksi-pil" href="/tamu">
-            <IkonTamu size={18} />
-            Tamu Baru
-          </Link>
+          {bisaUbah ? (
+            <>
+              <Link className="beranda-aksi-pil beranda-aksi-utama" href="/rencana">
+                <IkonTambah size={18} />
+                Tambah Tugas
+              </Link>
+              <Link className="beranda-aksi-pil" href="/rencana">
+                <IkonChecklist size={18} />
+                Muat checklist
+              </Link>
+              <Link className="beranda-aksi-pil" href="/anggaran">
+                <IkonUang size={18} />
+                Catat Pengeluaran
+              </Link>
+              <Link className="beranda-aksi-pil" href="/tamu">
+                <IkonTamu size={18} />
+                Tamu Baru
+              </Link>
+            </>
+          ) : null}
           <Link className="beranda-aksi-pil" href="/laporan/bagikan">
             <IkonBagikan size={18} />
-            Bagikan Link RSVP
+            Bagikan
           </Link>
           <Link className="beranda-aksi-pil beranda-aksi-halus" href="/laporan">
             <IkonCetak size={18} />
-            Cetak Laporan PDF
+            Cetak laporan
           </Link>
         </div>
       </section>
 
       <div className="beranda-grid">
         <div className="beranda-kolom-utama">
+          {dataRundown && dataRundown.rundown.length > 0 ? (
+            <section className="kartu beranda-kartu">
+              <div className="beranda-kartu-kepala">
+                <span className="label-bagian">Rundown hari ini</span>
+                <Link className="beranda-kartu-tautan" href="/hari-h">
+                  Lihat rundown
+                  <IkonPanah size={16} />
+                </Link>
+              </div>
+              <div className="tumpuk-rapat">
+                {dataRundown.rundown.slice(0, 4).map((r) => (
+                  <div className="butir" key={r.id}>
+                    <span className="lencana lencana-aksen angka">{r.startTime}</span>
+                    <div className="butir-isi">
+                      <div className="butir-judul">{r.title}</div>
+                      {r.location ? <div className="butir-ket">{r.location}</div> : null}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
           <div className="beranda-metrik">
             <section className="kartu beranda-kartu">
               <div className="beranda-kartu-kepala">
-                <span className="label-bagian">Checklist Rencana</span>
+                <span className="label-bagian">Tugas</span>
                 <span className="beranda-ikon-bulat beranda-ikon-utama">
                   <IkonChecklist size={18} />
                 </span>
@@ -225,10 +289,13 @@ export default function HalamanBeranda() {
                 </div>
               </div>
               {jumlahTugas.lewat > 0 ? (
-                <p className="beranda-kartu-catatan beranda-catatan-bahaya">
+                <Link
+                  className="beranda-kartu-catatan beranda-catatan-bahaya"
+                  href="/rencana"
+                >
                   <IkonPenting size={15} />
-                  {jumlahTugas.lewat} tugas lewat tenggat
-                </p>
+                  {jumlahTugas.lewat} tugas lewat tenggat, lihat daftarnya
+                </Link>
               ) : (
                 <p className="beranda-kartu-catatan">
                   {jumlahTugas.tanpaTenggat} tugas belum punya tenggat
@@ -245,10 +312,8 @@ export default function HalamanBeranda() {
               </div>
               <div className="beranda-kartu-isi">
                 <div className="beranda-kartu-angka">
-                  <span className="beranda-kartu-besar">
-                    {tamu.kursi}{" "}
-                    <span className="beranda-kartu-kecil">/ {tamu.orang}</span>
-                  </span>
+                  <span className="beranda-kartu-besar">{tamu.porsi}</span>
+                  <span className="beranda-kartu-kecil">perkiraan porsi katering</span>
                   <span className="beranda-kartu-kecil beranda-kartu-tanda">
                     {persenHadir}% sudah menyatakan hadir
                   </span>
@@ -268,11 +333,13 @@ export default function HalamanBeranda() {
                 </span>
               </div>
               <div className="beranda-pil-baris">
-                <span className="beranda-pil beranda-pil-utama">{tamu.kursi} Hadir</span>
+                <span className="beranda-pil beranda-pil-utama">{tamu.hadir} Hadir</span>
                 <span className="beranda-pil beranda-pil-kedua">
-                  {tamu.belumKonfirmasi} Belum Jawab
+                  {tamu.belumKonfirmasi} Belum konfirmasi hadir
                 </span>
-                <span className="beranda-pil beranda-pil-redup">{tamu.tidakHadir} Batal</span>
+                <span className="beranda-pil beranda-pil-redup">
+                  {tamu.tidakHadir} Tidak hadir
+                </span>
               </div>
             </section>
 
@@ -342,10 +409,12 @@ export default function HalamanBeranda() {
               <span className="beranda-tugas-petunjuk">
                 Tekan lingkaran untuk menandai tugas selesai
               </span>
-              <Link className="beranda-kartu-tautan" href="/rencana">
-                <IkonTambah size={16} />
-                Buat tugas baru
-              </Link>
+              {bisaUbah ? (
+                <Link className="beranda-kartu-tautan" href="/rencana">
+                  <IkonTambah size={16} />
+                  Buat tugas baru
+                </Link>
+              ) : null}
             </div>
           </section>
         </div>
@@ -396,9 +465,11 @@ export default function HalamanBeranda() {
             {vendorUtama.length === 0 ? (
               <p className="beranda-tugas-kosong">
                 Belum ada vendor yang dicatat.{" "}
-                <Link className="beranda-kartu-tautan" href="/rencana/vendor">
-                  Tambah vendor
-                </Link>
+                {bisaUbah ? (
+                  <Link className="beranda-kartu-tautan" href="/rencana/vendor">
+                    Tambah vendor
+                  </Link>
+                ) : null}
               </p>
             ) : (
               <div className="beranda-vendor-daftar">
@@ -438,7 +509,7 @@ export default function HalamanBeranda() {
             </span>
             <p className="beranda-catatan-teks">
               Luangkan waktu santai berdua malam ini tanpa membahas vendor, anggaran, atau
-              persiapan pernikahan. Seduh teh hangat dan saling bertukar senyum ya. 💕
+              persiapan pernikahan. Seduh teh hangat dan saling bertukar senyum ya.
             </p>
           </section>
         </aside>

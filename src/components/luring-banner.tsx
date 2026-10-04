@@ -1,14 +1,29 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { cekKoneksi, jumlahAntrean, kirimAntrean } from "@/lib/luring";
+import { bersihkanAntreanPenuh, catatLuring, useStatusLuring } from "@/lib/status-luring";
 
 /**
  * Bar tipis di bawah layar yang memberi tahu keadaan sambungan.
  *
- * Muncul hanya kalau memang ada yang perlu diberitahukan: sedang luring, ada
- * antrean menunggu, atau baru saja selesai mengirim. Bar yang selalu ada
- * walaupun semua normal cuma jadi hiasan yang mengganggu.
+ * Muncul kalau memang ada yang perlu diberitahukan. Pemicunya dua kelompok:
+ *
+ * 1. Data sedang atau pernah tidak datang dari jaringan. Ini yang diminta
+ *    docs/05 bagian 6: pita tipis "Menampilkan data dari perangkat". Pemicunya
+ *    bukan hanya "sedang luring", tapi juga "sudah pernah gagal menyambung
+ *    sejak halaman ini dibuka". Alasannya: begitu koneksi putus sebentar
+ *    (sinyal di lokasi yang jelek), data yang tampil sudah bukan dari
+ *    jaringan, walaupun sedetik kemudian jaringan kembali dan cek berikutnya
+ *    sudah hijau. Kalau bendera itu tidak disimpan, pita justru hilang tepat
+ *    saat datanya masih dari perangkat.
+ *
+ * 2. Ada antrean atau hasil pengiriman yang perlu dibaca orangnya. Isinya
+ *    dibaca dari src/lib/status-luring.ts, satu jalur data yang diisi
+ *    src/lib/luring.ts. Yang muncul: sesi habis (docs/14 baris 184),
+ *    perubahan gagal beserta pesannya (baris 206), dan antrean penuh beserta
+ *    jumlah yang dibuang (baris 207, docs/18 bagian 4).
  *
  * Cek koneksi dilakukan tiap 30 detik dan tiap kali tab kembali aktif.
  * `navigator.onLine` tidak dipakai sendirian karena browser sering melaporkan
@@ -19,6 +34,7 @@ export function LuringBanner() {
   const [antrean, setAntrean] = useState(0);
   const [mengirim, setMengirim] = useState(false);
   const [pesanSelesai, setPesanSelesai] = useState<string | null>(null);
+  const { perluMasuk, gagal, pesanGagal, dibuang, dariPerangkat } = useStatusLuring();
 
   useEffect(() => {
     let hidup = true;
@@ -27,6 +43,10 @@ export function LuringBanner() {
       const tersambung = await cekKoneksi();
       if (!hidup) return;
       setLuring(!tersambung);
+      // Penjaga koneksi ini penulis tunggal status luring untuk seluruh layar.
+      // Tanpa ini, useStatusLuring().luring selalu false dan tombol ubah tidak
+      // pernah disembunyikan saat data dibaca dari perangkat.
+      catatLuring(!tersambung);
       setAntrean(await jumlahAntrean());
 
       if (tersambung) {
@@ -61,30 +81,65 @@ export function LuringBanner() {
     };
   }, []);
 
-  if (!luring && antrean === 0 && !pesanSelesai) return null;
+  async function kirimUlang() {
+    setMengirim(true);
+    const hasil = await kirimAntrean();
+    setMengirim(false);
+    setAntrean(hasil.tersisa);
+    if (hasil.terkirim > 0 && hasil.tersisa === 0) setPesanSelesai("Semua perubahan sudah terkirim.");
+  }
 
-  const teks = luring
-    ? antrean > 0
-      ? `Luring. ${antrean} perubahan disimpan dan dikirim setelah ada internet.`
-      : "Luring. Perubahan akan disimpan dan dikirim nanti."
-    : mengirim
-      ? "Mengirim perubahan yang tertunda."
-      : (pesanSelesai ?? `${antrean} perubahan menunggu dikirim.`);
+  // Pemicu utama dari src/lib/status-luring.ts, diisi src/lib/api-client.ts:
+  // true berarti pembacaan data terakhir dilayani dari cadangan perangkat.
+  // `luring` dipakai sebagai cadangan supaya pita tetap muncul begitu
+  // perangkat kehilangan koneksi, sebelum jalur data sempat terisi.
+  const tampilkanPerangkat = dariPerangkat || luring;
+  if (!tampilkanPerangkat && antrean === 0 && !pesanSelesai && !perluMasuk && gagal === 0 && dibuang === 0) {
+    return null;
+  }
+
+  let teks: string;
+  let nada = "info";
+  if (perluMasuk) {
+    teks = "Sesi kamu sudah habis. Masuk lagi untuk melanjutkan.";
+    nada = "bahaya";
+  } else if (dibuang > 0) {
+    teks = `Antrean penuh. Perubahan lama yang belum terkirim dibuang (${dibuang} item).`;
+    nada = "bahaya";
+  } else if (gagal > 0) {
+    teks = pesanGagal
+      ? `Satu perubahan gagal dikirim dan perlu dikirim ulang manual. ${pesanGagal}`
+      : "Satu perubahan gagal dikirim dan perlu dikirim ulang manual.";
+    nada = "bahaya";
+  } else if (tampilkanPerangkat) {
+    teks = antrean > 0
+      ? `Menampilkan data dari perangkat. ${antrean} perubahan menunggu dikirim.`
+      : "Menampilkan data dari perangkat.";
+    if (luring) nada = "luring";
+  } else if (mengirim) {
+    teks = "Mengirim perubahan yang tertunda.";
+  } else {
+    teks = pesanSelesai ?? `${antrean} perubahan menunggu dikirim.`;
+  }
 
   return (
-    <div className="pita-luring" data-nada={luring ? "luring" : "info"} role="status">
+    <div className="pita-luring" data-nada={nada} role="status">
       <span>{teks}</span>
-      {!luring && antrean > 0 && !mengirim ? (
-        <button
-          type="button"
-          className="tombol tombol-halus"
-          onClick={async () => {
-            setMengirim(true);
-            const hasil = await kirimAntrean();
-            setMengirim(false);
-            setAntrean(hasil.tersisa);
-          }}
-        >
+
+      {perluMasuk ? (
+        <Link className="tombol tombol-halus" href="/masuk">
+          Masuk lagi
+        </Link>
+      ) : dibuang > 0 ? (
+        <button type="button" className="tombol tombol-halus" onClick={bersihkanAntreanPenuh}>
+          Tutup
+        </button>
+      ) : gagal > 0 ? (
+        <button type="button" className="tombol tombol-halus" onClick={kirimUlang} disabled={mengirim}>
+          Kirim ulang
+        </button>
+      ) : !luring && antrean > 0 && !mengirim ? (
+        <button type="button" className="tombol tombol-halus" onClick={kirimUlang}>
           Kirim sekarang
         </button>
       ) : null}
