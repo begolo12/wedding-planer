@@ -27,7 +27,7 @@ export default function LayoutAuth({ children }: { children: ReactNode }) {
         Lompat ke isi
       </a>
 
-      <div className="auth-kontainer">
+      <div className="auth-kontainer" data-visual-screen="auth">
         {/* Baris identitas layar: chip merek dan tombol tema. Ditaruh di
             tingkat kontainer, bukan di dalam kolom kepala, supaya di desktop
             bisa membentang di atas dua kolom dan tombol tema tidak
@@ -46,7 +46,7 @@ export default function LayoutAuth({ children }: { children: ReactNode }) {
           <AuthHero />
         </div>
 
-        <div className="auth-kartu">
+        <div className="auth-kartu" data-visual-screen="auth-card">
           <span className="auth-kabut auth-kabut-atas" aria-hidden="true" />
           <span className="auth-kabut auth-kabut-bawah" aria-hidden="true" />
           {children}

@@ -35,4 +35,31 @@ test.describe("kontrak visual dasar", () => {
     await expect(page.locator('[data-state="kosong"]')).toBeVisible();
     await expect(page.getByRole("link", { name: "Kembali ke Beranda" })).toBeVisible();
   });
+
+  for (const route of ["/masuk", "/daftar"]) {
+    test(`${route} mempertahankan hierarki auth di mobile dan desktop`, async ({ page }) => {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.goto(route);
+
+      await expect(page.locator('[data-visual-screen="auth"]')).toBeVisible();
+      await expect(page.locator('[data-visual-screen="auth-card"]')).toBeVisible();
+      await expect(page.locator("form.auth-form")).toBeVisible();
+      await expect(page.locator("body")).toHaveJSProperty("scrollWidth", 390);
+      await expect(page.locator(".auth-tombol-google")).toHaveCSS("border-radius", "16px");
+
+      const tinggiTombol = await page.locator("form.auth-form button[type=submit]").evaluate(
+        (button) => button.getBoundingClientRect().height,
+      );
+      expect(tinggiTombol).toBeGreaterThanOrEqual(44);
+
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.reload();
+      await expect(page.locator('[data-visual-screen="auth"]')).toBeVisible();
+      await expect(page.locator(".auth-kontainer")).toHaveCSS(
+        "grid-template-columns",
+        /.+/,
+      );
+    });
+  }
+
 });

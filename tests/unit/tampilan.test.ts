@@ -12,4 +12,10 @@ describe("kontrak visual", () => {
     expect(css).toContain("@media (min-width: 1023px)");
     expect(css).toContain("@media (max-width: 639px)");
   });
+
+  it("menyediakan lapisan visual auth dan beranda", () => {
+    expect(css).toContain(".auth-kartu[data-visual-screen=\"auth-card\"]");
+    expect(css).toContain(".beranda-hero {");
+    expect(css).toContain(".beranda-metrik {");
+  });
 });
