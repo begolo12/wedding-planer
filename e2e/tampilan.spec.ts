@@ -83,4 +83,13 @@ test.describe("kontrak visual dasar", () => {
     await expect(page.locator("body")).toHaveJSProperty("scrollWidth", 390);
   });
 
+  test("system and policy screens keep readable mobile surfaces", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    for (const route of ["/kebijakan", "/not-found", "/error"]) {
+      await page.goto(route);
+      await expect(page.locator("main.halaman-baca")).toBeVisible();
+      await expect(page.locator("body")).toHaveJSProperty("scrollWidth", 390);
+    }
+  });
+
 });

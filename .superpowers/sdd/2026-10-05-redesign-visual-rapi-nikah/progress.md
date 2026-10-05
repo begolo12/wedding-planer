@@ -7,5 +7,6 @@ Task 2: complete (tests: `npm run lint`, `npm test`, `npx playwright test e2e/ta
 Task 3: complete (tests: `npm run lint`, `npm test`, `npm run build`, `npx playwright test e2e/tampilan.spec.ts --project=chromium` -> pass; 152 unit tests, 5 E2E tests)
 Task 4: complete (tests: `npm run lint`, `npm test`, `npm run build`, `npx playwright test e2e/tampilan.spec.ts --project=chromium` -> pass; 152 unit tests, 6 E2E tests)
 Task 5-6: complete (tests: `npm run lint`, `npm test`, `npm run build`, `npx playwright test e2e/tampilan.spec.ts --project=chromium` -> pass; 153 unit tests, 7 E2E tests)
+Task 7: complete (sequential tests: `npm run build`, `npm run lint`, `npm test`, `npx playwright test e2e/tampilan.spec.ts --project=chromium` -> pass; 153 unit tests, 8 E2E tests; parallel run intentionally discarded because concurrent Next writers corrupted `.next`)
 Ruling: task-start scripts require Bash unavailable in this Windows environment — use the same task brief manually and record evidence here.
 Ruling: implementation remains in the active workspace — user selected Native execution and existing uncommitted Beranda/ringkasan changes are explicitly protected.
