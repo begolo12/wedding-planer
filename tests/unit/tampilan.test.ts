@@ -18,4 +18,10 @@ describe("kontrak visual", () => {
     expect(css).toContain(".beranda-hero {");
     expect(css).toContain(".beranda-metrik {");
   });
+
+  it("menyediakan surface report dan offline yang tetap terbaca", () => {
+    expect(css).toContain(".laporan .cetak-halaman");
+    expect(css).toContain(".bagikan .pilih-kartu[data-aktif=\"ya\"]");
+    expect(css).toContain(".halaman-baca > .kartu");
+  });
 });

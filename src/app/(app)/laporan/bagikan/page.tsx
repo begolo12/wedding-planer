@@ -181,7 +181,7 @@ export default function HalamanBagikanLaporan() {
   const sisaJatah = dataLinks?.sisa ?? 0;
 
   return (
-    <div className="tumpuk-sedang">
+    <div className="tumpuk-sedang bagikan">
       <div>
         <Link className="tautan-kalimat" href="/laporan">
           ← Kembali ke laporan

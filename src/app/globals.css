@@ -7869,6 +7869,66 @@ a:focus-visible {
   box-shadow: 0 8px 24px -14px var(--color-primary);
 }
 
+.laporan > .kepala-halaman,
+.bagikan > .kepala-halaman {
+  padding-bottom: 8px;
+}
+
+.laporan .cetak-halaman,
+.bagikan .panel-daftar,
+.bagikan .kotak-mono,
+.bagikan .bagikan-teks {
+  border-color: var(--visual-border);
+  box-shadow: var(--bayang-1);
+}
+
+.laporan .rekap-item {
+  min-width: 0;
+}
+
+.laporan .rekap-nilai {
+  overflow-wrap: anywhere;
+}
+
+.bagikan .pilih-kartu[data-aktif="ya"] {
+  border-color: var(--color-ink);
+  background: var(--visual-surface-soft);
+  box-shadow: inset 0 0 0 1px var(--color-ink);
+}
+
+.bagikan .kotak-mono {
+  background: var(--visual-surface-soft);
+}
+
+.halaman-baca {
+  max-width: 760px;
+  margin-inline: auto;
+  padding-bottom: 64px;
+}
+
+.halaman-baca > .kartu {
+  border-color: var(--visual-border);
+  box-shadow: var(--bayang-1);
+}
+
+@media (max-width: 639px) {
+  .laporan .kepala-halaman .aksi-baris,
+  .bagikan .kepala-halaman .aksi-baris,
+  .halaman-baca .aksi-baris {
+    width: 100%;
+  }
+
+  .laporan .kepala-halaman .aksi-baris > *,
+  .bagikan .kepala-halaman .aksi-baris > *,
+  .halaman-baca .aksi-baris > * {
+    flex: 1 1 160px;
+  }
+
+  .bagikan .kisi-kartu {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 @media (max-width: 639px) {
   .anggaran-hero,
   .tamu-hero,

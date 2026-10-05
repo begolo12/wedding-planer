@@ -71,4 +71,16 @@ test.describe("kontrak visual dasar", () => {
     }
   });
 
+  test("public and offline screens keep their useful action visible", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+
+    await page.goto("/luring");
+    await expect(page.getByRole("heading", { name: "Tidak ada internet" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Buka rundown" })).toBeVisible();
+    await expect(page.locator("body")).toHaveJSProperty("scrollWidth", 390);
+
+    await page.goto("/aplikasi");
+    await expect(page.locator("body")).toHaveJSProperty("scrollWidth", 390);
+  });
+
 });
