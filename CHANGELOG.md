@@ -29,6 +29,11 @@ Aturan singkat:
 
 ## [Belum dirilis]
 
+### Tambah
+
+- Tombol "Masuk dengan Google" di layar masuk dan "Daftar dengan Akun Google" di layar daftar. Pengguna bisa masuk satu klik tanpa mengingat kata sandi, dan akun Google otomatis jadi akun yang sah
+- Bukti tangkapan layar tiap halaman (desktop dan mobile) di `public/screenshots/`, dipakai sebagai evidence pengecekan visual
+
 ### Ubah
 
 - Menambahkan pola wildcard port lokal (`http://localhost:*`, `http://127.0.0.1:*`, dan subnet lokal) ke `trustedOrigins` Better Auth, serta melonggarkan batas rate limit di mode dev agar pendaftaran di local environment pada port selain 3000 tidak ditolak 403 INVALID_ORIGIN atau terkunci 429 RATE_LIMITED
@@ -40,7 +45,8 @@ Aturan singkat:
 - Navigasi mobile memiliki bidang aktif dan ruang safe area agar isi tidak tertutup bilah bawah
 - Beranda kosong memakai kepala halaman dan panel awal. Aksi tambah disembunyikan saat luring agar tidak menawarkan perubahan yang belum bisa dikirim
 - Hero Beranda memakai label tanpa bidang aksen tambahan, hitung mundur tanpa bayangan, dan kolom yang bisa menyusut agar hierarki lebih tenang dan layar sempit tidak melebar
-- Pratinjau lokal tersedia lewat task `Wedding UI preview` pada port 3015. Aturan navigasi aktif dilindungi unit test
+- Pratinjau lokal tersedia lewat task `Wedding UI preview` pada port 3015 (tersimpan di `.vscode/tasks.json`). Aturan navigasi aktif dilindungi unit test
+- Pendaftaran manual hanya menerima email `@gmail.com` atau `@googlemail.com`, supaya akun yang terdaftar selalu akun Google yang valid. Pengguna tanpa email Google diarahkan memakai tombol Google langsung
 
 ## [0.16.2] - 5 Oktober 2026
 
