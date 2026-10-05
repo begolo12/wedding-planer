@@ -39,3 +39,4 @@ playwright/.cache
 
 # hasil audit sekali pakai
 anti-slop
+.env*
