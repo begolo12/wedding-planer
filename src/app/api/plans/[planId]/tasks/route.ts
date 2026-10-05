@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { tasks } from "@/db/schema";
 import { bungkus, bacaJson } from "@/lib/galat";
 import { cariParam, konteksPlan, pastikanPosAnggaran } from "@/lib/api";
+import { HEADER_KUNCI, sekaliPerKunci } from "@/lib/idempotensi";
 import { skemaTugas } from "@/lib/skema";
 
 type Params = { params: Promise<{ planId: string }> };
@@ -43,26 +44,28 @@ export const POST = bungkus(async (req: Request, { params }: Params) => {
 
   const isi = skemaTugas.parse(await bacaJson(req));
 
-  // Pos anggaran yang ditunjuk harus milik plan ini. Tanpa ini, uuid yang
-  // tidak ada berakhir jadi 500 dari foreign key, dan uuid milik plan lain
-  // bisa tertaut diam-diam.
-  if (isi.budgetItemId) await pastikanPosAnggaran(planId, isi.budgetItemId);
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    // Pos anggaran yang ditunjuk harus milik plan ini. Tanpa ini, uuid yang
+    // tidak ada berakhir jadi 500 dari foreign key, dan uuid milik plan lain
+    // bisa tertaut diam-diam.
+    if (isi.budgetItemId) await pastikanPosAnggaran(planId, isi.budgetItemId);
 
-  const [tugas] = await db
-    .insert(tasks)
-    .values({
-      planId,
-      title: isi.title,
-      category: isi.category,
-      dueDate: isi.dueDate ?? null,
-      status: isi.status,
-      priority: isi.priority,
-      assignee: isi.assignee ?? null,
-      budgetItemId: isi.budgetItemId ?? null,
-      notes: isi.notes ?? null,
-      sortOrder: isi.sortOrder,
-    })
-    .returning();
+    const [tugas] = await db
+      .insert(tasks)
+      .values({
+        planId,
+        title: isi.title,
+        category: isi.category,
+        dueDate: isi.dueDate ?? null,
+        status: isi.status,
+        priority: isi.priority,
+        assignee: isi.assignee ?? null,
+        budgetItemId: isi.budgetItemId ?? null,
+        notes: isi.notes ?? null,
+        sortOrder: isi.sortOrder,
+      })
+      .returning();
 
-  return NextResponse.json({ task: tugas }, { status: 201 });
+    return NextResponse.json({ task: tugas }, { status: 201 });
+  });
 });

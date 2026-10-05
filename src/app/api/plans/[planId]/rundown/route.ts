@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { rundownItems } from "@/db/schema";
 import { bacaJson, bungkus } from "@/lib/galat";
 import { konteksPlan } from "@/lib/api";
+import { HEADER_KUNCI, sekaliPerKunci } from "@/lib/idempotensi";
 import { skemaRundown } from "@/lib/skema";
 
 type Params = { params: Promise<{ planId: string }> };
@@ -35,19 +36,21 @@ export const POST = bungkus(async (req: Request, { params }: Params) => {
 
   const isi = skemaRundown.parse(await bacaJson(req));
 
-  const [baris] = await db
-    .insert(rundownItems)
-    .values({
-      planId,
-      title: isi.title,
-      startTime: isi.startTime,
-      durationMinutes: isi.durationMinutes,
-      location: isi.location ?? null,
-      picName: isi.picName ?? null,
-      notes: isi.notes ?? null,
-      sortOrder: isi.sortOrder,
-    })
-    .returning();
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    const [baris] = await db
+      .insert(rundownItems)
+      .values({
+        planId,
+        title: isi.title,
+        startTime: isi.startTime,
+        durationMinutes: isi.durationMinutes,
+        location: isi.location ?? null,
+        picName: isi.picName ?? null,
+        notes: isi.notes ?? null,
+        sortOrder: isi.sortOrder,
+      })
+      .returning();
 
-  return NextResponse.json({ item: baris }, { status: 201 });
+    return NextResponse.json({ item: baris }, { status: 201 });
+  });
 });

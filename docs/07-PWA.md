@@ -36,7 +36,7 @@ Empat strategi, satu per jenis request:
 | Navigasi halaman | Network first, fallback ke cache | Halaman harus selalu paling baru, tapi harus tetap terbuka luring |
 | Aset statis (`/_next/static/`) | Cache first | Nama file sudah mengandung hash, jadi tidak pernah berubah |
 | Font | Cache first, dengan batas ukuran | Font tidak berubah dalam masa pakai aplikasi |
-| Request `/api/` | Network only, dengan antrean luring | Data plan harus benar, tidak boleh dari cache basi |
+| Request `/api/` | Tidak pernah masuk cache, selalu ke jaringan | Data plan harus benar, tidak boleh dari cache basi. Yang luring masuk antrean di `src/lib/api-client.ts`, bukan di service worker |
 
 ### Kenapa API tidak pernah cache first
 
@@ -100,13 +100,13 @@ Struktur antrean:
 Alur pengiriman ulang:
 
 ```
-1. Service worker menangkap request yang gagal karena luring
-2. Body dibaca sebagai teks, lalu disimpan di antrean
+1. Request yang gagal karena luring ditangkap lapisan client, bukan service worker
+2. Body dibaca sebagai teks, lalu disimpan di antrean IndexedDB
 3. Client diberi tahu "menyimpan, kirim nanti"
 4. Saat online, antrean dikirim berurutan dari yang paling lama
 5. Kalau berhasil, item dihapus
 6. Kalau gagal karena konflik, item ditahan dan client diberi tahu
-7. Kalau gagal karena galat server, coba lagi dengan jeda bertambah
+7. Kalau gagal karena galat server, percobaan dicatat dan item dicoba lagi tiap 30 detik
 8. Setelah 5 kali gagal, item ditahan dan ditandai perlu perhatian manual
 ```
 
@@ -116,7 +116,7 @@ Urutan pengiriman penting. Kalau user menambah tugas lalu menghapus di luring, a
 
 ### Batas antrean
 
-Batas 200 item. Kalau lewat, item tertua dibuang dan user diberi tahu. Alasannya, antrean yang membengkak tanpa batas akan memperlambat setiap pengiriman, dan 200 perubahan luring sudah jauh melebihi yang realistis.
+Batas 500 item, dari `BATAS_ANTREAN` di `src/lib/luring.ts`. Kalau lewat, item tertua dibuang dan user diberi tahu. Alasannya, antrean yang membengkak tanpa batas akan memperlambat setiap pengiriman, dan 500 perubahan luring sudah jauh melebihi yang realistis.
 
 ---
 

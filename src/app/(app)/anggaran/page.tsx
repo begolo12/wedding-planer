@@ -54,19 +54,24 @@ type IsiAnggaran = {
   payments: Pembayaran[];
 };
 
-// Warna bagian bilah sebaran, urut mengikuti KATEGORI_UANG. Bagian bilah cuma
-// pemanis proporsi; angka dan labelnya ditulis di legenda bawahnya, jadi warna
-// bukan satu-satunya penanda.
+// Warna bagian bilah sebaran, dipakai bergiliran.
+//
+// Tiga token saja, sesuai batas "dua warna inti plus satu aksen" di DESIGN.md
+// bagian 3. Sebelumnya ada sembilan, dan satu layar dengan sembilan keluarga
+// warna membuat tidak ada lagi yang menonjol; legenda tetap ada, jadi warna
+// memang bukan satu-satunya penanda, tapi anggaran warnanya tetap dilanggar.
+//
+// Bagian ketiga memakai token garis, bukan token netral. Alasannya kontras:
+// jalur bilah dan netral jaraknya hanya satu langkah, jadi bagian ketiga nyaris
+// tidak terlihat. Garis punya kontras cukup terhadap jalur di kedua tema.
+//
+// Giliran berulang aman karena bagian yang bersebelahan selalu beda warna
+// selama jumlah bagian lebih dari satu. Pembeda sesungguhnya tetap label di
+// legenda, bukan warnanya.
 const WARNA_SEBARAN = [
   "var(--color-marigold)",
   "var(--color-terracotta)",
-  "var(--color-badge-latar)",
-  "var(--color-aksen-gelap)",
-  "var(--color-sage)",
   "var(--color-line)",
-  "var(--color-kotak-abu)",
-  "var(--color-badge-teks)",
-  "var(--color-netral)",
 ];
 
 type TabAnggaran = "pos" | "pengeluaran";
@@ -316,7 +321,7 @@ export default function HalamanAnggaran() {
       label: LABEL_KATEGORI_UANG[k],
       nilai: sebaran[k] ?? 0,
       persen: Math.round(((sebaran[k] ?? 0) / totals.planned) * 100),
-      warna: WARNA_SEBARAN[i] ?? "var(--color-netral)",
+      warna: WARNA_SEBARAN[i % WARNA_SEBARAN.length] ?? "var(--color-line)",
     })).filter((b) => b.nilai > 0);
   }, [sebaran, totals.planned]);
 
@@ -393,13 +398,6 @@ export default function HalamanAnggaran() {
 
       {/* Kartu besar: total rencana anggaran */}
       <section className="anggaran-hero">
-        <span className="anggaran-hias anggaran-hias-kanan" aria-hidden="true">
-          <IkonKilau size={72} />
-        </span>
-        <span className="anggaran-hias anggaran-hias-kiri" aria-hidden="true">
-          <IkonKilau size={52} />
-        </span>
-
         <div className="anggaran-hero-kepala">
           <span className="anggaran-ikon-bulat" aria-hidden="true">
             <IkonDompet size={18} />
@@ -519,8 +517,6 @@ export default function HalamanAnggaran() {
             </button>
           </div>
         </div>
-
-      <div className="panel-daftar-isi">
 
       {tab === "pos" ? (
         <>
@@ -708,7 +704,6 @@ export default function HalamanAnggaran() {
           </div>
         </>
       )}
-      </div>
       </div>
       {/* Akhir panel daftar anggaran */}
 

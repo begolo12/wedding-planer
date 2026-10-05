@@ -38,8 +38,44 @@ Kode aplikasi berada di direktori `src/`, dibangun dengan Next.js 15, PostgreSQL
 | [`docs/16-Laporan-dan-Bagikan.md`](docs/16-Laporan-dan-Bagikan.md) | Aturan laporan keadaan, bagikan ke WhatsApp, dan cetak PDF |
 | [`docs/17-Rencana-Build.md`](docs/17-Rencana-Build.md) | Rencana teknis dan langkah implementasi kode aplikasi |
 | [`docs/18-Rencana-Produksi-dan-Pemakaian-Harian.md`](docs/18-Rencana-Produksi-dan-Pemakaian-Harian.md) | Sisa pekerjaan supaya aplikasi siap dipakai setiap hari, diurutkan dari P0 sampai P3 |
+| [`docs/19-Rencana-Perbaikan-Audit.md`](docs/19-Rencana-Perbaikan-Audit.md) | Hasil audit, bukti tiap temuan, dan urutan perbaikannya |
 | [`AGENTS.md`](AGENTS.md) | Aturan kerja untuk AI yang menulis di repo ini, termasuk daftar periksa sebelum kirim |
 | [`CHANGELOG.md`](CHANGELOG.md) | Catatan setiap perubahan, dari sudut pandang pembaca |
+
+---
+
+## Skill agen
+
+Skill agen ada di `.agents/skills/`, dipasang dari [skills.sh](https://www.skills.sh). Satu skill satu direktori berisi `SKILL.md`. Skill dibaca dari checkout yang sama dengan kode, jadi ikut repo dan ikut `skills-lock.json`.
+
+Cara memasang ulang di mesin baru:
+
+```bash
+npx skills@latest experimental_install
+```
+
+Cara memperbarui ke versi terbaru dari sumbernya:
+
+```bash
+npx skills@latest update
+```
+
+Skill yang isinya disiplin kerja dan ikut terpakai saat menulis kode:
+
+| Skill | Kepakai untuk |
+|---|---|
+| `tdd` | Menulis fitur atau memperbaiki bug dengan uji lebih dulu |
+| `diagnosing-bugs` | Menelusuri bug yang sulit dan kemunduran performa |
+| `code-review` | Memeriksa perubahan menurut standar repo dan kecocokan dengan spec |
+| `codebase-design` | Merancang modul dalam: perilaku banyak di balik antarmuka kecil |
+| `domain-modeling` | Menjaga istilah proyek tetap satu arti, sejalan dengan `docs/15-Glosarium.md` |
+| `improve-codebase-architecture` | Survei berkala untuk mencari peluang penyederhanaan |
+| `vercel-react-best-practices` | Aturan performa React dan Next.js |
+| `vercel-composition-patterns` | Pola komposisi komponen React 19 |
+| `web-design-guidelines` | Memeriksa UI terhadap panduan antarmuka web |
+| `frontend-design` | Arah visual dan tipografi saat membangun layar baru |
+
+Sisanya skill alur kerja yang hanya jalan kalau dipanggil lewat `/skill:<nama>`, misalnya `grill-with-docs`, `to-spec`, `to-tickets`, dan `wayfinder`.
 
 ---
 

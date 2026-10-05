@@ -68,11 +68,10 @@ Istilah di bawah ini tidak diterjemahkan, karena memang istilah kerja yang dipak
 | `planId` | Plan yang memiliki data ini | Semua tabel |
 | `userId` | Pemilik akun | plans, sessions |
 | `weddingDate` | Tanggal hari-H | plans |
-| `isDayOf` | Tandai kalau tanggal ini adalah hari-H | dates |
+| `isDayOf` | Tandai kalau tanggal ini adalah hari-H | milestones |
 | `dueDate` | Batas akhir tugas, boleh kosong | tasks |
 | `status` | Status tugas | tasks |
 | `plannedAmount` | Anggaran yang direncanakan | budget_items |
-| `spentAmount` | Uang yang sudah keluar | budget_items |
 | `contactName` | Nama orang yang dihubungi | vendors |
 | `isFinal` | Tandai ini pembayaran terakhir | payments |
 | `rsvpStatus` | Kehadiran tamu | guests |

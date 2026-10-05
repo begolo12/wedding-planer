@@ -103,6 +103,7 @@ export default function HalamanTugas() {
   // Dialog konfirmasi hapus
   const [tugasDihapus, setTugasDihapus] = useState<TugasLengkap | null>(null);
   const [sedangHapus, setSedangHapus] = useState(false);
+  const [sedangUrut, setSedangUrut] = useState(false);
 
   // Form state
   const [formJudul, setFormJudul] = useState("");
@@ -236,6 +237,42 @@ export default function HalamanTugas() {
     }
   }
 
+  /**
+   * Geser satu tugas satu langkah, lalu simpan urutan seluruh daftar.
+   *
+   * Yang dikirim ke server adalah daftar id lengkap, bukan diff, sesuai
+   * docs/04-API-Contract.md. Alasannya ditulis di sana: kiriman berbasis
+   * selisih meninggalkan urutan setengah berubah kalau satu request gagal,
+   * sedangkan daftar lengkap selalu bisa dikirim ulang.
+   *
+   * Urutan ditampilkan lebih dulu, lalu dimuat ulang dari server supaya angka
+   * yang tampil tidak pernah menyimpang dari yang tersimpan.
+   */
+  async function geserTugas(tugas: TugasLengkap, arah: -1 | 1) {
+    if (!planId || sedangUrut) return;
+
+    const urutanSekarang = semuaTugas.map((t) => t.id);
+    const dari = urutanSekarang.indexOf(tugas.id);
+    const ke = dari + arah;
+    if (dari < 0 || ke < 0 || ke >= urutanSekarang.length) return;
+
+    const urutanBaru = [...urutanSekarang];
+    [urutanBaru[dari], urutanBaru[ke]] = [urutanBaru[ke], urutanBaru[dari]];
+
+    setSedangUrut(true);
+    try {
+      await minta(`/api/plans/${planId}/tasks/reorder`, {
+        method: "POST",
+        body: { taskIds: urutanBaru },
+      });
+      await muatTugas();
+    } catch (err) {
+      toast(pesanGalat(err));
+    } finally {
+      setSedangUrut(false);
+    }
+  }
+
   const semuaTugas = dataTugas?.tasks ?? [];
 
   // Angka ringkasan progres. Dihitung dari data yang sudah dimuat, sama seperti
@@ -363,32 +400,6 @@ export default function HalamanTugas() {
         ) : null}
       </div>
 
-      {/* Kartu progres: angka besar, bar, dan satu kalimat yang jujur
-          mengikuti keadaan, bukan pujian yang tidak cocok dengan 0 persen
-          (DESIGN.md bagian 6). */}
-      <section className="kartu-progres">
-        <p className="kartu-progres-angka">
-          {totalTugas > 0 ? (
-            <>
-              {persenProgres}% <span>dari {totalTugas} tugas selesai</span>
-            </>
-          ) : (
-            <>
-              Belum ada tugas <span>belum ada apa pun untuk diselesaikan</span>
-            </>
-          )}
-        </p>
-        <div className="rencana-bar">
-          <div className="rencana-bar-isi" style={{ width: `${persenProgres}%` }} />
-        </div>
-        <p className="kartu-progres-ket">
-          {teksMundur ? `Hari besar ${teksMundur}. ` : ""}
-          {tugasSelesai > 0
-            ? `${tugasSelesai} tugas selesai, ${totalTugas - tugasSelesai} masih tersisa.`
-            : "Belum ada tugas yang selesai. Mulai dari yang paling dekat dengan tanggal."}
-        </p>
-      </section>
-
       {/* Jalan pintas template, satu-satunya jalan kedua menuju tugas pertama. */}
       <div className="aksi-baris">
         {bisaUbah ? (
@@ -409,6 +420,10 @@ export default function HalamanTugas() {
         </p>
       ) : null}
 
+      {/* Dua kolom di desktop: kolom utama berisi panel daftar, rel kanan
+          berisi kartu ringkasan progres (DESIGN.md komposisi desktop poin 3).
+          Di bawah 1023px tetap satu kolom seperti sekarang. */}
+      <div className="grid-daftar">
       {/* Satu panel untuk tab modul, saringan, daftar, dan keadaan kosongnya,
           supaya keadaan kosong tidak lagi mengambang di kanvas kosong dan
           perataannya sama dengan baris saringan di atasnya
@@ -587,6 +602,28 @@ export default function HalamanTugas() {
                             </button>
                           </>
                         ) : null}
+                        {bisaUbah ? (
+                          <div className="rencana-urut" role="group" aria-label={`Urutkan ${t.title}`}>
+                            <button
+                              type="button"
+                              className="tombol tombol-sekunder tombol-kecil"
+                              onClick={() => geserTugas(t, -1)}
+                              disabled={sedangUrut}
+                              aria-label={`Naikkan ${t.title}`}
+                            >
+                              {"\u25B2"}
+                            </button>
+                            <button
+                              type="button"
+                              className="tombol tombol-sekunder tombol-kecil"
+                              onClick={() => geserTugas(t, 1)}
+                              disabled={sedangUrut}
+                              aria-label={`Turunkan ${t.title}`}
+                            >
+                              {"\u25BC"}
+                            </button>
+                          </div>
+                        ) : null}
                       </div>
                     </article>
                   ))}
@@ -607,6 +644,39 @@ export default function HalamanTugas() {
       )}
       </div>
       {/* Akhir panel daftar tugas */}
+
+      {/* Rel kanan: ringkasan progres tugas. Isi rel hanya ringkasan atau
+          aksi cepat, jadi kartu ini yang pindah ke sini, bukan daftarnya
+          (DESIGN.md komposisi desktop poin 3). */}
+      <aside className="rel-samping">
+        {/* Kartu progres: angka besar, bar, dan satu kalimat yang jujur
+            mengikuti keadaan, bukan pujian yang tidak cocok dengan 0 persen
+            (DESIGN.md bagian 6). */}
+        <section className="kartu-progres">
+          <p className="kartu-progres-angka">
+            {totalTugas > 0 ? (
+              <>
+                {persenProgres}% <span>dari {totalTugas} tugas selesai</span>
+              </>
+            ) : (
+              <>
+                Belum ada tugas <span>belum ada apa pun untuk diselesaikan</span>
+              </>
+            )}
+          </p>
+          <div className="rencana-bar">
+            <div className="rencana-bar-isi" style={{ width: `${persenProgres}%` }} />
+          </div>
+          <p className="kartu-progres-ket">
+            {teksMundur ? `Hari besar ${teksMundur}. ` : ""}
+            {tugasSelesai > 0
+              ? `${tugasSelesai} tugas selesai, ${totalTugas - tugasSelesai} masih tersisa.`
+              : "Belum ada tugas yang selesai. Mulai dari yang paling dekat dengan tanggal."}
+          </p>
+        </section>
+      </aside>
+      </div>
+      {/* Akhir grid dua kolom */}
 
       {/* Lembar Tambah / Ubah Tugas */}
       <Lembar

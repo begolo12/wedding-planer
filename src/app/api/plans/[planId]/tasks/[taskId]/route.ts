@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { tasks } from "@/db/schema";
 import { bungkus, bacaJson, idUuid, tidakDitemukan } from "@/lib/galat";
 import { konteksPlan, pastikanPosAnggaran } from "@/lib/api";
+import { HEADER_KUNCI, sekaliPerKunci } from "@/lib/idempotensi";
 import { skemaTugasUbah } from "@/lib/skema";
 
 type Params = { params: Promise<{ planId: string; taskId: string }> };
@@ -33,27 +34,31 @@ export const PATCH = bungkus(async (req: Request, { params }: Params) => {
   // Sama seperti create: pos anggaran yang ditunjuk harus milik plan ini.
   if (isi.budgetItemId) await pastikanPosAnggaran(planId, isi.budgetItemId);
 
-  // completedAt diisi saat status berubah jadi selesai, dan dikosongkan lagi
-  // kalau dibuka. Tanpa ini, tugas yang dibuka ulang tetap terlihat selesai
-  // di hitungan lain.
-  const tambahan: Record<string, unknown> = {};
-  if (isi.status === "selesai") tambahan.completedAt = new Date();
-  if (isi.status === "belum") tambahan.completedAt = null;
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    // completedAt diisi saat status berubah jadi selesai, dan dikosongkan lagi
+    // kalau dibuka. Tanpa ini, tugas yang dibuka ulang tetap terlihat selesai
+    // di hitungan lain.
+    const tambahan: Record<string, unknown> = {};
+    if (isi.status === "selesai") tambahan.completedAt = new Date();
+    if (isi.status === "belum") tambahan.completedAt = null;
 
-  const [tugas] = await db
-    .update(tasks)
-    .set({ ...isi, ...tambahan })
-    .where(and(eq(tasks.planId, planId), eq(tasks.id, taskId)))
-    .returning();
+    const [tugas] = await db
+      .update(tasks)
+      .set({ ...isi, ...tambahan })
+      .where(and(eq(tasks.planId, planId), eq(tasks.id, taskId)))
+      .returning();
 
-  return NextResponse.json({ task: tugas });
+    return NextResponse.json({ task: tugas });
+  });
 });
 
-export const DELETE = bungkus(async (_req: Request, { params }: Params) => {
+export const DELETE = bungkus(async (req: Request, { params }: Params) => {
   const { planId, taskId } = await params;
   await konteksPlan(planId);
   await ambilTugas(planId, taskId);
 
-  await db.delete(tasks).where(and(eq(tasks.planId, planId), eq(tasks.id, taskId)));
-  return new NextResponse(null, { status: 204 });
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    await db.delete(tasks).where(and(eq(tasks.planId, planId), eq(tasks.id, taskId)));
+    return new NextResponse(null, { status: 204 });
+  });
 });

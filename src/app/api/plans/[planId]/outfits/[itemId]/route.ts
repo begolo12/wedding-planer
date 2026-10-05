@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { outfits } from "@/db/schema";
 import { bacaJson, bungkus, idUuid, tidakDitemukan } from "@/lib/galat";
 import { konteksPlan } from "@/lib/api";
+import { HEADER_KUNCI, sekaliPerKunci } from "@/lib/idempotensi";
 import { skemaBusanaUbah } from "@/lib/skema";
 
 type Params = { params: Promise<{ planId: string; itemId: string }> };
@@ -26,20 +27,24 @@ export const PATCH = bungkus(async (req: Request, { params }: Params) => {
 
   const isi = skemaBusanaUbah.parse(await bacaJson(req));
 
-  const [baris] = await db
-    .update(outfits)
-    .set(isi)
-    .where(and(eq(outfits.planId, planId), eq(outfits.id, itemId)))
-    .returning();
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    const [baris] = await db
+      .update(outfits)
+      .set(isi)
+      .where(and(eq(outfits.planId, planId), eq(outfits.id, itemId)))
+      .returning();
 
-  return NextResponse.json({ outfit: baris });
+    return NextResponse.json({ outfit: baris });
+  });
 });
 
-export const DELETE = bungkus(async (_req: Request, { params }: Params) => {
+export const DELETE = bungkus(async (req: Request, { params }: Params) => {
   const { planId, itemId } = await params;
   await konteksPlan(planId);
   await ambil(planId, itemId);
 
-  await db.delete(outfits).where(and(eq(outfits.planId, planId), eq(outfits.id, itemId)));
-  return new NextResponse(null, { status: 204 });
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    await db.delete(outfits).where(and(eq(outfits.planId, planId), eq(outfits.id, itemId)));
+    return new NextResponse(null, { status: 204 });
+  });
 });

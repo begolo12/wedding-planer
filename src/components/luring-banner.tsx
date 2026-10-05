@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { cekKoneksi, jumlahAntrean, kirimAntrean } from "@/lib/luring";
+import { cekKoneksi, buangItemMacet, itemMacet, jumlahAntrean, kirimAntrean } from "@/lib/luring";
 import { bersihkanAntreanPenuh, catatLuring, useStatusLuring } from "@/lib/status-luring";
 
 /**
@@ -34,6 +34,7 @@ export function LuringBanner() {
   const [antrean, setAntrean] = useState(0);
   const [mengirim, setMengirim] = useState(false);
   const [pesanSelesai, setPesanSelesai] = useState<string | null>(null);
+  const [macet, setMacet] = useState(0);
   const { perluMasuk, gagal, pesanGagal, dibuang, dariPerangkat } = useStatusLuring();
 
   useEffect(() => {
@@ -43,6 +44,10 @@ export function LuringBanner() {
       const tersambung = await cekKoneksi();
       if (!hidup) return;
       setLuring(!tersambung);
+      // Item yang sudah menembus batas percobaan tidak lagi dikirim otomatis.
+      // Jumlahnya dibaca di sini supaya pita bisa menawarkan tombol buang,
+      // bukan membiarkannya macet tanpa jalan keluar.
+      setMacet((await itemMacet()).length);
       // Penjaga koneksi ini penulis tunggal status luring untuk seluruh layar.
       // Tanpa ini, useStatusLuring().luring selalu false dan tombol ubah tidak
       // pernah disembunyikan saat data dibaca dari perangkat.
@@ -86,7 +91,16 @@ export function LuringBanner() {
     const hasil = await kirimAntrean();
     setMengirim(false);
     setAntrean(hasil.tersisa);
+    setMacet((await itemMacet()).length);
     if (hasil.terkirim > 0 && hasil.tersisa === 0) setPesanSelesai("Semua perubahan sudah terkirim.");
+  }
+
+  /** Buang item yang sudah tidak bisa dikirim otomatis, supaya antrean bersih. */
+  async function buangMacet() {
+    const dibuangMacet = await buangItemMacet();
+    setMacet(0);
+    setAntrean(await jumlahAntrean());
+    if (dibuangMacet > 0) setPesanSelesai(`${dibuangMacet} perubahan yang macet dibuang.`);
   }
 
   // Pemicu utama dari src/lib/status-luring.ts, diisi src/lib/api-client.ts:
@@ -107,9 +121,11 @@ export function LuringBanner() {
     teks = `Antrean penuh. Perubahan lama yang belum terkirim dibuang (${dibuang} item).`;
     nada = "bahaya";
   } else if (gagal > 0) {
-    teks = pesanGagal
-      ? `Satu perubahan gagal dikirim dan perlu dikirim ulang manual. ${pesanGagal}`
-      : "Satu perubahan gagal dikirim dan perlu dikirim ulang manual.";
+    teks = macet > 0
+      ? `${macet} perubahan tidak bisa dikirim otomatis dan perlu perhatian. ${pesanGagal ?? ""}`.trim()
+      : pesanGagal
+        ? `Satu perubahan gagal dikirim dan perlu dikirim ulang manual. ${pesanGagal}`
+        : "Satu perubahan gagal dikirim dan perlu dikirim ulang manual.";
     nada = "bahaya";
   } else if (tampilkanPerangkat) {
     teks = antrean > 0
@@ -133,6 +149,17 @@ export function LuringBanner() {
       ) : dibuang > 0 ? (
         <button type="button" className="tombol tombol-halus" onClick={bersihkanAntreanPenuh}>
           Tutup
+        </button>
+      ) : gagal > 0 && macet > 0 ? (
+        // Item yang macet tidak akan berhasil dikirim ulang, jadi tombolnya
+        // "Buang", bukan "Kirim ulang". Tanpa jalan keluar ini, satu item
+        // berisi data yang ditolak server menahan antrean selamanya.
+        <button
+          type="button"
+          className="tombol tombol-halus"
+          onClick={() => void buangMacet()}
+        >
+          Buang yang macet
         </button>
       ) : gagal > 0 ? (
         <button type="button" className="tombol tombol-halus" onClick={kirimUlang} disabled={mengirim}>

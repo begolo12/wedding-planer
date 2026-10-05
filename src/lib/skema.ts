@@ -73,12 +73,25 @@ const teksOpsional = (maks = 500) =>
     .nullable()
     .transform((v) => (v ? v : null));
 
-/** Uang selalu integer rupiah. Tidak pernah desimal, tidak pernah float. */
+/**
+ * Uang selalu integer rupiah. Tidak pernah desimal, tidak pernah float.
+ *
+ * Batas atasnya 2_147_483_647, yaitu batas kolom `integer` Postgres, bukan
+ * angka bulat yang enak dilihat. Sebelumnya batasnya 100_000_000_000 dan itu
+ * lebih besar dari kapasitas kolom: nilai seperti 3 miliar lolos validasi,
+ * lalu Postgres melempar `integer out of range` dan jawabannya 500, padahal
+ * kontraknya 422. Batas validasi harus sama dengan kapasitas penyimpanan.
+ *
+ * Angka ini juga jauh di atas kebutuhan nyata: pernikahan termahal pun tidak
+ * menyentuh dua miliar rupiah per pos.
+ */
+const BATAS_UANG = 2_147_483_647;
+
 const uang = z
   .coerce.number()
   .int("Jumlah harus angka bulat, tanpa desimal.")
   .min(0, "Jumlah tidak boleh kurang dari nol.")
-  .max(100_000_000_000, "Jumlah terlalu besar.");
+  .max(BATAS_UANG, "Jumlah terlalu besar.");
 
 /**
  * Nomor WhatsApp, dipakai tamu dan vendor dari satu tempat.

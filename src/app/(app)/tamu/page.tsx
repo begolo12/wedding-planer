@@ -371,9 +371,14 @@ export default function HalamanTamu() {
         </p>
       ) : null}
 
+      {/* Susunan dua kolom: daftar di kolom utama, ringkasan di rel kanan
+          (DESIGN.md komposisi desktop poin 3). Di bawah 1023px tetap satu
+          kolom, seperti contoh di /tamu/impor. */}
+      <div className="grid-daftar">
       {/* Ringkasan tamu */}
       {summary && summary.baris > 0 ? (
-        <div className="tamu-hero">
+        <aside className="rel-samping">
+        <div className="tamu-hero kartu">
           <div className="tamu-hero-atas">
             <div className="tamu-hero-kiri">
               <div className="tamu-hero-kepala">
@@ -450,6 +455,7 @@ export default function HalamanTamu() {
             </div>
           </div>
         </div>
+        </aside>
       ) : null}
 
       {/* Satu panel untuk pencarian, saringan, daftar, dan keadaan kosongnya,
@@ -745,6 +751,8 @@ export default function HalamanTamu() {
           </div>
         </section>
       ) : null}
+      </div>
+      {/* Akhir susunan dua kolom */}
 
       {/* Catatan penutup */}
       <div className="tamu-tips">

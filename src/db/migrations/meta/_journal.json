@@ -15,6 +15,13 @@
       "when": 1791094919194,
       "tag": "0001_outstanding_phantom_reporter",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791139697310,
+      "tag": "0002_curved_nebula",
+      "breakpoints": true
     }
   ]
 }

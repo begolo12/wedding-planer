@@ -10,6 +10,19 @@ import type { Laporan } from "@/lib/laporan";
 import { LABEL_AUDIEN, type Audien } from "@/lib/konstanta";
 import { tanggalPanjangDari, jamDari } from "@/lib/format";
 
+/**
+ * Bentuk balasan `/api/public/share/[token]`.
+ *
+ * `report` sengaja sebagian: server hanya mengirim bagian yang sesuai target
+ * tautan (docs/16 bagian 4). Tautan keluarga tidak membawa uang, tugas, tamu,
+ * dan vendor, jadi kunci itu tidak bisa diandalkan ada.
+ */
+export type ReportBagikan = Pick<
+  Laporan,
+  "dibuatPada" | "judul" | "hitungMundur" | "rundown" | "busana" | "jadwal"
+> &
+  Partial<Pick<Laporan, "uang" | "tugas" | "tamu" | "vendor">>;
+
 type ResponBagikan = {
   tipe: "laporan" | "pengumuman";
   label?: string;
@@ -20,7 +33,7 @@ type ResponBagikan = {
     weddingDate: string | null;
     isDayOfDate?: string | null;
   };
-  report?: Laporan;
+  report?: ReportBagikan;
   announcement?: {
     id: string;
     title: string;
@@ -129,9 +142,20 @@ export default function HalamanBagikanPublik({
     );
   }
 
-  // Tampilan Laporan Lengkap
+  // Tampilan Laporan.
+  //
+  // Isinya mengikuti `target` tautan. Tautan keluarga hanya berisi jadwal dan
+  // rundown, sesuai docs/16 bagian 4, jadi bagian uang, tugas, tamu, dan vendor
+  // tidak dirender. Server sudah tidak mengirim datanya; penjagaan di sini
+  // supaya layar tidak pecah kalau ada tautan lama yang masih membawanya.
   const rep = data.report;
   if (!rep) return null;
+
+  const lengkap = data.target === "laporan";
+  const uang = rep.uang;
+  const tugas = rep.tugas;
+  const tamu = rep.tamu;
+  const vendor = rep.vendor;
 
   return (
     <main className="bagikan" data-skala={ukuranFont}>
@@ -194,53 +218,56 @@ export default function HalamanBagikanPublik({
       </div>
 
       <div className="tumpuk">
-        {/* Ringkasan Anggaran */}
+        {/* Ringkasan Anggaran. Hanya di tautan Laporan. */}
+        {lengkap && uang ? (
         <section className="kartu tumpuk-sedang">
           <h2>Ringkasan Anggaran</h2>
 
           <div className="rekap">
             <div className="rekap-item">
               <span className="rekap-nilai">
-                <Rupiah nilai={rep.uang.planned} />
+                <Rupiah nilai={uang.planned} />
               </span>
               <span className="rekap-label">Rencana Batas</span>
             </div>
             <div className="rekap-item">
               <span className="rekap-nilai teks-aksen">
-                <Rupiah nilai={rep.uang.paid} />
+                <Rupiah nilai={uang.paid} />
               </span>
-              <span className="rekap-label">Sudah Dibayar ({rep.uang.persenTerpakai}%)</span>
+              <span className="rekap-label">Sudah Dibayar ({uang.persenTerpakai}%)</span>
             </div>
             <div className="rekap-item">
               <span className="rekap-nilai">
-                <Rupiah nilai={Math.abs(rep.uang.remaining)} />
+                <Rupiah nilai={Math.abs(uang.remaining)} />
               </span>
               <span className="rekap-label">
-                {rep.uang.remaining < 0 ? "Lebih dari anggaran" : "Sisa anggaran"}
+                {uang.remaining < 0 ? "Lebih dari anggaran" : "Sisa anggaran"}
               </span>
             </div>
           </div>
 
           <BudgetBar
-            terpakai={rep.uang.paid}
-            batas={rep.uang.planned}
+            terpakai={uang.paid}
+            batas={uang.planned}
             label="Penggunaan Anggaran"
           />
         </section>
+        ) : null}
 
-        {/* Tugas & Tamu */}
+        {/* Tugas & Tamu. Hanya di tautan Laporan. */}
+        {lengkap && tugas && tamu ? (
         <div className="kisi-kartu">
           <section className="kartu tumpuk-rapat">
             <h2>Kesiapan Tugas</h2>
             <div className="rekap rekap-dua">
               <div className="rekap-item">
                 <span className="rekap-nilai">
-                  {rep.tugas.selesai} / {rep.tugas.total}
+                  {tugas.selesai} / {tugas.total}
                 </span>
                 <span className="rekap-label">Selesai</span>
               </div>
               <div className="rekap-item">
-                <span className="rekap-nilai">{rep.tugas.total - rep.tugas.selesai}</span>
+                <span className="rekap-nilai">{tugas.total - tugas.selesai}</span>
                 <span className="rekap-label">Tugas tersisa</span>
               </div>
             </div>
@@ -250,18 +277,19 @@ export default function HalamanBagikanPublik({
             <h2>Tamu Undangan</h2>
             <div className="rekap rekap-dua">
               <div className="rekap-item">
-                <span className="rekap-nilai">{rep.tamu.orang}</span>
+                <span className="rekap-nilai">{tamu.orang}</span>
                 <span className="rekap-label">Perkiraan Hadir</span>
               </div>
               <div className="rekap-item">
                 <span className="rekap-nilai teks-aksen">
-                  {rep.tamu.kursi}
+                  {tamu.kursi}
                 </span>
                 <span className="rekap-label">Pasti Hadir (Kursi)</span>
               </div>
             </div>
           </section>
         </div>
+        ) : null}
 
         {/* Jadwal Acara (tanggal penting) */}
         {rep.jadwal.length > 0 ? (
@@ -306,33 +334,35 @@ export default function HalamanBagikanPublik({
           )}
         </section>
 
-        {/* Vendor yang Belum Lunas */}
+        {/* Vendor yang Belum Lunas. Hanya di tautan Laporan. */}
+        {lengkap && vendor ? (
         <section className="kartu tumpuk-rapat">
           <h2>Status Vendor &amp; Tagihan</h2>
           <div className="bagikan-tabel">
             <div className="bagikan-tabel-baris">
               <span>Total Tagihan Vendor</span>
               <strong>
-                <Rupiah nilai={rep.vendor.totalTagihan} />
+                <Rupiah nilai={vendor.totalTagihan} />
               </strong>
             </div>
             <div className="bagikan-tabel-baris">
               <span>Sudah Dibayarkan</span>
               <strong className="angka teks-aksen">
-                <Rupiah nilai={rep.vendor.totalDibayar} />
+                <Rupiah nilai={vendor.totalDibayar} />
               </strong>
             </div>
             <div className="bagikan-tabel-baris">
               <span>Vendor Belum Lunas</span>
               <strong
                 className="angka"
-                data-nada={rep.vendor.belumLunas > 0 ? "bahaya" : undefined}
+                data-nada={vendor.belumLunas > 0 ? "bahaya" : undefined}
               >
-                {rep.vendor.belumLunas} vendor
+                {vendor.belumLunas} vendor
               </strong>
             </div>
           </div>
         </section>
+        ) : null}
 
         <p className="bagikan-catatan">
           Halaman ini bersifat baca-saja dan tidak dapat melakukan perubahan data.

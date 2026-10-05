@@ -21,7 +21,7 @@ test("batas laju POST /api/plans: 30 kali 422 lalu ke-31 429", async ({ page, ba
     await page.goto("/masuk");
 
     const daftar = await page.request.post("/api/auth/sign-up/email", {
-      headers: { origin: baseURL ?? "http://localhost:3100" },
+      headers: { origin: baseURL ?? "http://localhost:3110" },
       data: { email, password: SANDI_UJI, name: "Uji Batas" },
     });
     expect(daftar.status(), await daftar.text()).toBe(200);

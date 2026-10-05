@@ -68,6 +68,7 @@ Satu rencana. Satu pasangan bisa punya lebih dari satu, misalnya rencana terpisa
 | `eventTime` | `time`, nullable | |
 | `type` | `text` | Enum: `akad`, `resepsi`, `prewedding`, `adat`, `seragam`, `lainnya` |
 | `isDayOf` | `boolean` | Default false |
+| `invitationUrl` | `text`, nullable | Tautan undangan digital untuk acara ini, nullable karena banyak acara tidak punya undangan sendiri |
 | `notes` | `text`, nullable | |
 | `sortOrder` | `integer` | Untuk urutan manual kalau jam sama |
 | `createdAt` | `timestamptz` | |

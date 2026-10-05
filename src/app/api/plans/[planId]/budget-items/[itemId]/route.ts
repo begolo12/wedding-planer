@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { budgetItems } from "@/db/schema";
 import { bacaJson, bungkus, idUuid, tidakDitemukan } from "@/lib/galat";
 import { konteksPlan } from "@/lib/api";
+import { HEADER_KUNCI, sekaliPerKunci } from "@/lib/idempotensi";
 import { skemaPosAnggaranUbah } from "@/lib/skema";
 
 type Params = { params: Promise<{ planId: string; itemId: string }> };
@@ -26,13 +27,15 @@ export const PATCH = bungkus(async (req: Request, { params }: Params) => {
 
   const isi = skemaPosAnggaranUbah.parse(await bacaJson(req));
 
-  const [baris] = await db
-    .update(budgetItems)
-    .set(isi)
-    .where(and(eq(budgetItems.planId, planId), eq(budgetItems.id, itemId)))
-    .returning();
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    const [baris] = await db
+      .update(budgetItems)
+      .set(isi)
+      .where(and(eq(budgetItems.planId, planId), eq(budgetItems.id, itemId)))
+      .returning();
 
-  return NextResponse.json({ item: baris });
+    return NextResponse.json({ item: baris });
+  });
 });
 
 /**
@@ -43,21 +46,23 @@ export const PATCH = bungkus(async (req: Request, { params }: Params) => {
  * tidak berubah diam-diam. Menghapus pos tidak boleh menghapus uang yang
  * sudah keluar.
  */
-export const DELETE = bungkus(async (_req: Request, { params }: Params) => {
+export const DELETE = bungkus(async (req: Request, { params }: Params) => {
   const { planId, itemId } = await params;
   await konteksPlan(planId);
   await ambil(planId, itemId);
 
-  const [dipakai] = await db
-    .select({ jumlah: sql<number>`count(*)::int` })
-    .from(budgetItems)
-    .where(and(eq(budgetItems.planId, planId), eq(budgetItems.id, itemId)));
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    const [dipakai] = await db
+      .select({ jumlah: sql<number>`count(*)::int` })
+      .from(budgetItems)
+      .where(and(eq(budgetItems.planId, planId), eq(budgetItems.id, itemId)));
 
-  if (!dipakai) throw tidakDitemukan("Pos anggaran");
+    if (!dipakai) throw tidakDitemukan("Pos anggaran");
 
-  await db
-    .delete(budgetItems)
-    .where(and(eq(budgetItems.planId, planId), eq(budgetItems.id, itemId)));
+    await db
+      .delete(budgetItems)
+      .where(and(eq(budgetItems.planId, planId), eq(budgetItems.id, itemId)));
 
-  return new NextResponse(null, { status: 204 });
+    return new NextResponse(null, { status: 204 });
+  });
 });

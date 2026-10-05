@@ -27,6 +27,40 @@ Aturan singkat:
 | Tulis alasan kalau tidak jelas | Pembaca versi berikutnya tidak perlu menebak |
 | Tambah entri baru di atas | Yang terbaru selalu di paling atas |
 
+## [Belum dirilis]
+
+### Ubah
+
+- Dokumen disinkronkan dengan kode: docs/18 memakai nomor baris dan jumlah test yang benar (150 unit, 9 e2e), baris nama produk diperbarui karena manifest sudah memakai `NAMA_PRODUK`, docs/19 diberi penanda 13 temuan selesai
+- Port uji e2e pindah dari 3100 ke 3110. Di mesin pengembangan port 3100 dipegang `next start` dari proyek lain, dan karena Playwright memakai ulang server yang sudah mendengar di port itu, test menabrak aplikasi yang salah sampai tiga test gagal dengan koneksi ditolak
+- Batas laju POST pembayaran diukur: 60 permintaan pertama menjawab 201, percobaan ke-61 menjawab 429 dengan header `X-Retry-After`. Sebelumnya kodenya ada tapi belum terukur, dan sekarang celah itu tertutup di docs/18
+- Tab Rencana mempertahankan penanda aktif sampai halaman detail turunannya, termasuk Vendor, supaya posisi pengguna tetap terbaca setelah membuka detail
+- Navigasi desktop memakai ikon dan bidang tinta untuk menu aktif agar posisi layar lebih mudah dikenali. Vendor tidak lagi menandai dua menu sidebar sekaligus, tetapi tetap masuk Rencana pada navigasi mobile
+- Navigasi mobile memiliki bidang aktif dan ruang safe area agar isi tidak tertutup bilah bawah
+- Beranda kosong memakai kepala halaman dan panel awal. Aksi tambah disembunyikan saat luring agar tidak menawarkan perubahan yang belum bisa dikirim
+- Hero Beranda memakai label tanpa bidang aksen tambahan, hitung mundur tanpa bayangan, dan kolom yang bisa menyusut agar hierarki lebih tenang dan layar sempit tidak melebar
+- Pratinjau lokal tersedia lewat task `Wedding UI preview` pada port 3015. Aturan navigasi aktif dilindungi unit test
+
+## [0.16.2] - 5 Oktober 2026
+
+### Tambah
+
+- Empat puluh satu skill agen di `.agents/skills/`, dipasang dari `skills.sh`. Isinya disiplin kerja yang dipakai agen saat menulis kode: `tdd`, `diagnosing-bugs`, `code-review`, `codebase-design`, `domain-modeling`, `improve-codebase-architecture`, `vercel-react-best-practices`, `web-design-guidelines`, `vercel-composition-patterns`, dan `frontend-design`. Sisanya skill alur kerja yang hanya dipanggil manual, misalnya `grill-with-docs` dan `to-spec`
+
+### Ubah
+
+- `.agents/` dan `skills-lock.json` berhenti diabaikan `.gitignore`. Alasannya: skill dibaca dari checkout yang sama dengan kode, jadi kalau tidak ikut repo, agen di mesin lain akan jalan tanpa skill yang sama. Isi `.agents/skills/` berasal dari repo pihak ketiga, jadi setiap berkas baru di sana harus dibaca sebelum dipercaya
+
+## [0.16.1] - 5 Oktober 2026
+
+### Tambah
+
+- `docs/19-Rencana-Perbaikan-Audit.md`: hasil audit menyeluruh, dengan bukti tiap temuan dan urutan perbaikannya
+
+### Perbaiki
+
+- Rujukan dokumen terbaru ditambahkan ke indeks `README.md`
+
 ## [0.16.0] - 4 Oktober 2026
 
 Putaran ini memperbaiki komposisi tampilan di layar lebar. Owner produk melaporkan halaman Rencana di desktop terlihat setengah jadi: kolom konten hanya memakai sekitar 830px dari 1568px, keadaan kosong melayang di tengah sementara saringan rata kiri, dan dua tombol untuk aksi yang sama. Aturan komposisi desktop sekarang ditulis di `DESIGN.md` bagian 5 dan berlaku seragam.

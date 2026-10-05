@@ -197,7 +197,11 @@ export default function HalamanVendor() {
         </div>
       </div>
 
-      {/* Satu panel untuk tab, ringkasan, saringan, dan daftar vendor. */}
+      {/* Susunan dua kolom: daftar vendor di kolom utama, ringkasan keuangan
+          di rel kanan (DESIGN.md komposisi desktop poin 3). Di bawah 1023px
+          tetap satu kolom, seperti contoh di /tamu/impor. */}
+      <div className="grid-daftar">
+      {/* Satu panel untuk tab, saringan, dan daftar vendor. */}
       <div className="panel-daftar" aria-label="Daftar vendor">
         <div className="panel-daftar-kepala">
           <TabRencana />
@@ -208,37 +212,6 @@ export default function HalamanVendor() {
           Data ini dibuka dari cadangan perangkat. Menambah atau mengubah vendor tidak bisa
           dilakukan sampai ada koneksi.
         </p>
-      ) : null}
-
-      {/* Ringkasan Keuangan Vendor */}
-      {vendors.length > 0 ? (
-        <div className="rekap">
-          <div className="rekap-item">
-            <span className="rekap-nilai">{vendors.length}</span>
-            <span className="rekap-label">Total vendor</span>
-          </div>
-          <div className="rekap-item">
-            <span className="rekap-nilai rekap-nilai-kecil">
-              <Rupiah nilai={rekap.totalDibook} />
-            </span>
-            <span className="rekap-label">Total kontrak</span>
-          </div>
-          <div className="rekap-item">
-            <span className="rekap-nilai rekap-nilai-kecil teks-aksen">
-              <Rupiah nilai={rekap.totalTerbayar} />
-            </span>
-            <span className="rekap-label">Sudah terbayar</span>
-          </div>
-          <div className="rekap-item">
-            <span
-              className="rekap-nilai rekap-nilai-kecil"
-              data-nada={rekap.totalSisa > 0 ? "bahaya" : undefined}
-            >
-              <Rupiah nilai={rekap.totalSisa} />
-            </span>
-            <span className="rekap-label">Sisa tagihan</span>
-          </div>
-        </div>
       ) : null}
 
       {/* Filter Bar */}
@@ -394,6 +367,44 @@ export default function HalamanVendor() {
         </div>
       )}
       </div>
+      {/* Akhir panel vendor */}
+
+      {/* Rel kanan: ringkasan keuangan vendor. Isi rel hanya ringkasan atau
+          aksi cepat, jadi kartu rekap yang pindah ke sini, bukan daftarnya
+          (DESIGN.md komposisi desktop poin 3). */}
+      {vendors.length > 0 ? (
+        <aside className="rel-samping">
+          <div className="rekap">
+            <div className="rekap-item">
+              <span className="rekap-nilai">{vendors.length}</span>
+              <span className="rekap-label">Total vendor</span>
+            </div>
+            <div className="rekap-item">
+              <span className="rekap-nilai rekap-nilai-kecil">
+                <Rupiah nilai={rekap.totalDibook} />
+              </span>
+              <span className="rekap-label">Total kontrak</span>
+            </div>
+            <div className="rekap-item">
+              <span className="rekap-nilai rekap-nilai-kecil teks-aksen">
+                <Rupiah nilai={rekap.totalTerbayar} />
+              </span>
+              <span className="rekap-label">Sudah terbayar</span>
+            </div>
+            <div className="rekap-item">
+              <span
+                className="rekap-nilai rekap-nilai-kecil"
+                data-nada={rekap.totalSisa > 0 ? "bahaya" : undefined}
+              >
+                <Rupiah nilai={rekap.totalSisa} />
+              </span>
+              <span className="rekap-label">Sisa tagihan</span>
+            </div>
+          </div>
+        </aside>
+      ) : null}
+      </div>
+      {/* Akhir grid dua kolom */}
 
       {/* Lembar Tambah Vendor */}
       <Lembar

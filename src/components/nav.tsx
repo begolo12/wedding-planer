@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { navigasiAktif as aktif } from "@/lib/navigasi";
 import { ThemeToggle } from "./theme-toggle";
 import { Merek, NAMA_MEREK } from "./merek";
 
@@ -33,32 +34,61 @@ export function KepalaApp() {
   );
 }
 
+// Ikon bilah bawah. Digambar sebagai SVG, bukan glyph Unicode, karena glyph
+// jatuh di baseline font yang berbeda-beda: ketebalan garisnya tidak seragam,
+// ukurannya tidak sama, dan posisinya bergeser sedikit antar perangkat. Empat
+// ikon ini memakai kotak gambar 24px dan ketebalan garis 2px yang sama, jadi
+// bilahnya terbaca sebagai satu set.
+//
+// Semua ikon `aria-hidden`; label teks di bawahnya yang membawa nama tujuan.
+type IkonBawah = (props: { className?: string }) => React.JSX.Element;
+
+const IkonBeranda: IkonBawah = () => (
+  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z" />
+  </svg>
+);
+
+const IkonRencana: IkonBawah = () => (
+  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M4 7h9M4 12h9M4 17h9" />
+    <path d="m16 16 2 2 4-5" />
+  </svg>
+);
+
+const IkonAnggaran: IkonBawah = () => (
+  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M4 8h16v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z" />
+    <path d="M4 8V7a1 1 0 0 1 1-1h11v2" />
+    <path d="M16 13h2" />
+  </svg>
+);
+
+const IkonTamu: IkonBawah = () => (
+  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <circle cx="12" cy="8" r="3.5" />
+    <path d="M5 20a7 7 0 0 1 14 0" />
+  </svg>
+);
+
 // Empat item bawah dari docs/05-IA-dan-Layar.md bagian 3. Sengaja empat,
 // bukan lima, supaya bilah bawah tetap muat di layar 360px tanpa mengecilkan
 // tulisan. Modul lain masuk lewat halaman Rencana.
 const BAWAH = [
-  { href: "/beranda", label: "Beranda", ikon: "\u25A6" },
-  { href: "/rencana", label: "Rencana", ikon: "\u2713" },
-  { href: "/anggaran", label: "Anggaran", ikon: "\u25B2" },
-  { href: "/tamu", label: "Tamu", ikon: "\u25CB" },
+  { href: "/beranda", label: "Beranda", ikon: <IkonBeranda /> },
+  { href: "/rencana", label: "Rencana", ikon: <IkonRencana /> },
+  { href: "/anggaran", label: "Anggaran", ikon: <IkonAnggaran /> },
+  { href: "/tamu", label: "Tamu", ikon: <IkonTamu /> },
 ];
 
 // Sisi kiri di layar lebar. Isinya empat item bawah, ditambah Hari-H, Vendor,
 // dan Laporan yang tidak muat di bilah bawah.
 const SISI = [
-  { href: "/beranda", label: "Beranda" },
-  { href: "/rencana", label: "Rencana" },
-  { href: "/anggaran", label: "Anggaran" },
-  { href: "/tamu", label: "Tamu" },
-  { href: "/hari-h", label: "Hari-H" },
-  { href: "/rencana/vendor", label: "Vendor" },
-  { href: "/laporan", label: "Laporan" },
+  ...BAWAH,
+  { href: "/hari-h", label: "Hari-H", ikon: <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M8 3v4m8-4v4M4 10h16m-12 4h3m-3 3h6" /></svg> },
+  { href: "/rencana/vendor", label: "Vendor", ikon: <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 10v10h16V10M3 10l2-6h14l2 6M8 20v-6h5v6M3 10a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0" /></svg> },
+  { href: "/laporan", label: "Laporan", ikon: <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 3H5v18h14V8zM14 3v5h5M8 12h8m-8 4h6" /></svg> },
 ];
-
-function aktif(pathname: string, href: string) {
-  if (href === "/beranda") return pathname === "/beranda";
-  return pathname === href || pathname.startsWith(`${href}/`);
-}
 
 export function NavBawah() {
   const pathname = usePathname();
@@ -98,7 +128,7 @@ export function NavSisi({ namaPasangan }: { namaPasangan: string }) {
 
       <ul className="nav-daftar">
         {SISI.map((item) => {
-          const ini = aktif(pathname, item.href);
+          const ini = aktif(pathname, item.href, true);
           return (
             <li key={item.href}>
               <Link
@@ -107,6 +137,7 @@ export function NavSisi({ namaPasangan }: { namaPasangan: string }) {
                 aria-current={ini ? "page" : undefined}
                 data-aktif={ini ? "ya" : undefined}
               >
+                <span className="nav-ikon">{item.ikon}</span>
                 {item.label}
               </Link>
             </li>

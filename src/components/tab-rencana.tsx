@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { navigasiAktif } from "@/lib/navigasi";
 
 /**
  * Tab modul di seluruh payung Rencana.
@@ -25,7 +26,8 @@ export function TabRencana() {
         <Link
           key={t.href}
           href={t.href}
-          data-aktif={pathname === t.href ? "ya" : undefined}
+          data-aktif={navigasiAktif(pathname, t.href) ? "ya" : undefined}
+          aria-current={navigasiAktif(pathname, t.href) ? "page" : undefined}
         >
           {t.label}
         </Link>

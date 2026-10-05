@@ -174,6 +174,10 @@ Bagian ini mengikat semua layar. Angka di bawah bukan saran, dan setiap kelas ya
 
 **6. Keadaan kosong dan keadaan gagal rata kiri, di dalam panel.** `.kosong` selalu `align-items: flex-start` dan `text-align: left`, dan punya permukaan panel sendiri (`--color-kartu-putih`, `--radius-panel`). Satu layar hanya boleh punya satu sumbu perataan: keadaan kosong harus sejajar dengan baris filter di atasnya, bukan di tengah kanvas. Kalau `.kosong` sudah berada di dalam `.panel-daftar`, permukaannya dimatikan supaya tidak ada kartu di dalam kartu.
 
+Beranda yang belum berisi memakai kepala halaman dan satu panel awal rata kiri. Ikon hati menjadi penanda, bukan tombol. Permukaan `.kosong` di dalam panel awal dimatikan supaya tidak muncul kartu di dalam kartu. Aksi tambah hanya tampil saat perubahan data tersedia.
+
+Navigasi desktop memakai ikon garis, label, dan bidang tinta untuk menu aktif. Batang tegak tetap menjadi penanda selain warna. Navigasi mobile memakai bidang netral untuk item aktif dan ruang safe area agar isi terakhir tidak tertutup. Label hero Beranda tidak memakai bidang aksen tambahan, supaya hitung mundur tetap menjadi fokus.
+
 **7. Jarak hanya dari skala.** Jarak antarbagian memakai kelipatan `4 / 8 / 12 / 16 / 24 / 32 / 48 / 64`: antar elemen dalam satu baris `8`, antar bagian di dalam panel `16`, antar bagian besar di halaman `24`, jarak tepi kontainer `32`. Tidak boleh ada ruang kosong lebih dari `48px` tanpa isi di dalam satu panel. Terukur di `/rencana`: kepala panel ke baris filter `16px`, baris pencarian ke keadaan kosong `16px`.
 
 **8. Latar menutup penuh setinggi viewport di kedua tema.** `html` dan `.tata-app` memakai `background: var(--color-base)` dan `.tata-app` `min-height: 100vh`. Tidak ada warna tema terang yang boleh dipakai lewat nilai hex langsung; semua latar lewat token, supaya di mode gelap tidak ada bidang terang yang bocor. `--color-kotak-abu` tidak dipakai sebagai trek bar jika latar di belakangnya juga `--color-kotak-abu`.

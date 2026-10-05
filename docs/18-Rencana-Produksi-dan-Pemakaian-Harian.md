@@ -93,7 +93,7 @@ Yang sudah ada: `src/lib/luring.ts` sudah menyimpan ke IndexedDB, mengirim dari 
 
 | Cacat | Akibat nyata | Perbaikan |
 |---|---|---|
-| Item dengan jawaban 4xx dihitung `terkirim` (`src/lib/luring.ts:134-137`) | Sesi sudah habis atau data tidak valid, jadi tulisannya hilang. Layar menunjukkan "terkirim" padahal tidak ada di server | 4xx dihitung gagal, bukan terkirim, dan alasannya ditunjukkan ke pengguna |
+| Item dengan jawaban 4xx dihitung `terkirim` (`src/lib/luring.ts:148-152`) | Sesi sudah habis atau data tidak valid, jadi tulisannya hilang. Layar menunjukkan "terkirim" padahal tidak ada di server | 4xx dihitung gagal, bukan terkirim, dan alasannya ditunjukkan ke pengguna |
 | Batas 200 item membuang yang tertua diam-diam | Kalau luring beberapa hari, catatan pembayaran hilang tanpa ada yang memberitahu | Batas dinaikkan ke 500, dan saat penuh muncul pita "antrean penuh" yang menyebut jumlah yang dibuang |
 | `cekKoneksi()` menerima 401 sebagai "ada jaringan" | Ini benar dan tidak diubah. 401 memang berarti ada jaringan, hanya saja sesi habis. Yang perlu ditambah ada di `kirimAntrean()`: kalau melihat 401, hentikan pengiriman dan beri tahu orangnya untuk masuk lagi |
 
@@ -103,7 +103,7 @@ Keputusan yang diambil:
 |---|---|
 | 401 menghentikan antrean, bukan membuang item | Sesi habis adalah masalah yang bisa diperbaiki orangnya sendiri. Membuang catatan pembayaran tanpa jejak tidak bisa |
 | Batas dinaikkan, bukan dihapus | Antrean yang membengkak memperlambat setiap pengiriman. Menaikkan batas hanya menunda masalah, jadi batas tetap ada, tapi pembuangan sekarang kelihatan |
-| Pita luring tidak hilang saat antrean kosong | `docs/05-IA-dan-Layar.md` bagian 4 menulis pita tipis di atas yang berbunyi "Menampilkan data dari perangkat". `src/components/luring-banner.tsx:80` masih mengembalikan `null` kalau luring false dan antrean kosong, jadi kalimat itu belum pernah muncul |
+| Pita luring tidak hilang saat antrean kosong | `docs/05-IA-dan-Layar.md` bagian 4 menulis pita tipis di atas yang berbunyi "Menampilkan data dari perangkat". `src/components/luring-banner.tsx:97` masih mengembalikan `null` kalau luring false dan antrean kosong, jadi kalimat itu belum pernah muncul |
 
 Syarat selesai: matikan jaringan, buat tiga perubahan, hidupkan jaringan, dan pastikan ketiganya sampai ke server dengan urutan benar dan jumlah yang sama.
 
@@ -233,7 +233,7 @@ Kalau nanti masuk Fase 2, urutan yang benar: lupa kata sandi dulu, baru verifika
 
 Keputusan pemilik produk 4 Oktober 2026: target deploy adalah Vercel, tersambung ke repositori GitHub `begolo12/wedding-planer`, dan deploy terpicu otomatis setiap push ke cabang `main`. Produksi sudah tayang di `https://wedding-planer-self.vercel.app`.
 
-Bukti diperiksa 4 Oktober 2026 setelah commit `fa9dfd1`: `GET /api/kesehatan` menjawab 200 dalam 2,43 detik (artinya database produksi terhubung), `/manifest.webmanifest` memuat name dan short_name "Rapi Nikah", `HEAD /masuk` mengirim lima header keamanan tanpa CSP, dan `GET /kebijakan` menjawab 200.
+Bukti diperiksa 4 Oktober 2026 setelah commit `5914f06` (v0.16.0): `GET /api/kesehatan` menjawab 200 dalam 2,43 detik (artinya database produksi terhubung), `/manifest.webmanifest` memuat name dan short_name "Rapi Nikah", `HEAD /masuk` mengirim lima header keamanan tanpa CSP, dan `GET /kebijakan` menjawab 200.
 
 | Yang sudah berlaku | Keadaan | Alasan atau bukti |
 |---|---|---|
@@ -277,7 +277,7 @@ Tidak memblokir produksi, tetapi kalau tidak diperbaiki, dokumen akan dipercaya 
 | `docs/17-Rencana-Build.md` bagian 2 memakai awalan `/l/` untuk tautan berbagi | Kode memakai `/bagikan/` | Tulis ulang keputusan di bagian 2, dan koreksi rujukan di `17` bagian 6 |
 | `docs/11-Delivery-Plan.md` dan `docs/10-Epik-dan-Story.md` mewajibkan test | `docs/17-Rencana-Build.md` bagian 11 menundanya ke Fase 3 | Tulis keputusannya di `17` bagian 2: test masuk Fase 2. Alasannya cacat `generateId` yang ditemukan karena tidak ada test. Ini bukti nyata, bukan perkiraan |
 | `docs/03-Data-Model.md` belum punya "bentuk sekarang" | Bentuk tabel nyata ada di database | Tulis setelah `db:generate` selesai |
-| Nama produk masih ditulis "Aisyah & Bagas" | `docs/01-PRD.md` menulis nama produk belum diputuskan | `NAMA_PRODUK` di `src/lib/konstanta.ts:169` sudah jadi satu sumber, dan `src/app/manifest.ts` masih menulis nama itu sendiri. Arahkan `manifest.ts` ke `NAMA_PRODUK`, lalu ubah satu konstanta itu ketika nama diputuskan |
+| Nama produk | Sudah selesai: nama produk adalah "Rapi Nikah", satu sumber di `NAMA_PRODUK` (`src/lib/konstanta.ts:213`), dipakai `src/app/manifest.ts` dan layar akun. "Aisyah & Bagas" di wireframe adalah nama pasangan pemakai, bukan nama produk (lihat `docs/01-PRD.md` bagian 1) | Tidak ada |
 
 ---
 
@@ -292,9 +292,9 @@ Tabel ini status, bukan lagi rencana. Tiap status diambil dari bukti yang bisa d
 | 3 | Antrean luring | P0 | Selesai | 4xx tidak dihitung terkirim, 401 menahan item, batas 500 dan jumlah yang dibuang dilaporkan, tulis tanpa respons ikut diantrekan, dan baca luring per perangkat (cache IndexedDB per `planId`, batas 50 tugas dan 50 tamu, rundown dan anggaran penuh) dengan pita "Menampilkan data dari perangkat". Tombol tambah/ubah/hapus disembunyikan saat luring. Bukti: tiga perubahan saat luring sampai ke server dengan urutan sama; e2e membuktikan isi object store antrean 1 lalu 3 lalu 0 | Tidak ada |
 | 4 | Migrasi database | P0 | Selesai | `src/db/migrations/0000_open_outlaw_kid.sql` (15 tabel) ter-commit; `package.json` punya `db:migrate` dan `db:check`; `npm run db:check` menjawab "Everything's fine"; `db:migrate` dijalankan ke database sementara `wedding_uji_20261004` dan menjawab "migrations applied successfully", 15 tabel terbentuk termasuk `users`, `plans`, `payments`, lalu database sementara itu di-DROP dan `DATABASE_URL` (database `wedding_planer`) tidak pernah jadi target migrasi | Tidak ada |
 | 5 | Koneksi database | P0 | Selesai di kode | `prepare: false` dan `ssl: "require"` untuk host bukan localhost | Jalur ssl remote belum teruji runtime karena `DATABASE_URL` di mesin ini localhost |
-| 6 | Rate limit | P0 | Selesai | better-auth bawaan untuk sign-up 5 per jam per IP dan sign-in 10 per 15 menit per IP, badan 429 diterjemahkan ke bentuk standar; `src/lib/batas.ts` untuk POST plans 30 per jam per pengguna dan POST payments 60 per jam per pengguna. Terukur: percobaan sign-in ke-11 menjawab 429 dengan `X-Retry-After` 900 dan `{"error":{"code":"RATE_LIMITED"}}`; POST `/api/plans` 30 kali pertama menjawab 422, percobaan ke-31 menjawab 429 dengan `{"error":{"code":"RATE_LIMITED"}}` dan header `X-Retry-After`, tanpa satu pun plan dibuat | 429 untuk POST payments belum diukur |
+| 6 | Rate limit | P0 | Selesai | better-auth bawaan untuk sign-up 5 per jam per IP dan sign-in 10 per 15 menit per IP, badan 429 diterjemahkan ke bentuk standar; `src/lib/batas.ts` untuk POST plans 30 per jam per pengguna dan POST payments 60 per jam per pengguna. Terukur: percobaan sign-in ke-11 menjawab 429 dengan `X-Retry-After` 900 dan `{"error":{"code":"RATE_LIMITED"}}`; POST `/api/plans` 30 kali pertama menjawab 422, percobaan ke-31 menjawab 429 dengan `{"error":{"code":"RATE_LIMITED"}}` dan header `X-Retry-After`, tanpa satu pun plan dibuat; POST payments 60 kali pertama menjawab 201, percobaan ke-61 menjawab 429 dengan `X-Retry-After: 3598` | Tidak ada |
 | 7 | Security headers | P1 | Selesai | Lima header terkirim tanpa CSP | Tidak ada |
-| 8 | Test otomatis | P1 | Selesai | Vitest 9 berkas 89 test hijau (format, plan, skema, status-luring, cache-baca, api-client-luring, batas laju, integrasi kepemilikan plan, integrasi laporan); Playwright 5 spec hijau di port 3100 (alur utama, alur luring, batas laju plans, hapus akun, kontrak share-text) | Tanpa `TEST_DATABASE_URL`, test integrasi memakai database pengembangan dan tiap test membuat lalu menghapus datanya sendiri |
+| 8 | Test otomatis | P1 | Selesai | Vitest 15 berkas 150 test hijau (format, plan, skema, status-luring, cache-baca, api-client-luring, batas laju, navigasi, antrean luring, integrasi kepemilikan plan, integrasi laporan, dan lain-lain); Playwright 9 test hijau di port 3110 (alur utama, alur luring, batas laju plans, hapus akun, kontrak share-text, tamu dan ekspor, zona dan tenggat) | Tanpa `TEST_DATABASE_URL`, test integrasi memakai database pengembangan dan tiap test membuat lalu menghapus datanya sendiri |
 | 9 | Perbaikan kontrak | P1 | Selesai | `/api/public/share/{token}` menjawab `{"error":{"code":"NOT_FOUND"}}` (terukur 404); POST `report/share-text` memakai `skemaBagikanTeks` dengan field `variant`, `message`, `linkId` | Tidak ada |
 | 10 | Keselarasan dokumen | P3 | Selesai | Daftar berkasnya ada di laporan pekerja dokumen | Tidak ada |
 
@@ -327,11 +327,12 @@ Ukuran di bawah sudah diukur, kecuali baris yang ditandai belum di bagian 18.
 | Plan sampai pembayaran | Ya, Rp 5.000.000 | e2e Playwright alur utama |
 | Antrean luring tidak kehilangan data | Ya, 3 perubahan terkirim berurutan; isi object store antrean 1 lalu 3 lalu 0 | e2e alur luring |
 | Bentuk tabel bisa dijelaskan tanpa membuka database | Ya | Migrasi ter-commit, dan `docs/03-Data-Model.md` sudah dilengkapi |
-| Build dan tipe | Hijau | `npm run lint`, 137 test, `npm run build` 26 rute statis dan dinamis |
+| Build dan tipe | Hijau | `npm run lint`, 150 test, `npm run build` 26 rute statis dan dinamis |
 | Kontras | 0 gagal di terang dan gelap; rasio terburuk 4,55 di terang dan 5,35 di gelap | Diukur di 17 rute pada 390 dan 1440 px |
-| Test | 89 test hijau, plus 5 e2e hijau | Vitest dan Playwright |
+| Test | 150 test unit dan integrasi hijau, plus 9 e2e hijau | Vitest dan Playwright |
 | Migrasi dari nol | 15 tabel terbentuk, "migrations applied successfully" | `db:migrate` ke database sementara `wedding_uji_20261004`, lalu di-DROP |
 | Batas laju endpoint plan | 30 kali 422, percobaan ke-31 429 dengan `X-Retry-After` | Diukur lewat request, tanpa plan yang dibuat |
+| Batas laju endpoint pembayaran | 60 kali 201, percobaan ke-61 429 dengan `X-Retry-After: 3598` | Diukur lewat request, 5 Oktober 2026 |
 | Tanpa geser horizontal | Tidak ada geser di 360, 390, dan 1440 px | Diukur lewat browser |
 | Tombol tanpa handler | 0 di 17 rute | Diukur lewat browser |
 | Gradasi | 1, turun dari 20 | Diukur, sesuai `DESIGN.md` bagian 5 |
@@ -358,7 +359,6 @@ Celah di bawah disengaja belum dikerjakan, atau sudah selesai di kode tapi belum
 | Lupa kata sandi dan verifikasi surel | Tetap P2, butuh penyedia surel | Penyedia surel dan keputusan lima pertanyaan |
 | Hapus akun | Sudah diuji lewat e2e: akun hilang dari database, sesi hilang, dan diarahkan ke `/masuk` | Tidak ada untuk akun dengan kata sandi |
 | Akun tanpa kata sandi (khusus Google) | Hapus akun butuh konfirmasi kata sandi, sedangkan akun Google tidak punya kata sandi | Cara konfirmasi lain untuk akun tanpa kata sandi |
-| 429 untuk POST payments | Kodenya ada, tapi belum diukur jumlah percobaannya | Uji terukur per endpoint |
 | Kursi hanya angka yang perlu disiapkan, integrasi sewa kursi tidak dibangun | Angka kursi dihitung dari tamu hadir ditambah yang belum menjawab (`src/lib/tamu.ts:98,108-109`). Pemilik produk memutuskan 4 Oktober 2026 bahwa integrasi sewa kursi tidak dibangun, dan kursi tetap dicatat sebagai vendor biasa | Tidak ada untuk Fase 1. Ditinjau ulang kalau pemilik produk mengubah keputusan |
 | QRIS hanya label metode pembayaran | `qris` ada di `METODE_BAYAR` (`src/lib/konstanta.ts:120,128`), tapi tidak ada gerbang pembayaran, jadi tidak ada uang yang benar-benar berpindah lewat aplikasi | Gerbang pembayaran, atau keputusan bahwa label ini memang cuma penanda |
 | Tautan undangan disimpan dan ditandai terkirim secara manual | `invitationUrl` disimpan per acara (`src/db/schema.ts:100`) dan `invitedAt` ditandai borongan (`src/app/api/plans/[planId]/guests/undangan/route.ts:27-38`), tapi aplikasi tidak mengirim undangan | Penyedia kirim pesan, atau keputusan bahwa penandaan manual sudah cukup |

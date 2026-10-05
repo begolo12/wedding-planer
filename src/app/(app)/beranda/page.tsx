@@ -14,11 +14,10 @@ import { jamDari, tanggalPanjangDari } from "@/lib/format";
  * Beranda utama aplikasi.
  *
  * Susunannya mengikuti layar Beranda dari rancangan Stitch
- * (docs/stitch_cute_wedding_planner/beranda_web_app_sweet_ties), bukan lagi
- * tata letak 60/40 yang lama:
+ * (docs/stitch_cute_wedding_planner/beranda_web_app_sweet_ties):
  *
- * 1. Banner hitung mundur dengan dua bulatan cahaya dan kutipan.
- * 2. Lima pil aksi cepat.
+ * 1. Banner hitung mundur dan kutipan.
+ * 2. Tiga pil aksi cepat.
  * 3. Tiga kartu angka: checklist, konfirmasi tamu, anggaran.
  * 4. Daftar tugas prioritas.
  * 5. Sisi kanan: vendor utama, tanggal penting, catatan pasangan.
@@ -126,14 +125,28 @@ export default function HalamanBeranda() {
 
   if (!hariBesar && jumlahTugas.total === 0 && jumlahVendor === 0) {
     return (
-      <Kosong
-        keadaan="Rencana kamu masih kosong."
-        jalanKeluar="Tambahkan tugas pertama, lalu anggaran dan daftar tamu menyusul."
-      >
-        <Link className="tombol tombol-utama" href="/rencana">
-          Tambah tugas pertama
-        </Link>
-      </Kosong>
+      <div className="beranda">
+        <div className="kepala-halaman">
+          <div>
+            <h1>Beranda</h1>
+            <p>Ringkasan hari ini: tugas terdekat, sisa anggaran, dan hitung mundur menuju hari besar.</p>
+          </div>
+        </div>
+        <section className="beranda-awal">
+          <span className="beranda-awal-ikon" aria-hidden="true"><IkonHati size={32} /></span>
+          <Kosong
+            keadaan="Rencana kamu masih kosong."
+            jalanKeluar="Tambahkan tugas pertama, lalu anggaran dan daftar tamu menyusul."
+          >
+            {bisaUbah ? (
+              <Link className="tombol tombol-utama" href="/rencana">
+                <IkonTambah size={18} />
+                Tambah tugas pertama
+              </Link>
+            ) : null}
+          </Kosong>
+        </section>
+      </div>
     );
   }
 
@@ -159,8 +172,6 @@ export default function HalamanBeranda() {
       </div>
 
       <section className="beranda-hero">
-        <span className="beranda-cahaya beranda-cahaya-kanan" aria-hidden="true" />
-        <span className="beranda-cahaya beranda-cahaya-kiri" aria-hidden="true" />
         <div className="beranda-hero-isi">
           <div className="beranda-hero-kiri">
             <span className="beranda-pil-aksen">

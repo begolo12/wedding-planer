@@ -226,31 +226,16 @@ export default function HalamanInfo() {
         </p>
       ) : null}
 
-      {/* Satu panel untuk tab modul, ringkasan, daftar pengumuman, dan keadaan
+      {/* Susunan dua kolom: daftar pengumuman di kolom utama, ringkasan
+          jumlah terbit/disematkan di rel kanan (DESIGN.md komposisi desktop
+          poin 3). Di bawah 1023px tetap satu kolom, seperti /tamu/impor. */}
+      <div className="grid-daftar">
+      {/* Satu panel untuk tab modul, daftar pengumuman, dan keadaan
           kosongnya (DESIGN.md komposisi desktop poin 5 dan 6). */}
       <div className="panel-daftar" aria-label="Pengumuman untuk keluarga">
         <div className="panel-daftar-kepala">
       <TabRencana />
         </div>
-
-      {summary && summary.total > 0 ? (
-        <div className="rekap rekap-tiga">
-          <div className="rekap-item">
-            <span className="rekap-nilai">{summary.total}</span>
-            <span className="rekap-label">Total catatan</span>
-          </div>
-          <div className="rekap-item">
-            <span className="rekap-nilai teks-aksen">
-              {summary.terbit}
-            </span>
-            <span className="rekap-label">Sudah terbit</span>
-          </div>
-          <div className="rekap-item">
-            <span className="rekap-nilai">{summary.disematkan}</span>
-            <span className="rekap-label">Disematkan</span>
-          </div>
-        </div>
-      ) : null}
 
       {daftar.length === 0 ? (
         <Kosong
@@ -344,6 +329,32 @@ export default function HalamanInfo() {
       )}
       </div>
       {/* Akhir panel pengumuman */}
+
+      {/* Rel kanan: ringkasan jumlah catatan terbit/disematkan. Isi rel hanya
+          ringkasan atau aksi cepat, jadi kartu rekap yang pindah ke sini,
+          bukan daftarnya (DESIGN.md komposisi desktop poin 3). */}
+      {summary && summary.total > 0 ? (
+        <aside className="rel-samping">
+          <div className="rekap rekap-tiga">
+            <div className="rekap-item">
+              <span className="rekap-nilai">{summary.total}</span>
+              <span className="rekap-label">Total catatan</span>
+            </div>
+            <div className="rekap-item">
+              <span className="rekap-nilai teks-aksen">
+                {summary.terbit}
+              </span>
+              <span className="rekap-label">Sudah terbit</span>
+            </div>
+            <div className="rekap-item">
+              <span className="rekap-nilai">{summary.disematkan}</span>
+              <span className="rekap-label">Disematkan</span>
+            </div>
+          </div>
+        </aside>
+      ) : null}
+      </div>
+      {/* Akhir grid dua kolom */}
 
       <DialogKonfirmasi
         buka={Boolean(dicabut)}

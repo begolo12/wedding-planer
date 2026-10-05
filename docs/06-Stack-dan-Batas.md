@@ -27,6 +27,7 @@ Empat aturan dipakai untuk setiap pilihan teknologi.
 | ORM | Drizzle ORM | Query-nya mirip SQL, tipe yang dihasilkan akurat, dan tidak butuh engine terpisah seperti Prisma |
 | Auth | Better Auth | Cukup untuk email dan Google. Sesi di cookie, jadi tidak butuh token yang disimpan manual |
 | Validasi | Zod | Satu skema dipakai di form, di API, dan di tipe TypeScript |
+| Konfigurasi platform | `@neon/config` dan `@neon/env` | Dua paket dari Neon untuk file `neon.ts` (preview bucket) dan pembacaan variabel lingkungan. Tidak dipakai kode aplikasi, hanya konfigurasi deployment |
 | Styling | Tailwind CSS | Token warna dan spasi diambil dari `DESIGN.md`, jadi tidak ada tempat kedua untuk menentukan tampilan |
 | PWA | Service worker tulis tangan | Strategi cache-nya spesifik untuk data plan. `next-pwa` tidak cukup fleksibel untuk itu |
 | Deployment | Satu platform, satu proses | Monolith, satu repo, satu deploy |
@@ -41,7 +42,7 @@ Ini bagian paling penting dari dokumen ini. Setiap baris adalah sesuatu yang sen
 
 | Tidak dipakai | Alasan |
 |---|---|
-| GraphQL | REST dengan empat endpoint sudah cukup. GraphQL menambah layer dan skill tanpa menambah fitur |
+| GraphQL | REST dengan 35 route API (dihitung dari berkas `route.ts` di `src/app/api`) sudah cukup. GraphQL menambah layer dan skill tanpa menambah fitur |
 | Redis | Cache pertama bisa pakai `unstable_cache` bawaan Next.js. Butuh yang lebih baik nanti |
 | Message queue | Tidak ada proses yang butuh jalan di belakang layar pada Fase 1 |
 | Microservices | Satu aplikasi kecil. Microservice untuk aplikasi kecil hanya menambah jaringan |

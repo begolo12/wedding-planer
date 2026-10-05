@@ -64,6 +64,43 @@ export const verifications = pgTable("verification", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+/**
+ * Kunci idempotency untuk kiriman ulang dari antrean luring.
+ *
+ * Alasannya: saat jaringan putus, perubahan disimpan di perangkat lalu dikirim
+ * lagi saat sinyal kembali. Kalau server memprosesnya dua kali (dua tab
+ * mengirim bersamaan, atau tab ditutup setelah server memproses tapi sebelum
+ * antrean lokal terhapus), tugas atau catatan pembayaran yang sama bisa masuk
+ * dua kali. Catatan pembayaran yang dobel lebih buruk daripada gagal terkirim.
+ *
+ * Server menyimpan kunci yang sudah diproses beserta balasan aslinya. Kiriman
+ * dengan kunci yang sama tidak membuat baris baru, tapi mengembalikan balasan
+ * yang sama, jadi efeknya persis seperti satu permintaan.
+ *
+ * Kuncinya dibuat di perangkat (`crypto.randomUUID()` per item antrean), bukan
+ * dari isi permintaan, supaya dua perubahan yang isinya kebetulan sama tetap
+ * dianggap dua perubahan yang berbeda.
+ *
+ * `planId` ikut disimpan dan di-cascade, supaya kunci tidak menumpuk selamanya
+ * setelah rencananya dihapus.
+ */
+export const idempotencyKeys = pgTable(
+  "idempotency_keys",
+  {
+    // Kunci dari perangkat, dipakai sebagai primary key. Bentuknya dibatasi
+    // di skema Zod saat masuk, jadi tidak ada teks bebas yang masuk ke sini.
+    key: text("key").primaryKey(),
+    planId: uuid("plan_id")
+      .notNull()
+      .references(() => plans.id, { onDelete: "cascade" }),
+    /** Kode status dan badan balasan asli, supaya kiriman ulang dapat balasan sama. */
+    status: integer("status").notNull(),
+    body: text("body").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("idempotency_keys_plan_idx").on(t.planId, t.createdAt)],
+);
+
 export const plans = pgTable(
   "plans",
   {

@@ -28,6 +28,15 @@ export type { ItemAntrean } from "./penyimpanan-antrean";
 // dilaporkan lewat nilai balik simpanKeAntrean, bukan disembunyikan.
 const BATAS_ANTREAN = 500;
 
+/**
+ * Berapa kali satu item boleh dicoba otomatis sebelum berhenti dicoba sendiri.
+ *
+ * Setelah batas ini, item tidak lagi dikirim otomatis dan hanya muncul sebagai
+ * "perlu dikirim ulang manual" di pita. Tanpa batas, item yang isinya selalu
+ * ditolak akan dicoba tiap 30 detik selamanya.
+ */
+const BATAS_PERCOBAAN = 5;
+
 /** Semua antrean, dari yang paling lama. Urutan ini yang dipakai saat kirim. */
 export async function daftarAntrean(): Promise<ItemAntrean[]> {
   return urutkanAntrean(await penyimpananAntrean().daftar());
@@ -109,59 +118,106 @@ export async function kirimAntrean(): Promise<{
   gagal: number;
   perluMasuk: boolean;
 }> {
+  /*
+   * Satu pengiriman pada satu waktu, lintas tab.
+   *
+   * Tiap tab memasang pemeriksa koneksi sendiri tiap 30 detik, dan tanpa kunci
+   * ini dua tab bisa mengambil daftar antrean yang sama lalu mengirim item
+   * yang sama bersamaan. Kuncinya dari Web Locks API, jadi tidak butuh
+   * pustaka. Di peramban yang belum punya, kiriman jalan seperti sebelumnya;
+   * dobelnya tetap dicegah server lewat kunci idempotency, jadi yang hilang
+   * cuma penghematan, bukan kebenaran.
+   */
+  if (typeof navigator !== "undefined" && "locks" in navigator) {
+    return navigator.locks.request("haribesar-kirim-antrean", () => kirimAntreanSekali());
+  }
+  return kirimAntreanSekali();
+}
+
+async function kirimAntreanSekali(): Promise<{
+  terkirim: number;
+  tersisa: number;
+  gagal: number;
+  perluMasuk: boolean;
+}> {
   const semua = await daftarAntrean();
   let terkirim = 0;
   let gagal = 0;
   let perluMasuk = false;
   let pesanGagal: string | null = null;
 
+  /*
+   * Berhenti hanya untuk kegagalan yang memang menghalangi sisanya, bukan
+   * untuk setiap kegagalan.
+   *
+   * Urutannya bermakna: kalau orang menambah lalu menghapus saat luring,
+   * hapus tidak boleh tiba sebelum tambah. Karena itu kegagalan yang mungkin
+   * hilang sendiri (jaringan, 5xx) dan kegagalan sesi (401) tetap menghentikan
+   * seluruh antrean.
+   *
+   * 4xx lain berbeda: isinya memang ditolak server dan mengulang tidak akan
+   * menolong. Dulu ini juga menghentikan antrean, dan akibatnya satu item
+   * yang isinya salah membuat semua perubahan di belakangnya tidak pernah
+   * terkirim. Sekarang item itu dipisahkan dari jalur otomatis, lalu kiriman
+   * lanjut ke item berikutnya.
+   */
   for (const item of semua) {
-    if (item.attempts >= 5) {
+    if (item.attempts >= BATAS_PERCOBAAN) {
       gagal += 1;
-      pesanGagal = pesanGagal ?? item.lastError;
+      pesanGagal = pesanGagal ?? item.lastError ?? "Satu perubahan perlu dikirim ulang manual.";
       continue;
     }
 
+    let res: Response;
     try {
-      const res = await fetch(item.path, {
+      res = await fetch(item.path, {
         method: item.method,
-        headers: item.body ? { "Content-Type": "application/json" } : undefined,
+        headers: {
+          // Kunci idempotency: id item antrean ini sendiri. Server menyimpan
+          // kunci beserta balasannya, jadi kiriman ulang dengan kunci yang
+          // sama tidak menambah baris kedua.
+          "Idempotency-Key": item.id,
+          ...(item.body ? { "Content-Type": "application/json" } : {}),
+        },
         body: item.body ?? undefined,
         credentials: "same-origin",
       });
-
-      if (res.ok) {
-        await buangAntrean(item.id);
-        terkirim += 1;
-        continue;
-      }
-
-      if (res.status === 401) {
-        await naikkanPercobaan(
-          item,
-          "Sesi habis. Masuk lagi supaya perubahan ini bisa terkirim.",
-        );
-        perluMasuk = true;
-        break;
-      }
-
-      if (res.status >= 400 && res.status < 500) {
-        pesanGagal = `Server menolak perubahan ini (${res.status}).`;
-        await naikkanPercobaan(item, pesanGagal);
-        gagal += 1;
-        break;
-      }
-
-      pesanGagal = `Server membalas ${res.status}.`;
-      await naikkanPercobaan(item, pesanGagal);
-      gagal += 1;
-      break;
     } catch {
       pesanGagal = "Masih tidak ada koneksi.";
       await naikkanPercobaan(item, pesanGagal);
       gagal += 1;
       break;
     }
+
+    if (res.ok) {
+      await buangAntrean(item.id);
+      terkirim += 1;
+      continue;
+    }
+
+    if (res.status === 401) {
+      await naikkanPercobaan(
+        item,
+        "Sesi habis. Masuk lagi supaya perubahan ini bisa terkirim.",
+      );
+      perluMasuk = true;
+      break;
+    }
+
+    if (res.status >= 400 && res.status < 500) {
+      const pesan = `Server menolak perubahan ini (${res.status}).`;
+      await naikkanPercobaan(item, pesan);
+      gagal += 1;
+      pesanGagal = pesanGagal ?? pesan;
+      // Lanjut, bukan berhenti: item ini tidak akan membaik kalau dicoba lagi,
+      // dan menahannya di sini membuat item di belakangnya ikut tertahan.
+      continue;
+    }
+
+    pesanGagal = `Server membalas ${res.status}.`;
+    await naikkanPercobaan(item, pesanGagal);
+    gagal += 1;
+    break;
   }
 
   // Satu jalur data ke layar, lihat src/lib/status-luring.ts.
@@ -172,6 +228,31 @@ export async function kirimAntrean(): Promise<{
 
 async function naikkanPercobaan(item: ItemAntrean, pesan: string): Promise<void> {
   await penyimpananAntrean().simpan({ ...item, attempts: item.attempts + 1, lastError: pesan });
+}
+
+/**
+ * Item yang sudah menembus batas percobaan dan tidak lagi dicoba otomatis.
+ *
+ * Dipisahkan supaya layar bisa menampilkannya sebagai "perlu perhatian", bukan
+ * diam-diam dilewati. Sebelum ini, item seperti itu terus dihitung gagal tapi
+ * tidak pernah muncul dengan alasan yang bisa dibaca orangnya.
+ */
+export async function itemMacet(): Promise<ItemAntrean[]> {
+  const semua = await daftarAntrean();
+  return semua.filter((i) => i.attempts >= BATAS_PERCOBAAN);
+}
+
+/**
+ * Buang semua item yang macet, supaya antrean bisa kosong lagi.
+ *
+ * Dipakai tombol "Buang yang macet" di pita. Tanpa ini, item yang isinya salah
+ * menahan antrean selamanya dan orangnya tidak punya jalan keluar selain
+ * menghapus data peramban.
+ */
+export async function buangItemMacet(): Promise<number> {
+  const macet = await itemMacet();
+  for (const item of macet) await buangAntrean(item.id);
+  return macet.length;
 }
 
 /** Cek koneksi sungguhan. `navigator.onLine` hanya jadi saringan pertama. */

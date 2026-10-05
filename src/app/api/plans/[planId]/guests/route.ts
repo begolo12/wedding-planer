@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { guests } from "@/db/schema";
 import { bacaJson, bungkus, tidakValid } from "@/lib/galat";
 import { cariParam, konteksPlan } from "@/lib/api";
+import { HEADER_KUNCI, sekaliPerKunci } from "@/lib/idempotensi";
 import { ringkasTamu, sisiDikenal } from "@/lib/tamu";
 import { skemaTamu } from "@/lib/skema";
 
@@ -111,22 +112,24 @@ export const POST = bungkus(async (req: Request, { params }: Params) => {
 
   const isi = skemaTamu.parse(await bacaJson(req));
 
-  const [baris] = await db
-    .insert(guests)
-    .values({
-      planId,
-      name: isi.name,
-      // Nomor sudah dinormalkan ke 628xx oleh skema (satu aturan untuk tamu
-      // dan vendor), jadi tidak ada normalisasi kedua di sini.
-      phone: isi.phone ?? null,
-      category: isi.category,
-      side: isi.side ?? null,
-      rsvpStatus: isi.rsvpStatus,
-      guestCount: isi.guestCount,
-      tableName: isi.tableName ?? null,
-      notes: isi.notes ?? null,
-    })
-    .returning();
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    const [baris] = await db
+      .insert(guests)
+      .values({
+        planId,
+        name: isi.name,
+        // Nomor sudah dinormalkan ke 628xx oleh skema (satu aturan untuk tamu
+        // dan vendor), jadi tidak ada normalisasi kedua di sini.
+        phone: isi.phone ?? null,
+        category: isi.category,
+        side: isi.side ?? null,
+        rsvpStatus: isi.rsvpStatus,
+        guestCount: isi.guestCount,
+        tableName: isi.tableName ?? null,
+        notes: isi.notes ?? null,
+      })
+      .returning();
 
-  return NextResponse.json({ guest: baris }, { status: 201 });
+    return NextResponse.json({ guest: baris }, { status: 201 });
+  });
 });

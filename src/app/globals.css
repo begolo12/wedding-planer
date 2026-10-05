@@ -230,12 +230,13 @@ h3 {
   font-variant-numeric: tabular-nums;
 }
 
-/* Label bagian. Huruf kecil semua dan berspasi lebar, jadi berbeda dari judul. */
+/* Label bagian. Skala `label-sm` di DESIGN.md bagian 4: 10px, 700, 0.04em.
+   Huruf besar semua dan berspasi lebar supaya jelas berbeda dari judul. */
 .label-bagian {
   display: block;
-  font-size: var(--text-kecil);
+  font-size: var(--text-mini);
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--color-muted);
 }
@@ -1089,10 +1090,10 @@ textarea.isian {
   z-index: 40;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  height: 56px;
-  background: var(--color-base);
+  height: calc(64px + env(safe-area-inset-bottom, 0px));
+  background: var(--color-kartu-putih);
   border-top: 1px solid var(--color-line);
-  padding-bottom: env(safe-area-inset-bottom, 0);
+  padding: 4px 8px calc(4px + env(safe-area-inset-bottom, 0px));
 }
 
 .nav-item {
@@ -1106,6 +1107,8 @@ textarea.isian {
 }
 
 .nav-item[data-aktif="ya"] {
+  background: var(--color-netral);
+  border-radius: var(--radius-kontrol);
   color: var(--color-ink);
 }
 
@@ -1114,12 +1117,27 @@ textarea.isian {
 }
 
 .nav-ikon {
-  font-size: 18px;
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: inherit;
+}
+
+/* Kotak gambar dan ketebalan garis sama untuk keempat ikon, jadi bilahnya
+   terbaca sebagai satu set. Warnanya ikut teks di sekitarnya. */
+.nav-ikon svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .nav-label {
-  font-size: 0.75rem;
+  font-size: var(--text-mini);
   font-weight: 600;
 }
 
@@ -1129,7 +1147,9 @@ textarea.isian {
 }
 
 .nav-kepala {
-  padding: 24px 16px 16px;
+  padding: 32px 24px 24px;
+  border-bottom: 1px solid var(--color-line);
+  margin-bottom: 24px;
 }
 
 .nav-nama {
@@ -1151,10 +1171,12 @@ textarea.isian {
   position: relative;
   display: flex;
   align-items: center;
-  min-height: 44px;
-  padding: 0 12px 0 16px;
+  min-height: 48px;
+  gap: 12px;
+  padding: 0 16px;
   border-radius: var(--radius-kontrol);
   color: var(--color-muted);
+  font-size: var(--text-kecil);
   font-weight: 600;
 }
 
@@ -1168,8 +1190,8 @@ textarea.isian {
    elemen aksen dan tidak menambah anggaran aksen layar. Sebelumnya item aktif
    hanya beda latar, sehingga di daftar tujuh item penandanya tidak terbaca. */
 .nav-tautan[data-aktif="ya"] {
-  background: var(--color-netral);
-  color: var(--color-ink);
+  background: var(--color-ink);
+  color: var(--color-base);
   font-weight: 700;
 }
 
@@ -1182,7 +1204,7 @@ textarea.isian {
   height: 20px;
   margin-top: -10px;
   border-radius: var(--radius-pil);
-  background: var(--color-ink);
+  background: var(--color-base);
 }
 
 .nav-kaki {
@@ -1196,7 +1218,7 @@ textarea.isian {
 
 /* Ruang bawah supaya konten terakhir tidak tertutup bilah bawah. */
 .isi-app {
-  padding-bottom: 80px;
+  padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
 }
 
 /* Cangkang menutup penuh setinggi viewport di kedua tema. Tanpa min-height,
@@ -1382,7 +1404,8 @@ textarea.isian {
   flex: 1 1 0;
 }
 
-/* Label kecil bergaya pita di atas judul, misalnya status atau rentang waktu. */
+/* Label kecil bergaya pita di atas judul, misalnya status atau rentang waktu.
+   Skala `label-md` di DESIGN.md bagian 4: 12px, 600, 0.02em. */
 .pita-label {
   display: inline-flex;
   align-items: center;
@@ -1391,9 +1414,9 @@ textarea.isian {
   border-radius: var(--radius-pil);
   background: var(--color-badge-latar);
   color: var(--color-badge-teks);
-  font-size: var(--text-kecil);
+  font-size: var(--text-mini);
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
@@ -2133,7 +2156,12 @@ textarea.isian {
 }
 
 .auth-emblem-lencana-bunga {
-  background: var(--color-tertiary-container, #d5c5de);
+  /* Dulu `var(--color-tertiary-container, #d5c5de)`, dan token itu tidak
+     pernah didefinisikan di mana pun. Yang terpakai selalu nilai jatuhnya,
+     ungu di luar palet DESIGN.md, dan karena bukan token, warnanya tidak
+     ikut berubah di mode gelap. Sekarang memakai token lencana yang sudah
+     punya pasangan terang dan gelap. */
+  background: var(--color-badge-latar);
   color: var(--color-marigold);
 }
 
@@ -2699,8 +2727,8 @@ textarea.isian {
 
 .mundur-label {
   display: block;
-  font-size: var(--text-kecil);
-  font-weight: 500;
+  font-size: var(--text-mini);
+  font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--color-muted);
@@ -3235,7 +3263,7 @@ textarea.isian {
 }
 
 .aksi-cepat-sub {
-  font-size: 0.75rem;
+  font-size: var(--text-mini);
   color: var(--color-muted);
   line-height: 1.2;
   margin-top: 2px;
@@ -3349,7 +3377,7 @@ textarea.isian {
 .tamu-hero-label {
   font-size: var(--text-mini);
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--color-muted);
 }
@@ -3421,7 +3449,7 @@ textarea.isian {
 }
 
 .tamu-lencana-teks span {
-  font-size: 0.625rem;
+  font-size: var(--text-mini);
   color: var(--color-muted);
 }
 
@@ -3905,37 +3933,41 @@ textarea.isian {
 /* Hero hitung mundur. Ini satu-satunya gradasi di aplikasi, sesuai DESIGN.md
    bagian 5: 135 derajat dari Blush Silk ke Warm Peach. Cahaya latar sengaja
    ditaruh di belakang isi. */
+.beranda-awal {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: clamp(24px, 4vw, 48px);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lembar);
+  background: var(--color-kartu-putih);
+}
+
+.beranda-awal .kosong {
+  padding: 24px 0 0;
+  border: 0;
+  background: transparent;
+}
+
+.beranda-awal-ikon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-kartu);
+  background: var(--color-netral);
+  color: var(--color-marigold);
+}
+
 .beranda-hero {
   position: relative;
   overflow: hidden;
   padding: clamp(20px, 4vw, 36px);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-lembar);
+  /* Satu-satunya gradasi di aplikasi ini, dan hanya di sini. Alasannya di
+     DESIGN.md bagian 5. */
   background: linear-gradient(135deg, var(--color-netral), var(--color-badge-latar));
-}
-
-.beranda-cahaya {
-  position: absolute;
-  pointer-events: none;
-  border-radius: var(--radius-pil);
-  filter: blur(60px);
-  opacity: 0.55;
-}
-
-.beranda-cahaya-kanan {
-  top: -80px;
-  right: -60px;
-  width: 280px;
-  height: 280px;
-  background: var(--color-terracotta);
-}
-
-.beranda-cahaya-kiri {
-  bottom: -100px;
-  left: -80px;
-  width: 240px;
-  height: 240px;
-  background: var(--color-badge-latar);
 }
 
 .beranda-hero-isi {
@@ -3948,9 +3980,10 @@ textarea.isian {
 
 @media (min-width: 900px) {
   .beranda-hero-isi {
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 320px);
     align-items: center;
-    justify-content: space-between;
+    gap: 32px;
   }
 }
 
@@ -3966,24 +3999,24 @@ textarea.isian {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
-  border-radius: var(--radius-pil);
-  background: var(--beranda-aksen);
-  color: var(--beranda-aksen-teks);
-  font-size: var(--text-mini);
+  padding: 0;
+  color: var(--color-marigold);
+  font-size: var(--text-kecil);
   font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 .beranda-pil-aksen svg {
   flex: none;
 }
 
+/* Sapaan pasangan. Dibuat sebagai paragraf, bukan judul, dan turun satu
+   langkah dari --text-h1, karena layar ini sudah punya satu judul di
+   `.kepala-halaman`. Dua teks sebesar judul halaman di satu layar membuat
+   keduanya sama pentingnya, jadi tidak ada lagi yang jadi pintu masuk. */
 .beranda-sapa {
   margin: 0;
   font-family: var(--font-judul);
-  font-size: var(--text-h1);
+  font-size: var(--text-h2);
   font-weight: 700;
   line-height: 1.2;
 }
@@ -4045,7 +4078,6 @@ textarea.isian {
   border: 1px solid var(--color-line);
   border-radius: var(--radius-kartu);
   background: var(--color-kartu-putih);
-  box-shadow: var(--bayang-2);
   text-align: center;
 }
 
@@ -4061,7 +4093,7 @@ textarea.isian {
 .beranda-mundur-kecil {
   font-size: var(--text-mini);
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--color-marigold);
 }
@@ -4101,7 +4133,8 @@ textarea.isian {
   display: block;
   margin-top: 2px;
   font-size: var(--text-mini);
-  letter-spacing: 0.06em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--color-muted);
 }
@@ -4187,7 +4220,7 @@ textarea.isian {
 
 .beranda-metrik {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
   gap: 16px;
 }
 
@@ -4971,7 +5004,6 @@ textarea.isian {
 .rencana-titik[data-jenis="lewat"],
 .rencana-titik[data-jenis="hariIni"] {
   background: var(--color-bata);
-  animation: rencana-denyut 2s ease-in-out infinite;
 }
 
 .rencana-titik[data-jenis="selesai"] {
@@ -4987,22 +5019,7 @@ textarea.isian {
   font-weight: 700;
 }
 
-@keyframes rencana-denyut {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.4;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .rencana-titik[data-jenis="lewat"],
-  .rencana-titik[data-jenis="hariIni"] {
-    animation: none;
-  }
-
   .rencana-bar-isi {
     transition: none;
   }
@@ -5043,6 +5060,14 @@ textarea.isian {
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
+  flex: 0 0 auto;
+}
+
+/* Tombol naik/turun urutan tugas. Dipisah dalam grupnya sendiri supaya jarak
+   antar tombol urut lebih rapat daripada jarak ke tombol Ubah dan Hapus. */
+.rencana-urut {
+  display: flex;
+  gap: 4px;
   flex: 0 0 auto;
 }
 
@@ -5175,24 +5200,6 @@ textarea.isian {
   gap: 16px;
 }
 
-.anggaran-hias {
-  position: absolute;
-  color: var(--color-terracotta);
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-.anggaran-hias-kanan {
-  top: -18px;
-  right: -14px;
-}
-
-.anggaran-hias-kiri {
-  bottom: -14px;
-  left: -12px;
-  opacity: 0.35;
-}
-
 .anggaran-hero-kepala {
   position: relative;
   display: flex;
@@ -5214,7 +5221,7 @@ textarea.isian {
 
 .anggaran-hero-label {
   font-family: var(--font-judul);
-  font-size: var(--text-kecil);
+  font-size: var(--text-mini);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -5261,19 +5268,30 @@ textarea.isian {
 }
 
 /* Bilah sebaran bertingkat */
+/* Bilah sebaran rencana biaya per kategori. Jalurnya diberi garis tepi karena
+   jalur putih telanjang di kanvas krem nyaris tidak terlihat, jadi bagian
+   terakhir yang memakai token krem juga hilang. Dengan garis tepi, batas
+   bilahnya terbaca dan tiap bagian punya sisi yang jelas kapan pun bagiannya
+   lebih kecil dari ruang yang tersisa. */
 .anggaran-sebar {
   display: flex;
   width: 100%;
   height: 14px;
   border-radius: var(--radius-pil);
   overflow: hidden;
-  background: var(--color-kartu-putih);
+  background: var(--color-netral);
+  border: 1px solid var(--color-line);
 }
 
 .anggaran-sebar-bagian {
   display: block;
   height: 100%;
   min-width: 3px;
+  border-right: 1px solid var(--color-line);
+}
+
+.anggaran-sebar-bagian:last-child {
+  border-right: 0;
 }
 
 .anggaran-legenda {
@@ -6465,10 +6483,10 @@ textarea.isian {
   border-radius: var(--radius-pil);
   background: var(--hari-h-aksen-lembut);
   color: var(--hari-h-aksen-lembut-teks);
-  font-size: var(--text-kecil);
+  font-size: var(--text-mini);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
 }
 
 .hari-h-ringkas-judul {
@@ -6731,6 +6749,12 @@ textarea.isian {
   background: var(--color-primary);
 }
 
+/* Titik penanda acara yang sedang berlangsung. Dulu titik ini berdenyut tanpa
+   henti; denyut itu dihapus karena gerak hanya untuk perubahan keadaan
+   (DESIGN.md bagian 1), dan denyut tanpa henti juga memakan baterai justru di
+   tempat yang paling butuh tahan lama. Sekarang keadaan "sekarang" ditandai
+   tenang: titik solid, cincin tetap di sekelilingnya, dan kartunya sendiri
+   sudah dibedakan garis aksen plus bayang. */
 .hari-h-acara-denyut {
   position: absolute;
   top: -3px;
@@ -6739,16 +6763,7 @@ textarea.isian {
   height: 9px;
   border-radius: var(--radius-pil);
   background: var(--color-primary);
-  animation: hari-h-denyut 1.6s ease-out infinite;
-}
-
-@keyframes hari-h-denyut {
-  0% {
-    box-shadow: 0 0 0 0 rgb(134 78 90 / 55%);
-  }
-  100% {
-    box-shadow: 0 0 0 12px rgb(134 78 90 / 0%);
-  }
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 25%, transparent);
 }
 
 .hari-h-acara-jam {
@@ -6859,10 +6874,6 @@ textarea.isian {
   .hari-h-lompat-pil,
   .hari-h-skala-tombol {
     transition: none;
-  }
-
-  .hari-h-acara-denyut {
-    animation: none;
   }
 }
 

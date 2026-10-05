@@ -209,6 +209,24 @@ export default function HalamanTanggal() {
       : true,
   );
 
+  // Ringkasan rel kanan: hitung mundur ke hari-H utama (atau tanggal terdekat
+  // yang belum lewat) dan jumlah tanggal per kelompok. Dihitung dari daftar
+  // yang sudah ada, jadi tidak ada angka baru yang perlu disimpan.
+  const hariH =
+    daftar.find((m) => m.isDayOf && (selisihHari(m.eventDate) ?? -1) >= 0) ?? null;
+  const berikutnya =
+    hariH ??
+    [...daftar]
+      .filter((m) => (selisihHari(m.eventDate) ?? -1) >= 0)
+      .sort((a, b) => a.eventDate.localeCompare(b.eventDate))[0] ??
+    null;
+  const selisihBerikutnya = berikutnya ? selisihHari(berikutnya.eventDate) : null;
+  const jumlahGrup = {
+    bulanIni: daftar.filter((m) => grupTanggal(m.eventDate) === "bulanIni").length,
+    akanDatang: daftar.filter((m) => grupTanggal(m.eventDate) === "akanDatang").length,
+    sudahLewat: daftar.filter((m) => grupTanggal(m.eventDate) === "sudahLewat").length,
+  };
+
   return (
     <div className="tumpuk-sedang">
       <div className="kepala-halaman">
@@ -232,6 +250,10 @@ export default function HalamanTanggal() {
         </p>
       ) : null}
 
+      {/* Susunan dua kolom: daftar tanggal di kolom utama, hitung mundur dan
+          jumlah per kelompok di rel kanan (DESIGN.md komposisi desktop poin
+          3). Di bawah 1023px tetap satu kolom, seperti contoh di /tamu/impor. */}
+      <div className="grid-daftar">
       {/* Satu panel untuk tab modul, pencarian, daftar tanggal, dan keadaan
           kosongnya (DESIGN.md komposisi desktop poin 5 dan 6). */}
       <div className="panel-daftar" aria-label="Daftar tanggal penting">
@@ -368,6 +390,49 @@ export default function HalamanTanggal() {
       )}
       </div>
       {/* Akhir panel daftar tanggal */}
+
+      {/* Rel kanan: hitung mundur ke hari-H dan jumlah tanggal per kelompok.
+          Isi rel hanya ringkasan atau aksi cepat, jadi angka ringkas yang
+          pindah ke sini, bukan daftarnya (DESIGN.md komposisi desktop poin
+          3). */}
+      {daftar.length > 0 ? (
+        <aside className="rel-samping">
+          <div className="rekap">
+            <div className="rekap-item">
+              <span className="rekap-nilai">
+                {selisihBerikutnya === null
+                  ? "—"
+                  : selisihBerikutnya < 0
+                    ? `${Math.abs(selisihBerikutnya)} hari lalu`
+                    : selisihBerikutnya === 0
+                      ? "Hari ini"
+                      : `${selisihBerikutnya} hari lagi`}
+              </span>
+              <span className="rekap-label">
+                {berikutnya
+                  ? hariH
+                    ? `Menuju ${berikutnya.title}`
+                    : `Tanggal terdekat: ${berikutnya.title}`
+                  : "Belum ada tanggal berikutnya"}
+              </span>
+            </div>
+            <div className="rekap-item">
+              <span className="rekap-nilai">{jumlahGrup.bulanIni}</span>
+              <span className="rekap-label">Bulan ini</span>
+            </div>
+            <div className="rekap-item">
+              <span className="rekap-nilai">{jumlahGrup.akanDatang}</span>
+              <span className="rekap-label">Akan datang</span>
+            </div>
+            <div className="rekap-item">
+              <span className="rekap-nilai">{jumlahGrup.sudahLewat}</span>
+              <span className="rekap-label">Sudah lewat</span>
+            </div>
+          </div>
+        </aside>
+      ) : null}
+      </div>
+      {/* Akhir grid dua kolom */}
 
       {/* Lembar Tambah / Ubah Tanggal */}
       <Lembar

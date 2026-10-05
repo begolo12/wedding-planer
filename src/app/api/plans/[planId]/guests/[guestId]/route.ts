@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { guests } from "@/db/schema";
 import { bacaJson, bungkus, idUuid, tidakDitemukan } from "@/lib/galat";
 import { konteksPlan } from "@/lib/api";
+import { HEADER_KUNCI, sekaliPerKunci } from "@/lib/idempotensi";
 import { awalHariJakarta } from "@/lib/format";
 import { skemaTamuUbah } from "@/lib/skema";
 
@@ -42,13 +43,15 @@ export const PATCH = bungkus(async (req: Request, { params }: Params) => {
     tambahan.invitedAt = awalHariJakarta();
   }
 
-  const [baris] = await db
-    .update(guests)
-    .set({ ...isi, ...tambahan })
-    .where(and(eq(guests.planId, planId), eq(guests.id, guestId)))
-    .returning();
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    const [baris] = await db
+      .update(guests)
+      .set({ ...isi, ...tambahan })
+      .where(and(eq(guests.planId, planId), eq(guests.id, guestId)))
+      .returning();
 
-  return NextResponse.json({ guest: baris });
+    return NextResponse.json({ guest: baris });
+  });
 });
 
 /** Tandai undangan sudah dikirim atau belum, tanpa membuka formulir. */
@@ -57,20 +60,24 @@ export const POST = bungkus(async (req: Request, { params }: Params) => {
   await konteksPlan(planId);
   const tamu = await ambil(planId, guestId);
 
-  const [baris] = await db
-    .update(guests)
-    .set({ invitedAt: tamu.invitedAt ? null : awalHariJakarta() })
-    .where(and(eq(guests.planId, planId), eq(guests.id, guestId)))
-    .returning();
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    const [baris] = await db
+      .update(guests)
+      .set({ invitedAt: tamu.invitedAt ? null : awalHariJakarta() })
+      .where(and(eq(guests.planId, planId), eq(guests.id, guestId)))
+      .returning();
 
-  return NextResponse.json({ guest: baris });
+    return NextResponse.json({ guest: baris });
+  });
 });
 
-export const DELETE = bungkus(async (_req: Request, { params }: Params) => {
+export const DELETE = bungkus(async (req: Request, { params }: Params) => {
   const { planId, guestId } = await params;
   await konteksPlan(planId);
   await ambil(planId, guestId);
 
-  await db.delete(guests).where(and(eq(guests.planId, planId), eq(guests.id, guestId)));
-  return new NextResponse(null, { status: 204 });
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    await db.delete(guests).where(and(eq(guests.planId, planId), eq(guests.id, guestId)));
+    return new NextResponse(null, { status: 204 });
+  });
 });

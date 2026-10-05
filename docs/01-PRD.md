@@ -59,7 +59,7 @@ Bukan pengganti semua alat. Tapi tempat tunggal yang bisa dibuka pagi hari untuk
 | Siapa | Orang tua, saudara, atau keluarga yang diminta mencatat atau mengurus tamu |
 | Situasi | Membantu di hari-H, atau mengelola daftar tamu dari jauh |
 | Kebutuhan | Masuk daftar tamu, lihat info acara, print daftar nama untuk pengawas |
-| Batasan | Tidak akan belajar aplikasi baru. Butuh akses lewat link yang dikirim, bukan akun baru |
+| Batasan | Tidak akan belajar aplikasi baru. Butuh akses lewat tautan yang dikirim, bukan akun baru |
 | Nilai | Menghemat waktu agar pasangan tidak perlu mengurus semuanya sendiri |
 
 ---

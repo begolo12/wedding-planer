@@ -76,6 +76,23 @@ describe("skemaPembayaran", () => {
     expect(skemaPembayaran.safeParse({ amount: 1_000, paidAt: "2026-13-01" }).success).toBe(false);
   });
 
+  /**
+   * Batas atas uang harus sama dengan kapasitas kolom `integer` Postgres.
+   * Kalau validasi lebih longgar, nilainya lolos ke database dan yang keluar
+   * adalah 500 (integer out of range), padahal kontraknya 422.
+   */
+  it("nilai tepat di batas kolom integer diterima", () => {
+    expect(skemaPembayaran.safeParse({ amount: 2_147_483_647, paidAt: "2026-06-30" }).success).toBe(true);
+  });
+
+  it("satu rupiah di atas batas kolom integer ditolak validasi, bukan database", () => {
+    expect(skemaPembayaran.safeParse({ amount: 2_147_483_648, paidAt: "2026-06-30" }).success).toBe(false);
+  });
+
+  it("nilai miliaran yang dulu lolos sekarang ditolak di validasi", () => {
+    expect(skemaPembayaran.safeParse({ amount: 3_000_000_000, paidAt: "2026-06-30" }).success).toBe(false);
+  });
+
   it("isFinal dibaca apa adanya, bukan lewat Boolean()", () => {
     const dasar = { amount: 1_000, paidAt: "2026-06-30" };
     expect(skemaPembayaran.parse({ ...dasar, isFinal: "false" }).isFinal).toBe(false);

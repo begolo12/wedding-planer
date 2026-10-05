@@ -7,10 +7,13 @@ import { defineConfig, devices } from "@playwright/test";
  * luring, hanya bisa dibuktikan di browser sungguhan. Keduanya disebut
  * docs/06-Stack-dan-Batas.md bagian 3 sebagai "cukup".
  *
- * Port 3100 dipakai supaya tidak berebut dengan dev server pengembangan di
- * port 3000. `webServer` di bawah baru dijalankan kalau `npm run test:e2e`
- * dipanggil; kalau di port itu sudah ada server yang jalan, yang itu dipakai
- * ulang (reuseExistingServer).
+ * Port 3110 dipakai supaya tidak berebut dengan dev server pengembangan di
+ * port 3000. Pernah memakai 3100, tapi di mesin pengembangan port itu
+ * dipegang proyek lain (`next start` dari folder berbeda), dan Playwright
+ * memakai ulang server mana pun yang mendengar di port itu, sehingga test
+ * menabrak aplikasi yang salah. `webServer` di bawah baru dijalankan kalau
+ * `npm run test:e2e` dipanggil; kalau di port itu sudah ada server yang
+ * jalan, yang itu dipakai ulang (reuseExistingServer).
  *
  * Catatan menjalankan di mesin ini: jangan panggil `npm run test:e2e` saat
  * dev server pengembangan masih memegang folder `.next`, karena dua proses
@@ -19,7 +22,7 @@ import { defineConfig, devices } from "@playwright/test";
  * Database: alur ini membuat akun dan data sungguhan. Pakai
  * `TEST_DATABASE_URL` kalau ada supaya tidak menyentuh data pengembangan.
  */
-const PORT = 3100;
+const PORT = 3110;
 
 export default defineConfig({
   testDir: "./e2e",

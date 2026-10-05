@@ -298,8 +298,12 @@ export default function HalamanSeragam() {
         </div>
       </div>
 
-      {/* Satu panel untuk tab modul, ringkasan, saringan, daftar busana, dan
-          keadaan kosongnya (DESIGN.md komposisi desktop poin 5 dan 6). */}
+      {/* Susunan dua kolom: daftar busana di kolom utama, ringkasan dan
+          aksi anggaran di rel kanan (DESIGN.md komposisi desktop poin 3).
+          Di bawah 1023px tetap satu kolom, seperti contoh di /tamu/impor. */}
+      <div className="grid-daftar">
+      {/* Satu panel untuk tab modul, saringan, daftar busana, dan keadaan
+          kosongnya (DESIGN.md komposisi desktop poin 5 dan 6). */}
       <div className="panel-daftar" aria-label="Daftar barang busana">
         <div className="panel-daftar-kepala">
       <TabRencana />
@@ -310,77 +314,6 @@ export default function HalamanSeragam() {
           Data ini dibuka dari cadangan perangkat. Menambah atau mengubah busana tidak bisa
           dilakukan sampai ada koneksi.
         </p>
-      ) : null}
-
-      {summary && summary.total > 0 ? (
-        <div className="rekap">
-          <div className="rekap-item">
-            <span className="rekap-nilai">{summary.total}</span>
-            <span className="rekap-label">Total busana</span>
-          </div>
-          <div className="rekap-item">
-            <span className="rekap-nilai teks-aksen">
-              {summary.siap}
-            </span>
-            <span className="rekap-label">Sudah siap</span>
-          </div>
-          <div className="rekap-item">
-            <span className="rekap-nilai teks-bahaya">
-              {summary.belumSiap}
-            </span>
-            <span className="rekap-label">Belum siap</span>
-          </div>
-          <div className="rekap-item">
-            <span className="rekap-nilai rekap-nilai-kecil">
-              <Rupiah nilai={summary.estimatedCost} />
-            </span>
-            <span className="rekap-label">Total biaya busana</span>
-          </div>
-        </div>
-      ) : null}
-
-      {summary && summary.total > 0 ? (
-        <section className="kartu tumpuk-rapat">
-          <div className="bagian-kepala">
-            <h2 className="label-bagian">Biaya busana dan anggaran</h2>
-          </div>
-          <div className="baris">
-            <span className="baris-isi">Total biaya busana</span>
-            <strong className="angka">
-              <Rupiah nilai={summary.estimatedCost} />
-            </strong>
-          </div>
-          <p className="keterangan">
-            {posBusana ? (
-              <>
-                Pos anggaran &ldquo;{posBusana.name}&rdquo; sekarang berisi{" "}
-                <Rupiah nilai={posBusana.plannedAmount} />. Tombol di bawah mengganti nilainya
-                dengan total di atas, bukan menambah, supaya tidak terhitung dua kali.
-              </>
-            ) : anggaranSiap ? (
-              "Belum ada pos anggaran berkategori busana. Tombol di bawah membuat pos baru bernama Busana."
-            ) : galatAnggaran ? (
-              "Daftar anggaran gagal dimuat, jadi pos busana belum bisa diperiksa. Coba muat ulang halaman."
-            ) : (
-              "Sedang memeriksa pos anggaran yang ada."
-            )}
-          </p>
-          {bisaUbah ? (
-            <button
-              type="button"
-              className="tombol tombol-sekunder"
-              disabled={!anggaranSiap || summary.estimatedCost <= 0 || sedangMasukkan}
-              onClick={() => setBukaMasukkanAnggaran(true)}
-            >
-              {posBusana ? "Perbarui pos Busana" : "Buat pos Busana"}
-            </button>
-          ) : null}
-          {summary.estimatedCost <= 0 ? (
-            <p className="keterangan">
-              Isi perkiraan biaya tiap barang dulu supaya totalnya ada.
-            </p>
-          ) : null}
-        </section>
       ) : null}
 
       {/* Filter Bar */}
@@ -557,6 +490,83 @@ export default function HalamanSeragam() {
       )}
       </div>
       {/* Akhir panel barang busana */}
+
+      {/* Rel kanan: ringkasan jumlah busana dan aksi memasukkan biayanya ke
+          anggaran. Isi rel hanya ringkasan atau aksi cepat, jadi rekap dan
+          kartu anggaran yang pindah ke sini, bukan daftarnya (DESIGN.md
+          komposisi desktop poin 3). */}
+      {summary && summary.total > 0 ? (
+        <aside className="rel-samping">
+          <div className="rekap">
+            <div className="rekap-item">
+              <span className="rekap-nilai">{summary.total}</span>
+              <span className="rekap-label">Total busana</span>
+            </div>
+            <div className="rekap-item">
+              <span className="rekap-nilai teks-aksen">
+                {summary.siap}
+              </span>
+              <span className="rekap-label">Sudah siap</span>
+            </div>
+            <div className="rekap-item">
+              <span className="rekap-nilai teks-bahaya">
+                {summary.belumSiap}
+              </span>
+              <span className="rekap-label">Belum siap</span>
+            </div>
+            <div className="rekap-item">
+              <span className="rekap-nilai rekap-nilai-kecil">
+                <Rupiah nilai={summary.estimatedCost} />
+              </span>
+              <span className="rekap-label">Total biaya busana</span>
+            </div>
+          </div>
+
+          <section className="kartu tumpuk-rapat">
+            <div className="bagian-kepala">
+              <h2 className="label-bagian">Biaya busana dan anggaran</h2>
+            </div>
+            <div className="baris">
+              <span className="baris-isi">Total biaya busana</span>
+              <strong className="angka">
+                <Rupiah nilai={summary.estimatedCost} />
+              </strong>
+            </div>
+            <p className="keterangan">
+              {posBusana ? (
+                <>
+                  Pos anggaran &ldquo;{posBusana.name}&rdquo; sekarang berisi{" "}
+                  <Rupiah nilai={posBusana.plannedAmount} />. Tombol di bawah mengganti nilainya
+                  dengan total di atas, bukan menambah, supaya tidak terhitung dua kali.
+                </>
+              ) : anggaranSiap ? (
+                "Belum ada pos anggaran berkategori busana. Tombol di bawah membuat pos baru bernama Busana."
+              ) : galatAnggaran ? (
+                "Daftar anggaran gagal dimuat, jadi pos busana belum bisa diperiksa. Coba muat ulang halaman."
+              ) : (
+                "Sedang memeriksa pos anggaran yang ada."
+              )}
+            </p>
+            {bisaUbah ? (
+              <button
+                type="button"
+                className="tombol tombol-sekunder"
+                disabled={!anggaranSiap || summary.estimatedCost <= 0 || sedangMasukkan}
+                onClick={() => setBukaMasukkanAnggaran(true)}
+              >
+                {posBusana ? "Perbarui pos Busana" : "Buat pos Busana"}
+              </button>
+            ) : null}
+            {summary.estimatedCost <= 0 ? (
+              <p className="keterangan">
+                Isi perkiraan biaya tiap barang dulu supaya totalnya ada.
+              </p>
+            ) : null}
+          </section>
+        </aside>
+      ) : null}
+      </div>
+      {/* Akhir grid dua kolom */}
 
       {/* Lembar Tambah / Ubah */}
       <Lembar

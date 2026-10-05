@@ -41,7 +41,9 @@ Semua endpoint mengikuti aturan yang sama. Kalau ada endpoint yang melanggar sal
 | `VALIDATION_ERROR` | 422 | Body tidak sesuai skema |
 | `CONFLICT` | 409 | Perubahan bentrok, misalnya edit dari dua perangkat |
 | `RATE_LIMITED` | 429 | Terlalu banyak permintaan |
+| `LIMIT_REACHED` | 429 | Batas jumlah data per plan sudah tercapai, misalnya lima tautan bagikan |
 | `INTERNAL_ERROR` | 500 | Bug |
+| `LURING` | 503 | Bukan dari server. Dilempar `src/lib/api-client.ts` saat perangkat luring, request masuk antrean IndexedDB |
 
 **`FORBIDDEN` dan `NOT_FOUND` sengaja dipisah.** `NOT_FOUND` berarti data memang tidak ada. `FORBIDDEN` berarti ada tapi bukan milikmu. Menggabungkan keduanya jadi `404` lebih aman secara keamanan, tapi lebih sulit dipakai saat debugging.
 
@@ -65,14 +67,26 @@ Semua endpoint mengikuti aturan yang sama. Kalau ada endpoint yang melanggar sal
 
 ## Auth
 
+Semua endpoint auth ditangani satu catch-all Better Auth, `src/app/api/auth/[...all]/route.ts`. Path-nya sama dengan path bawaan Better Auth, jadi yang dipakai antara lain:
+
 | Endpoint | Method | Body | Returns |
 |---|---|---|---|
-| `/api/auth/register` | `POST` | `{ email, password, name }` | Sesi + user |
-| `/api/auth/login` | `POST` | `{ email, password }` | Sesi + user |
-| `/api/auth/logout` | `POST` | kosong | 204 |
-| `/api/auth/session` | `GET` | - | User sekarang atau 401 |
+| `/api/auth/sign-up/email` | `POST` | `{ email, password, name }` | Sesi + user |
+| `/api/auth/sign-in/email` | `POST` | `{ email, password }` | Sesi + user |
+| `/api/auth/sign-out` | `POST` | kosong | 204 |
+| `/api/auth/get-session` | `GET` | - | Sesi sekarang atau null |
 
-Lima endpoint di atas ditangani Better Auth, ditulis ulang hanya kalau butuh bentuk khusus. Arahkan sisanya ke `auth.api` dan jangan membuat handler sendiri.
+Better Auth juga melayani jalur lain di bawah `/api/auth/` (misalnya `/callback/google`), semuanya lewat catch-all yang sama. Arahkan sisanya ke `auth.api` dan jangan membuat handler sendiri.
+
+---
+
+## Kesehatan
+
+| Endpoint | Method | Returns |
+|---|---|---|
+| `/api/kesehatan` | `GET` | `{ ok: true, waktu }`, tanpa menyentuh database |
+
+Satu-satunya endpoint tanpa sesi. Balasannya sengaja tidak membaca database: kalau ikut membaca, satu gangguan database akan terbaca sebagai luring di semua perangkat. Endpoint ini juga dipakai client untuk memastikan ada koneksi, jadi jawabannya `no-store`.
 
 ---
 
@@ -86,8 +100,11 @@ Lima endpoint di atas ditangani Better Auth, ditulis ulang hanya kalau butuh ben
 | `/api/plans/:planId` | `PATCH` | Field yang diubah | Plan terbaru |
 | `/api/plans/:planId` | `DELETE` | - | 204 |
 | `/api/plans/:planId/overview` | `GET` | - | Data untuk Beranda, sudah dihitung |
+| `/api/plans/:planId/ekspor` | `GET` | - | Seluruh data plan, untuk hak unduh data pribadi |
 
 `/overview` mengembalikan satu objek berisi hitung mundur, lima tugas terdekat, total anggaran, total terbayar, dan tanggal berikutnya. Client tidak perlu lima request terpisah untuk Beranda.
+
+`/ekspor` mengembalikan baris apa adanya, termasuk nama dan nomor tamu, karena pemilik data berhak atas datanya sendiri. Semua query memakai filter `planId`.
 
 **Alasannya** lima request untuk satu layar berarti lima kali loading state yang harus ditangani.
 
@@ -140,6 +157,7 @@ Lima endpoint di atas ditangani Better Auth, ditulis ulang hanya kalau butuh ben
 | `/api/plans/:planId/guests` | `GET` | `?category=&rsvpStatus=&search=` | Daftar tamu + rekap |
 | `/api/plans/:planId/guests` | `POST` | `{ name, category, guestCount?, phone? }` | Tamu baru |
 | `/api/plans/:planId/guests/import` | `POST` | `{ text, category }` | `{ preview, created }` |
+| `/api/plans/:planId/guests/undangan` | `POST` | `{ ids?, semua? }` | `{ updated, invitedAt }` |
 | `/api/plans/:planId/guests/:guestId` | `PATCH` | Field yang diubah | Tamu terbaru |
 | `/api/plans/:planId/guests/:guestId` | `DELETE` | - | 204 |
 
