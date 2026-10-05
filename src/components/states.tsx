@@ -36,7 +36,7 @@ export function Kosong({
   children?: ReactNode;
 }) {
   return (
-    <div className="kosong">
+    <div className="kosong" data-state="kosong">
       <p className="kosong-judul">{keadaan}</p>
       <p>{jalanKeluar}</p>
       {children ? <div className="kosong-aksi">{children}</div> : null}
@@ -56,7 +56,7 @@ export function Gagal({
   onCoba?: () => void;
 }) {
   return (
-    <div className="kosong">
+    <div className="kosong" data-state="gagal">
       <p className="kosong-judul">{apa} gagal dimuat.</p>
       <p>Bukan salahmu, coba lagi.</p>
       {onCoba ? (

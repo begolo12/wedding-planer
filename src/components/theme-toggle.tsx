@@ -41,11 +41,12 @@ export function ThemeToggle() {
     <button
       type="button"
       className="ikon-tombol"
+      data-theme-control="true"
       onClick={ganti}
       aria-pressed={siap ? gelap : undefined}
       title={gelap ? "Ganti ke mode terang" : "Ganti ke mode gelap"}
     >
-      <span aria-hidden="true">{gelap ? "\u25D1" : "\u25D0"}</span>
+      <span className="tema-ikon" aria-hidden="true">{gelap ? "\u25D1" : "\u25D0"}</span>
       <span className="sr-only">
         {gelap ? "Ganti ke mode terang" : "Ganti ke mode gelap"}
       </span>

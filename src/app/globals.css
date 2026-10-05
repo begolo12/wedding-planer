@@ -1354,6 +1354,38 @@ textarea.isian {
   background: var(--color-netral);
 }
 
+[data-theme-control] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--visual-border);
+  border-radius: var(--radius-kontrol);
+  background: var(--visual-surface);
+  color: var(--color-ink);
+  cursor: pointer;
+}
+
+[data-theme-control] .tema-ikon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.kosong[data-state="kosong"],
+.kosong[data-state="gagal"] {
+  min-width: 0;
+  padding: clamp(24px, 5vw, 48px);
+  border: 1px solid var(--visual-border);
+  border-radius: var(--radius-kartu);
+  background: var(--visual-surface);
+  box-shadow: var(--bayang-1);
+}
+
 /* Kepala halaman. Judul menjelaskan isinya, bukan mengulang nama modul.
    Di baris yang sama duduk satu aksi utama halaman, rata kanan, supaya
    mata pengguna tidak perlu mencari tombol utama di tempat lain.

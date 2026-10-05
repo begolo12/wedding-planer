@@ -23,4 +23,16 @@ test.describe("kontrak visual dasar", () => {
 
     expect(ukuran.lebarIsi).toBeLessThanOrEqual(ukuran.lebarViewport);
   });
+
+  test("kontrol tema punya ikon visual dan state kosong punya aksi jelas", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/masuk");
+
+    await expect(page.locator("[data-theme-control] .tema-ikon")).toBeVisible();
+    await expect(page.locator("[data-theme-control]")).toHaveAttribute("aria-pressed");
+
+    await page.goto("/not-found");
+    await expect(page.locator('[data-state="kosong"]')).toBeVisible();
+    await expect(page.getByRole("link", { name: "Kembali ke Beranda" })).toBeVisible();
+  });
 });
