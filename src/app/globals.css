@@ -25,46 +25,46 @@
    terang. Di 6,42:1 dengan tulisan Rosy Charcoal, blush aman sebagai isian
    besar. Karena itu blush tidak pernah jadi warna teks. */
 @theme {
-  --color-base: #fffdf9;
-  --color-ink: #4a3b43;
-  --color-sage: #665a6f;
-  --color-terracotta: #ffb7c5;
+  --color-base: #fcf9f5;
+  --color-ink: #382a32;
+  --color-sage: #66556b;
+  --color-terracotta: #ffa8b8;
   --color-marigold: #864e5a;
-  --color-netral: #fff0f5;
+  --color-netral: #fbf0f4;
   --color-bata: #ba1a1a;
 
-  --color-line: #d6c2c4;
+  --color-line: #e6d5d8;
   /* 78%, bukan 68%. Muted tidak pernah duduk di atas base saja: kartu, pita,
      tombol, dan bar memakai netral sebagai latar. Di 68% rasionya di atas
      base cuma 4,126:1. Di 78% rasionya 5,397:1 di base dan 4,969:1 di netral,
      jadi dua-duanya lolos. */
-  --color-muted: #72666b;
+  --color-muted: #6e6268;
 
   /* Lima warna khusus layar auth. Bukan bagian palet inti, tapi tetap
      dijadikan token supaya mode gelap cukup menimpa satu tempat, bukan
      menyusun ulang aturan tiap kelas. */
   --color-kartu-putih: #ffffff;
   --color-badge-latar: #fed5b9;
-  --color-badge-teks: #795b44;
+  --color-badge-teks: #744e32;
   --color-aksen-gelap: #7b4551;
-  --color-kotak-abu: #f9e2ec;
+  --color-kotak-abu: #f7e6ec;
 
   /* Blush tetap terang di dua mode, jadi tulisan di atasnya selalu Rosy
      Charcoal. --color-ink tidak boleh dipakai di sini karena di mode gelap
      nilainya berbalik jadi nyaris putih, dan tulisan itu hilang di atas
      blush. Token ini sengaja hanya punya satu nilai, bukan sepasang. */
-  --color-di-atas-blush: #4a3b43;
+  --color-di-atas-blush: #382a32;
 
-  --radius-kontrol: 9999px;
-  --radius-kartu: 2rem;
-  --radius-panel: 2rem;
-  --radius-lembar: 3rem;
+  --radius-kontrol: 16px;
+  --radius-kartu: 24px;
+  --radius-panel: 24px;
+  --radius-lembar: 32px;
   --radius-pil: 9999px;
 
-  /* Bayangan ambient, bukan bayangan keras. Warnanya blush, bukan hitam,
-     supaya kartu terlihat mengambang di atas kanvas krem. */
-  --bayang-1: 0px 8px 24px -4px rgb(74 59 67 / 6%), 0px 2px 6px -1px rgb(255 183 197 / 12%);
-  --bayang-2: 0px 16px 36px -8px rgb(74 59 67 / 10%), 0px 4px 12px -2px rgb(255 183 197 / 20%);
+  /* Bayangan ambient v3.0, bukan bayangan keras. Menggunakan pendar hangat
+     rose-peach bertingkat untuk memberi kedalaman tanpa kekakuan. */
+  --bayang-1: 0 8px 24px -4px rgba(56, 42, 50, 0.05), 0 2px 8px -2px rgba(255, 168, 184, 0.12);
+  --bayang-2: 0 16px 36px -6px rgba(56, 42, 50, 0.09), 0 4px 16px -2px rgba(255, 168, 184, 0.2);
 
   --font-judul: var(--font-plus-jakarta), system-ui, sans-serif;
   --font-teks: var(--font-be-vietnam), system-ui, sans-serif;
@@ -110,54 +110,54 @@
    Blush di mode gelap dipakai lebih terang, bukan lebih gelap, karena kontras
    di ukuran kecil harus tetap lolos. */
 [data-theme="gelap"] {
-  --color-base: #1f181c;
-  --color-ink: #f4e9ee;
-  --color-sage: #c4b3cf;
-  --color-terracotta: #ffb7c5;
-  --color-marigold: #f0a8ba;
-  --color-netral: #2b2126;
+  --color-base: #1a1317;
+  --color-ink: #f8ecf2;
+  --color-sage: #cca8c4;
+  --color-terracotta: #ffa8b8;
+  --color-marigold: #f8a8b8;
+  --color-netral: #22191f;
   --color-bata: #ffb4ab;
-  --color-line: #4a3b43;
-  --color-muted: #a89aa0;
-  --color-primary: #c4b3cf;
-  --color-kertas: #1f181c;
-  --color-garis: #4a3b43;
-  --color-tinta: #f4e9ee;
+  --color-line: #483741;
+  --color-muted: #b0a0a7;
+  --color-primary: #cca8c4;
+  --color-kertas: #1a1317;
+  --color-garis: #483741;
+  --color-tinta: #f8ecf2;
   /* Kartu putih jadi permukaan terang paling atas di mode gelap, jadi
-     dipakai #2f252b, lebih terang dari base. */
-  --color-kartu-putih: #2f252b;
-  --color-badge-latar: #4a3b43;
-  --color-badge-teks: #ffd6ba;
-  --color-aksen-gelap: #ffb7c5;
-  --color-kotak-abu: #3a2d33;
-  --bayang-1: 0px 8px 24px -4px rgb(0 0 0 / 40%), 0px 2px 6px -1px rgb(255 183 197 / 8%);
-  --bayang-2: 0px 16px 36px -8px rgb(0 0 0 / 50%), 0px 4px 12px -2px rgb(255 183 197 / 12%);
+     dipakai #281e24, lebih terang dari base. */
+  --color-kartu-putih: #281e24;
+  --color-badge-latar: #483741;
+  --color-badge-teks: #fed5b9;
+  --color-aksen-gelap: #ffa8b8;
+  --color-kotak-abu: #352630;
+  --bayang-1: 0 8px 24px -4px rgba(0, 0, 0, 0.45), 0 2px 8px -2px rgba(255, 168, 184, 0.08);
+  --bayang-2: 0 16px 36px -8px rgba(0, 0, 0, 0.55), 0 4px 16px -2px rgba(255, 168, 184, 0.14);
 }
 
 /* Pilihan "Mengikuti Sistem" di layar akun. Tanpa aturan ini tombolnya tidak
    mengubah apa pun saat perangkat memakai mode gelap. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="terang"]) {
-    --color-base: #1f181c;
-    --color-ink: #f4e9ee;
-    --color-sage: #c4b3cf;
-    --color-terracotta: #ffb7c5;
-    --color-marigold: #f0a8ba;
-    --color-netral: #2b2126;
+    --color-base: #1a1317;
+    --color-ink: #f8ecf2;
+    --color-sage: #cca8c4;
+    --color-terracotta: #ffa8b8;
+    --color-marigold: #f8a8b8;
+    --color-netral: #22191f;
     --color-bata: #ffb4ab;
-    --color-line: #4a3b43;
-    --color-muted: #a89aa0;
-    --color-primary: #c4b3cf;
-    --color-kertas: #1f181c;
-    --color-garis: #4a3b43;
-    --color-tinta: #f4e9ee;
-    --color-kartu-putih: #2f252b;
-    --color-badge-latar: #4a3b43;
-    --color-badge-teks: #ffd6ba;
-    --color-aksen-gelap: #ffb7c5;
-    --color-kotak-abu: #3a2d33;
-    --bayang-1: 0px 8px 24px -4px rgb(0 0 0 / 40%), 0px 2px 6px -1px rgb(255 183 197 / 8%);
-    --bayang-2: 0px 16px 36px -8px rgb(0 0 0 / 50%), 0px 4px 12px -2px rgb(255 183 197 / 12%);
+    --color-line: #483741;
+    --color-muted: #b0a0a7;
+    --color-primary: #cca8c4;
+    --color-kertas: #1a1317;
+    --color-garis: #483741;
+    --color-tinta: #f8ecf2;
+    --color-kartu-putih: #281e24;
+    --color-badge-latar: #483741;
+    --color-badge-teks: #fed5b9;
+    --color-aksen-gelap: #ffa8b8;
+    --color-kotak-abu: #352630;
+    --bayang-1: 0 8px 24px -4px rgba(0, 0, 0, 0.45), 0 2px 8px -2px rgba(255, 168, 184, 0.08);
+    --bayang-2: 0 16px 36px -8px rgba(0, 0, 0, 0.55), 0 4px 16px -2px rgba(255, 168, 184, 0.14);
   }
 }
 
@@ -2473,6 +2473,48 @@ textarea.isian {
   color: var(--color-muted);
 }
 
+/* Tombol Masuk/Daftar dengan Google */
+.auth-tombol-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 16px;
+  background: var(--color-card-bg, #ffffff);
+  color: var(--color-ink, #2d2629);
+  border: 1px solid var(--color-kotak-abu, #e5e0dc);
+  border-radius: var(--radius-md, 12px);
+  font-size: var(--text-dasar, 15px);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.auth-tombol-google:hover:not(:disabled) {
+  background: var(--color-latar, #faf8f5);
+  border-color: var(--color-muted, #948882);
+  transform: translateY(-1px);
+}
+
+.auth-tombol-google:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.auth-tombol-google:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-google-ikon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
 /* Kotak "ingat saya". Kotak centang aslinya disembunyikan, tapi tetap ada di
    alur dokumen supaya bisa difokus dengan papan tik. Tanda hati dipasang
    sebagai elemen terpisah yang mengikuti keadaan kotak. */
@@ -3963,11 +4005,18 @@ textarea.isian {
   position: relative;
   overflow: hidden;
   padding: clamp(20px, 4vw, 36px);
-  border: 1px solid var(--color-line);
+  border: 1px solid rgba(255, 255, 255, 0.85);
   border-radius: var(--radius-lembar);
-  /* Satu-satunya gradasi di aplikasi ini, dan hanya di sini. Alasannya di
-     DESIGN.md bagian 5. */
-  background: linear-gradient(135deg, var(--color-netral), var(--color-badge-latar));
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, var(--color-netral) 45%, var(--color-badge-latar) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 16px 36px -6px rgba(255, 168, 184, 0.3), 0 4px 14px -2px rgba(134, 78, 90, 0.06);
+}
+
+[data-theme="gelap"] .beranda-hero {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg, #241a20 0%, #2e2029 55%, #3d2935 100%);
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.65);
 }
 
 .beranda-hero-isi {
@@ -3981,7 +4030,7 @@ textarea.isian {
 @media (min-width: 900px) {
   .beranda-hero-isi {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 320px);
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 360px);
     align-items: center;
     gap: 32px;
   }
@@ -3999,20 +4048,27 @@ textarea.isian {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 0;
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: var(--radius-pil);
   color: var(--color-marigold);
-  font-size: var(--text-kecil);
+  font-size: var(--text-mini);
   font-weight: 700;
+  box-shadow: 0 2px 8px rgba(255, 168, 184, 0.25);
+  backdrop-filter: blur(8px);
+}
+
+[data-theme="gelap"] .beranda-pil-aksen {
+  background: rgba(53, 38, 48, 0.8);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .beranda-pil-aksen svg {
   flex: none;
 }
 
-/* Sapaan pasangan. Dibuat sebagai paragraf, bukan judul, dan turun satu
-   langkah dari --text-h1, karena layar ini sudah punya satu judul di
-   `.kepala-halaman`. Dua teks sebesar judul halaman di satu layar membuat
-   keduanya sama pentingnya, jadi tidak ada lagi yang jadi pintu masuk. */
+/* Sapaan pasangan. */
 .beranda-sapa {
   margin: 0;
   font-family: var(--font-judul);
@@ -4053,18 +4109,22 @@ textarea.isian {
   flex: none;
 }
 
-/* Kotak angka hari. */
+/* Kotak angka hari Stitch Luxury. */
 .beranda-mundur {
   display: flex;
-  flex-wrap: wrap;
-  align-items: stretch;
-  gap: 14px;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--radius-kartu);
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 24px -4px rgba(255, 168, 184, 0.22);
 }
 
-@media (min-width: 900px) {
-  .beranda-mundur {
-    flex: none;
-  }
+[data-theme="gelap"] .beranda-mundur {
+  background: rgba(35, 25, 32, 0.85);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .beranda-mundur-kotak {
@@ -4072,22 +4132,19 @@ textarea.isian {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  min-width: 140px;
-  padding: 18px 22px;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-kartu);
-  background: var(--color-kartu-putih);
+  gap: 2px;
+  padding: 12px 16px;
   text-align: center;
 }
 
 .beranda-mundur-besar {
   font-family: var(--font-judul);
   font-size: clamp(2.5rem, 2rem + 3vw, 4rem);
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1;
   color: var(--color-marigold);
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
 }
 
 .beranda-mundur-kecil {
@@ -4095,29 +4152,31 @@ textarea.isian {
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--color-marigold);
+  color: var(--color-ink);
 }
 
 .beranda-mundur-sisi {
   display: flex;
-  flex: 1 1 150px;
   flex-direction: column;
-  justify-content: center;
   gap: 10px;
-  min-width: 150px;
 }
 
 .beranda-mundur-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 
 .beranda-mundur-sel {
-  padding: 10px 12px;
-  border-radius: var(--radius-kartu);
+  padding: 10px 8px;
+  border-radius: var(--radius-kontrol);
   background: var(--color-netral);
   text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+[data-theme="gelap"] .beranda-mundur-sel {
+  border-color: rgba(255, 255, 255, 0.06);
 }
 
 .beranda-mundur-nilai {
@@ -7121,3 +7180,249 @@ textarea.isian {
 .tab-berjarak {
   margin-bottom: 16px;
 }
+
+/* ==========================================================================
+   STITCH "CUTE WEDDING PLANNER" LUXURY SYSTEM
+   Palet, ambient glowing orbs, frosted glass, bento quick actions, dan mikrointeraksi.
+   ========================================================================== */
+
+/* Ambient Glowing Orbs Background */
+.stitch-ambient-glow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.stitch-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(64px);
+  opacity: 0.65;
+  pointer-events: none;
+  transform: translateZ(0);
+}
+
+.stitch-orb-1 {
+  top: -80px;
+  left: -80px;
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, #ffd9df 0%, #fed5b9 70%, transparent 100%);
+  animation: floatOrb1 16s ease-in-out infinite alternate;
+}
+
+.stitch-orb-2 {
+  top: 35%;
+  right: -90px;
+  width: 340px;
+  height: 340px;
+  background: radial-gradient(circle, #ffb7c5 0%, #eeddf7 70%, transparent 100%);
+  animation: floatOrb2 20s ease-in-out infinite alternate;
+}
+
+.stitch-orb-3 {
+  bottom: 80px;
+  left: 5%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, #ffe8f2 0%, #ffdcc4 70%, transparent 100%);
+  animation: floatOrb1 18s ease-in-out infinite alternate-reverse;
+}
+
+[data-theme="gelap"] .stitch-orb {
+  opacity: 0.22;
+}
+
+/* Luxury Frosted Glass Containers */
+.luxury-glass {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 36px -6px rgba(255, 168, 184, 0.25), 0 2px 8px -2px rgba(134, 78, 90, 0.05);
+  border-radius: var(--radius-kartu);
+}
+
+[data-theme="gelap"] .luxury-glass {
+  background: rgba(40, 30, 36, 0.78);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 36px -8px rgba(0, 0, 0, 0.65), 0 2px 8px -2px rgba(255, 168, 184, 0.08);
+}
+
+.luxury-card {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 24px -4px rgba(255, 168, 184, 0.2), 0 2px 6px 0 rgba(134, 78, 90, 0.04);
+  border-radius: var(--radius-kartu);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+[data-theme="gelap"] .luxury-card {
+  background: rgba(40, 30, 36, 0.85);
+  border-color: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.55);
+}
+
+.luxury-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px -4px rgba(255, 168, 184, 0.32), 0 4px 10px 0 rgba(134, 78, 90, 0.08);
+}
+
+/* Shimmer Animation */
+.shimmer-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.5) 50%, transparent 100%);
+  transform: translateX(-150%) skewX(-20deg);
+  animation: shimmerWave 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+[data-theme="gelap"] .shimmer-container::after {
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.12) 50%, transparent 100%);
+}
+
+/* Keyframes */
+@keyframes floatOrb1 {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(24px, 20px) scale(1.08); }
+  100% { transform: translate(-12px, 12px) scale(0.96); }
+}
+
+@keyframes floatOrb2 {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(-22px, -24px) scale(0.94); }
+  100% { transform: translate(16px, -10px) scale(1.04); }
+}
+
+@keyframes shimmerWave {
+  0% { transform: translateX(-150%) skewX(-20deg); }
+  100% { transform: translateX(250%) skewX(-20deg); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 168, 184, 0.6), 0 0 16px 2px rgba(255, 168, 184, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(255, 168, 184, 0), 0 0 24px 6px rgba(255, 168, 184, 0.5);
+  }
+}
+
+@keyframes softBreath {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.025); }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-breath {
+  animation: softBreath 3.5s ease-in-out infinite;
+}
+
+/* Bento Quick Action Grid */
+.bento-aksi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .bento-aksi-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.bento-aksi-tombol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 12px;
+  min-height: 96px;
+  border-radius: var(--radius-kartu);
+  text-align: center;
+  cursor: pointer;
+  color: var(--color-ink);
+  text-decoration: none;
+  transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.16s ease;
+}
+
+.bento-aksi-tombol:active {
+  transform: scale(0.96);
+}
+
+.bento-aksi-ikon-lingkaran {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 9999px;
+  margin-bottom: 8px;
+  box-shadow: 0 4px 10px -2px rgba(134, 78, 90, 0.15);
+  transition: transform 0.2s ease;
+}
+
+.bento-aksi-tombol:hover .bento-aksi-ikon-lingkaran {
+  transform: scale(1.1) rotate(2deg);
+}
+
+.bento-aksi-label {
+  font-family: var(--font-judul);
+  font-size: var(--text-kecil);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.bento-aksi-sub {
+  font-size: var(--text-mini);
+  color: var(--color-muted);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+/* Material Symbols Outlined helper */
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined", sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+.material-symbols-outlined.fill-1 {
+  font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 24;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stitch-orb,
+  .animate-pulse-glow,
+  .animate-breath,
+  .shimmer-container::after {
+    animation: none !important;
+  }
+}
+

@@ -31,6 +31,7 @@ Aturan singkat:
 
 ### Ubah
 
+- Menambahkan pola wildcard port lokal (`http://localhost:*`, `http://127.0.0.1:*`, dan subnet lokal) ke `trustedOrigins` Better Auth, serta melonggarkan batas rate limit di mode dev agar pendaftaran di local environment pada port selain 3000 tidak ditolak 403 INVALID_ORIGIN atau terkunci 429 RATE_LIMITED
 - Dokumen disinkronkan dengan kode: docs/18 memakai nomor baris dan jumlah test yang benar (150 unit, 9 e2e), baris nama produk diperbarui karena manifest sudah memakai `NAMA_PRODUK`, docs/19 diberi penanda 13 temuan selesai
 - Port uji e2e pindah dari 3100 ke 3110. Di mesin pengembangan port 3100 dipegang `next start` dari proyek lain, dan karena Playwright memakai ulang server yang sudah mendengar di port itu, test menabrak aplikasi yang salah sampai tiga test gagal dengan koneksi ditolak
 - Batas laju POST pembayaran diukur: 60 permintaan pertama menjawab 201, percobaan ke-61 menjawab 429 dengan header `X-Retry-After`. Sebelumnya kodenya ada tapi belum terukur, dan sekarang celah itu tertutup di docs/18

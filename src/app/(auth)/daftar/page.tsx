@@ -7,6 +7,7 @@ import { signUp } from "@/lib/auth-client";
 import { minta } from "@/lib/api-client";
 import { PesanGalat } from "@/components/states";
 import { IsianSandi } from "@/components/field";
+import { TombolGoogle } from "@/components/tombol-google";
 import { NAMA_PRODUK } from "@/lib/konstanta";
 
 /**
@@ -43,6 +44,12 @@ export default function HalamanDaftar() {
       return;
     }
 
+    const surelBersih = email.trim().toLowerCase();
+    if (!surelBersih.endsWith("@gmail.com") && !surelBersih.endsWith("@googlemail.com")) {
+      setGalat("Gunakan akun email Google (@gmail.com) yang valid, atau daftar langsung lewat tombol Google di bawah.");
+      return;
+    }
+
     if (!setuju) {
       setGalat("Centang dulu persetujuan kebijakan privasi.");
       return;
@@ -63,9 +70,13 @@ export default function HalamanDaftar() {
 
     if (error) {
       setSedangJalan(false);
-      const kode = (error as { code?: string }).code;
-      if (kode === "USER_ALREADY_EXISTS") {
+      const err = error as { code?: string; status?: number };
+      if (err.code === "USER_ALREADY_EXISTS") {
         setGalat("Email ini sudah dipakai. Masuk saja.");
+        return;
+      }
+      if (err.status === 429 || err.code === "RATE_LIMITED") {
+        setGalat("Terlalu banyak percobaan. Coba lagi sebentar lagi.");
         return;
       }
       setGalat("Pendaftaran belum berhasil. Coba lagi sebentar.");
@@ -263,6 +274,14 @@ export default function HalamanDaftar() {
             "Buat Akun Pernikahan Kami"
           )}
         </button>
+
+        <div className="auth-pemisah" role="separator" aria-label="pilihan daftar lain">
+          <span className="auth-pemisah-garis" aria-hidden="true" />
+          <span className="auth-pemisah-teks">ATAU</span>
+          <span className="auth-pemisah-garis" aria-hidden="true" />
+        </div>
+
+        <TombolGoogle label="Daftar dengan Akun Google" onError={setGalat} />
       </form>
 
       <p className="auth-kaki">

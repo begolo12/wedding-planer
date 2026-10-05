@@ -2,7 +2,7 @@ import { expect, type Page } from "@playwright/test";
 
 /** Email unik supaya test bisa diulang tanpa bentrok akun lama. */
 export function akunUnik(awalan: string): string {
-  return `${awalan}-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}@contoh.id`;
+  return `${awalan}-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}@gmail.com`;
 }
 
 export const SANDI_UJI = "rahasia-uji-123";

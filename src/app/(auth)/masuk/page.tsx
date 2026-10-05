@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { signIn } from "@/lib/auth-client";
 import { PesanGalat } from "@/components/states";
 import { IsianSandi } from "@/components/field";
+import { TombolGoogle } from "@/components/tombol-google";
 import { NAMA_PRODUK } from "@/lib/konstanta";
 
 /**
@@ -67,7 +68,11 @@ export default function HalamanMasuk() {
       });
 
       if (error) {
-        setSedangJalan(false);
+        const err = error as { code?: string; status?: number };
+        if (err.status === 429 || err.code === "RATE_LIMITED") {
+          setGalat("Terlalu banyak percobaan. Coba lagi sebentar lagi.");
+          return;
+        }
         // Email yang belum terdaftar dan sandi yang salah dibalas sama,
         // supaya layar ini tidak bisa dipakai menebak siapa yang punya akun.
         setGalat("Email atau kata sandi belum cocok.");
@@ -183,6 +188,14 @@ export default function HalamanMasuk() {
             `Masuk ke ${NAMA_PRODUK}`
           )}
         </button>
+
+        <div className="auth-pemisah" role="separator" aria-label="pilihan masuk lain">
+          <span className="auth-pemisah-garis" aria-hidden="true" />
+          <span className="auth-pemisah-teks">ATAU</span>
+          <span className="auth-pemisah-garis" aria-hidden="true" />
+        </div>
+
+        <TombolGoogle label="Masuk dengan Google" onError={setGalat} />
       </form>
 
       <p className="auth-kaki">

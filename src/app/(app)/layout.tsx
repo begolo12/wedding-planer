@@ -21,6 +21,12 @@ export default async function LayoutApp({ children }: { children: ReactNode }) {
 
   return (
     <div className="tata-app">
+      {/* Pendaran ambient romantis bergaya Stitch Luxury */}
+      <div aria-hidden="true" className="stitch-ambient-glow">
+        <div className="stitch-orb stitch-orb-1" />
+        <div className="stitch-orb stitch-orb-2" />
+        <div className="stitch-orb stitch-orb-3" />
+      </div>
       <DaftarServiceWorker />
       <NavSisi namaPasangan={nama} />
       <a className="lompat" href="#konten">

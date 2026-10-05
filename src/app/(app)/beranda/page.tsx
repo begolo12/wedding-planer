@@ -171,52 +171,63 @@ export default function HalamanBeranda() {
         ) : null}
       </div>
 
-      <section className="beranda-hero">
+      <section className="beranda-hero shimmer-container">
         <div className="beranda-hero-isi">
           <div className="beranda-hero-kiri">
-            <span className="beranda-pil-aksen">
-              <IkonHati size={16} />
-              Hitung Mundur Menuju Pelaminan
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="beranda-pil-aksen">
+                <IkonHati size={14} />
+                Hitung Mundur Bahagia
+              </span>
+              <span className="px-3 py-0.5 rounded-full text-[12px] font-bold bg-white/80 text-[var(--color-ink)] border border-white/70 shadow-xs">
+                Fase 2
+              </span>
+            </div>
             <p className="beranda-sapa">{sapaan}</p>
             <p className="beranda-tanggal">
-              <IkonKalender size={20} />
+              <IkonKalender size={18} />
               {hariBesar ? tanggalPanjangDari(hariBesar) : "Tanggal pernikahan belum ditentukan"}
               {tanggalBerikut ? (
                 <>
                   <span className="beranda-pemisah" aria-hidden="true">
                     •
                   </span>
-                  <IkonTanda size={20} />
+                  <IkonTanda size={18} />
                   {tanggalBerikut.title}
                 </>
               ) : null}
             </p>
             <span className="beranda-kutip">
               <IkonKutip size={14} />
-              Satu langkah kecil tiap hari, dan hari besar itu makin dekat.
+              Setiap langkah kecil membawamu makin dekat ke pelaminan impian.
             </span>
           </div>
 
           {hariKe !== null ? (
             <div className="beranda-mundur">
               <div className="beranda-mundur-kotak">
-                <span className="beranda-mundur-besar">
+                <span className="beranda-mundur-besar animate-breath">
                   {hariKe < 0 ? Math.abs(hariKe) : hariKe}
                 </span>
                 <span className="beranda-mundur-kecil">
-                  {hariKe < 0 ? "Hari Berlalu" : "Hari Lagi"}
+                  {hariKe < 0 ? "Hari Berlalu" : "Hari Lagi!"}
                 </span>
               </div>
               <div className="beranda-mundur-sisi">
                 <div className="beranda-mundur-grid">
+                  <div className="beranda-mundur-sel">
+                    <span className="beranda-mundur-nilai">
+                      {hariKe < 0 ? 0 : Math.abs(hariKe)}
+                    </span>
+                    <span className="beranda-mundur-sel-label">Hari</span>
+                  </div>
                   <div className="beranda-mundur-sel">
                     <span className="beranda-mundur-nilai">{mingguLagi ?? "-"}</span>
                     <span className="beranda-mundur-sel-label">Minggu</span>
                   </div>
                   <div className="beranda-mundur-sel">
                     <span className="beranda-mundur-nilai">{tugasSisa}</span>
-                    <span className="beranda-mundur-sel-label">Tugas Sisa</span>
+                    <span className="beranda-mundur-sel-label">Tugas</span>
                   </div>
                 </div>
                 <p className="beranda-mundur-pita">
@@ -237,34 +248,77 @@ export default function HalamanBeranda() {
             </div>
           )}
         </div>
+      </section>
 
-        {/*
-          Maksimal tiga aksi sekunder, dan ketiganya menuju modul berbeda:
-          rencana, anggaran, dan tamu. "Bagikan" dan "Cetak laporan" dihapus
-          karena keduanya berakhir di modul laporan yang sama, jadi dua tombol
-          itu satu pekerjaan di dua tempat, dan laporan tetap terjangkau lewat
-          item "Laporan" di navigasi. Tidak ada tombol bergaya utama di baris
-          ini: aksi utama layar sudah ada di kepala halaman.
-          Ketiganya tetap disembunyikan saat luring, karena isinya menambah
-          data dan penambahan data butuh koneksi.
-        */}
-        <div className="beranda-aksi">
-          {bisaUbah ? (
-            <>
-              <Link className="beranda-aksi-pil" href="/rencana">
-                <IkonChecklist size={18} />
-                Muat checklist
-              </Link>
-              <Link className="beranda-aksi-pil" href="/anggaran">
-                <IkonUang size={18} />
-                Catat Pengeluaran
-              </Link>
-              <Link className="beranda-aksi-pil" href="/tamu">
-                <IkonTamu size={18} />
-                Tamu Baru
-              </Link>
-            </>
-          ) : null}
+      {/* Bento Quick Actions Stitch (Ergonomic Thumb Zone) */}
+      <section className="flex flex-col gap-2 mt-6">
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-2">
+            <span className="text-[var(--color-marigold)] flex items-center">
+              <IkonHati size={16} />
+            </span>
+            <h2 className="text-base font-bold">Aksi Cepat</h2>
+          </div>
+          <span className="text-xs text-[var(--color-muted)] font-medium">
+            Ketuk untuk mulai
+          </span>
+        </div>
+        <div className="bento-aksi-grid">
+          <Link
+            className="bento-aksi-tombol luxury-card shimmer-container"
+            href="/rencana"
+          >
+            <span
+              className="bento-aksi-ikon-lingkaran"
+              style={{ background: "var(--color-terracotta)", color: "var(--color-di-atas-blush)" }}
+            >
+              <IkonChecklist size={22} />
+            </span>
+            <span className="bento-aksi-label">+ Tugas</span>
+            <span className="bento-aksi-sub">Checklist</span>
+          </Link>
+
+          <Link
+            className="bento-aksi-tombol luxury-card shimmer-container"
+            href="/anggaran"
+          >
+            <span
+              className="bento-aksi-ikon-lingkaran"
+              style={{ background: "var(--color-badge-latar)", color: "var(--color-badge-teks)" }}
+            >
+              <IkonUang size={22} />
+            </span>
+            <span className="bento-aksi-label">Catat Biaya</span>
+            <span className="bento-aksi-sub">Anggaran</span>
+          </Link>
+
+          <Link
+            className="bento-aksi-tombol luxury-card shimmer-container"
+            href="/tamu"
+          >
+            <span
+              className="bento-aksi-ikon-lingkaran"
+              style={{ background: "var(--color-kotak-abu)", color: "var(--color-marigold)" }}
+            >
+              <IkonTamu size={22} />
+            </span>
+            <span className="bento-aksi-label">Undangan</span>
+            <span className="bento-aksi-sub">Tamu Baru</span>
+          </Link>
+
+          <Link
+            className="bento-aksi-tombol luxury-card shimmer-container"
+            href="/rencana/vendor"
+          >
+            <span
+              className="bento-aksi-ikon-lingkaran"
+              style={{ background: "var(--color-netral)", color: "var(--color-sage)" }}
+            >
+              <IkonVendor size={22} />
+            </span>
+            <span className="bento-aksi-label">Vendor</span>
+            <span className="bento-aksi-sub">Hubungi</span>
+          </Link>
         </div>
       </section>
 
@@ -294,9 +348,9 @@ export default function HalamanBeranda() {
           ) : null}
 
           <div className="beranda-metrik">
-            <section className="kartu beranda-kartu">
+            <section className="luxury-glass beranda-kartu p-5">
               <div className="beranda-kartu-kepala">
-                <span className="label-bagian">Tugas</span>
+                <span className="label-bagian">Checklist Siap</span>
                 <span className="beranda-ikon-bulat beranda-ikon-utama">
                   <IkonChecklist size={18} />
                 </span>
@@ -305,7 +359,7 @@ export default function HalamanBeranda() {
                 <div className="beranda-kartu-angka">
                   <span className="beranda-kartu-besar">{persenTugas}%</span>
                   <span className="beranda-kartu-kecil">
-                    {jumlahTugas.selesai} / {jumlahTugas.total} selesai
+                    {jumlahTugas.selesai} dari {jumlahTugas.total} selesai
                   </span>
                 </div>
                 <div className="beranda-bar">
@@ -330,7 +384,7 @@ export default function HalamanBeranda() {
               )}
             </section>
 
-            <section className="kartu beranda-kartu">
+            <section className="luxury-glass beranda-kartu p-5">
               <div className="beranda-kartu-kepala">
                 <span className="label-bagian">Konfirmasi Tamu</span>
                 <span className="beranda-ikon-bulat beranda-ikon-tersier">
@@ -342,7 +396,7 @@ export default function HalamanBeranda() {
                   <span className="beranda-kartu-besar">{tamu.porsi}</span>
                   <span className="beranda-kartu-kecil">perkiraan porsi katering</span>
                   <span className="beranda-kartu-kecil beranda-kartu-tanda">
-                    {persenHadir}% sudah menyatakan hadir
+                    {persenHadir}% sudah konfirmasi hadir
                   </span>
                 </div>
                 <span className="beranda-cincin" aria-hidden="true">
@@ -362,7 +416,7 @@ export default function HalamanBeranda() {
               <div className="beranda-pil-baris">
                 <span className="beranda-pil beranda-pil-utama">{tamu.hadir} Hadir</span>
                 <span className="beranda-pil beranda-pil-kedua">
-                  {tamu.belumKonfirmasi} Belum konfirmasi hadir
+                  {tamu.belumKonfirmasi} Belum konfirmasi
                 </span>
                 <span className="beranda-pil beranda-pil-redup">
                   {tamu.tidakHadir} Tidak hadir
@@ -370,9 +424,9 @@ export default function HalamanBeranda() {
               </div>
             </section>
 
-            <section className="kartu beranda-kartu">
+            <section className="luxury-glass beranda-kartu p-5">
               <div className="beranda-kartu-kepala">
-                <span className="label-bagian">Anggaran Pernikahan</span>
+                <span className="label-bagian">Anggaran Terbayar</span>
                 <span className="beranda-ikon-bulat beranda-ikon-kedua">
                   <IkonUang size={18} />
                 </span>
@@ -383,7 +437,7 @@ export default function HalamanBeranda() {
                     <Rupiah nilai={uang.paid} />
                   </span>
                   <span className="beranda-kartu-kecil">
-                    Dari <Rupiah nilai={uang.planned} /> ({persenAnggaran}%)
+                    Dari target <Rupiah nilai={uang.planned} /> ({persenAnggaran}%)
                   </span>
                 </div>
                 <div className="beranda-bar">
@@ -394,7 +448,7 @@ export default function HalamanBeranda() {
                 </div>
               </div>
               <div className="beranda-kartu-kaki">
-                <span>Sisa anggaran</span>
+                <span>Sisa dana aman</span>
                 <span className="beranda-kartu-tebal">
                   <Rupiah nilai={uang.remaining} /> ({100 - persenAnggaran}%)
                 </span>

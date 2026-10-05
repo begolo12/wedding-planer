@@ -55,8 +55,8 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 5,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#FFFDF9" },
-    { media: "(prefers-color-scheme: dark)", color: "#1F181C" },
+    { media: "(prefers-color-scheme: light)", color: "#fcf9f5" },
+    { media: "(prefers-color-scheme: dark)", color: "#1a1317" },
   ],
 };
 
@@ -86,6 +86,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: skripTema }} />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        />
       </head>
       <body>{children}</body>
     </html>

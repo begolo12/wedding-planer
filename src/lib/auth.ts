@@ -35,6 +35,11 @@ function kumpulkanOrigin(): string[] {
     // Sumber utama, sekaligus jalur pengembangan lokal.
     process.env.BETTER_AUTH_URL,
     "http://localhost:3000",
+    // Dukung semua port pengembangan lokal (mis. 3001, 3002, 3110) dan loopback IP.
+    "http://localhost:*",
+    "https://localhost:*",
+    "http://127.0.0.1:*",
+    "https://127.0.0.1:*",
     // Daftar tambahan bebas, dipisah koma, tanpa perlu ubah kode.
     ...(process.env.BETTER_AUTH_TRUSTED_ORIGINS?.split(",") ?? []),
     // Domain yang diisi Vercel sendiri pada tiap deployment.
@@ -44,6 +49,10 @@ function kumpulkanOrigin(): string[] {
     // Alamat tetap yang dipakai orang, dan pola untuk preview per-cabang.
     "https://wedding-planer-self.vercel.app",
     "https://wedding-planer-*.vercel.app",
+    // Akses perangkat lokal lewat LAN di mode dev (misalnya tes dari HP).
+    ...(process.env.NODE_ENV !== "production"
+      ? ["http://192.168.*:*", "http://10.*:*", "http://172.*:*"]
+      : []),
   ];
 
   const bersih = mentah
@@ -87,6 +96,9 @@ export const auth = betterAuth({
       enabled: true,
     },
   },
+  // databaseHooks sengaja tidak otomatis memasukkan plan saat pendaftaran email biasa,
+  // karena halaman pendaftaran (/daftar) dan form rencana masing-masing sudah mengelola
+  // pembuatan plan pertama bersama nama pasangannya secara eksplisit.
   socialProviders: googleAda
     ? {
         google: {
@@ -106,19 +118,22 @@ export const auth = betterAuth({
   // sistem kedua untuk masalah yang sama. docs/18 bagian 7 memutuskan angka
   // untuk dua endpoint ini.
   rateLimit: {
-    // Bawaan pustakanya cuma aktif di produksi. Dinyalakan di sini supaya
-    // syarat selesai story 6 (daftar enam kali dalam satu jam mendapat 429)
-    // bisa diperiksa di mode dev, bukan cuma setelah naik produksi.
+    // Bawaan pustakanya cuma aktif di produksi. Di mode dev batas dilonggarkan
+    // agar pengujian lokal dan pendaftaran tidak terkunci 1 jam saat mencoba.
     enabled: true,
     window: 60,
     max: 300,
     customRules: {
-      // 5 permintaan per jam per alamat IP. Mendaftarkan banyak akun tidak
-      // pernah punya alasan yang sah.
-      "/sign-up/email": { window: 60 * 60, max: 5 },
-      // 10 permintaan per 15 menit per alamat IP. Untuk mendeteksi tebakan
-      // kata sandi tanpa menahan orang yang salah ketik dua kali.
-      "/sign-in/email": { window: 15 * 60, max: 10 },
+      // 5 permintaan per jam per alamat IP di produksi. Di mode dev dilonggarkan.
+      "/sign-up/email": {
+        window: 60 * 60,
+        max: process.env.NODE_ENV === "production" ? 5 : 100,
+      },
+      // 10 permintaan per 15 menit per alamat IP di produksi.
+      "/sign-in/email": {
+        window: 15 * 60,
+        max: process.env.NODE_ENV === "production" ? 10 : 100,
+      },
     },
   },
   advanced: {
