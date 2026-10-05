@@ -7796,6 +7796,123 @@ a:focus-visible {
   }
 }
 
+/* Screen refinements: planning, budget, guests, and day-of. Keep page-specific
+   selectors local so existing data and mutation markup remain untouched. */
+.anggaran-hero,
+.tamu-hero,
+.hari-h-ringkas {
+  border-color: var(--visual-border);
+  background: linear-gradient(145deg, var(--visual-surface), var(--visual-surface-soft));
+  box-shadow: var(--bayang-2);
+}
+
+.anggaran-hero {
+  padding: clamp(20px, 4vw, 32px);
+}
+
+.anggaran-stat-kotak,
+.anggaran-kartu,
+.anggaran-bayar,
+.anggaran-tips,
+.tamu-kartu,
+.tamu-meja,
+.tamu-tips {
+  border-color: var(--visual-border);
+  background: var(--visual-surface);
+  box-shadow: var(--bayang-1);
+}
+
+.anggaran-kartu:hover,
+.tamu-kartu:hover {
+  border-color: color-mix(in srgb, var(--color-marigold) 44%, var(--visual-border));
+}
+
+.anggaran-tab {
+  border-radius: var(--radius-kontrol);
+  background: var(--visual-surface-soft);
+}
+
+.anggaran-tab-pil {
+  border-radius: var(--radius-kontrol);
+}
+
+.anggaran-tab-pil[data-aktif="ya"] {
+  background: var(--color-ink);
+  color: var(--color-base);
+}
+
+.tamu-saring {
+  padding: 16px;
+  border: 1px solid var(--visual-border);
+  border-radius: var(--radius-kartu);
+  background: var(--visual-surface-soft);
+}
+
+.tamu-chip[data-aktif="ya"] {
+  background: var(--color-ink);
+  color: var(--color-base);
+}
+
+.tamu-rsvp-opsi,
+.tamu-tombol-kecil,
+.anggaran-tombol-kecil,
+.hari-h-tombol {
+  min-height: 44px;
+}
+
+.hari-h-acara {
+  border-color: var(--visual-border);
+  box-shadow: var(--bayang-1);
+}
+
+.hari-h-acara[data-sekarang="ya"] {
+  box-shadow: 0 8px 24px -14px var(--color-primary);
+}
+
+@media (max-width: 639px) {
+  .anggaran-hero,
+  .tamu-hero,
+  .hari-h-ringkas {
+    border-radius: var(--radius-kartu);
+  }
+
+  .anggaran-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .anggaran-saring,
+  .filter-baris,
+  .tamu-cari-baris {
+    align-items: stretch;
+  }
+
+  .anggaran-cari,
+  .anggaran-pilih,
+  .tamu-cari,
+  .tamu-pilih,
+  .filter-grup {
+    width: 100%;
+    flex-basis: 100%;
+  }
+
+  .anggaran-kartu-aksi,
+  .tamu-kartu-aksi,
+  .tamu-kartu-tautan {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .anggaran-kartu-aksi > *,
+  .tamu-kartu-aksi > *,
+  .tamu-kartu-tautan > * {
+    flex: 1 1 140px;
+  }
+
+  .anggaran-bayar-nilai {
+    margin-left: auto;
+  }
+}
+
 @media (max-width: 639px) {
   .rencana-cari {
     align-items: stretch;

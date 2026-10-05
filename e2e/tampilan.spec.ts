@@ -62,4 +62,13 @@ test.describe("kontrak visual dasar", () => {
     });
   }
 
+  test("rencana publik tetap mengarahkan pengguna tanpa sesi", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    for (const route of ["/rencana", "/anggaran", "/tamu", "/hari-h"]) {
+      await page.goto(route);
+      await expect(page).toHaveURL(/\/masuk/);
+      await expect(page.locator("body")).toHaveJSProperty("scrollWidth", 390);
+    }
+  });
+
 });
