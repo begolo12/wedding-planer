@@ -106,6 +106,7 @@ Rilis ini menggabungkan empat bagian `[Belum dirilis]` yang menumpuk. Di dalam t
 
 ### Perbaiki
 
+- Lembar dan dialog sekarang dirender ke `document.body` lewat portal. Sebelumnya lapisan lembar hidup di dalam `.isi-app` yang punya `z-index: 1`, sehingga `z-index: 65` di dalamnya tidak pernah menang atas bilah navigasi bawah (`z-index: 40`) di luar. Akibatnya tombol "Tampilkan" di lembar Saring tamu tertutup bilah bawah dan tidak bisa ditekan. Ditemukan lewat uji klik, bukan lewat tsc atau test yang sudah ada
 - Beranda di HP: empat pintu aksi cepat sekarang satu baris, bukan dua kali dua. Versi lama memakan sekitar 220px dan mendorong daftar tugas ke bawah lipatan; satu baris memakan sekitar 90px
 - Hari-H di HP: pengingat, alat ukuran huruf, dan tombol bagikan serta cetak turun ke bawah daftar acara. Acara pertama naik dari y=652 ke y=502 di 390x844, jadi rundown yang justru dibutuhkan di lokasi terlihat lebih dulu
 - Tamu: tiga dropdown saringan pindah ke satu lembar yang dibuka dari tombol "Saring" dengan angka saringan aktif. Di 390px versi lama memakan lebih dari 150px sebelum daftar tamu

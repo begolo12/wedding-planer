@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 const NAMA_EVENT = "haribesar-toast";
 
@@ -100,6 +101,25 @@ export function DialogKonfirmasi({
   );
 }
 
+/**
+ * Portal ke body untuk semua lapisan yang menutup layar.
+ *
+ * Tanpa portal, lapisan ini hidup di dalam `.isi-app` yang punya
+ * `position: relative; z-index: 1`. Itu membuat konteks tumpukan sendiri, jadi
+ * `z-index: 65` di dalamnya tidak pernah menang atas `.nav-bawah` yang
+ * `z-index: 40` di luar. Akibatnya bilah bawah menutupi tombol di dalam lembar,
+ * dan di layar Tamu tombol "Tampilkan" benar-benar tidak bisa ditekan.
+ * Dipindah ke body, lapisan ini kembali bersaing di tingkat akar.
+ *
+ * `siap` menunggu satu efek supaya `document` hanya disentuh di peramban dan
+ * render server tetap kosong.
+ */
+function usePortalSiap() {
+  const [siap, setSiap] = useState(false);
+  useEffect(() => setSiap(true), []);
+  return siap;
+}
+
 /** Panel geser dari bawah di HP, dialog di layar lebar. Satu bentuk saja. */
 export function Lembar({
   buka,
@@ -112,8 +132,9 @@ export function Lembar({
   onTutup: () => void;
   children: ReactNode;
 }) {
-  if (!buka) return null;
-  return (
+  const siap = usePortalSiap();
+  if (!buka || !siap) return null;
+  return createPortal(
     <div className="lembar-lapis" role="presentation" onClick={onTutup}>
       <div
         className="lembar"
@@ -130,6 +151,7 @@ export function Lembar({
         </div>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
