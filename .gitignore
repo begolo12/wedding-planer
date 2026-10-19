@@ -48,3 +48,7 @@ cadangan/
 /cookies*.txt
 /c[0-9].txt
 /cp[0-9]*.txt
+
+# perkakas agen dan tangkapan layar audit, tidak ikut produk
+.claude
+.shots

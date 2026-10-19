@@ -27,6 +27,68 @@ Aturan singkat:
 | Tulis alasan kalau tidak jelas | Pembaca versi berikutnya tidak perlu menebak |
 | Tambah entri baru di atas | Yang terbaru selalu di paling atas |
 
+## [0.19.0] - 2026-10-19
+
+### Yang berubah untuk kamu
+
+Rilis ini menutup celah yang membuat sebagian layar tidak bisa dipakai, dan
+merapikan tampilan di HP.
+
+- Laporan dan tautan bagikan sekarang bisa dibuka. Sebelumnya keduanya gagal
+  dimuat karena database produksi tertinggal dari kode
+- Bagikan laporan jenis tautan tidak lagi mengirim kalimat "Tautan belum
+  dibuat." ke WhatsApp
+- Lembar saringan di layar Tamu sekarang bisa dipakai. Sebelumnya tombolnya
+  tertutup bilah navigasi bawah
+- Beranda di HP jauh lebih pendek sebelum daftar tugas muncul
+- Kalau server bermasalah, pesan galat menyebut kode pendek yang bisa
+  dicari di log
+
+### Catatan untuk pengembang
+
+Dua belas commit sejak tag v0.18.0. Semuanya perbaikan dan alat, tanpa
+perubahan bentuk data. Migrasi tidak berubah, jadi tidak ada langkah database
+di rilis ini selain menyelaraskan produksi yang tertinggal (lihat butir
+pertama di bagian Perbaiki).
+
+### Tambah
+
+- Log galat terstruktur: setiap galat tak terduga menulis satu baris JSON berisi rujukan pendek, metode, jalur, status, durasi, dan pesan. Rujukan yang sama dikirim di header `X-Galat-Ref` dan di badan balasan sebagai `ref`, lalu ditampilkan di layar sebagai "Kode: xxxxxxxx". Tanpa itu, laporan "aplikasinya error" tidak bisa dicocokkan dengan log mana pun
+- `tests/unit/galat.test.ts` untuk bentuk balasan, header, dan isi baris log
+- Bagian Catatan rilis di `docs/23`, dan bagian "Yang berubah untuk kamu" di entri 0.18.0. Sebelumnya `CHANGELOG.md` hanya bisa dibaca orang yang menulis kodenya
+- Bagian Tim Support di `docs/25`: triage per jenis laporan, data yang boleh dan tidak boleh diminta, isi laporan yang diteruskan, dan tiga hal yang belum diputuskan pemilik produk
+- Kolom pelaksana di seluruh tabel prioritas `docs/26`, dan dua pekerjaan baru: kanal dukungan privat dan tombol lapor masalah di dalam aplikasi
+- `docs/24` sekarang mencatat empat peran, termasuk Tim Support
+- Peringatan di paragraf kontak `/kebijakan`: halaman Issues bisa dibaca siapa saja, jadi jangan menulis nama tamu, nomor telepon, jumlah uang, atau alamat surel di sana
+- `scripts/cadangan.mjs` untuk mencadangkan dan memulihkan database memakai `pg_dump` dan `pg_restore`, tanpa dependensi baru. Menyimpan 7 berkas terakhir, dan menolak memulihkan ke database sumber supaya tidak menimpa data yang sedang dipakai. Diuji penuh: dump 55.851 byte, dipulihkan ke database kosong, hasilnya sama persis dengan sumber (16 tabel, 8 users, 9 plans, 21 payments)
+- `scripts/kinerja.mjs` untuk mengukur p50, p95, dan maks dua endpoint publik. Hasil 19 Oktober 2026 di produksi: `/api/siap` p95 79 sampai 99ms, `/api/kesehatan` p95 125 sampai 135ms, nol galat
+- `npm run cadangan` dan `npm run kinerja`
+- Pesan validasi pilihan tertutup sekarang berbahasa Indonesia dan menyebut nilai yang boleh dipakai, menggantikan teks bawaan Zod. Sebelumnya pengguna melihat "Invalid option: expected one of ..." di layar
+- `docs/26-Rencana-Siklus-Berikutnya.md` untuk prioritas 0.19.0, syarat selesai, dan dua keputusan yang masih menunggu pemilik produk
+- README dan `AGENTS.md` menautkan dokumen 26
+- `GET /api/siap` sebagai titik kesiapan yang benar-benar membaca database (`select 1`). Dipisah dari `/api/kesehatan` yang sengaja tidak menyentuh database, karena endpoint itu dipakai penjaga koneksi di perangkat. Diukur dengan database mati: `/api/siap` menjawab 503, `/api/kesehatan` tetap 200
+- `.github/workflows/jaga.yml`: kesiapan produksi dipanggil setiap 30 menit dan audit dependensi setiap Senin. Kegagalan mengirim surel lewat GitHub, tanpa vendor baru
+- `tests/integration/siap.test.ts` untuk bentuk balasan titik kesiapan
+- `docs/25-Pemeliharaan-dan-Monitoring.md` untuk irama pemeliharaan, prosedur insiden, dan retro
+- README dan `AGENTS.md` menautkan dokumen 25
+
+### Perbaiki
+
+- Beranda di HP dipadatkan dari 1602px ke 913px sebelum baris rundown pertama. Tiga kartu metrik yang bertumpuk 499px sekarang dua baris (dua kartu bersebelahan, satu penuh), hiasan yang mengulang angka yang sudah tertulis (cincin persentase, pil hadir, bar progres) disembunyikan di layar sempit, dan kartu tugas naik ke atas metrik
+- Jarak antarbagian Beranda di HP turun dari 24px ke 16px, dan kutipan pembuka disembunyikan di layar sempit. Tugas pertama sekarang di y=748, sebelumnya 1175, dan sebelumnya lagi tidak terlihat sama sekali di layar 844px
+- Lembar dan dialog sekarang dirender ke `document.body` lewat portal. Sebelumnya lapisan lembar hidup di dalam `.isi-app` yang punya `z-index: 1`, sehingga `z-index: 65` di dalamnya tidak pernah menang atas bilah navigasi bawah (`z-index: 40`) di luar. Akibatnya tombol "Tampilkan" di lembar Saring tamu tertutup bilah bawah dan tidak bisa ditekan. Ditemukan lewat uji klik, bukan lewat tsc atau test yang sudah ada
+- Beranda di HP: empat pintu aksi cepat sekarang satu baris, bukan dua kali dua. Versi lama memakan sekitar 220px dan mendorong daftar tugas ke bawah lipatan; satu baris memakan sekitar 90px
+- Hari-H di HP: pengingat, alat ukuran huruf, dan tombol bagikan serta cetak turun ke bawah daftar acara. Acara pertama naik dari y=652 ke y=502 di 390x844, jadi rundown yang justru dibutuhkan di lokasi terlihat lebih dulu
+- Tamu: tiga dropdown saringan pindah ke satu lembar yang dibuka dari tombol "Saring" dengan angka saringan aktif. Di 390px versi lama memakan lebih dari 150px sebelum daftar tamu
+- Anggaran: label tab "Rincian Pengeluaran" dipendekkan jadi "Pengeluaran" supaya muat satu baris. Kedua pil tab sekarang sama tinggi 44px
+- Beranda di desktop: kolom sapa dan kartu hitung mundur dirata atas, bukan tengah, sehingga tidak ada ruang kosong di bawah garis kepala
+- `scripts/audit-ui.mjs` untuk mengukur geser horizontal, tinggi kepala, posisi isi pertama, dan target sentuh di bawah 44px pada delapan layar, dua lebar
+- Database produksi tertinggal dari kode. `milestones` tidak punya kolom `invitation_url`, dan tabel `idempotency_keys` tidak ada sama sekali, karena produksi dibuat dengan `db:push` dan tidak pernah menjalankan `db:migrate`. Akibatnya `GET /milestones`, `GET /report`, `POST /report/share-text`, dan `GET /api/public/share/{token}` menjawab 500, sehingga fitur Laporan dan tautan keluarga tidak bisa dipakai. Kolom dan tabel yang hilang ditambahkan, lalu `drizzle.__drizzle_migrations` diisi tiga baris supaya migrasi berikutnya tidak mengulang dari nol. Bukti: kelima endpoint 200 atau 201, selisih kolom produksi dengan lokal 0
+- Pemeriksaan pasca-deploy di `docs/23` sekarang memeriksa satu endpoint yang membaca tabel, karena health check tidak menyentuh database dan tidak bisa menangkap selisih skema
+- Bagikan laporan jenis tautan tidak lagi mengirim "Tautan belum dibuat." ke WhatsApp. Kalau `linkId` tidak dikirim, server memakai tautan terbaru milik plan; kalau plan belum punya tautan, balasannya 422 dengan pesan yang menyuruh membuat tautan dulu. Ditemukan saat menguji kontrak, dan sebelumnya kalimat itu benar-benar bisa terkirim ke keluarga
+- Angka test di `docs/18` dan `docs/22` diselaraskan dengan kenyataan: 18 berkas 162 test Vitest, 17 test Playwright di 8 berkas spec
+- Jumlah tabel pada ukuran migrasi di `docs/18` naik dari 15 ke 16, karena migrasi `0002` menambah `idempotency_keys`
+
 ## [0.18.0] - 2026-10-19
 
 ### Yang berubah untuk kamu
@@ -51,24 +113,6 @@ Rilis ini menggabungkan empat bagian `[Belum dirilis]` yang menumpuk. Di dalam t
 
 ### Tambah
 
-- Log galat terstruktur: setiap galat tak terduga menulis satu baris JSON berisi rujukan pendek, metode, jalur, status, durasi, dan pesan. Rujukan yang sama dikirim di header `X-Galat-Ref` dan di badan balasan sebagai `ref`, lalu ditampilkan di layar sebagai "Kode: xxxxxxxx". Tanpa itu, laporan "aplikasinya error" tidak bisa dicocokkan dengan log mana pun
-- `tests/unit/galat.test.ts` untuk bentuk balasan, header, dan isi baris log
-- Bagian Catatan rilis di `docs/23`, dan bagian "Yang berubah untuk kamu" di entri 0.18.0. Sebelumnya `CHANGELOG.md` hanya bisa dibaca orang yang menulis kodenya
-- Bagian Tim Support di `docs/25`: triage per jenis laporan, data yang boleh dan tidak boleh diminta, isi laporan yang diteruskan, dan tiga hal yang belum diputuskan pemilik produk
-- Kolom pelaksana di seluruh tabel prioritas `docs/26`, dan dua pekerjaan baru: kanal dukungan privat dan tombol lapor masalah di dalam aplikasi
-- `docs/24` sekarang mencatat empat peran, termasuk Tim Support
-- Peringatan di paragraf kontak `/kebijakan`: halaman Issues bisa dibaca siapa saja, jadi jangan menulis nama tamu, nomor telepon, jumlah uang, atau alamat surel di sana
-- `scripts/cadangan.mjs` untuk mencadangkan dan memulihkan database memakai `pg_dump` dan `pg_restore`, tanpa dependensi baru. Menyimpan 7 berkas terakhir, dan menolak memulihkan ke database sumber supaya tidak menimpa data yang sedang dipakai. Diuji penuh: dump 55.851 byte, dipulihkan ke database kosong, hasilnya sama persis dengan sumber (16 tabel, 8 users, 9 plans, 21 payments)
-- `scripts/kinerja.mjs` untuk mengukur p50, p95, dan maks dua endpoint publik. Hasil 19 Oktober 2026 di produksi: `/api/siap` p95 79 sampai 99ms, `/api/kesehatan` p95 125 sampai 135ms, nol galat
-- `npm run cadangan` dan `npm run kinerja`
-- Pesan validasi pilihan tertutup sekarang berbahasa Indonesia dan menyebut nilai yang boleh dipakai, menggantikan teks bawaan Zod. Sebelumnya pengguna melihat "Invalid option: expected one of ..." di layar
-- `docs/26-Rencana-Siklus-Berikutnya.md` untuk prioritas 0.19.0, syarat selesai, dan dua keputusan yang masih menunggu pemilik produk
-- README dan `AGENTS.md` menautkan dokumen 26
-- `GET /api/siap` sebagai titik kesiapan yang benar-benar membaca database (`select 1`). Dipisah dari `/api/kesehatan` yang sengaja tidak menyentuh database, karena endpoint itu dipakai penjaga koneksi di perangkat. Diukur dengan database mati: `/api/siap` menjawab 503, `/api/kesehatan` tetap 200
-- `.github/workflows/jaga.yml`: kesiapan produksi dipanggil setiap 30 menit dan audit dependensi setiap Senin. Kegagalan mengirim surel lewat GitHub, tanpa vendor baru
-- `tests/integration/siap.test.ts` untuk bentuk balasan titik kesiapan
-- `docs/25-Pemeliharaan-dan-Monitoring.md` untuk irama pemeliharaan, prosedur insiden, dan retro
-- README dan `AGENTS.md` menautkan dokumen 25
 - `.github/workflows/ci.yml` untuk menjalankan gerbang rilis otomatis: job `kualitas` (tipe, test, build, dependensi) dan job `e2e` dengan PostgreSQL 17 sebagai service. Dua job dipisah karena build dan dev server uji sama-sama menulis `.next`
 - `scripts/periksa-dependensi.mjs` sebagai gerbang dependensi. `npm audit --audit-level=high` saja akan merah terus karena satu temuan tinggi di `postcss` yang dibawa `next`, dan menaikkan `next` ke versi mayor 16 adalah keputusan terpisah. Skrip ini menggagalkan temuan tinggi atau kritis baru, dan mencatat pengecualian yang sudah diperiksa beserta alasannya
 - `npm run deps` untuk menjalankan gerbang dependensi
@@ -106,22 +150,8 @@ Rilis ini menggabungkan empat bagian `[Belum dirilis]` yang menumpuk. Di dalam t
 
 ### Perbaiki
 
-- Beranda di HP dipadatkan dari 1602px ke 913px sebelum baris rundown pertama. Tiga kartu metrik yang bertumpuk 499px sekarang dua baris (dua kartu bersebelahan, satu penuh), hiasan yang mengulang angka yang sudah tertulis (cincin persentase, pil hadir, bar progres) disembunyikan di layar sempit, dan kartu tugas naik ke atas metrik
-- Jarak antarbagian Beranda di HP turun dari 24px ke 16px, dan kutipan pembuka disembunyikan di layar sempit. Tugas pertama sekarang di y=748, sebelumnya 1175, dan sebelumnya lagi tidak terlihat sama sekali di layar 844px
-- Lembar dan dialog sekarang dirender ke `document.body` lewat portal. Sebelumnya lapisan lembar hidup di dalam `.isi-app` yang punya `z-index: 1`, sehingga `z-index: 65` di dalamnya tidak pernah menang atas bilah navigasi bawah (`z-index: 40`) di luar. Akibatnya tombol "Tampilkan" di lembar Saring tamu tertutup bilah bawah dan tidak bisa ditekan. Ditemukan lewat uji klik, bukan lewat tsc atau test yang sudah ada
-- Beranda di HP: empat pintu aksi cepat sekarang satu baris, bukan dua kali dua. Versi lama memakan sekitar 220px dan mendorong daftar tugas ke bawah lipatan; satu baris memakan sekitar 90px
-- Hari-H di HP: pengingat, alat ukuran huruf, dan tombol bagikan serta cetak turun ke bawah daftar acara. Acara pertama naik dari y=652 ke y=502 di 390x844, jadi rundown yang justru dibutuhkan di lokasi terlihat lebih dulu
-- Tamu: tiga dropdown saringan pindah ke satu lembar yang dibuka dari tombol "Saring" dengan angka saringan aktif. Di 390px versi lama memakan lebih dari 150px sebelum daftar tamu
-- Anggaran: label tab "Rincian Pengeluaran" dipendekkan jadi "Pengeluaran" supaya muat satu baris. Kedua pil tab sekarang sama tinggi 44px
-- Beranda di desktop: kolom sapa dan kartu hitung mundur dirata atas, bukan tengah, sehingga tidak ada ruang kosong di bawah garis kepala
-- `scripts/audit-ui.mjs` untuk mengukur geser horizontal, tinggi kepala, posisi isi pertama, dan target sentuh di bawah 44px pada delapan layar, dua lebar
 - Klaim bahwa `GET /api/kesehatan` 200 berarti database produksi terhubung dihapus dari `docs/18` dan `docs/23`. Endpoint itu sengaja tidak menyentuh database, dan komentarnya di `src/app/api/kesehatan/route.ts` menjelaskan alasannya. Pemeriksaan pasca-deploy sekarang memakai `GET /api/plans` dengan sesi sebagai bukti database benar-benar terbaca
 - Suite e2e tidak lagi kehabisan heap. `playwright.config.ts` sekarang menjalankan dev server uji dengan `BATCH_DEV_MB=2048`, karena heap bawaan 1 GB habis di tengah suite sehingga server uji mati dengan `Ineffective mark-compacts near heap limit` dan dua spec terakhir gagal dengan `ECONNRESET`. Sebelumnya kegagalan itu terbaca seperti test rapuh, padahal penyebabnya batas memori
-- Database produksi tertinggal dari kode. `milestones` tidak punya kolom `invitation_url`, dan tabel `idempotency_keys` tidak ada sama sekali, karena produksi dibuat dengan `db:push` dan tidak pernah menjalankan `db:migrate`. Akibatnya `GET /milestones`, `GET /report`, `POST /report/share-text`, dan `GET /api/public/share/{token}` menjawab 500, sehingga fitur Laporan dan tautan keluarga tidak bisa dipakai. Kolom dan tabel yang hilang ditambahkan, lalu `drizzle.__drizzle_migrations` diisi tiga baris supaya migrasi berikutnya tidak mengulang dari nol. Bukti: kelima endpoint 200 atau 201, selisih kolom produksi dengan lokal 0
-- Pemeriksaan pasca-deploy di `docs/23` sekarang memeriksa satu endpoint yang membaca tabel, karena health check tidak menyentuh database dan tidak bisa menangkap selisih skema
-- Bagikan laporan jenis tautan tidak lagi mengirim "Tautan belum dibuat." ke WhatsApp. Kalau `linkId` tidak dikirim, server memakai tautan terbaru milik plan; kalau plan belum punya tautan, balasannya 422 dengan pesan yang menyuruh membuat tautan dulu. Ditemukan saat menguji kontrak, dan sebelumnya kalimat itu benar-benar bisa terkirim ke keluarga
-- Angka test di `docs/18` dan `docs/22` diselaraskan dengan kenyataan: 18 berkas 162 test Vitest, 17 test Playwright di 8 berkas spec
-- Jumlah tabel pada ukuran migrasi di `docs/18` naik dari 15 ke 16, karena migrasi `0002` menambah `idempotency_keys`
 - Label bagian tidak lagi ditulis dengan huruf besar semua dan jarak antarhuruf lebar. Delapan tempat memakai pola itu tanpa alasan, dan pola itu justru tanda paling umum tulisan yang belum dipilih
 - Bayangan seragam di 25 bidang dihapus. Semua kartu memakai bayangan lembut yang sama, jadi kedalamannya tidak lagi membedakan apa pun. Yang tersisa hanya bayangan untuk elemen yang benar-benar mengambang: toast dan dialog
 - Radius tidak lagi satu nilai untuk semua hal. Sekarang empat tingkat menurut peran: batang penanda 4px, badge dan chip 8px, tombol dan bidang 14px, dan elemen yang memang bulat seperti lingkaran ikon dan jalur sakelar tetap pill. Sebelumnya tombol aksi, chip keterangan, dan bilah progres memakai bentuk yang sama
