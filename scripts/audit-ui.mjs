@@ -18,7 +18,11 @@ const LAYAR = [
 mkdirSync(".shots/audit", { recursive: true });
 
 const b = await chromium.launch();
-const ctx = await b.newContext({ viewport: { width: 390, height: 844 } });
+// Service worker dimatikan saat audit. Halaman navigasi memakai batas 3 detik
+// lalu jatuh ke cache /luring kalau jaringan lambat, dan di dev setiap rute
+// baru butuh kompilasi lebih lama dari itu. Tanpa ini, audit membaca halaman
+// "Tidak ada internet" di tengah putaran dan angkanya jadi sampah.
+const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: "block" });
 const p = await ctx.newPage();
 
 const email = `audit-${Date.now()}@gmail.com`;
@@ -61,8 +65,27 @@ await seed("/rundown", { title: "Prosesi akad", startTime: "08:00", endTime: "09
 
 const ukur = async (nama, jalur, lebar) => {
   await p.setViewportSize({ width: lebar, height: 844 });
-  await p.goto(`${DASAR}${jalur}`, { waitUntil: "domcontentloaded" });
-  await p.waitForTimeout(1500);
+  // `domcontentloaded` saja tidak cukup: halaman ini client component, jadi
+  // setelah dokumen selesai browser masih memuat data dan berpindah rute.
+  // Tanpa menunggu judul yang benar, pengukuran bisa membaca DOM layar
+  // sebelumnya, dan hasilnya tampak sama di semua layar.
+  // Dev server sesekali menulis `.next` saat halaman lain sedang dibaca, dan
+  // halaman itu balas 500 dengan "Unexpected end of JSON input". Itu artefak
+  // kompilasi, bukan cacat aplikasi, jadi satu kali ulang cukup.
+  let siap = false;
+  for (let coba = 1; coba <= 3 && !siap; coba++) {
+    await p.goto(`${DASAR}${jalur}`, { waitUntil: "load" });
+    siap = await p
+      .waitForSelector("main", { state: "visible", timeout: 12000 })
+      .then(() => true)
+      .catch(() => false);
+    if (!siap) console.log(`${nama} ${lebar}: ulang ${coba}`);
+  }
+  if (!siap) {
+    console.log(`${nama} ${lebar}: halaman tidak pernah tampil, dilewati`);
+    return;
+  }
+  await p.waitForTimeout(3200);
 
   const m = await p.evaluate(() => {
     const q = (s) => document.querySelector(s);
@@ -83,6 +106,7 @@ const ukur = async (nama, jalur, lebar) => {
         return `${Math.round(r.width)}x${Math.round(r.height)} ${label}`;
       });
     return {
+      judul: document.querySelector("main h1")?.textContent?.trim().slice(0, 24) ?? "-",
       geser: document.body.scrollWidth - window.innerWidth,
       kepala: kepala ? Math.round(kepala.getBoundingClientRect().height) : null,
       isiPertama: baris.length ? Math.round(baris[0].getBoundingClientRect().top) : null,
@@ -93,7 +117,7 @@ const ukur = async (nama, jalur, lebar) => {
   });
 
   console.log(
-    `${nama.padEnd(18)} ${String(lebar).padEnd(5)} geser=${m.geser} kepala=${m.kepala ?? "-"} isiPertama=${m.isiPertama ?? "-"} baris=${m.baris} targetKecil=${m.kecilJumlah}${m.kecil.length ? " " + m.kecil.join(" | ") : ""}`,
+    `${nama.padEnd(18)} ${String(lebar).padEnd(5)} judul=${m.judul.padEnd(20)} geser=${m.geser} kepala=${m.kepala ?? "-"} isiPertama=${m.isiPertama ?? "-"} baris=${m.baris} targetKecil=${m.kecilJumlah}${m.kecil.length ? " " + m.kecil.join(" | ") : ""}`,
   );
 
   await p.screenshot({ path: `.shots/audit/${nama}-${lebar}.png`, fullPage: false });

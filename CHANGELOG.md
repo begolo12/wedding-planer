@@ -106,6 +106,8 @@ Rilis ini menggabungkan empat bagian `[Belum dirilis]` yang menumpuk. Di dalam t
 
 ### Perbaiki
 
+- Beranda di HP dipadatkan dari 1602px ke 913px sebelum baris rundown pertama. Tiga kartu metrik yang bertumpuk 499px sekarang dua baris (dua kartu bersebelahan, satu penuh), hiasan yang mengulang angka yang sudah tertulis (cincin persentase, pil hadir, bar progres) disembunyikan di layar sempit, dan kartu tugas naik ke atas metrik
+- Jarak antarbagian Beranda di HP turun dari 24px ke 16px, dan kutipan pembuka disembunyikan di layar sempit. Tugas pertama sekarang di y=748, sebelumnya 1175, dan sebelumnya lagi tidak terlihat sama sekali di layar 844px
 - Lembar dan dialog sekarang dirender ke `document.body` lewat portal. Sebelumnya lapisan lembar hidup di dalam `.isi-app` yang punya `z-index: 1`, sehingga `z-index: 65` di dalamnya tidak pernah menang atas bilah navigasi bawah (`z-index: 40`) di luar. Akibatnya tombol "Tampilkan" di lembar Saring tamu tertutup bilah bawah dan tidak bisa ditekan. Ditemukan lewat uji klik, bukan lewat tsc atau test yang sudah ada
 - Beranda di HP: empat pintu aksi cepat sekarang satu baris, bukan dua kali dua. Versi lama memakan sekitar 220px dan mendorong daftar tugas ke bawah lipatan; satu baris memakan sekitar 90px
 - Hari-H di HP: pengingat, alat ukuran huruf, dan tombol bagikan serta cetak turun ke bawah daftar acara. Acara pertama naik dari y=652 ke y=502 di 390x844, jadi rundown yang justru dibutuhkan di lokasi terlihat lebih dulu

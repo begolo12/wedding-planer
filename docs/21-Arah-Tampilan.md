@@ -266,6 +266,19 @@ Semua saringan (pencarian, kategori, status, urutan, tampilkan selesai) masuk ke
 | Kontrol di badan layar | maksimal satu baris | hitung elemen kontrol sebelum baris pertama |
 | Saringan | masuk lembar, bukan deretan dropdown | lihat pola 4 |
 
+Hasil pengukuran 19 Oktober 2026, 390x844, sesudah tiga perbaikan:
+
+| Layar | Isi pertama | Target | Catatan |
+|---|---|---|---|
+| Tugas | 272px | 200px | Gagal tipis. Saringan sudah di lembar, sisanya kepala dan pil |
+| Tanggal penting | 275px | 200px | Gagal tipis |
+| Anggaran | 303px | 200px | Gagal tipis |
+| Tamu | 858px | 200px | Gagal. Ringkasan tamu (tiga kartu) memakan ruang sebelum daftar |
+| Hari-H | 502px | 200px | Gagal. Kartu ringkas rundown dan kepala memakan ruang |
+| Beranda | 913px | tidak berlaku | Beranda adalah dasbor, bukan daftar. Yang dihitung "isi" di sini adalah baris rundown pertama; isi sesungguhnya adalah angka hitung mundur yang sudah terlihat di 147px |
+
+Angka ini ditulis apa adanya supaya target yang belum tercapai tidak hilang dari dokumen. Empat layar yang gagal tipis punya penyebab yang sama: kepala layar, pil tab, dan ringkasan di atas daftar. Memperbaikinya berarti memindahkan ringkasan ke lembar atau rel, dan itu perubahan susunan yang belum diputuskan.
+
 Cara mengukurnya: `node scripts/audit-ui.mjs` membuka delapan layar pada 390px dan 1440px, lalu mencetak geser horizontal, tinggi kepala, posisi baris pertama, dan jumlah target sentuh di bawah 44px. Skrip itu membuat satu akun uji, mengisi data contoh, dan menghapus akunnya sendiri di akhir. Port bisa diganti lewat `AUDIT_URL`.
 | Jarak antar grup | 16px | CSS |
 

@@ -4323,6 +4323,95 @@ textarea.isian {
   margin-bottom: 0;
 }
 
+/* Di 390px, tiga kartu metrik yang masing-masing setinggi 166px bertumpuk jadi
+   499px (terukur 19 Oktober 2026). Penyebabnya `minmax(190px, 1fr)`: dua kolom
+   butuh 380px sedangkan ruangnya 358px, jadi grid jatuh ke satu kolom.
+
+   Di layar sempit isinya jadi dua baris: dua kartu bersebelahan, satu kartu
+   penuh di bawahnya. Hiasan yang mengulang angka yang sudah tertulis (cincin
+   persentase, pil hadir/belum/tidak, bar progres) disembunyikan, karena isinya
+   ada di layar Tamu dan Anggaran. Label, angka besar, dan keterangan kecilnya
+   tetap ada supaya angka tidak pernah tampil tanpa keterangan.
+
+   Urutannya juga dibalik: kartu tugas naik ke atas kartu metrik. Yang dibutuhkan
+   saat membuka Beranda adalah tugas yang harus dikerjakan, sedangkan metrik
+   adalah ringkasan yang dibaca setelahnya. Tanpa ini, tugas pertama baru muncul
+   di y=1175 dari layar 844px. */
+@media (max-width: 639px) {
+  /* Jarak antarbagian dirapatkan dari 24px ke 16px. Di layar 844px, 16px
+     adalah selisih antara tugas pertama yang masih tertutup bilah bawah
+     (y=803, bilah mulai y=784) dan yang benar-benar terlihat. */
+  .beranda {
+    gap: 16px;
+  }
+
+  /* Kutipan pembuka mengulang nada, bukan informasi. Di layar sempit satu
+     baris ini memakan ruang yang dipakai tugas pertama. */
+  .beranda-kutip {
+    display: none;
+  }
+
+  .beranda-metrik {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 0;
+  }
+
+  .beranda-metrik .kartu {
+    padding: 12px 0;
+    border-left: 0;
+  }
+
+  .beranda-metrik .kartu:nth-child(2n + 1) {
+    padding-right: 12px;
+    border-right: 1px solid var(--color-line);
+  }
+
+  .beranda-metrik .kartu:nth-child(3) {
+    grid-column: 1 / -1;
+    padding-right: 0;
+    border-top: 1px solid var(--color-line);
+    border-right: 0;
+  }
+
+  .beranda-metrik .beranda-ikon-bulat,
+  .beranda-metrik .beranda-bar,
+  .beranda-metrik .beranda-cincin,
+  .beranda-metrik .beranda-pil,
+  .beranda-metrik .beranda-pil-baris {
+    display: none;
+  }
+
+  .beranda-metrik .beranda-kartu-kepala {
+    margin-bottom: 4px;
+  }
+
+  .beranda-metrik .beranda-kartu-besar {
+    white-space: nowrap;
+  }
+
+  .beranda-metrik .beranda-kartu-kaki {
+    margin-top: 2px;
+  }
+
+  .beranda-metrik .beranda-kartu-catatan {
+    font-size: var(--text-mini);
+    line-height: 1.3;
+  }
+
+  /* Tugas sebelum metrik, hanya di layar sempit. */
+  .beranda-kolom-utama > .beranda-tugas {
+    order: 1;
+  }
+
+  .beranda-kolom-utama > .beranda-metrik {
+    order: 2;
+  }
+
+  .beranda-kolom-utama > .kartu:not(.beranda-tugas):not(.beranda-metrik) {
+    order: 0;
+  }
+}
+
 /* Ikon di kepala sel ringkasan tidak perlu bulatan berwarna. Warnanya sendiri
    sudah cukup menandai, dan satu lingkaran penuh lagi di baris yang cuma
    memuat satu label membuat barisnya jadi ramai. */
