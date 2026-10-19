@@ -38,6 +38,7 @@ Rilis ini menggabungkan empat bagian `[Belum dirilis]` yang menumpuk. Di dalam t
 - `npm run deps` untuk menjalankan gerbang dependensi
 - Bagian Domain dan TLS di `docs/24`: sertifikat `*.vercel.app` dari Google Trust Services, berlaku sampai 27 November 2026, diperpanjang otomatis
 - Bagian Container di `docs/24` yang menjawab lima pertanyaan `docs/06` untuk Docker, dengan hasilnya tidak dipakai
+- Rilis 0.18.0 tayang di `https://wedding-planer-self.vercel.app`. Bukti: manifest produksi memakai `#f4f2ea`, nama berkas chunk yang dilayani sama dengan hasil build lokal, dan `GET /api/public/share/tokenpalsu` menjawab 404 dari query database
 - `docs/22-Rencana-Uji-dan-UAT.md` untuk Test Plan, Test Case, Laporan Bug, dan UAT Sign-off. Isinya cakupan per epik dari 42 story, kode kasus yang bisa dilacak ke `10-Epik-dan-Story.md`, kolom wajib laporan bug, dan delapan skenario UAT. UAT ditandai belum bisa dikerjakan karena aplikasi belum dipakai pengguna sungguhan, dan menandatanganinya sekarang berarti mengarang bukti
 - README menautkan dokumen 22
 - `docs/23-Rilis-dan-Penyebaran.md` untuk prosedur rilis: gerbang pra-rilis, urutan migrasi expand dan contract, commit dan tag, pemeriksaan pasca-deploy, rollback kode dan batas rollback database. Isinya juga mencatat bahwa produksi masih menjalankan kode 5 Oktober, tag `v0.17.0` menunjuk commit yang versinya masih `0.16.0`, dan empat berkas sumber belum masuk Git

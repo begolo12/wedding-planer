@@ -15,21 +15,20 @@ Diukur 2026-10-19.
 | Hal | Keadaan | Bukti |
 |---|---|---|
 | Alamat produksi | `https://wedding-planer-self.vercel.app` | Menjawab 200 |
-| Kesehatan proses | `{"ok":true}` dalam 1,68 detik. Endpoint ini tidak membaca database | `GET /api/kesehatan` |
+| Kesehatan proses | `{"ok":true}`. Endpoint ini tidak membaca database | `GET /api/kesehatan` |
+| Kesehatan database | `GET /api/public/share/tokenpalsu` menjawab 404 dengan bentuk galat standar, artinya query ke `share_links` berjalan | Diukur setelah deploy |
 | Header keamanan | 5 dari 5 terkirim, tanpa CSP | `HEAD /masuk` |
 | Region | `sin1` | `vercel.json`, `X-Vercel-Id: sin1::...` |
 | Rute publik | `/masuk` 200, `/luring` 200, `/` 307 ke masuk | Diukur langsung |
-| Isi manifest produksi | `background_color` dan `theme_color` `#fcf9f5` | `GET /manifest.webmanifest` |
-| Isi manifest di kode | `#f4f2ea` | `src/app/manifest.ts:23` |
-| Cabang produksi | `main` di `169de04`, 5 Oktober 2026 | `git log origin/main` |
-| Versi di `main` | `0.16.0` | `package.json` di `main` |
-| Tag terakhir | `v0.17.0` di `180e736`, tapi `package.json` di commit itu masih `0.16.0` | `git show v0.17.0:package.json` |
-| Tag di remote | Tidak ada | `git ls-remote --tags` kosong |
-| Cabang kerja | `ui/visual-refresh`, 6 commit di atas `main` | `git rev-list --left-right --count` |
-| Perubahan belum di-commit | 87 entri, 81 berkas, 2.901 baris ditambah | `git status --porcelain` |
-| Berkas belum dilacak | 8 entri, 4 di antaranya dirujuk kode atau dokumen | `git status --porcelain`, `git ls-files` |
+| Isi manifest produksi | `background_color` dan `theme_color` `#f4f2ea` | `GET /manifest.webmanifest` |
+| Cabang produksi | `main` di `79b6e53`, 19 Oktober 2026 | `git log origin/main` |
+| Versi di `main` | `0.18.0` | `package.json` |
+| Tag terakhir | `v0.18.0` di `ac3e4af`, `package.json` di commit itu `0.18.0` | `git show v0.18.0:package.json` |
+| Tag di remote | `v0.18.0` | `git ls-remote --tags` |
+| CI | Dua job hijau: kualitas dan ujung ke ujung | `gh run view 39180299839` |
+| Cabang kerja | `main`, bersih | `git status --porcelain` |
 
-**Kesimpulan.** Produksi menjalankan kode 5 Oktober. Redesign yang ada di pohon kerja belum pernah tayang. Selisihnya terlihat dari satu angka: manifest produksi masih memakai palet lama `#fcf9f5`, sedangkan kode sekarang memakai `#f4f2ea`.
+**Kesimpulan.** Produksi menjalankan rilis 0.18.0. Bukti paling kuat: nama berkas chunk yang dilayani produksi (`1255-dc3ddf72a1dc71a7.js`) sama persis dengan hasil `npm run build` di commit ini, dan manifest produksi sudah memakai palet baru `#f4f2ea`.
 
 ---
 

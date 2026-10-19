@@ -35,7 +35,7 @@ Diperiksa 2026-10-19.
 | Object storage | Tidak dipakai. `neon.ts` mendefinisikan bucket `test`, tapi tidak ada kode yang membacanya | `neon.ts`, `docs/08` bagian Unggah file | Terverifikasi |
 | Domain | `wedding-planer-self.vercel.app`. Tidak ada domain kustom | `vercel.json` tanpa `domains` | Terverifikasi |
 | Repositori | Publik, 4 bintang | `api.github.com/repos/begolo12/wedding-planer` | Terverifikasi |
-| CI | GitHub Actions, dua job: kualitas dan e2e | `.github/workflows/ci.yml` | Terverifikasi |
+| CI | GitHub Actions, dua job: kualitas dan e2e, keduanya hijau | `.github/workflows/ci.yml`, run `39180299839` | Terverifikasi |
 | Infrastructure as Code | Tidak ada. Tidak ada Terraform, Docker, atau manifes Kubernetes | Daftar akar repo | Terverifikasi |
 | Pemantauan | Tidak ada agregasi log dan tidak ada pemberitahuan | Satu `console.error` di `src/lib/galat.ts:108` | Terverifikasi |
 | Cadangan | Tidak ada bukti dump berjalan | `docs/18` bagian 18 | **Belum diverifikasi** |
@@ -80,7 +80,7 @@ Dua hal yang perlu dibaca dari gambar itu:
 
 | Belum | Akibat nyata |
 |---|---|
-| CI di cabang | Workflow sudah ada, tapi baru berjalan setelah commit ini di-push. Belum ada bukti hijau di GitHub |
+| Gerbang sebelum push | Tidak ada yang memaksa gerbang dijalankan di mesin pengembang sebelum push. CI menangkapnya setelah push, bukan sebelum |
 | Health check yang dipanggil | `/api/kesehatan` tidak dipoll siapa pun. Endpoint itu ada tapi tidak dipakai |
 | Pemberitahuan kegagalan | Deploy gagal atau situs mati hanya ketahuan kalau ada yang membuka aplikasi |
 | Agregasi log | Log hanya bisa dibaca satu per satu di dashboard |
@@ -200,7 +200,7 @@ Rollback kode tidak mengembalikan data. Satu-satunya jalan adalah cadangan. Kare
 | 2 | Jadwal dump harian dan satu uji restore | SysAdmin | Satu-satunya perlindungan terhadap kehilangan data |
 | 3 | Pemeriksaan kesiapan yang membaca database, dipanggil dari luar | DevOps | Mengganti sinyal palsu dengan sinyal yang benar |
 | 4 | Pemberitahuan saat kesiapan gagal | DevOps | Tanpa ini, kegagalan hanya ketahuan dari keluhan |
-| 5 | Pastikan CI hijau pada push pertama | DevOps | Workflow sudah ditulis, tapi belum pernah berjalan di GitHub |
+| 5 | Pasang perlindungan cabang: wajib CI hijau sebelum merge | DevOps | Workflow sudah hijau, tapi belum diwajibkan |
 | 6 | Catatan akses dan rotasi rahasia | SysAdmin | Menjawab siapa bisa melakukan apa |
 | 7 | Ukur biaya dan batas skala | Cloud Architect | Baru bisa diukur setelah ada angka pemakaian |
 
