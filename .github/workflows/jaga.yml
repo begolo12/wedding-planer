@@ -1,0 +1,74 @@
+name: Jaga
+
+# Pemantauan berkala tanpa alat berbayar.
+#
+# Kenapa lewat GitHub Actions dan bukan layanan uptime: docs/06 menolak
+# menambah vendor selama masalahnya bisa diselesaikan dengan yang sudah ada.
+# Repositori sudah di GitHub, dan GitHub mengirim surel ke pemilik repositori
+# saat workflow terjadwal gagal. Itu pemberitahuan yang benar-benar sampai,
+# dengan nol biaya dan nol vendor baru.
+#
+# Keterbatasan yang harus ditulis jujur: cron GitHub tidak dijamin tepat
+# waktu. Pada jam sibuk, jadwal bisa mundur belasan menit. Untuk situs yang
+# dipakai satu pasangan, jeda selama itu masih bisa diterima. Kalau nanti
+# butuh deteksi per menit, itu keputusan terpisah dengan alat berbayar.
+
+on:
+  schedule:
+    # Setiap 30 menit. GitHub memakai UTC.
+    - cron: "*/30 * * * *"
+    # Audit dependensi mingguan, Senin 03:00 UTC atau 10:00 WIB.
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jaga-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  siap:
+    name: Kesiapan produksi
+    # Hanya untuk jadwal 30 menit dan pemicu manual, bukan jadwal mingguan.
+    if: github.event.schedule != '0 3 * * 1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Panggil titik kesiapan
+        run: |
+          # -f membuat curl gagal pada status 4xx dan 5xx, sehingga workflow
+          # merah dan surel terkirim. Badan balasan ikut dicetak supaya
+          # penyebabnya terbaca di log.
+          for percobaan in 1 2 3; do
+            if curl -fsS --max-time 20 https://wedding-planer-self.vercel.app/api/siap; then
+              exit 0
+            fi
+            echo "percobaan $percobaan gagal, tunggu 30 detik"
+            sleep 30
+          done
+          echo "titik kesiapan tidak menjawab siap setelah 3 percobaan"
+          exit 1
+
+  dependensi:
+    name: Audit dependensi mingguan
+    # Hanya untuk jadwal Senin dan pemicu manual.
+    if: github.event.schedule == '0 3 * * 1' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Pasang dependensi
+        run: npm ci
+
+      - name: Gerbang dependensi
+        run: npm run deps

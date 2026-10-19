@@ -33,6 +33,11 @@ Rilis ini menggabungkan empat bagian `[Belum dirilis]` yang menumpuk. Di dalam t
 
 ### Tambah
 
+- `GET /api/siap` sebagai titik kesiapan yang benar-benar membaca database (`select 1`). Dipisah dari `/api/kesehatan` yang sengaja tidak menyentuh database, karena endpoint itu dipakai penjaga koneksi di perangkat. Diukur dengan database mati: `/api/siap` menjawab 503, `/api/kesehatan` tetap 200
+- `.github/workflows/jaga.yml`: kesiapan produksi dipanggil setiap 30 menit dan audit dependensi setiap Senin. Kegagalan mengirim surel lewat GitHub, tanpa vendor baru
+- `tests/integration/siap.test.ts` untuk bentuk balasan titik kesiapan
+- `docs/25-Pemeliharaan-dan-Monitoring.md` untuk irama pemeliharaan, prosedur insiden, dan retro
+- README dan `AGENTS.md` menautkan dokumen 25
 - `.github/workflows/ci.yml` untuk menjalankan gerbang rilis otomatis: job `kualitas` (tipe, test, build, dependensi) dan job `e2e` dengan PostgreSQL 17 sebagai service. Dua job dipisah karena build dan dev server uji sama-sama menulis `.next`
 - `scripts/periksa-dependensi.mjs` sebagai gerbang dependensi. `npm audit --audit-level=high` saja akan merah terus karena satu temuan tinggi di `postcss` yang dibawa `next`, dan menaikkan `next` ke versi mayor 16 adalah keputusan terpisah. Skrip ini menggagalkan temuan tinggi atau kritis baru, dan mencatat pengecualian yang sudah diperiksa beserta alasannya
 - `npm run deps` untuk menjalankan gerbang dependensi

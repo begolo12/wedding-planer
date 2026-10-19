@@ -36,8 +36,9 @@ Diperiksa 2026-10-19.
 | Domain | `wedding-planer-self.vercel.app`. Tidak ada domain kustom | `vercel.json` tanpa `domains` | Terverifikasi |
 | Repositori | Publik, 4 bintang | `api.github.com/repos/begolo12/wedding-planer` | Terverifikasi |
 | CI | GitHub Actions, dua job: kualitas dan e2e, keduanya hijau | `.github/workflows/ci.yml`, run `39180299839` | Terverifikasi |
+| Pemantauan berkala | Workflow `Jaga`: kesiapan produksi setiap 30 menit, audit dependensi mingguan | `.github/workflows/jaga.yml` | Terverifikasi setelah push |
 | Infrastructure as Code | Tidak ada. Tidak ada Terraform, Docker, atau manifes Kubernetes | Daftar akar repo | Terverifikasi |
-| Pemantauan | Tidak ada agregasi log dan tidak ada pemberitahuan | Satu `console.error` di `src/lib/galat.ts:108` | Terverifikasi |
+| Pemantauan | Kesiapan produksi dipanggil tiap 30 menit dan surel terkirim saat gagal. Tidak ada agregasi log dan tidak ada pelacakan galat klien | `.github/workflows/jaga.yml`, `src/app/api/siap/route.ts` | Terverifikasi setelah push |
 | Cadangan | Tidak ada bukti dump berjalan | `docs/18` bagian 18 | **Belum diverifikasi** |
 | Pemulihan | Belum pernah diuji | `docs/18` bagian 18 | Terverifikasi belum ada |
 
@@ -66,6 +67,8 @@ Dua hal yang perlu dibaca dari gambar itu:
 
 ## 4. DevOps: yang sudah dan belum
 
+Irama pemeriksaan dan prosedur insiden ada di [`25-Pemeliharaan-dan-Monitoring.md`](25-Pemeliharaan-dan-Monitoring.md). Bagian ini hanya mencatat apa yang ada dan apa yang belum.
+
 ### 4.1 Yang sudah
 
 | Hal | Keadaan |
@@ -81,8 +84,7 @@ Dua hal yang perlu dibaca dari gambar itu:
 | Belum | Akibat nyata |
 |---|---|
 | Gerbang sebelum push | Tidak ada yang memaksa gerbang dijalankan di mesin pengembang sebelum push. CI menangkapnya setelah push, bukan sebelum |
-| Health check yang dipanggil | `/api/kesehatan` tidak dipoll siapa pun. Endpoint itu ada tapi tidak dipakai |
-| Pemberitahuan kegagalan | Deploy gagal atau situs mati hanya ketahuan kalau ada yang membuka aplikasi |
+| Pemberitahuan tanpa eskalasi | Surel GitHub bisa masuk spam, dan tidak ada jalur kedua |
 | Agregasi log | Log hanya bisa dibaca satu per satu di dashboard |
 | Pemeriksaan asap otomatis | Enam langkah di `docs/23` dijalankan dengan tangan |
 
