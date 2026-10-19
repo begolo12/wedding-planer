@@ -91,6 +91,7 @@ Ambang "nol cacat berat" dipilih karena satu-satunya cacat berat yang pernah ada
 | Dua proses menulis `.next` bersamaan | Server produksi membalas 500 `ENOENT required-server-files.json` | Jangan jalankan `next start` bersamaan dengan `npm run test:e2e`. Sudah diperingatkan di `playwright.config.ts` |
 | Database uji tidak terpisah | Data pengembangan tercampur data uji | Isi `TEST_DATABASE_URL` |
 | Test bergantung waktu | Hasil berbeda di zona waktu lain | `tests/unit/zona-waktu.test.ts` dan `e2e/zona-dan-tenggat.spec.ts` mengunci ini |
+| Dev server kehabisan memori saat audit berjalan | Halaman balas 500 sesaat dengan `SyntaxError: Unexpected end of JSON input`, lalu server restart sendiri. Bukan cacat aplikasi | Jalankan dev server dengan `BATCH_DEV_MB=4096` saat mengaudit banyak layar. Terukur 2026-10-19: `/laporan` dibuka tiga kali berturut-turut setelah itu, 200 dalam 2,3 sampai 3,5 detik, nol galat konsol |
 | Batas laju hilang saat restart | Batas tidak berlaku sesaat setelah deploy | Diterima, satu instance. Tercatat di `docs/18` bagian 7 |
 | 13 layar tanpa uji bersesi | Regresi di layar itu tidak tertangkap | Uji manual sebelum kirim, lalu tambah e2e |
 
