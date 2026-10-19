@@ -29,6 +29,25 @@ const STATUS: Record<KodeGalat, number> = {
   LURING: 503,
 };
 
+/** Bagian permintaan yang ikut dicatat saat galat tak terduga terjadi. */
+export type KonteksGalat = {
+  metode: string | null;
+  jalur: string | null;
+  mulai: number;
+};
+
+/**
+ * Rujukan pendek untuk satu galat tak terduga.
+ *
+ * Delapan huruf, bukan UUID penuh, karena angkanya akan dibaca orang lewat
+ * telepon atau tangkapan layar. Peluang dua galat bertabrakan dalam satu
+ * minggu sangat kecil, dan yang dibutuhkan hanya kecocokan dengan satu baris
+ * log.
+ */
+function rujukanGalat(): string {
+  return Math.random().toString(16).slice(2, 10);
+}
+
 /** Galat yang sengaja dilempar aplikasi dan sudah punya pesan bahasa Indonesia. */
 export class GalatAplikasi extends Error {
   kode: KodeGalat;
@@ -87,7 +106,7 @@ function dariZod(err: ZodError): GalatAplikasi {
 }
 
 /** Ubah galat apa pun jadi response dengan bentuk yang sama. */
-export function balasGalat(err: unknown) {
+export function balasGalat(err: unknown, konteks?: KonteksGalat) {
   if (err instanceof GalatAplikasi) {
     // Batas laju menyertakan sisa waktunya, jadi client tidak perlu menebak.
     const headers = err.retryAfter ? { "X-Retry-After": String(err.retryAfter) } : undefined;
@@ -105,15 +124,38 @@ export function balasGalat(err: unknown) {
     );
   }
 
-  console.error("[api] galat tak terduga:", err);
+  // Galat yang tidak dikenal berarti ada yang salah di sisi kami, dan
+  // pengguna tidak bisa memperbaikinya. Yang bisa dilakukan pengguna hanya
+  // melaporkannya, jadi balasan ini membawa satu rujukan pendek yang juga
+  // dicatat di log. Tanpa itu, laporan "aplikasinya error" tidak bisa
+  // dicocokkan dengan satu baris log pun.
+  const ref = rujukanGalat();
+  const status = STATUS.INTERNAL_ERROR;
+
+  console.error(
+    JSON.stringify({
+      level: "error",
+      waktu: new Date().toISOString(),
+      ref,
+      kode: "INTERNAL_ERROR",
+      status,
+      metode: konteks?.metode ?? null,
+      jalur: konteks?.jalur ?? null,
+      durasiMs: konteks ? Math.round(performance.now() - konteks.mulai) : null,
+      pesan: err instanceof Error ? err.message : String(err),
+      nama: err instanceof Error ? err.name : typeof err,
+    }),
+  );
+
   return NextResponse.json(
     {
       error: {
         code: "INTERNAL_ERROR",
         message: "Ada masalah di server. Coba lagi sebentar.",
+        ref,
       },
     },
-    { status: 500 },
+    { status, headers: { "X-Galat-Ref": ref } },
   );
 }
 
@@ -122,10 +164,17 @@ export function bungkus<A extends unknown[]>(
   handler: (...args: A) => Promise<Response>,
 ) {
   return async (...args: A): Promise<Response> => {
+    const mulai = performance.now();
+    const req = args[0];
+    const konteks: KonteksGalat =
+      req instanceof Request
+        ? { metode: req.method, jalur: new URL(req.url).pathname, mulai }
+        : { metode: null, jalur: null, mulai };
+
     try {
       return await handler(...args);
     } catch (err) {
-      return balasGalat(err);
+      return balasGalat(err, konteks);
     }
   };
 }

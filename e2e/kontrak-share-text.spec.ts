@@ -49,6 +49,27 @@ test("share-text memakai variant dan menolak nama lama", async ({ page }) => {
     const salah = await page.request.post(url, { data: { variant: "salah" } });
     expect(salah.status()).toBe(422);
     expect(((await salah.json()) as { error: { code: string } }).error.code).toBe("VALIDATION_ERROR");
+
+    // Varian tautan tanpa tautan tersimpan tidak boleh menghasilkan teks
+    // "Tautan belum dibuat." yang ikut terkirim ke WhatsApp keluarga.
+    const tanpaTautan = await page.request.post(url, { data: { variant: "tautan" } });
+    expect(tanpaTautan.status()).toBe(422);
+    expect(((await tanpaTautan.json()) as { error: { code: string; message: string } }).error.message).toContain(
+      "Belum ada tautan laporan",
+    );
+
+    // Setelah tautan dibuat, varian tautan memakai tautan terbaru tanpa
+    // perlu mengirim linkId.
+    const buat = await page.request.post(`/api/plans/${plans[0]!.id}/report/links`, {
+      data: { label: "Keluarga" },
+    });
+    expect(buat.status()).toBe(201);
+
+    const denganTautan = await page.request.post(url, { data: { variant: "tautan" } });
+    expect(denganTautan.status()).toBe(200);
+    const isiTautan = (await denganTautan.json()) as { text: string };
+    expect(isiTautan.text).toMatch(/\/bagikan\/[A-Za-z0-9_-]{10,}/);
+    expect(isiTautan.text).not.toContain("Tautan belum dibuat");
   } finally {
     await hapusAkunUji(email);
   }

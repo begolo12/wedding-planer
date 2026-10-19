@@ -29,10 +29,30 @@ Aturan singkat:
 
 ## [0.18.0] - 2026-10-19
 
+### Yang berubah untuk kamu
+
+Tampilan aplikasi diganti total. Latarnya sekarang berwarna kertas gading, tulisannya tinta pekat, dan satu warna aksen merah bata dipakai hemat. Judul dan angka hitung mundur memakai huruf berbeda supaya angka penting langsung terlihat.
+
+Beberapa hal yang terasa langsung:
+
+- Beranda tidak lagi berupa tumpukan kartu. Kepala layarnya seperti tulisan di halaman, dan tiga angka ringkasan jadi satu baris dengan garis pemisah
+- Tab yang sedang aktif di navigasi ditandai bilah tipis, bukan bidang berwarna penuh
+- Tombol dan bidang memakai sudut 14px, badge dan chip 8px, jadi tombol yang bisa ditekan tidak lagi terlihat sama dengan label keterangan
+- Layar masuk dan daftar tidak lagi memuat pita "100% Gratis" dan hiasan yang tidak menambah kemampuan
+- Lembar "Lainnya" di bilah bawah membuka Laporan, Akun, dan mode tampilan dari layar sempit
+- Tombol "Masuk dengan Google" dan "Daftar dengan Akun Google" tersedia di layar masuk dan daftar
+- Kalau server bermasalah, pesan galat sekarang menyebut kode pendek. Sebutkan kode itu saat melapor supaya bisa dicari di log
+- Bagikan laporan jenis tautan tidak lagi mengirim kalimat "Tautan belum dibuat." ke WhatsApp. Kalau belum ada tautan, aplikasi meminta kamu membuatnya dulu
+
+### Catatan untuk pengembang
+
 Rilis ini menggabungkan empat bagian `[Belum dirilis]` yang menumpuk. Di dalam tiap kelompok, urutan dari keputusan terbaru ke terlama; kalau dua entri bertentangan, yang lebih atas yang berlaku.
 
 ### Tambah
 
+- Log galat terstruktur: setiap galat tak terduga menulis satu baris JSON berisi rujukan pendek, metode, jalur, status, durasi, dan pesan. Rujukan yang sama dikirim di header `X-Galat-Ref` dan di badan balasan sebagai `ref`, lalu ditampilkan di layar sebagai "Kode: xxxxxxxx". Tanpa itu, laporan "aplikasinya error" tidak bisa dicocokkan dengan log mana pun
+- `tests/unit/galat.test.ts` untuk bentuk balasan, header, dan isi baris log
+- Bagian Catatan rilis di `docs/23`, dan bagian "Yang berubah untuk kamu" di entri 0.18.0. Sebelumnya `CHANGELOG.md` hanya bisa dibaca orang yang menulis kodenya
 - Bagian Tim Support di `docs/25`: triage per jenis laporan, data yang boleh dan tidak boleh diminta, isi laporan yang diteruskan, dan tiga hal yang belum diputuskan pemilik produk
 - Kolom pelaksana di seluruh tabel prioritas `docs/26`, dan dua pekerjaan baru: kanal dukungan privat dan tombol lapor masalah di dalam aplikasi
 - `docs/24` sekarang mencatat empat peran, termasuk Tim Support
@@ -87,7 +107,8 @@ Rilis ini menggabungkan empat bagian `[Belum dirilis]` yang menumpuk. Di dalam t
 
 - Klaim bahwa `GET /api/kesehatan` 200 berarti database produksi terhubung dihapus dari `docs/18` dan `docs/23`. Endpoint itu sengaja tidak menyentuh database, dan komentarnya di `src/app/api/kesehatan/route.ts` menjelaskan alasannya. Pemeriksaan pasca-deploy sekarang memakai `GET /api/plans` dengan sesi sebagai bukti database benar-benar terbaca
 - Suite e2e tidak lagi kehabisan heap. `playwright.config.ts` sekarang menjalankan dev server uji dengan `BATCH_DEV_MB=2048`, karena heap bawaan 1 GB habis di tengah suite sehingga server uji mati dengan `Ineffective mark-compacts near heap limit` dan dua spec terakhir gagal dengan `ECONNRESET`. Sebelumnya kegagalan itu terbaca seperti test rapuh, padahal penyebabnya batas memori
-- Angka test di `docs/18` dan `docs/22` diselaraskan dengan kenyataan: 17 berkas 158 test Vitest, 17 test Playwright di 8 berkas spec
+- Bagikan laporan jenis tautan tidak lagi mengirim "Tautan belum dibuat." ke WhatsApp. Kalau `linkId` tidak dikirim, server memakai tautan terbaru milik plan; kalau plan belum punya tautan, balasannya 422 dengan pesan yang menyuruh membuat tautan dulu. Ditemukan saat menguji kontrak, dan sebelumnya kalimat itu benar-benar bisa terkirim ke keluarga
+- Angka test di `docs/18` dan `docs/22` diselaraskan dengan kenyataan: 18 berkas 162 test Vitest, 17 test Playwright di 8 berkas spec
 - Jumlah tabel pada ukuran migrasi di `docs/18` naik dari 15 ke 16, karena migrasi `0002` menambah `idempotency_keys`
 - Label bagian tidak lagi ditulis dengan huruf besar semua dan jarak antarhuruf lebar. Delapan tempat memakai pola itu tanpa alasan, dan pola itu justru tanda paling umum tulisan yang belum dipilih
 - Bayangan seragam di 25 bidang dihapus. Semua kartu memakai bayangan lembut yang sama, jadi kedalamannya tidak lagi membedakan apa pun. Yang tersisa hanya bayangan untuk elemen yang benar-benar mengambang: toast dan dialog

@@ -13,6 +13,12 @@ export type GalatApi = {
   kode: KodeGalat;
   pesan: string;
   fields?: Record<string, string>;
+  /**
+   * Rujukan pendek dari server untuk galat yang tidak dikenal. Hanya ada pada
+   * INTERNAL_ERROR. Dipakai supaya laporan pengguna bisa dicocokkan dengan
+   * satu baris log, tanpa meminta mereka mengirim isi data rencananya.
+   */
+  ref?: string;
 };
 
 /** Galat jaringan dipisah dari galat server, karena penanganannya berbeda. */
@@ -26,7 +32,12 @@ export class GalatJaringan extends Error {
 const PESAN_ANTRE = "Tidak ada koneksi. Perubahan disimpan dan dikirim nanti.";
 const PESAN_UMUM = "Ada yang tidak beres. Coba lagi sebentar.";
 
-type GalatServer = { code: KodeGalat; message: string; fields?: Record<string, string> };
+type GalatServer = {
+  code: KodeGalat;
+  message: string;
+  fields?: Record<string, string>;
+  ref?: string;
+};
 
 /**
  * Baca bentuk galat server dari isi yang belum dipercaya. Dibaca dengan
@@ -49,9 +60,11 @@ function bacaGalat(isi: unknown): GalatServer | null {
     }
   }
 
+  const ref = "ref" in e && typeof e.ref === "string" ? e.ref : undefined;
+
   // Kode datang dari server sendiri. Nilai yang tidak dikenal tetap dibawa
   // apa adanya; layar hanya membandingkannya dengan daftar KodeGalat.
-  return { code: e.code as KodeGalat, message, fields };
+  return { code: e.code as KodeGalat, message, fields, ref };
 }
 
 export async function minta<T>(
@@ -115,6 +128,7 @@ export async function minta<T>(
       kode,
       pesan: galat?.message ?? PESAN_UMUM,
       fields: galat?.fields,
+      ref: galat?.ref,
     } satisfies GalatApi;
   }
 
@@ -153,11 +167,20 @@ async function tanpaRespons<T>(url: string, method: string, body: string | null)
   throw new GalatJaringan();
 }
 
-/** Ubah galat apa pun jadi satu kalimat yang bisa ditampilkan di layar. */
+/**
+ * Ubah galat apa pun jadi satu kalimat yang bisa ditampilkan di layar.
+ *
+ * Kalau server memberi rujukan, rujukan itu ikut ditulis. Tanpa itu, laporan
+ * "aplikasinya error" tidak bisa dicocokkan dengan log mana pun, dan support
+ * hanya bisa menebak.
+ */
 export function pesanGalat(err: unknown): string {
   if (err instanceof GalatJaringan) return err.message;
+
   if (err && typeof err === "object" && "pesan" in err && typeof err.pesan === "string") {
-    return err.pesan;
+    const ref = "ref" in err && typeof err.ref === "string" ? err.ref : null;
+    return ref ? `${err.pesan} Kode: ${ref}` : err.pesan;
   }
+
   return PESAN_UMUM;
 }

@@ -252,6 +252,7 @@ Toast dipakai untuk hasil yang sudah selesai, bukan untuk memberi tahu yang seda
 | Kehadiran diubah | "Kehadiran diubah" | 3 detik |
 | Salin tautan | "Tautan tersalin" | 2 detik |
 | Gagal | pesan galat, bukan toast | lihat bagian 8 |
+| Gagal server | pesan galat ditambah "Kode: xxxxxxxx" | `src/lib/api-client.ts` menambahkan rujukan dari server. Rujukan itu yang diminta support saat pengguna melapor |
 
 **Alasan toast tidak punya tombol.** Toast yang perlu tindakan berarti pesan itu salah tempat. Pemotongan atau pembatalan harus berupa dialog, bukan toast dengan tombol.
 

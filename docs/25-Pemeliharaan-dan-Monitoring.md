@@ -40,7 +40,42 @@ Kalau kedua endpoint menjawab sama, salah satunya tidak berguna.
 
 Bukti kedua job pemantauan berjalan: run `39181196427` pada 2026-10-19, `Kesiapan produksi` dan `Audit dependensi mingguan` sama-sama hijau.
 
-### 2.1 Kenapa GitHub Actions, bukan layanan uptime
+### 2.1 Log galat
+
+Setiap galat tak terduga menulis satu baris JSON ke log platform, bukan pesan bebas. Bentuknya:
+
+```json
+{
+  "level": "error",
+  "waktu": "2026-10-19T00:58:39.271Z",
+  "ref": "a3f91c2e",
+  "kode": "INTERNAL_ERROR",
+  "status": 500,
+  "metode": "POST",
+  "jalur": "/api/plans/abc/tasks",
+  "durasiMs": 42,
+  "pesan": "koneksi database putus",
+  "nama": "Error"
+}
+```
+
+`ref` yang sama dikirim ke klien di header `X-Galat-Ref` dan di badan balasan, lalu ditampilkan di layar sebagai akhiran pesan: "Ada yang tidak beres. Coba lagi sebentar. Kode: a3f91c2e".
+
+Alur pemakaiannya:
+
+```mermaid
+flowchart LR
+  A[Pengguna melihat kode] --> B[Support menerima kode]
+  B --> C[Cari ref di log platform]
+  C --> D[Baris log menyebut jalur, metode, dan pesan]
+  D --> E[Developer menerima laporan lengkap]
+```
+
+Yang sengaja tidak dicatat: isi body permintaan, nama tamu, nomor telepon, jumlah uang, dan alamat surel. Baris log hanya memuat metadata permintaan. Alasannya, log dibaca orang dan disimpan platform, sedangkan isi body adalah data pribadi.
+
+Keterbatasan: log platform punya masa simpan terbatas, dan belum ada agregasi. Kalau `ref` dilaporkan setelah masa simpannya lewat, barisnya tidak bisa dicari lagi. Itu alasan agregasi log tetap ada di daftar pekerjaan.
+
+### 2.2 Kenapa GitHub Actions, bukan layanan uptime
 
 `docs/06` menolak menambah vendor selama masalahnya bisa diselesaikan dengan yang sudah ada. Repositori sudah di GitHub, dan GitHub mengirim surel ke pemilik repositori saat workflow terjadwal gagal. Itu pemberitahuan yang benar-benar sampai, tanpa vendor baru dan tanpa biaya.
 

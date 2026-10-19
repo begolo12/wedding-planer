@@ -13,7 +13,7 @@ Aturan kerja tetap dari [`AGENTS.md`](../AGENTS.md). Angka di dokumen ini diambi
 | Keluaran | Status | Bahan yang sudah ada | Yang kurang |
 |---|---|---|---|
 | Test Plan | Sebagian | [`18-Rencana-Produksi-dan-Pemakaian-Harian.md`](18-Rencana-Produksi-dan-Pemakaian-Harian.md) bagian 9 | Lingkup, lingkungan, kriteria masuk dan keluar, daftar risiko |
-| Test Case | Sebagian | 158 test Vitest di 17 berkas, 17 test Playwright di 8 spec | Kode kasus, keterkaitan ke 42 story, kasus manual |
+| Test Case | Sebagian | 162 test Vitest di 18 berkas, 17 test Playwright di 8 spec | Kode kasus, keterkaitan ke 42 story, kasus manual |
 | Laporan Bug | Ada | [`19-Rencana-Perbaikan-Audit.md`](19-Rencana-Perbaikan-Audit.md), 13 temuan; [`20-Hasil-Audit-Menyeluruh.md`](20-Hasil-Audit-Menyeluruh.md) | Status per temuan, commit perbaikan, uji regresi per temuan |
 | UAT Sign-off | Belum ada | Belum ada | Semua, dan tidak bisa diisi jujur sebelum ada pengguna sungguhan |
 
@@ -50,8 +50,8 @@ Keterbatasan yang harus ditulis jujur: selama `TEST_DATABASE_URL` kosong, `tests
 
 | Jenis | Alat | Cakupan sekarang | Berkas |
 |---|---|---|---|
-| Unit | Vitest | 147 test | `tests/unit/` |
-| Integrasi | Vitest, menyentuh database | 11 test | `tests/integration/` |
+| Unit | Vitest | 149 test | `tests/unit/` |
+| Integrasi | Vitest, menyentuh database | 13 test | `tests/integration/` |
 | Ujung ke ujung | Playwright, Chromium | 17 test | `e2e/` |
 | Tipe | `tsc --noEmit` | Seluruh `src` | `npm run lint` |
 | Build | `next build` | 26 halaman dan route | `npm run build` |
@@ -121,7 +121,7 @@ Untuk kasus otomatis, nama test di berkas adalah nama kasusnya. Tidak ada nama k
 | E7 PWA | 5 | `tests/unit/cache-baca.test.ts`, `status-luring.test.ts`, `antrean-luring.test.ts`, `api-client-luring.test.ts`, `e2e/alur-luring.spec.ts` | E7.3 prompt install dan E7.4 peringatan versi tanpa kasus |
 | E8 Kualitas | 5 | `tests/integration/kepemilikan-plan.test.ts`, `e2e/tampilan.spec.ts`, `e2e/zona-dan-tenggat.spec.ts` | E8.1 performa dan E8.2 aksesibilitas belum diukur |
 
-Jumlah test yang benar-benar berjalan: 147 unit, 11 integrasi, 17 ujung ke ujung. Angka itu dibaca dari keluaran Vitest dan Playwright, bukan dihitung dari nama berkas.
+Jumlah test yang benar-benar berjalan: 149 unit, 13 integrasi, 17 ujung ke ujung. Angka itu dibaca dari keluaran Vitest dan Playwright, bukan dihitung dari nama berkas.
 
 ### 3.3 Kasus ujung ke ujung
 

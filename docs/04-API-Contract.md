@@ -33,6 +33,22 @@ Semua endpoint mengikuti aturan yang sama. Kalau ada endpoint yang melanggar sal
 
 `code` adalah nilai tetap dari daftar di bawah, bukan pesan error yang berubah-ubah. `message` untuk manusia, `fields` hanya ada pada `VALIDATION_ERROR`.
 
+Pada `INTERNAL_ERROR` saja, balasan memuat `ref` berisi delapan huruf hex, dan header `X-Galat-Ref` berisi nilai yang sama:
+
+```json
+{
+  "error": {
+    "code": "INTERNAL_ERROR",
+    "message": "Ada masalah di server. Coba lagi sebentar.",
+    "ref": "a3f91c2e"
+  }
+}
+```
+
+Rujukan itu juga dicatat di log server sebagai satu baris JSON bersama metode, jalur, status, dan durasi. Gunanya satu: laporan pengguna bisa dicocokkan dengan satu baris log tanpa meminta mereka mengirim isi data rencananya. Klien menampilkannya sebagai akhiran pesan, "Ada yang tidak beres. Coba lagi sebentar. Kode: a3f91c2e".
+
+**Alasannya** galat tak terduga tidak bisa diperbaiki pengguna, dan tanpa rujukan, laporan "aplikasinya error" tidak bisa dicocokkan dengan apa pun. Rujukan sengaja pendek supaya bisa dibaca ulang lewat telepon.
+
 | Code | HTTP | Kapan |
 |---|---|---|
 | `UNAUTHENTICATED` | 401 | Belum login atau sesi habis |

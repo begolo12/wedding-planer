@@ -59,7 +59,7 @@ Semua perintah dijalankan dari akar repo, berurutan. Kalau satu gagal, rilis ber
 | Urutan | Perintah | Yang dibuktikan |
 |---|---|---|
 | 1 | `npm run lint` | Tipe bersih |
-| 2 | `npm test` | 147 unit dan 11 integrasi hijau |
+| 2 | `npm test` | 149 unit dan 13 integrasi hijau |
 | 3 | `npm run test:e2e` | 17 kasus ujung ke ujung hijau |
 | 4 | `npm run build` | Build produksi sukses |
 | 5 | `npm run db:check` | Migrasi dan skema tidak berselisih |
@@ -158,7 +158,29 @@ Rollback kode tidak mengembalikan data yang sudah ditulis. Satu-satunya jalan ad
 
 ---
 
-## 5. Versi
+## 5. Catatan rilis
+
+Setiap entri rilis di `CHANGELOG.md` punya dua bagian, dengan urutan ini:
+
+| Bagian | Pembaca | Isi |
+|---|---|---|
+| `Yang berubah untuk kamu` | Pengguna | Perubahan yang terasa di layar, tanpa nama berkas, tanpa istilah teknis |
+| `Catatan untuk pengembang` | Tim | Keputusan, alasan, berkas, dan hal yang sengaja tidak dikerjakan |
+
+Alasannya: `CHANGELOG.md` sebelumnya hanya bisa dibaca orang yang menulis kodenya. Pengguna yang bertanya "apa yang berubah" tidak menemukan jawaban di sana, padahal itu satu-satunya catatan rilis yang dimiliki proyek ini.
+
+Aturan penulisan bagian pengguna:
+
+| Aturan | Contoh benar | Contoh salah |
+|---|---|---|
+| Sebut yang terlihat di layar | "Tab aktif ditandai bilah tipis" | "`.nav-item` memakai `border-bottom`" |
+| Tanpa nama berkas | "Pesan galat menyebut kode pendek" | "`balasGalat` menambahkan `X-Galat-Ref`" |
+| Kalimat kedua menyebut akibatnya | "supaya angka penting langsung terlihat" | tanpa akibat |
+| Tidak menjanjikan yang belum ada | "Tombol lapor masalah" hanya ditulis kalau tombolnya ada | menulis rencana sebagai kenyataan |
+
+Kalau satu rilis tidak punya perubahan yang terasa oleh pengguna, bagian itu ditulis "Tidak ada perubahan yang terasa di layar." Kalimat itu lebih jujur daripada menghapus bagiannya, karena pembaca jadi tahu bahwa memang tidak ada, bukan lupa ditulis.
+
+## 6. Versi
 
 | Aturan | Alasan |
 |---|---|
@@ -169,7 +191,7 @@ Rollback kode tidak mengembalikan data yang sudah ditulis. Satu-satunya jalan ad
 
 ---
 
-## 6. Yang belum ada
+## 7. Yang belum ada
 
 | Belum | Akibat | Yang dibutuhkan |
 |---|---|---|
@@ -183,7 +205,7 @@ Rollback kode tidak mengembalikan data yang sudah ditulis. Satu-satunya jalan ad
 
 ---
 
-## 7. Risiko khusus rilis berikutnya
+## 8. Risiko khusus rilis berikutnya
 
 | Risiko | Bukti | Pengurangan |
 |---|---|---|
@@ -196,7 +218,7 @@ Rollback kode tidak mengembalikan data yang sudah ditulis. Satu-satunya jalan ad
 
 ---
 
-## 8. Ringkas satu halaman
+## 9. Ringkas satu halaman
 
 ```text
 1. npm run lint && npm test && npm run test:e2e && npm run build

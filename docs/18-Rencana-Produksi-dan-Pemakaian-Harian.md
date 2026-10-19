@@ -296,7 +296,7 @@ Tabel ini status, bukan lagi rencana. Tiap status diambil dari bukti yang bisa d
 | 5 | Koneksi database | P0 | Selesai di kode | `prepare: false` dan `ssl: "require"` untuk host bukan localhost | Jalur ssl remote belum teruji runtime karena `DATABASE_URL` di mesin ini localhost |
 | 6 | Rate limit | P0 | Selesai | better-auth bawaan untuk sign-up 5 per jam per IP dan sign-in 10 per 15 menit per IP, badan 429 diterjemahkan ke bentuk standar; `src/lib/batas.ts` untuk POST plans 30 per jam per pengguna dan POST payments 60 per jam per pengguna. Terukur: percobaan sign-in ke-11 menjawab 429 dengan `X-Retry-After` 900 dan `{"error":{"code":"RATE_LIMITED"}}`; POST `/api/plans` 30 kali pertama menjawab 422, percobaan ke-31 menjawab 429 dengan `{"error":{"code":"RATE_LIMITED"}}` dan header `X-Retry-After`, tanpa satu pun plan dibuat; POST payments 60 kali pertama menjawab 201, percobaan ke-61 menjawab 429 dengan `X-Retry-After: 3598` | Tidak ada |
 | 7 | Security headers | P1 | Selesai | Lima header terkirim tanpa CSP | Tidak ada |
-| 8 | Test otomatis | P1 | Selesai | Vitest 16 berkas 153 test hijau (format, plan, skema, status-luring, cache-baca, api-client-luring, batas laju, navigasi, antrean luring, integrasi kepemilikan plan, integrasi laporan, integrasi agregat uang, dan lain-lain); Playwright 8 berkas spec di port 3110 (alur utama, alur luring, batas laju plans, hapus akun, kontrak share-text, tampilan, tamu dan ekspor, zona dan tenggat) | Tanpa `TEST_DATABASE_URL`, test integrasi memakai database pengembangan dan tiap test membuat lalu menghapus datanya sendiri |
+| 8 | Test otomatis | P1 | Selesai | Vitest 18 berkas 162 test hijau (format, plan, skema, status-luring, cache-baca, api-client-luring, batas laju, navigasi, antrean luring, integrasi kepemilikan plan, integrasi laporan, integrasi agregat uang, dan lain-lain); Playwright 8 berkas spec di port 3110 (alur utama, alur luring, batas laju plans, hapus akun, kontrak share-text, tampilan, tamu dan ekspor, zona dan tenggat) | Tanpa `TEST_DATABASE_URL`, test integrasi memakai database pengembangan dan tiap test membuat lalu menghapus datanya sendiri |
 | 9 | Perbaikan kontrak | P1 | Selesai | `/api/public/share/{token}` menjawab `{"error":{"code":"NOT_FOUND"}}` (terukur 404); POST `report/share-text` memakai `skemaBagikanTeks` dengan field `variant`, `message`, `linkId` | Tidak ada |
 | 10 | Keselarasan dokumen | P3 | Selesai | Daftar berkasnya ada di laporan pekerja dokumen | Tidak ada |
 
@@ -329,9 +329,9 @@ Ukuran di bawah sudah diukur, kecuali baris yang ditandai belum di bagian 18.
 | Plan sampai pembayaran | Ya, Rp 5.000.000 | e2e Playwright alur utama |
 | Antrean luring tidak kehilangan data | Ya, 3 perubahan terkirim berurutan; isi object store antrean 1 lalu 3 lalu 0 | e2e alur luring |
 | Bentuk tabel bisa dijelaskan tanpa membuka database | Ya | Migrasi ter-commit, dan `docs/03-Data-Model.md` sudah dilengkapi |
-| Build dan tipe | Hijau | `npm run lint`, 153 test, `npm run build` 26 rute statis dan dinamis |
+| Build dan tipe | Hijau | `npm run lint`, 162 test, `npm run build` 26 rute statis dan dinamis |
 | Kontras | 0 gagal di terang dan gelap; rasio terburuk 4,55 di terang dan 5,35 di gelap | Diukur di 17 rute pada 390 dan 1440 px |
-| Test | 158 test unit dan integrasi hijau, plus 17 test e2e di 8 berkas spec | Vitest dan Playwright, diukur 19 Oktober 2026 |
+| Test | 162 test unit dan integrasi hijau di 18 berkas, plus 17 test e2e di 8 berkas spec | Vitest dan Playwright, diukur 19 Oktober 2026 |
 | Migrasi dari nol | 16 tabel terbentuk, "migrations applied successfully" | `db:migrate` ke database sementara `wedding_uji_20261004`, lalu di-DROP. Angka 15 pada pengukuran 4 Oktober 2026 naik jadi 16 setelah migrasi `0002_curved_nebula.sql` menambah `idempotency_keys`; diukur ulang 19 Oktober 2026 |
 | Batas laju endpoint plan | 30 kali 422, percobaan ke-31 429 dengan `X-Retry-After` | Diukur lewat request, tanpa plan yang dibuat |
 | Batas laju endpoint pembayaran | 60 kali 201, percobaan ke-61 429 dengan `X-Retry-After: 3598` | Diukur lewat request, 5 Oktober 2026 |
