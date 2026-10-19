@@ -74,6 +74,23 @@ const teksOpsional = (maks = 500) =>
     .transform((v) => (v ? v : null));
 
 /**
+ * Pilihan tertutup dengan pesan bahasa Indonesia.
+ *
+ * `z.enum` bawaan menjawab "Invalid option: expected one of ..." dalam bahasa
+ * Inggris. Teks itu sampai ke layar lewat `pesanGalat`, dan `AGENTS.md`
+ * bagian 4 mewajibkan bahasa Indonesia sehari-hari. Nilai yang sah disebut
+ * ulang supaya orang tahu apa yang boleh diisi, bukan hanya tahu bahwa
+ * isiannya salah.
+ */
+const pilihan = <const T extends readonly [string, ...string[]]>(
+  nilai: T,
+  nama: string,
+): z.ZodType<T[number]> =>
+  z.enum(nilai as unknown as [string, ...string[]], {
+    error: `${nama} tidak dikenal. Pilih: ${nilai.join(", ")}.`,
+  }) as z.ZodType<T[number]>;
+
+/**
  * Uang selalu integer rupiah. Tidak pernah desimal, tidak pernah float.
  *
  * Batas atasnya 2_147_483_647, yaitu batas kolom `integer` Postgres, bukan
@@ -120,7 +137,7 @@ const nomorWa = z
  * bukan disimpan sebagai teks bebas. String kosong berarti belum diisi.
  */
 const sisiTamu = z
-  .union([z.enum(SISI_TAMU), z.literal(""), z.null()])
+  .union([pilihan(SISI_TAMU, "Sisi tamu"), z.literal(""), z.null()])
   .optional()
   .transform((v) => (v ? v : null));
 
@@ -150,7 +167,7 @@ const tautanUndangan = z
  */
 export const bendera = (bawaan = false) =>
   z
-    .union([z.boolean(), z.enum(["true", "false", "1", "0"])])
+    .union([z.boolean(), pilihan(["true", "false", "1", "0"], "Nilai benar atau salah")])
     .transform((v) => (typeof v === "boolean" ? v : v === "true" || v === "1"))
     .default(bawaan);
 
@@ -195,7 +212,7 @@ export const skemaPlanUbah = z.object({
   partnerName: teksWajib("Nama pasangan", 80).optional(),
   weddingDate: tanggal.optional().nullable(),
   isDayOfDate: tanggal.optional().nullable(),
-  status: z.enum(STATUS_PLAN).optional(),
+  status: pilihan(STATUS_PLAN, "Status rencana").optional(),
   notes: teksOpsional(1000),
 });
 
@@ -203,7 +220,7 @@ export const skemaMilestone = z.object({
   title: teksWajib("Nama tanggal", 120),
   eventDate: tanggal,
   eventTime: jam.optional().nullable(),
-  type: z.enum(JENIS_TANGGAL).default("lainnya"),
+  type: pilihan(JENIS_TANGGAL, "Jenis tanggal").default("lainnya"),
   isDayOf: bendera(),
   invitationUrl: tautanUndangan,
   notes: teksOpsional(500),
@@ -214,11 +231,11 @@ export const skemaMilestoneUbah = untukUbah(skemaMilestone);
 
 export const skemaTugas = z.object({
   title: teksWajib("Nama tugas", 160),
-  category: z.enum(KATEGORI_TUGAS).default("Pelengkap"),
+  category: pilihan(KATEGORI_TUGAS, "Kategori tugas").default("Pelengkap"),
   dueDate: tanggal.optional().nullable(),
-  status: z.enum(["belum", "selesai"]).default("belum"),
-  priority: z.enum(PRIORITAS).default("sedang"),
-  assignee: z.enum(PENUGASAN).optional().nullable(),
+  status: pilihan(["belum", "selesai"], "Status tugas").default("belum"),
+  priority: pilihan(PRIORITAS, "Prioritas").default("sedang"),
+  assignee: pilihan(PENUGASAN, "Penugasan").optional().nullable(),
   budgetItemId: z.string().uuid().optional().nullable(),
   notes: teksOpsional(1000),
   sortOrder: z.coerce.number().int().min(0).max(9999).default(0),
@@ -228,7 +245,7 @@ export const skemaTugasUbah = untukUbah(skemaTugas);
 
 export const skemaPosAnggaran = z.object({
   name: teksWajib("Nama pos", 120),
-  category: z.enum(KATEGORI_UANG).default("lainnya"),
+  category: pilihan(KATEGORI_UANG, "Kategori anggaran").default("lainnya"),
   plannedAmount: uang.default(0),
   notes: teksOpsional(500),
   sortOrder: z.coerce.number().int().min(0).max(9999).default(0),
@@ -238,12 +255,12 @@ export const skemaPosAnggaranUbah = untukUbah(skemaPosAnggaran);
 
 export const skemaVendor = z.object({
   name: teksWajib("Nama vendor", 120),
-  category: z.enum(KATEGORI_UANG).default("lainnya"),
+  category: pilihan(KATEGORI_UANG, "Kategori anggaran").default("lainnya"),
   budgetItemId: z.string().uuid().optional().nullable(),
   contactName: teksOpsional(80),
   phone: nomorWa,
   address: teksOpsional(240),
-  status: z.enum(STATUS_VENDOR).default("calon"),
+  status: pilihan(STATUS_VENDOR, "Status vendor").default("calon"),
   notes: teksOpsional(1000),
 });
 
@@ -252,7 +269,7 @@ export const skemaVendorUbah = untukUbah(skemaVendor);
 export const skemaPembayaran = z.object({
   amount: uang.refine((v) => v > 0, "Jumlah pembayaran belum diisi."),
   paidAt: tanggal,
-  method: z.enum(METODE_BAYAR).default("transfer"),
+  method: pilihan(METODE_BAYAR, "Metode bayar").default("transfer"),
   isFinal: bendera(),
   notes: teksOpsional(500),
 });
@@ -262,9 +279,9 @@ export const skemaPembayaranUbah = untukUbah(skemaPembayaran);
 export const skemaTamu = z.object({
   name: teksWajib("Nama tamu", 120),
   phone: nomorWa,
-  category: z.enum(KATEGORI_TAMU).default("lainnya"),
+  category: pilihan(KATEGORI_TAMU, "Kategori tamu").default("lainnya"),
   side: sisiTamu,
-  rsvpStatus: z.enum(STATUS_HADIR).default("belum"),
+  rsvpStatus: pilihan(STATUS_HADIR, "Status kehadiran").default("belum"),
   guestCount: z.coerce
     .number()
     .int("Jumlah orang harus angka bulat.")
@@ -279,7 +296,7 @@ export const skemaTamuUbah = untukUbah(skemaTamu);
 
 export const skemaImporTamu = z.object({
   teks: z.string().trim().min(1, "Tempel dulu daftar namanya.").max(20_000, "Terlalu banyak teks sekaligus."),
-  category: z.enum(KATEGORI_TAMU).default("lainnya"),
+  category: pilihan(KATEGORI_TAMU, "Kategori tamu").default("lainnya"),
 });
 
 /**
@@ -320,7 +337,7 @@ export const skemaRundownUbah = untukUbah(skemaRundown);
 export const skemaPengumuman = z.object({
   title: teksWajib("Judul pengumuman", 160),
   body: teksWajib("Isi pengumuman", 2000),
-  audience: z.enum(AUIDENS).default("semua"),
+  audience: pilihan(AUIDENS, "Audiens").default("semua"),
   isPinned: bendera(),
   publishedAt: z.coerce.date().optional().nullable(),
 });
@@ -333,8 +350,8 @@ export const skemaPengumumanUbah = untukUbah(skemaPengumuman.omit({ publishedAt:
 
 export const skemaBusana = z.object({
   itemName: teksWajib("Nama barang", 120),
-  owner: z.enum(PEMILIK_BUSANA).default("pengantinWanita"),
-  status: z.enum(STATUS_BUSANA).default("belum"),
+  owner: pilihan(PEMILIK_BUSANA, "Pemilik busana").default("pengantinWanita"),
+  status: pilihan(STATUS_BUSANA, "Status busana").default("belum"),
   measureDate: tanggal.optional().nullable(),
   pickupDate: tanggal.optional().nullable(),
   estimatedCost: uang.optional().nullable(),
@@ -353,7 +370,7 @@ export const skemaBusanaUbah = untukUbah(skemaBusana);
  * Sekarang satu nama, dan isinya diperiksa di sini.
  */
 export const skemaBagikanTeks = z.object({
-  variant: z.enum(["ringkas", "lengkap", "tautan"]),
+  variant: pilihan(["ringkas", "lengkap", "tautan"], "Jenis bagikan"),
   message: z
     .string()
     .trim()
@@ -373,7 +390,7 @@ export const skemaBagikanTeks = z.object({
  */
 export const skemaTerbitPengumuman = z
   .object({
-    audience: z.enum(AUIDENS).optional(),
+    audience: pilihan(AUIDENS, "Audiens").optional(),
     publishAll: bendera(),
   })
   .refine((v) => Boolean(v.audience) || v.publishAll, {
@@ -394,5 +411,5 @@ export const skemaBagikanPengumuman = z.object({
 
 export const skemaTautan = z.object({
   label: teksWajib("Nama tautan", 40),
-  target: z.enum(["keluarga", "crew", "tamu", "laporan"]).default("keluarga"),
+  target: pilihan(["keluarga", "crew", "tamu", "laporan"], "Target tautan").default("keluarga"),
 });

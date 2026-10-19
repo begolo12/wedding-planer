@@ -14,7 +14,8 @@ Kode aplikasi berada di direktori `src/`, dibangun dengan Next.js 15, PostgreSQL
 | [`docs/22-Rencana-Uji-dan-UAT.md`](docs/22-Rencana-Uji-dan-UAT.md) | Test Plan, Test Case, Laporan Bug, dan UAT Sign-off. Cakupan per epik dan alasannya |
 | [`docs/23-Rilis-dan-Penyebaran.md`](docs/23-Rilis-dan-Penyebaran.md) | Prosedur rilis, urutan migrasi, rollback, dan risiko khusus rilis berikutnya |
 | [`docs/24-Infrastruktur-dan-Operasi.md`](docs/24-Infrastruktur-dan-Operasi.md) | Topologi, region, rahasia, akses, cadangan, dan batas yang belum ditetapkan |
-| [`docs/25-Pemeliharaan-dan-Monitoring.md`](docs/25-Pemeliharaan-dan-Monitoring.md) | Titik kesiapan, irama pemeliharaan, prosedur insiden, dan retro |
+| [`docs/25-Pemeliharaan-dan-Monitoring.md`](docs/25-Pemeliharaan-dan-Monitoring.md) | Titik kesiapan, irama pemeliharaan, cadangan, performa, prosedur insiden, dan retro |
+| [`docs/26-Rencana-Siklus-Berikutnya.md`](docs/26-Rencana-Siklus-Berikutnya.md) | Prioritas 0.19.0, syarat selesai, dan keputusan yang masih menunggu pemilik produk |
 | [`docs/01-PRD.md`](docs/01-PRD.md) | Product requirements. Masalah, persona, scope, use case, metrik, dan syarat penerimaan |
 | [`docs/02-Domain-Spec.md`](docs/02-Domain-Spec.md) | Indeks spesifikasi domain |
 | [`docs/02a-Perencanaan.md`](docs/02a-Perencanaan.md) | Tanggal penting, daftar tugas, anggaran, vendor dan pembayaran |

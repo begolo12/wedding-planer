@@ -59,7 +59,7 @@ Semua perintah dijalankan dari akar repo, berurutan. Kalau satu gagal, rilis ber
 | Urutan | Perintah | Yang dibuktikan |
 |---|---|---|
 | 1 | `npm run lint` | Tipe bersih |
-| 2 | `npm test` | 142 unit dan 11 integrasi hijau |
+| 2 | `npm test` | 147 unit dan 11 integrasi hijau |
 | 3 | `npm run test:e2e` | 17 kasus ujung ke ujung hijau |
 | 4 | `npm run build` | Build produksi sukses |
 | 5 | `npm run db:check` | Migrasi dan skema tidak berselisih |

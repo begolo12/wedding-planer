@@ -183,16 +183,73 @@ Kalau jawaban pertanyaan keempat adalah "menunggu", artinya tidak ada langkah ya
 
 ---
 
-## 7. Yang belum dipantau
+## 7. Cadangan dan pemulihan
+
+### 7.1 Alat
+
+`scripts/cadangan.mjs`, tanpa dependensi baru. Memakai `pg_dump` dan `pg_restore` dari klien PostgreSQL.
+
+| Perintah | Isi |
+|---|---|
+| `npm run cadangan` | Menulis satu berkas ke `cadangan/`, format custom, menyimpan 7 berkas terakhir |
+| `node scripts/cadangan.mjs --daftar` | Menampilkan berkas yang ada beserta ukurannya |
+| `node scripts/cadangan.mjs --pulihkan <berkas> <database>` | Memulihkan ke database lain |
+
+Alasan memakai skrip sendiri, bukan fitur penyedia: penyedia database belum dipastikan, dan `docs/18` mencatat dump harian belum terbukti berjalan. Skrip ini jalan di mana saja `pg_dump` ada, jadi tidak mengunci keputusan ke satu penyedia.
+
+Pengaman yang dipasang di skrip: pemulihan menolak kalau database tujuan sama dengan database sumber. Tanpa itu, satu salah ketik bisa menimpa data yang sedang dipakai dengan cadangan lama.
+
+### 7.2 Bukti uji restore
+
+Diuji 2026-10-19 terhadap database pengembangan:
+
+| Langkah | Hasil |
+|---|---|
+| `npm run cadangan` | `rapi-nikah-20261019-0740.dump`, 55.851 byte |
+| Buat database tujuan kosong | `wedding_pulih` |
+| `--pulihkan` ke database tujuan | Selesai tanpa galat |
+| Bandingkan isi | Asal dan hasil pulih sama: 16 tabel, 8 users, 9 plans, 21 payments |
+| Bersihkan | Database uji dan berkas dump dihapus |
+
+Artinya skripnya bekerja, dan pemulihan penuh mungkin dilakukan. Yang belum: jadwal otomatis dan tempat penyimpanan di luar mesin ini.
+
+### 7.3 Yang masih kurang
+
+| Belum | Akibat |
+|---|---|
+| Jadwal harian | Cadangan hanya ada kalau seseorang menjalankannya |
+| Penyimpanan di luar mesin | Bencana pada mesin ini ikut menghapus cadangan |
+| Uji restore terjadwal | Uji ini manual, dan bisa terlupakan |
+
+---
+
+## 8. Performa
+
+`scripts/kinerja.mjs`, tanpa dependensi baru. Mengukur dua endpoint publik yang aman dipanggil berulang: `/api/kesehatan` dan `/api/siap`. Endpoint yang menulis tidak diukur karena memanggilnya berulang akan mengubah data.
+
+Hasil 2026-10-19 terhadap produksi, `n=120`, konkurensi 12, dua kali berturut-turut:
+
+| Endpoint | p50 | p95 | maks | Galat |
+|---|---|---|---|---|
+| `/api/kesehatan` | 50ms dan 48ms | 135ms dan 125ms | 290ms dan 314ms | 0 |
+| `/api/siap` | 49ms dan 49ms | 99ms dan 79ms | 138ms dan 204ms | 0 |
+
+Satu pengukuran pertama dengan `n=60` menunjukkan p95 942ms pada `/api/kesehatan`. Pengukuran ulang dengan jumlah lebih besar menunjukkan 135ms. Selisih itu konsisten dengan cold start fungsi serverless, bukan dengan beban. Karena itu angka yang dipakai adalah hasil pengukuran berulang, dan pengukuran pertama tidak dipakai sebagai patokan.
+
+Persentil dipakai, bukan rata-rata, karena rata-rata menyembunyikan ekor yang justru terasa oleh pengguna.
+
+---
+
+## 9. Yang belum dipantau
 
 | Belum | Akibat | Yang dibutuhkan |
 |---|---|---|
-| Cadangan harian dan restore teruji | Kerusakan data tidak bisa dipulihkan | Jadwal dump dan satu uji restore |
+| Jadwal cadangan harian | Kerusakan data tidak bisa dipulihkan tanpa cadangan terbaru | Penjadwalan dan penyimpanan di luar mesin |
 | Agregasi log | Galat hanya terbaca satu per satu di dashboard | Alat agregasi, atau ekspor log berkala |
 | Pelacakan galat di sisi klien | Galat di browser pengguna tidak pernah terlihat | Alat pelacakan, dan itu vendor baru |
-| Angka performa | Tidak ada pembanding saat situs terasa lambat | Lighthouse dan Core Web Vitals |
+| Angka Core Web Vitals | Waktu jawab API sudah diukur, waktu render halaman belum | Lighthouse |
 | Deteksi per menit | Jeda deteksi sampai 30 menit | Alat uptime berbayar |
 | Perlindungan cabang | CI hijau tapi tidak diwajibkan sebelum merge | Pengaturan di GitHub, bukan kode |
 | Pemisahan database preview | Preview bisa menulis ke data produksi | Konfirmasi variabel lingkungan per lingkungan |
 
-Tujuh baris ini sengaja tidak dikerjakan sekarang, dan alasannya sudah tertulis di `docs/24` bagian 8. Yang berubah setelah dokumen ini ada: kesiapan produksi dan kerentanan dependensi tidak lagi ada di daftar itu.
+Baris-baris ini sengaja tidak dikerjakan sekarang, dan alasannya sudah tertulis di `docs/24` bagian 8. Yang berubah setelah dokumen ini ada: kesiapan produksi, kerentanan dependensi, alat cadangan, uji restore, dan pengukuran waktu jawab API tidak lagi ada di daftar itu.

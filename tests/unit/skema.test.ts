@@ -258,3 +258,34 @@ describe("skemaTandaiUndangan", () => {
   });
 });
 
+
+describe("pesan pilihan tertutup", () => {
+  const pesan = (hasil: { success: boolean; error?: unknown }) => {
+    const err = (hasil as { error?: { issues: { message: string }[] } }).error;
+    return err?.issues[0]?.message ?? "";
+  };
+
+  it("menyebut nilai yang boleh dipakai, dalam bahasa Indonesia", () => {
+    const hasil = skemaTugas.safeParse({ title: "Bayar DP", category: "dekorasi" });
+    expect(hasil.success).toBe(false);
+    expect(pesan(hasil)).toBe(
+      'Kategori tugas tidak dikenal. Pilih: Administrasi, Pencarian venue, Vendor, Sandang, Pelengkap, Tamu, Hari-H.',
+    );
+  });
+
+  it("tidak memakai teks bawaan Zod yang berbahasa Inggris", () => {
+    for (const hasil of [
+      skemaPembayaran.safeParse({ amount: 1_000, paidAt: "2026-06-30", method: "bitcoin" }),
+      skemaBagikanTeks.safeParse({ variant: "panjang" }),
+      skemaTamu.safeParse({ name: "Siti", rsvpStatus: "mungkin" }),
+    ]) {
+      expect(hasil.success).toBe(false);
+      expect(pesan(hasil)).not.toMatch(/Invalid option|expected one of/i);
+    }
+  });
+
+  it("nilai yang sah tetap diterima apa adanya", () => {
+    expect(skemaTugas.parse({ title: "Bayar DP", category: "Vendor" }).category).toBe("Vendor");
+    expect(skemaPembayaran.parse({ amount: 1_000, paidAt: "2026-06-30", method: "qris" }).method).toBe("qris");
+  });
+});

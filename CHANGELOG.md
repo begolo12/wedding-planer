@@ -33,6 +33,12 @@ Rilis ini menggabungkan empat bagian `[Belum dirilis]` yang menumpuk. Di dalam t
 
 ### Tambah
 
+- `scripts/cadangan.mjs` untuk mencadangkan dan memulihkan database memakai `pg_dump` dan `pg_restore`, tanpa dependensi baru. Menyimpan 7 berkas terakhir, dan menolak memulihkan ke database sumber supaya tidak menimpa data yang sedang dipakai. Diuji penuh: dump 55.851 byte, dipulihkan ke database kosong, hasilnya sama persis dengan sumber (16 tabel, 8 users, 9 plans, 21 payments)
+- `scripts/kinerja.mjs` untuk mengukur p50, p95, dan maks dua endpoint publik. Hasil 19 Oktober 2026 di produksi: `/api/siap` p95 79 sampai 99ms, `/api/kesehatan` p95 125 sampai 135ms, nol galat
+- `npm run cadangan` dan `npm run kinerja`
+- Pesan validasi pilihan tertutup sekarang berbahasa Indonesia dan menyebut nilai yang boleh dipakai, menggantikan teks bawaan Zod. Sebelumnya pengguna melihat "Invalid option: expected one of ..." di layar
+- `docs/26-Rencana-Siklus-Berikutnya.md` untuk prioritas 0.19.0, syarat selesai, dan dua keputusan yang masih menunggu pemilik produk
+- README dan `AGENTS.md` menautkan dokumen 26
 - `GET /api/siap` sebagai titik kesiapan yang benar-benar membaca database (`select 1`). Dipisah dari `/api/kesehatan` yang sengaja tidak menyentuh database, karena endpoint itu dipakai penjaga koneksi di perangkat. Diukur dengan database mati: `/api/siap` menjawab 503, `/api/kesehatan` tetap 200
 - `.github/workflows/jaga.yml`: kesiapan produksi dipanggil setiap 30 menit dan audit dependensi setiap Senin. Kegagalan mengirim surel lewat GitHub, tanpa vendor baru
 - `tests/integration/siap.test.ts` untuk bentuk balasan titik kesiapan
@@ -77,7 +83,8 @@ Rilis ini menggabungkan empat bagian `[Belum dirilis]` yang menumpuk. Di dalam t
 
 - Klaim bahwa `GET /api/kesehatan` 200 berarti database produksi terhubung dihapus dari `docs/18` dan `docs/23`. Endpoint itu sengaja tidak menyentuh database, dan komentarnya di `src/app/api/kesehatan/route.ts` menjelaskan alasannya. Pemeriksaan pasca-deploy sekarang memakai `GET /api/plans` dengan sesi sebagai bukti database benar-benar terbaca
 - Suite e2e tidak lagi kehabisan heap. `playwright.config.ts` sekarang menjalankan dev server uji dengan `BATCH_DEV_MB=2048`, karena heap bawaan 1 GB habis di tengah suite sehingga server uji mati dengan `Ineffective mark-compacts near heap limit` dan dua spec terakhir gagal dengan `ECONNRESET`. Sebelumnya kegagalan itu terbaca seperti test rapuh, padahal penyebabnya batas memori
-- Angka test di `docs/18` dan `docs/22` diselaraskan dengan kenyataan: 16 berkas 153 test Vitest, 17 test Playwright di 8 berkas spec
+- Angka test di `docs/18` dan `docs/22` diselaraskan dengan kenyataan: 17 berkas 158 test Vitest, 17 test Playwright di 8 berkas spec
+- Jumlah tabel pada ukuran migrasi di `docs/18` naik dari 15 ke 16, karena migrasi `0002` menambah `idempotency_keys`
 - Label bagian tidak lagi ditulis dengan huruf besar semua dan jarak antarhuruf lebar. Delapan tempat memakai pola itu tanpa alasan, dan pola itu justru tanda paling umum tulisan yang belum dipilih
 - Bayangan seragam di 25 bidang dihapus. Semua kartu memakai bayangan lembut yang sama, jadi kedalamannya tidak lagi membedakan apa pun. Yang tersisa hanya bayangan untuk elemen yang benar-benar mengambang: toast dan dialog
 - Radius tidak lagi satu nilai untuk semua hal. Sekarang empat tingkat menurut peran: batang penanda 4px, badge dan chip 8px, tombol dan bidang 14px, dan elemen yang memang bulat seperti lingkaran ikon dan jalur sakelar tetap pill. Sebelumnya tombol aksi, chip keterangan, dan bilah progres memakai bentuk yang sama

@@ -14,7 +14,9 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:check": "drizzle-kit check",
-    "deps": "node scripts/periksa-dependensi.mjs"
+    "deps": "node scripts/periksa-dependensi.mjs",
+    "cadangan": "node scripts/cadangan.mjs",
+    "kinerja": "node scripts/kinerja.mjs"
   },
   "dependencies": {
     "@neon/config": "^1.8.3",

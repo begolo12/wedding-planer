@@ -331,8 +331,8 @@ Ukuran di bawah sudah diukur, kecuali baris yang ditandai belum di bagian 18.
 | Bentuk tabel bisa dijelaskan tanpa membuka database | Ya | Migrasi ter-commit, dan `docs/03-Data-Model.md` sudah dilengkapi |
 | Build dan tipe | Hijau | `npm run lint`, 153 test, `npm run build` 26 rute statis dan dinamis |
 | Kontras | 0 gagal di terang dan gelap; rasio terburuk 4,55 di terang dan 5,35 di gelap | Diukur di 17 rute pada 390 dan 1440 px |
-| Test | 153 test unit dan integrasi hijau, plus 17 test e2e di 8 berkas spec | Vitest dan Playwright |
-| Migrasi dari nol | 15 tabel terbentuk, "migrations applied successfully" | `db:migrate` ke database sementara `wedding_uji_20261004`, lalu di-DROP |
+| Test | 158 test unit dan integrasi hijau, plus 17 test e2e di 8 berkas spec | Vitest dan Playwright, diukur 19 Oktober 2026 |
+| Migrasi dari nol | 16 tabel terbentuk, "migrations applied successfully" | `db:migrate` ke database sementara `wedding_uji_20261004`, lalu di-DROP. Angka 15 pada pengukuran 4 Oktober 2026 naik jadi 16 setelah migrasi `0002_curved_nebula.sql` menambah `idempotency_keys`; diukur ulang 19 Oktober 2026 |
 | Batas laju endpoint plan | 30 kali 422, percobaan ke-31 429 dengan `X-Retry-After` | Diukur lewat request, tanpa plan yang dibuat |
 | Batas laju endpoint pembayaran | 60 kali 201, percobaan ke-61 429 dengan `X-Retry-After: 3598` | Diukur lewat request, 5 Oktober 2026 |
 | Tanpa geser horizontal | Tidak ada geser di 360, 390, dan 1440 px | Diukur lewat browser |
