@@ -36,9 +36,9 @@ Diperiksa 2026-10-19.
 | Domain | `wedding-planer-self.vercel.app`. Tidak ada domain kustom | `vercel.json` tanpa `domains` | Terverifikasi |
 | Repositori | Publik, 4 bintang | `api.github.com/repos/begolo12/wedding-planer` | Terverifikasi |
 | CI | GitHub Actions, dua job: kualitas dan e2e, keduanya hijau | `.github/workflows/ci.yml`, run `39180299839` | Terverifikasi |
-| Pemantauan berkala | Workflow `Jaga`: kesiapan produksi setiap 30 menit, audit dependensi mingguan | `.github/workflows/jaga.yml` | Terverifikasi setelah push |
+| Pemantauan berkala | Workflow `Jaga`: kesiapan produksi setiap 30 menit, audit dependensi mingguan. Kedua job hijau pada run `39181196427` | `.github/workflows/jaga.yml` | Terverifikasi |
 | Infrastructure as Code | Tidak ada. Tidak ada Terraform, Docker, atau manifes Kubernetes | Daftar akar repo | Terverifikasi |
-| Pemantauan | Kesiapan produksi dipanggil tiap 30 menit dan surel terkirim saat gagal. Tidak ada agregasi log dan tidak ada pelacakan galat klien | `.github/workflows/jaga.yml`, `src/app/api/siap/route.ts` | Terverifikasi setelah push |
+| Pemantauan | Kesiapan produksi dipanggil tiap 30 menit dan surel terkirim saat gagal. Tidak ada agregasi log dan tidak ada pelacakan galat klien | `.github/workflows/jaga.yml`, `src/app/api/siap/route.ts` | Terverifikasi |
 | Cadangan | Tidak ada bukti dump berjalan | `docs/18` bagian 18 | **Belum diverifikasi** |
 | Pemulihan | Belum pernah diuji | `docs/18` bagian 18 | Terverifikasi belum ada |
 

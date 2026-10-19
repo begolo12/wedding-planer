@@ -38,6 +38,8 @@ Kalau kedua endpoint menjawab sama, salah satunya tidak berguna.
 | Log galat server | Log platform Vercel | Selama ada yang membuka dashboard | Tidak ada |
 | Sertifikat TLS | Perpanjangan otomatis Vercel | Otomatis | Tidak ada |
 
+Bukti kedua job pemantauan berjalan: run `39181196427` pada 2026-10-19, `Kesiapan produksi` dan `Audit dependensi mingguan` sama-sama hijau.
+
 ### 2.1 Kenapa GitHub Actions, bukan layanan uptime
 
 `docs/06` menolak menambah vendor selama masalahnya bisa diselesaikan dengan yang sudah ada. Repositori sudah di GitHub, dan GitHub mengirim surel ke pemilik repositori saat workflow terjadwal gagal. Itu pemberitahuan yang benar-benar sampai, tanpa vendor baru dan tanpa biaya.
