@@ -15,8 +15,7 @@
  * Jalankan dengan: node scripts/periksa-dependensi.mjs
  */
 
-import { execFileSync } from "node:child_process";
-import { dirname, join } from "node:path";
+import { execFileSync, execSync } from "node:child_process";
 
 /**
  * Temuan yang sudah diperiksa dan diterima. Kuncinya nama paket, nilainya
@@ -28,15 +27,17 @@ const DAFTAR_DIKETAHUI = {
 };
 
 function jalankanAudit() {
-  // `npm.cmd` tidak bisa dijalankan langsung oleh Node 24 tanpa shell, dan
-  // `shell: true` memunculkan peringatan deprecation. Jadi berkas npm-cli.js
-  // dipanggil lewat proses Node yang sedang berjalan.
-  const npmCli = join(dirname(process.execPath), "node_modules", "npm", "bin", "npm-cli.js");
+  // Di Linux dan macOS `npm` bisa dipanggil langsung. Di Windows `npm` adalah
+  // berkas .cmd, dan Node 24 menolak menjalankannya tanpa shell. Perintahnya
+  // tetap, tidak ada masukan pengguna, jadi `execSync` aman di sini.
+  const windows = process.platform === "win32";
   try {
-    return execFileSync(process.execPath, [npmCli, "audit", "--json"], {
-      encoding: "utf8",
-      maxBuffer: 32 * 1024 * 1024,
-    });
+    return windows
+      ? execSync("npm audit --json", { encoding: "utf8", maxBuffer: 32 * 1024 * 1024 })
+      : execFileSync("npm", ["audit", "--json"], {
+          encoding: "utf8",
+          maxBuffer: 32 * 1024 * 1024,
+        });
   } catch (err) {
     // npm audit keluar dengan kode 1 kalau ada temuan. Keluarannya tetap JSON.
     if (err.stdout) return err.stdout;
