@@ -156,7 +156,7 @@ Hapus akun menghapus `users` dan semua `plans` beserta turunannya. Karena cascad
 
 Halaman `/kebijakan` bisa dibuka tanpa masuk dan memuat isi bagian ini dalam bahasa sehari-hari: data yang dikumpulkan, bahwa tidak ada iklan dan pelacak pihak ketiga, hak pengguna menurut UU PDP, retensi, dan cara menghubungi pemilik produk. Halaman itu yang dirujuk oleh centang persetujuan di layar Daftar.
 
-Kanal kontak yang dipakai halaman `/kebijakan` sekarang adalah halaman Issues repositori `github.com/begolo12/wedding-planer/issues`. Keputusan pemilik produk 4 Oktober 2026 memakai kanal yang benar-benar ada, dan ini kanal sementara sampai ada surel resmi khusus privasi. Kalau surel resmi tersedia, halaman itu dan bagian ini diperbarui.
+Kanal kontak yang dipakai halaman `/kebijakan` sekarang adalah halaman Issues repositori `github.com/begolo12/wedding-planer/issues`. Halaman itu bisa dibaca siapa pun, jadi paragraf kontaknya juga memuat satu peringatan: jangan menulis nama tamu, nomor telepon, jumlah uang, atau alamat surel di sana. Kanal privat tetap dibutuhkan, dan tercatat sebagai P1 di `26-Rencana-Siklus-Berikutnya.md` nomor 5. Keputusan pemilik produk 4 Oktober 2026 memakai kanal yang benar-benar ada, dan ini kanal sementara sampai ada surel resmi khusus privasi. Kalau surel resmi tersedia, halaman itu dan bagian ini diperbarui.
 
 ### Retensi
 

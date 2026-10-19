@@ -233,7 +233,7 @@ wedding-planer/
 │   ├── 22-Rencana-Uji-dan-UAT.md  test plan, test case, laporan bug, UAT
 │   ├── 23-Rilis-dan-Penyebaran.md  prosedur rilis, migrasi, rollback
 │   ├── 24-Infrastruktur-dan-Operasi.md  topologi, akses, cadangan
-│   ├── 25-Pemeliharaan-dan-Monitoring.md  kesiapan, cadangan, performa
+│   ├── 25-Pemeliharaan-dan-Monitoring.md  kesiapan, cadangan, performa, support
 │   └── 26-Rencana-Siklus-Berikutnya.md  prioritas siklus berikutnya
 └── src/                 kode aplikasi: lib, db, components, app
 ```

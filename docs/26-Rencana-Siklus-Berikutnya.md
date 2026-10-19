@@ -33,38 +33,40 @@ Yang tidak dipakai sebagai dasar: daftar keinginan, permintaan pihak ketiga, dan
 
 ### 3.1 P0, menyentuh data
 
-| # | Pekerjaan | Kenapa P0 | Syarat selesai |
-|---|---|---|---|
-| 1 | Jadwal cadangan harian | Satu-satunya perlindungan terhadap kehilangan catatan pembayaran | Dump berjalan otomatis tiap hari, tersimpan di luar mesin aplikasi, dan tiga dump berturut-turut bisa dibuka |
-| 2 | Penyimpanan cadangan di luar penyedia database | Cadangan di mesin yang sama tidak menolong saat mesin itu hilang | Satu dump dipulihkan dari lokasi penyimpanan, bukan dari mesin asal |
-| 3 | Pastikan database preview berbeda dari produksi | Preview dibuat untuk setiap push cabang. Kalau menunjuk database produksi, siapa pun yang membuka URL preview bisa menulis ke data sungguhan | `DATABASE_URL` di lingkungan preview menunjuk database lain, dibuktikan dengan satu akun uji yang tidak muncul di produksi |
+| # | Pekerjaan | Pelaksana | Kenapa P0 | Syarat selesai |
+|---|---|---|---|---|
+| 1 | Jadwal cadangan harian | DevOps | Satu-satunya perlindungan terhadap kehilangan catatan pembayaran | Dump berjalan otomatis tiap hari, tersimpan di luar mesin aplikasi, dan tiga dump berturut-turut bisa dibuka |
+| 2 | Penyimpanan cadangan di luar penyedia database | DevOps | Cadangan di mesin yang sama tidak menolong saat mesin itu hilang | Satu dump dipulihkan dari lokasi penyimpanan, bukan dari mesin asal |
+| 3 | Pastikan database preview berbeda dari produksi | DevOps | Preview dibuat untuk setiap push cabang. Kalau menunjuk database produksi, siapa pun yang membuka URL preview bisa menulis ke data sungguhan | `DATABASE_URL` di lingkungan preview menunjuk database lain, dibuktikan dengan satu akun uji yang tidak muncul di produksi |
 
 Ketiganya bisa dikerjakan tanpa satu baris kode aplikasi. Yang dibutuhkan hanya pengaturan dan satu skrip yang sudah ada (`scripts/cadangan.mjs`).
 
 ### 3.2 P1, menyentuh kepercayaan
 
-| # | Pekerjaan | Kenapa P1 | Syarat selesai |
-|---|---|---|---|
-| 4 | Lupa kata sandi | Sekarang pengguna yang lupa kata sandi tidak punya jalan pulih selain menghubungi pemilik. Akun Google tidak terkena, akun kata sandi terkena | Tautan atur ulang dikirim lewat WhatsApp, berlaku sekali, dan kedaluwarsa. Diuji dengan satu akun yang benar-benar lupa |
-| 5 | Perlindungan cabang | CI sudah hijau, tapi belum diwajibkan. Satu merge tanpa CI tetap mungkin | `main` menolak merge saat CI merah |
-| 6 | Agregasi log galat | Satu-satunya galat yang terlihat adalah yang dibaca manual di dashboard | Galat 5xx dari produksi terkumpul di satu tempat dan bisa dicari |
-| 7 | Angka Core Web Vitals | Waktu jawab API sudah diukur, waktu render halaman belum | Satu pengukuran Lighthouse untuk Beranda di mobile, dicatat dengan tanggal |
+| # | Pekerjaan | Pelaksana | Kenapa P1 | Syarat selesai |
+|---|---|---|---|---|
+| 4 | Lupa kata sandi | Backend | Sekarang pengguna yang lupa kata sandi tidak punya jalan pulih selain menghubungi pemilik. Akun Google tidak terkena, akun kata sandi terkena | Tautan atur ulang dikirim lewat WhatsApp, berlaku sekali, dan kedaluwarsa. Diuji dengan satu akun yang benar-benar lupa |
+| 5 | Kanal dukungan yang tidak publik | Support | Satu-satunya kanal sekarang adalah halaman Issues yang bisa dibaca siapa pun. Pertanyaan soal data pribadi di sana membocorkan data itu sendiri | Ada kanal yang tidak bisa dibaca publik, ditautkan dari `/kebijakan`, dan diuji dengan satu pertanyaan contoh |
+| 6 | Perlindungan cabang | DevOps | CI sudah hijau, tapi belum diwajibkan. Satu merge tanpa CI tetap mungkin | `main` menolak merge saat CI merah |
+| 7 | Agregasi log galat | DevOps | Satu-satunya galat yang terlihat adalah yang dibaca manual di dashboard | Galat 5xx dari produksi terkumpul di satu tempat dan bisa dicari |
+| 8 | Angka Core Web Vitals | Frontend | Waktu jawab API sudah diukur, waktu render halaman belum | Satu pengukuran Lighthouse untuk Beranda di mobile, dicatat dengan tanggal |
 
 ### 3.3 P2, menyentuh kenyamanan
 
-| # | Pekerjaan | Kenapa P2 | Syarat selesai |
-|---|---|---|---|
-| 8 | Verifikasi email | Butuh penyedia surel, dan belum ada laporan salah masuk | Hanya dikerjakan kalau nomor 4 selesai dan surel sudah ada |
-| 9 | Uji aksesibilitas otomatis | Kontras diukur manual dan hasilnya baik, tapi belum ada yang mencegah kemunduran | Pemeriksaan kontras dan label berjalan di CI |
-| 10 | Unggah bukti transfer | Butuh object storage, dan `docs/08` sudah mencatat kenapa ditunda | Dikerjakan hanya kalau ada permintaan nyata dari pengguna |
+| # | Pekerjaan | Pelaksana | Kenapa P2 | Syarat selesai |
+|---|---|---|---|---|
+| 9 | Verifikasi email | Backend | Butuh penyedia surel, dan belum ada laporan salah masuk | Hanya dikerjakan kalau nomor 4 selesai dan surel sudah ada |
+| 10 | Uji aksesibilitas otomatis | Frontend | Kontras diukur manual dan hasilnya baik, tapi belum ada yang mencegah kemunduran | Pemeriksaan kontras dan label berjalan di CI |
+| 11 | Unggah bukti transfer | Backend | Butuh object storage, dan `docs/08` sudah mencatat kenapa ditunda | Dikerjakan hanya kalau ada permintaan nyata dari pengguna |
+| 12 | Tombol lapor masalah di dalam aplikasi | Frontend dan Support | Sekarang orang yang menemukan cacat tidak punya jalan melapor selain membuka GitHub | Satu tautan di layar Akun yang membuka kanal nomor 5, dengan teks dari `docs/14` |
 
 ### 3.4 P3, kebersihan
 
-| # | Pekerjaan | Syarat selesai |
-|---|---|---|
-| 11 | Tinjau `docs/18` bagian 18 | Setiap baris yang sudah selesai dicoret, dan setiap baris baru punya alasan |
-| 12 | Putuskan naik `next` 16 | Lima pertanyaan `docs/06` dijawab, termasuk biaya migrasi dari 15.5 |
-| 13 | Retro siklus 0.18.0 | Satu paragraf per pertanyaan di `docs/25` bagian 6 |
+| # | Pekerjaan | Pelaksana | Syarat selesai |
+|---|---|---|---|
+| 13 | Tinjau `docs/18` bagian 18 | Support | Setiap baris yang sudah selesai dicoret, dan setiap baris baru punya alasan |
+| 14 | Putuskan naik `next` 16 | DevOps | Lima pertanyaan `docs/06` dijawab, termasuk biaya migrasi dari 15.5 |
+| 15 | Retro siklus 0.18.0 | Semua | Satu paragraf per pertanyaan di `docs/25` bagian 6 |
 
 ---
 

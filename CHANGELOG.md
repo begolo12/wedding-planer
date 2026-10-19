@@ -33,6 +33,10 @@ Rilis ini menggabungkan empat bagian `[Belum dirilis]` yang menumpuk. Di dalam t
 
 ### Tambah
 
+- Bagian Tim Support di `docs/25`: triage per jenis laporan, data yang boleh dan tidak boleh diminta, isi laporan yang diteruskan, dan tiga hal yang belum diputuskan pemilik produk
+- Kolom pelaksana di seluruh tabel prioritas `docs/26`, dan dua pekerjaan baru: kanal dukungan privat dan tombol lapor masalah di dalam aplikasi
+- `docs/24` sekarang mencatat empat peran, termasuk Tim Support
+- Peringatan di paragraf kontak `/kebijakan`: halaman Issues bisa dibaca siapa saja, jadi jangan menulis nama tamu, nomor telepon, jumlah uang, atau alamat surel di sana
 - `scripts/cadangan.mjs` untuk mencadangkan dan memulihkan database memakai `pg_dump` dan `pg_restore`, tanpa dependensi baru. Menyimpan 7 berkas terakhir, dan menolak memulihkan ke database sumber supaya tidak menimpa data yang sedang dipakai. Diuji penuh: dump 55.851 byte, dipulihkan ke database kosong, hasilnya sama persis dengan sumber (16 tabel, 8 users, 9 plans, 21 payments)
 - `scripts/kinerja.mjs` untuk mengukur p50, p95, dan maks dua endpoint publik. Hasil 19 Oktober 2026 di produksi: `/api/siap` p95 79 sampai 99ms, `/api/kesehatan` p95 125 sampai 135ms, nol galat
 - `npm run cadangan` dan `npm run kinerja`

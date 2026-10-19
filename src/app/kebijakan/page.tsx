@@ -108,8 +108,8 @@ export default function HalamanKebijakan() {
       <section className="kartu tumpuk-rapat">
         <h2 className="label-bagian">Cara menghubungi pemilik produk</h2>
         <p>
-          Surel resmi belum dipublikasikan. Sementara ini, sampai ada surel resmi, pertanyaan soal
-          data pribadi bisa dikirim lewat halaman Issues repositori proyek di{" "}
+          Surel resmi belum dipublikasikan. Sementara ini, sampai ada surel resmi, pertanyaan bisa
+          dikirim lewat halaman Issues repositori proyek di{" "}
           <a
             className="tautan-kalimat"
             href="https://github.com/begolo12/wedding-planer/issues"
@@ -120,6 +120,11 @@ export default function HalamanKebijakan() {
           </a>
           . Kanal ini sementara; alamat surel khusus privasi akan ditambahkan di halaman ini
           begitu tersedia.
+        </p>
+        <p>
+          Halaman itu bisa dibaca siapa saja, jadi jangan menulis nama tamu, nomor telepon, jumlah
+          uang, atau alamat surelmu di sana. Sebutkan saja halaman mana yang bermasalah dan apa
+          yang terjadi.
         </p>
       </section>
 

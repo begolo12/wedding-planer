@@ -253,3 +253,72 @@ Persentil dipakai, bukan rata-rata, karena rata-rata menyembunyikan ekor yang ju
 | Pemisahan database preview | Preview bisa menulis ke data produksi | Konfirmasi variabel lingkungan per lingkungan |
 
 Baris-baris ini sengaja tidak dikerjakan sekarang, dan alasannya sudah tertulis di `docs/24` bagian 8. Yang berubah setelah dokumen ini ada: kesiapan produksi, kerentanan dependensi, alat cadangan, uji restore, dan pengukuran waktu jawab API tidak lagi ada di daftar itu.
+
+---
+
+## 10. Tim Support
+
+### 10.1 Keadaan sekarang
+
+| Hal | Keadaan |
+|---|---|
+| Kanal yang ditautkan dari aplikasi | Halaman `/kebijakan` menunjuk `github.com/begolo12/wedding-planer/issues` |
+| Sifat kanal | Publik. Siapa pun bisa membaca, dan repositorinya sendiri juga publik |
+| Tombol lapor masalah di dalam aplikasi | Tidak ada |
+| Alamat surel resmi | Belum ada |
+| Target waktu respons | Belum ditetapkan |
+| Pemilik triage | Belum ada orangnya |
+
+**Masalah yang nyata.** Halaman `/kebijakan` menawarkan kanal itu untuk pertanyaan soal data pribadi. Halaman Issues publik bukan tempat untuk itu: pertanyaan "kenapa data tamu saya hilang" biasanya menyertakan nama, email, atau cuplikan daftar tamu, dan semuanya akan terbaca siapa pun. Kanal yang salah untuk satu jenis pertanyaan lebih buruk daripada tidak ada kanal, karena orang akan memakainya.
+
+Peringatan itu sudah ditambahkan ke paragraf kontak di `/kebijakan` pada 2026-10-19: jangan menulis nama tamu, nomor telepon, jumlah uang, atau alamat surel di kanal publik. Itu mengurangi risiko, tapi tidak menghilangkannya, karena kanal privat belum ada.
+
+Karena itu "kanal dukungan yang tidak publik" masuk P1 di [`26`](26-Rencana-Siklus-Berikutnya.md) nomor 5.
+
+### 10.2 Triage
+
+Support tidak memperbaiki. Support memilah, mengumpulkan bukti, dan menyerahkan ke yang memperbaiki.
+
+| Jenis laporan | Pemilik | Langkah pertama | Eskalasi ke |
+|---|---|---|---|
+| Tidak bisa masuk | Support | Tanya apakah akun dibuat dengan kata sandi atau Google. Kalau kata sandi, catat bahwa pemulihan belum ada | Backend |
+| Data tidak muncul padahal sudah diisi | Support | Tanya apakah ada pita "Menampilkan data dari perangkat" atau "Tidak ada koneksi". Kalau ada, periksa antrean luring | Frontend |
+| Angka uang salah | Support | Minta tiga angka: total rencana, total terbayar, dan satu pembayaran yang dianggap hilang. Jangan minta seluruh data | Backend |
+| Halaman rusak atau tidak bisa dibuka | Support | Catat rute, waktu, dan perangkat. Cek `/api/siap` saat itu juga | DevOps |
+| Laporan keamanan atau kebocoran | Support | Jangan dibalas di kanal publik. Pindahkan ke kanal privat, catat waktunya | DevOps |
+| Permintaan fitur | Support | Catat, jangan janjikan tanggal | Pemilik produk |
+
+Aturan yang dipegang saat triage:
+
+| Aturan | Alasan |
+|---|---|
+| Jangan pernah meminta kata sandi | Tidak ada alasan sah, dan permintaan itu melatih orang menyerahkan rahasianya |
+| Jangan meminta seluruh isi data rencana | Tiga angka cukup untuk memulai. Data tamu dan pembayaran adalah data pribadi |
+| Jangan menyuruh menghapus data situs atau menginstal ulang | Antrean luring bisa hilang, dan itu data yang tidak bisa dipulihkan tanpa cadangan |
+| Jangan menjanjikan waktu perbaikan | Belum ada target yang ditetapkan, dan janji yang tidak bisa dipenuhi lebih buruk daripada tidak menjanjikan |
+| Catat waktu laporan masuk dan waktu diteruskan | Tanpa itu, lama deteksi tidak bisa diukur |
+
+### 10.3 Isi laporan yang diteruskan ke developer
+
+| Kolom | Isi |
+|---|---|
+| Waktu | Kapan laporan masuk, dalam WIB |
+| Perangkat dan peramban | Dari laporan pengguna, bukan ditebak |
+| Rute | Alamat halaman yang bermasalah |
+| Langkah | Apa yang dilakukan tepat sebelum masalah muncul |
+| Hasil yang diharapkan dan yang terjadi | Satu kalimat masing-masing |
+| Bukti | Tangkapan layar, atau keluaran `curl` kalau menyangkut API |
+| Tingkat awal | Berat, sedang, ringan, menurut `docs/22` bagian 4.2 |
+| Yang sudah dicoba | Supaya developer tidak mengulang langkah yang sama |
+
+Laporan yang diteruskan tanpa kolom ini akan dikembalikan. Bukan karena formalitas, tapi karena laporan tanpa langkah reproduksi berubah menjadi tebakan, dan `docs/19` sudah menunjukkan bahwa setiap temuan di sana punya bukti yang bisa dibuka.
+
+### 10.4 Yang belum diputuskan
+
+| Pertanyaan | Kenapa menunggu pemilik produk |
+|---|---|
+| Kanal privat mana yang dipakai | Surel resmi, formulir, atau WhatsApp bisnis punya biaya dan kewajiban berbeda |
+| Berapa lama waktu respons yang dijanjikan | Janji itu mengikat, dan belum ada orang yang menjaga kanal setiap hari |
+| Siapa yang memegang triage | Pada proyek satu orang, itu orang yang sama dengan developer, dan kelelahan peran adalah risiko nyata |
+
+Selama tiga pertanyaan itu belum dijawab, bagian ini adalah prosedur yang siap dipakai, bukan janji layanan.

@@ -8,15 +8,16 @@ Prosedur rilis ada di [`23-Rilis-dan-Penyebaran.md`](23-Rilis-dan-Penyebaran.md)
 
 ---
 
-## 1. Tiga peran
+## 1. Empat peran
 
 | Peran | Pertanyaan yang dijawab | Keluaran |
 |---|---|---|
 | DevOps Engineer | Bagaimana kode sampai ke produksi, dan bagaimana kegagalannya diketahui | Pipeline, health check, pemberitahuan, rollback |
 | Cloud Architect | Bentuk sistemnya seperti apa, dan di mana batas skalanya | Topologi, pilihan region, pemisahan lingkungan, batas biaya |
 | System Administrator | Siapa yang boleh masuk, dan bagaimana data dipulihkan | Daftar akses, rotasi rahasia, jadwal cadangan, prosedur insiden |
+| Tim Support | Apa yang dilaporkan pengguna, dan ke siapa laporan itu diteruskan | Triage, bukti, eskalasi. Prosedurnya di [`25`](25-Pemeliharaan-dan-Monitoring.md) bagian 10 |
 
-Pada proyek satu orang, ketiganya dipegang orang yang sama. Itu bukan alasan untuk melewatkannya. Yang berubah hanya jumlah orang yang memeriksa, dan itu justru membuat catatan tertulis lebih penting.
+Pada proyek satu orang, keempatnya dipegang orang yang sama. Itu bukan alasan untuk melewatkannya. Yang berubah hanya jumlah orang yang memeriksa, dan itu justru membuat catatan tertulis lebih penting.
 
 ---
 
