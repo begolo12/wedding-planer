@@ -13,7 +13,8 @@
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:check": "drizzle-kit check"
+    "db:check": "drizzle-kit check",
+    "deps": "node scripts/periksa-dependensi.mjs"
   },
   "dependencies": {
     "@neon/config": "^1.8.3",

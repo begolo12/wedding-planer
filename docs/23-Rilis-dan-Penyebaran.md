@@ -174,7 +174,7 @@ Rollback kode tidak mengembalikan data yang sudah ditulis. Satu-satunya jalan ad
 
 | Belum | Akibat | Yang dibutuhkan |
 |---|---|---|
-| CI | Semua gerbang dijalankan manual. Tidak ada yang memaksa | Satu workflow: lint, test, build, e2e, audit |
+| CI | Workflow ada di `.github/workflows/ci.yml`, tapi belum pernah berjalan di GitHub | Push pertama, lalu pastikan dua job hijau |
 | Lingkungan staging | Setiap rilis diuji di produksi atau tidak diuji sama sekali | Satu deployment preview dengan database terpisah |
 | Backup harian dan restore teruji | Kerusakan data tidak bisa dipulihkan | Jadwal dump dan satu uji restore |
 | Pemantauan dan pemberitahuan | Kegagalan produksi hanya ketahuan kalau ada yang membuka aplikasi | Pemberitahuan dari platform saat health check gagal |

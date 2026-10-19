@@ -35,7 +35,7 @@ Diperiksa 2026-10-19.
 | Object storage | Tidak dipakai. `neon.ts` mendefinisikan bucket `test`, tapi tidak ada kode yang membacanya | `neon.ts`, `docs/08` bagian Unggah file | Terverifikasi |
 | Domain | `wedding-planer-self.vercel.app`. Tidak ada domain kustom | `vercel.json` tanpa `domains` | Terverifikasi |
 | Repositori | Publik, 4 bintang | `api.github.com/repos/begolo12/wedding-planer` | Terverifikasi |
-| CI | Tidak ada. Tidak ada `.github/workflows` | Daftar akar repo | Terverifikasi |
+| CI | GitHub Actions, dua job: kualitas dan e2e | `.github/workflows/ci.yml` | Terverifikasi |
 | Infrastructure as Code | Tidak ada. Tidak ada Terraform, Docker, atau manifes Kubernetes | Daftar akar repo | Terverifikasi |
 | Pemantauan | Tidak ada agregasi log dan tidak ada pemberitahuan | Satu `console.error` di `src/lib/galat.ts:108` | Terverifikasi |
 | Cadangan | Tidak ada bukti dump berjalan | `docs/18` bagian 18 | **Belum diverifikasi** |
@@ -80,7 +80,7 @@ Dua hal yang perlu dibaca dari gambar itu:
 
 | Belum | Akibat nyata |
 |---|---|
-| CI | Tidak ada yang memaksa gerbang dijalankan. Bukti hijau bergantung pada orang yang ingat |
+| CI di cabang | Workflow sudah ada, tapi baru berjalan setelah commit ini di-push. Belum ada bukti hijau di GitHub |
 | Health check yang dipanggil | `/api/kesehatan` tidak dipoll siapa pun. Endpoint itu ada tapi tidak dipakai |
 | Pemberitahuan kegagalan | Deploy gagal atau situs mati hanya ketahuan kalau ada yang membuka aplikasi |
 | Agregasi log | Log hanya bisa dibaca satu per satu di dashboard |
@@ -92,7 +92,28 @@ Yang dibutuhkan bukan mengubah endpoint itu, melainkan menambah pemeriksaan kesi
 
 ---
 
-## 5. Cloud Architect: batas yang sudah ditetapkan
+## 5. Domain dan TLS
+
+Diukur 2026-10-19.
+
+| Hal | Nilai | Bukti |
+|---|---|---|
+| Nama host | `wedding-planer-self.vercel.app` | Header `Server: Vercel` |
+| Penerbit sertifikat | Google Trust Services, `CN=WR1` | `openssl s_client` |
+| Nama di sertifikat | `*.vercel.app` | sama |
+| Masa berlaku | 29 Agustus 2026 sampai 27 November 2026 | sama |
+| Perpanjangan | Otomatis oleh Vercel | Tidak ada langkah manual |
+| HSTS | `max-age=63072000; includeSubDomains` | `HEAD /masuk` |
+| Redirect HTTP ke HTTPS | Ditangani Vercel | `Strict-Transport-Security` terkirim |
+| Domain kustom | Tidak ada | `vercel.json` tanpa `domains` |
+
+SSL aktif tanpa biaya tambahan karena memakai domain bawaan Vercel. Kalau nanti dipakai domain kustom, tiga hal ini yang berubah dan tidak bisa dikerjakan dari repo: pembelian domain, pengaturan DNS di registrar, dan verifikasi kepemilikan di dashboard Vercel. Sertifikatnya tetap otomatis.
+
+Satu hal yang perlu diingat: masa berlaku sertifikat berakhir 27 November 2026. Perpanjangan otomatis, tapi kalau tanggal itu lewat dan situs membalas galat sertifikat, penyebabnya bukan kode.
+
+---
+
+## 6. Cloud Architect: batas yang sudah ditetapkan
 
 | Keputusan | Nilai | Alasan | Sumber |
 |---|---|---|---|
@@ -104,7 +125,7 @@ Yang dibutuhkan bukan mengubah endpoint itu, melainkan menambah pemeriksaan kesi
 | Tanpa object storage | Unggah bukti transfer ditunda | Menambah vendor baru tanpa nilai di Fase 1 | `docs/08` bagian Unggah file |
 | Batas koneksi | 5 | Satu instance, dan Postgres serverless membatasi koneksi | `src/db/index.ts` |
 
-### 5.1 Yang belum ditetapkan
+### 6.1 Yang belum ditetapkan
 
 | Belum | Kenapa penting |
 |---|---|
@@ -118,9 +139,9 @@ Pemisahan lingkungan adalah yang paling mendesak dari daftar itu. Alasannya di b
 
 ---
 
-## 6. System Administrator: akses, rahasia, cadangan
+## 7. System Administrator: akses, rahasia, cadangan
 
-### 6.1 Rahasia
+### 7.1 Rahasia
 
 | Rahasia | Tempat | Terlacak Git? |
 |---|---|---|
@@ -133,7 +154,7 @@ Pemeriksaan 2026-10-19: nol berkas terlacak memuat pola kunci AWS, kunci Stripe,
 
 Yang belum ada: rotasi rahasia terjadwal, pemindaian rahasia otomatis di CI, dan catatan siapa saja yang bisa membaca variabel lingkungan Vercel.
 
-### 6.2 Akses
+### 7.2 Akses
 
 | Pertanyaan | Keadaan |
 |---|---|
@@ -144,7 +165,7 @@ Yang belum ada: rotasi rahasia terjadwal, pemindaian rahasia otomatis di CI, dan
 
 Repositori bersifat publik. Itu keputusan yang sah, tapi konsekuensinya perlu ditulis: kode bisa dibaca siapa pun, dan siapa pun bisa membuka pull request yang memicu build preview.
 
-### 6.3 Cadangan dan pemulihan
+### 7.3 Cadangan dan pemulihan
 
 | Hal | Keadaan |
 |---|---|
@@ -158,7 +179,7 @@ Rollback kode tidak mengembalikan data. Satu-satunya jalan adalah cadangan. Kare
 
 ---
 
-## 7. Risiko yang perlu ditutup
+## 8. Risiko yang perlu ditutup
 
 | Risiko | Bukti atau alasan | Dampak |
 |---|---|---|
@@ -171,7 +192,7 @@ Rollback kode tidak mengembalikan data. Satu-satunya jalan adalah cadangan. Kare
 
 ---
 
-## 8. Urutan kerja
+## 9. Urutan kerja
 
 | # | Langkah | Peran | Alasan urutan |
 |---|---|---|---|
@@ -179,7 +200,7 @@ Rollback kode tidak mengembalikan data. Satu-satunya jalan adalah cadangan. Kare
 | 2 | Jadwal dump harian dan satu uji restore | SysAdmin | Satu-satunya perlindungan terhadap kehilangan data |
 | 3 | Pemeriksaan kesiapan yang membaca database, dipanggil dari luar | DevOps | Mengganti sinyal palsu dengan sinyal yang benar |
 | 4 | Pemberitahuan saat kesiapan gagal | DevOps | Tanpa ini, kegagalan hanya ketahuan dari keluhan |
-| 5 | CI yang menjalankan enam gerbang | DevOps | Mengubah disiplin menjadi aturan |
+| 5 | Pastikan CI hijau pada push pertama | DevOps | Workflow sudah ditulis, tapi belum pernah berjalan di GitHub |
 | 6 | Catatan akses dan rotasi rahasia | SysAdmin | Menjawab siapa bisa melakukan apa |
 | 7 | Ukur biaya dan batas skala | Cloud Architect | Baru bisa diukur setelah ada angka pemakaian |
 
@@ -187,10 +208,29 @@ Nomor 1 dan 2 tidak butuh kode. Keduanya bisa dikerjakan hari ini.
 
 ---
 
-## 9. Yang sengaja tidak dibangun
+## 10. Container: keputusan dan alasannya
+
+Docker tidak dipakai. Ini bukan kelalaian, dan lima pertanyaan di `docs/06` bagian 4 sudah dijawab:
+
+| Pertanyaan | Jawaban |
+|---|---|
+| Apakah ini cuma benar kalau bertahan sampai sepuluh ribu pengguna? | Tidak. Container tidak menambah kapasitas apa pun di sini |
+| Apakah Phase 1 benar-benar butuh? | Tidak. Vercel sudah membangun dan menjalankan aplikasi Next.js |
+| Berapa biaya pemeliharaannya? | Satu `Dockerfile` berarti satu jalur build kedua yang harus ikut diperbarui setiap kali dependensi berubah |
+| Kalau nanti dibuang, berapa biaya pencabutannya? | Sedang. Berkasnya kecil, tapi orang akan memakainya untuk men-deploy lalu menemukan jalur itu tidak terpelihara |
+| Bisakah masalahnya diselesaikan tanpa teknologi baru? | Ya. `npm run build` di Vercel sudah reproducible dari lockfile |
+
+Karena pertanyaan kelima dijawab "bisa", jawabannya selesai dan `Dockerfile` tidak ditambahkan. Kalau nanti pindah platform atau butuh jalan keluar dari Vercel, keputusan itu dibuka lagi dan lima pertanyaan yang sama dijawab ulang.
+
+Yang menggantikan container adalah reproducibility lewat tiga hal: `package-lock.json` yang dikunci, versi Node yang ditetapkan CI, dan `npm ci` di pipeline.
+
+---
+
+## 11. Yang sengaja tidak dibangun
 
 | Tidak dibangun | Alasan |
 |---|---|
+| Docker dan container | Dijawab di bagian 10 |
 | Kubernetes | Satu container di platform terkelola sudah cukup. `docs/06` menolaknya |
 | Infrastructure as Code | Satu platform, satu proyek, satu database. Menulis Terraform untuk tiga resource menambah lapisan yang harus dijaga |
 | Multi-region | Pengguna di satu negara, dan replikasi menambah biaya serta konsistensi yang harus diurus |

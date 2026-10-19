@@ -1,0 +1,131 @@
+name: CI
+
+# Gerbang yang sama dengan docs/23 bagian 3.1, dijalankan otomatis.
+# Tujuannya bukan menambah aturan baru, melainkan memastikan aturan yang sudah
+# ada tidak bergantung pada orang yang ingat menjalankannya.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Push berturut-turut ke cabang yang sama membatalkan yang lama, supaya build
+# dan uji tidak menumpuk.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Nilai di bawah hanya untuk CI. Tidak ada rahasia produksi di sini.
+  BETTER_AUTH_SECRET: rahasia-ci-yang-tidak-dipakai-di-produksi
+  BETTER_AUTH_URL: http://localhost:3110
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  kualitas:
+    name: Tipe, test, build, dependensi
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: wedding_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wedding_ci
+      DATABASE_URL_UNPOOLED: postgresql://postgres:postgres@localhost:5432/wedding_ci
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Pasang dependensi
+        run: npm ci
+
+      - name: Terapkan migrasi ke database uji
+        run: npm run db:check && npm run db:migrate
+
+      - name: Periksa tipe
+        run: npm run lint
+
+      - name: Test unit dan integrasi
+        run: npm test
+
+      - name: Build produksi
+        run: npm run build
+
+      - name: Gerbang dependensi
+        run: node scripts/periksa-dependensi.mjs
+
+  e2e:
+    name: Uji ujung ke ujung
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: wedding_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wedding_e2e
+      DATABASE_URL_UNPOOLED: postgresql://postgres:postgres@localhost:5432/wedding_e2e
+      # Port uji Playwright. Nilainya juga dipakai playwright.config.ts.
+      BETTER_AUTH_TRUSTED_ORIGINS: http://localhost:3110,http://127.0.0.1:3110
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Pasang dependensi
+        run: npm ci
+
+      - name: Terapkan migrasi ke database uji
+        run: npm run db:migrate
+
+      - name: Pasang Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Jalankan uji ujung ke ujung
+        run: npm run test:e2e
+
+      - name: Simpan laporan kalau gagal
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7
