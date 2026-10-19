@@ -70,6 +70,10 @@ export default function HalamanTamu() {
   const [filterRsvp, setFilterRsvp] = useState<string>("semua");
   const [filterSisi, setFilterSisi] = useState<string>("semua");
   const [filterUndangan, setFilterUndangan] = useState<string>("semua");
+  // Saringan yang butuh isian (kehadiran, pihak, undangan) ditaruh di satu
+  // lembar, bukan tiga dropdown bertumpuk di badan layar. Pencarian dan chip
+  // kategori tetap terlihat karena keduanya dipakai paling sering.
+  const [saringBuka, setSaringBuka] = useState(false);
   const [batasTamu, setBatasTamu] = useState(20);
 
   // Build query string
@@ -272,6 +276,10 @@ export default function HalamanTamu() {
 
   const rawGuests = data?.guests ?? [];
   const tamuTampil = rawGuests.slice(0, batasTamu);
+
+  // Jumlah saringan isian yang sedang aktif. Dipakai tombol "Saring" supaya
+  // orang tahu ada saringan menyala tanpa membuka lembarnya.
+  const saringAktif = [filterRsvp, filterSisi, filterUndangan].filter((v) => v !== "semua").length;
   const summary = data?.summary;
 
   // Persentase konfirmasi hadir dihitung dari data nyata. Pembaginya jumlah
@@ -478,7 +486,10 @@ export default function HalamanTamu() {
           ) : null}
         </div>
 
-      {/* Pencarian dan saringan status */}
+      {/* Pencarian dan saringan. Tiga saringan isian ditaruh di satu lembar,
+          dibuka dari satu tombol yang menyebut jumlah saringan aktif. Di
+          lebar 390px versi tiga dropdown bertumpuk memakan lebih dari 150px
+          dan mendorong daftar tamu ke bawah lipatan. */}
       <div className="tamu-saring">
         <div className="tamu-cari-baris">
           <input
@@ -489,53 +500,15 @@ export default function HalamanTamu() {
             value={cari}
             onChange={(e) => setCari(e.target.value)}
           />
-          <label className="sr-only" htmlFor="filterRsvp">
-            Saring status kehadiran
-          </label>
-          <select
-            id="filterRsvp"
-            className="isian tamu-pilih"
-            value={filterRsvp}
-            onChange={(e) => setFilterRsvp(e.target.value)}
+          <button
+            type="button"
+            className="tamu-saring-tombol"
+            aria-expanded={saringBuka}
+            onClick={() => setSaringBuka(true)}
           >
-            <option value="semua">Semua kehadiran</option>
-            {STATUS_HADIR.map((s) => (
-              <option key={s} value={s}>
-                {LABEL_STATUS_HADIR[s]}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="tamu-cari-baris">
-          <label className="sr-only" htmlFor="filterSisi">
-            Saring sisi keluarga
-          </label>
-          <select
-            id="filterSisi"
-            className="isian tamu-pilih"
-            value={filterSisi}
-            onChange={(e) => setFilterSisi(e.target.value)}
-          >
-            <option value="semua">Semua pihak</option>
-            <option value="pria">{LABEL_SISI_TAMU.pria}</option>
-            <option value="wanita">{LABEL_SISI_TAMU.wanita}</option>
-            <option value="bersama">{LABEL_SISI_TAMU.lainnya}</option>
-          </select>
-
-          <label className="sr-only" htmlFor="filterUndangan">
-            Saring status undangan
-          </label>
-          <select
-            id="filterUndangan"
-            className="isian tamu-pilih"
-            value={filterUndangan}
-            onChange={(e) => setFilterUndangan(e.target.value)}
-          >
-            <option value="semua">Semua undangan</option>
-            <option value="sudah">Undangan sudah dikirim</option>
-            <option value="belum">Belum dikirim</option>
-          </select>
+            Saring
+            {saringAktif > 0 ? <span className="tamu-chip-angka">{saringAktif}</span> : null}
+          </button>
         </div>
 
         {/* Chip kategori, angkanya dari server */}
@@ -555,6 +528,67 @@ export default function HalamanTamu() {
           ))}
         </div>
       </div>
+
+      <Lembar buka={saringBuka} judul="Saring tamu" onTutup={() => setSaringBuka(false)}>
+        <div className="tumpuk-sedang">
+          <Pilih
+            label="Kehadiran"
+            id="filterRsvp"
+            nilai={filterRsvp}
+            onUbah={setFilterRsvp}
+            opsi={[
+              { nilai: "semua", label: "Semua kehadiran" },
+              ...STATUS_HADIR.map((s) => ({ nilai: s, label: LABEL_STATUS_HADIR[s] })),
+            ]}
+          />
+
+          <Pilih
+            label="Pihak keluarga"
+            id="filterSisi"
+            nilai={filterSisi}
+            onUbah={setFilterSisi}
+            opsi={[
+              { nilai: "semua", label: "Semua pihak" },
+              { nilai: "pria", label: LABEL_SISI_TAMU.pria },
+              { nilai: "wanita", label: LABEL_SISI_TAMU.wanita },
+              { nilai: "bersama", label: LABEL_SISI_TAMU.lainnya },
+            ]}
+          />
+
+          <Pilih
+            label="Status undangan"
+            id="filterUndangan"
+            nilai={filterUndangan}
+            onUbah={setFilterUndangan}
+            opsi={[
+              { nilai: "semua", label: "Semua undangan" },
+              { nilai: "sudah", label: "Undangan sudah dikirim" },
+              { nilai: "belum", label: "Belum dikirim" },
+            ]}
+          />
+
+          <div className="aksi-baris">
+            <button
+              type="button"
+              className="tombol tombol-sekunder"
+              onClick={() => {
+                setFilterRsvp("semua");
+                setFilterSisi("semua");
+                setFilterUndangan("semua");
+              }}
+            >
+              Kosongkan
+            </button>
+            <button
+              type="button"
+              className="tombol tombol-utama"
+              onClick={() => setSaringBuka(false)}
+            >
+              Tampilkan
+            </button>
+          </div>
+        </div>
+      </Lembar>
 
       {/* Daftar tamu */}
       {rawGuests.length === 0 ? (

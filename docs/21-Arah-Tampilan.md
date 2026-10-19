@@ -264,6 +264,9 @@ Semua saringan (pencarian, kategori, status, urutan, tampilkan selesai) masuk ke
 | Isi pertama terlihat | dalam 200px dari atas area isi, tanpa menggulir di 390x844 | posisi baris pertama |
 | Kepala layar | maksimal 88px termasuk judul dan aksi utama | `getBoundingClientRect` |
 | Kontrol di badan layar | maksimal satu baris | hitung elemen kontrol sebelum baris pertama |
+| Saringan | masuk lembar, bukan deretan dropdown | lihat pola 4 |
+
+Cara mengukurnya: `node scripts/audit-ui.mjs` membuka delapan layar pada 390px dan 1440px, lalu mencetak geser horizontal, tinggi kepala, posisi baris pertama, dan jumlah target sentuh di bawah 44px. Skrip itu membuat satu akun uji, mengisi data contoh, dan menghapus akunnya sendiri di akhir. Port bisa diganti lewat `AUDIT_URL`.
 | Jarak antar grup | 16px | CSS |
 
 ---

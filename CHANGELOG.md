@@ -106,6 +106,12 @@ Rilis ini menggabungkan empat bagian `[Belum dirilis]` yang menumpuk. Di dalam t
 
 ### Perbaiki
 
+- Beranda di HP: empat pintu aksi cepat sekarang satu baris, bukan dua kali dua. Versi lama memakan sekitar 220px dan mendorong daftar tugas ke bawah lipatan; satu baris memakan sekitar 90px
+- Hari-H di HP: pengingat, alat ukuran huruf, dan tombol bagikan serta cetak turun ke bawah daftar acara. Acara pertama naik dari y=652 ke y=502 di 390x844, jadi rundown yang justru dibutuhkan di lokasi terlihat lebih dulu
+- Tamu: tiga dropdown saringan pindah ke satu lembar yang dibuka dari tombol "Saring" dengan angka saringan aktif. Di 390px versi lama memakan lebih dari 150px sebelum daftar tamu
+- Anggaran: label tab "Rincian Pengeluaran" dipendekkan jadi "Pengeluaran" supaya muat satu baris. Kedua pil tab sekarang sama tinggi 44px
+- Beranda di desktop: kolom sapa dan kartu hitung mundur dirata atas, bukan tengah, sehingga tidak ada ruang kosong di bawah garis kepala
+- `scripts/audit-ui.mjs` untuk mengukur geser horizontal, tinggi kepala, posisi isi pertama, dan target sentuh di bawah 44px pada delapan layar, dua lebar
 - Klaim bahwa `GET /api/kesehatan` 200 berarti database produksi terhubung dihapus dari `docs/18` dan `docs/23`. Endpoint itu sengaja tidak menyentuh database, dan komentarnya di `src/app/api/kesehatan/route.ts` menjelaskan alasannya. Pemeriksaan pasca-deploy sekarang memakai `GET /api/plans` dengan sesi sebagai bukti database benar-benar terbaca
 - Suite e2e tidak lagi kehabisan heap. `playwright.config.ts` sekarang menjalankan dev server uji dengan `BATCH_DEV_MB=2048`, karena heap bawaan 1 GB habis di tengah suite sehingga server uji mati dengan `Ineffective mark-compacts near heap limit` dan dua spec terakhir gagal dengan `ECONNRESET`. Sebelumnya kegagalan itu terbaca seperti test rapuh, padahal penyebabnya batas memori
 - Database produksi tertinggal dari kode. `milestones` tidak punya kolom `invitation_url`, dan tabel `idempotency_keys` tidak ada sama sekali, karena produksi dibuat dengan `db:push` dan tidak pernah menjalankan `db:migrate`. Akibatnya `GET /milestones`, `GET /report`, `POST /report/share-text`, dan `GET /api/public/share/{token}` menjawab 500, sehingga fitur Laporan dan tautan keluarga tidak bisa dipakai. Kolom dan tabel yang hilang ditambahkan, lalu `drizzle.__drizzle_migrations` diisi tiga baris supaya migrasi berikutnya tidak mengulang dari nol. Bukti: kelima endpoint 200 atau 201, selisih kolom produksi dengan lokal 0

@@ -410,55 +410,7 @@ export default function HalamanHariH() {
         </div>
       </section>
 
-      <p className="hari-h-catatan-luring">
-        Halaman ini yang paling sering dibutuhkan di lokasi acara, jadi buka sekali sebelum
-        berangkat.
-      </p>
 
-      <section className="hari-h-alat tanpa-cetak">
-        <div className="hari-h-skala">
-          <span className="hari-h-skala-label" id="hari-h-skala-label">
-            Ukuran huruf
-          </span>
-          <div className="hari-h-skala-pil" role="group" aria-labelledby="hari-h-skala-label">
-            {UKURAN_FONT.map((u) => (
-              <button
-                key={u.id}
-                type="button"
-                className="hari-h-skala-tombol"
-                style={{ fontSize: u.tampil }}
-                data-aktif={ukuranFont === u.id ? "ya" : "tidak"}
-                aria-pressed={ukuranFont === u.id}
-                onClick={() => gantiUkuran(u.id)}
-              >
-                {u.label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="hari-h-alat-aksi">
-          {items.length > 0 ? (
-            <>
-              <button
-                type="button"
-                className="hari-h-tombol hari-h-tombol-halus"
-                onClick={bagikanRundownWa}
-              >
-                <IkonBagikan />
-                Bagikan
-              </button>
-              <button
-                type="button"
-                className="hari-h-tombol hari-h-tombol-halus"
-                onClick={() => window.print()}
-              >
-                <IkonCetak />
-                Cetak
-              </button>
-            </>
-          ) : null}
-        </div>
-      </section>
 
       {dariPerangkat ? (
         <p className="keterangan">
@@ -612,6 +564,62 @@ export default function HalamanHariH() {
           </ol>
           </div>
           {/* Akhir panel daftar acara */}
+
+          {/* Alat (ukuran huruf, bagikan, cetak) dulu di atas daftar, dan
+              mendorong acara pertama ke bawah lipatan di 390x844. Yang dibutuhkan
+              di lokasi adalah daftarnya, bukan pengaturannya, jadi alat turun ke
+              bawah daftar. */}
+          <section className="hari-h-alat tanpa-cetak">
+            <div className="hari-h-skala">
+              <span className="hari-h-skala-label" id="hari-h-skala-label">
+                Ukuran huruf
+              </span>
+              <div className="hari-h-skala-pil" role="group" aria-labelledby="hari-h-skala-label">
+                {UKURAN_FONT.map((u) => (
+                  <button
+                    key={u.id}
+                    type="button"
+                    className="hari-h-skala-tombol"
+                    style={{ fontSize: u.tampil }}
+                    data-aktif={ukuranFont === u.id ? "ya" : "tidak"}
+                    aria-pressed={ukuranFont === u.id}
+                    onClick={() => gantiUkuran(u.id)}
+                  >
+                    {u.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="hari-h-alat-aksi">
+              {items.length > 0 ? (
+                <>
+                  <button
+                    type="button"
+                    className="hari-h-tombol hari-h-tombol-halus"
+                    onClick={bagikanRundownWa}
+                  >
+                    <IkonBagikan />
+                    Bagikan
+                  </button>
+                  <button
+                    type="button"
+                    className="hari-h-tombol hari-h-tombol-halus"
+                    onClick={() => window.print()}
+                  >
+                    <IkonCetak />
+                    Cetak
+                  </button>
+                </>
+              ) : null}
+            </div>
+          </section>
+          {/* Catatan ini dulu di atas alat dan daftar, dan mendorong acara
+              pertama ke bawah lipatan di 390x844. Isinya pengingat, bukan
+              data, jadi tempatnya setelah daftar selesai dibaca. */}
+          <p className="hari-h-catatan-luring">
+            Halaman ini yang paling sering dibutuhkan di lokasi acara, jadi buka sekali sebelum
+            berangkat.
+          </p>
         </>
       )}
 

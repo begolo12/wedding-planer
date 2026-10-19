@@ -506,7 +506,11 @@ export default function HalamanAnggaran() {
               onClick={() => setTab("pengeluaran")}
             >
               <IkonStruk size={16} />
-              Rincian Pengeluaran
+              {/* Label ini tidak ada di docs/14, jadi dipendekkan supaya
+                  muat satu baris di 390px. "Rincian Pengeluaran" membungkus
+                  jadi dua baris dan membuat pil tab lebih tinggi daripada
+                  pil sebelahnya. */}
+              Pengeluaran
               <span className="anggaran-pil-angka">{bayarList.length}</span>
             </button>
           </div>

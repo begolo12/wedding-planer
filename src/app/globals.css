@@ -4055,7 +4055,11 @@ textarea.isian {
   .beranda-hero-isi {
     display: grid;
     grid-template-columns: minmax(0, 1.2fr) minmax(0, 360px);
-    align-items: center;
+    /* Sebelumnya `center`. Dengan `center`, sapa dan kutipan yang tingginya
+       setengah kartu hitung mundur mengambang di tengah baris, dan hasilnya
+       jarak kosong belasan piksel di bawah garis kepala. `start` menempelkan
+       keduanya ke atas, jadi tidak ada ruang yang tidak menjelaskan apa pun. */
+    align-items: start;
     gap: 40px;
   }
 }
@@ -7454,8 +7458,28 @@ textarea.isian {
 }
 
 @media (max-width: 639px) {
+  /* Empat pintu dalam satu baris, bukan dua kali dua. Versi 2x2 memakan
+     sekitar 220px dan mendorong daftar tugas ke bawah lipatan; satu baris
+     memakan sekitar 90px. Ikonnya mengecil, labelnya tetap ada, dan
+     targetnya tetap di atas 44px. */
   .bento-aksi-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .bento-aksi-tombol {
+    gap: 6px;
+    min-height: 76px;
+    padding: 10px 6px;
+  }
+
+  .bento-aksi-ikon-lingkaran {
+    width: 36px;
+    height: 36px;
+  }
+
+  .bento-aksi-label {
+    font-size: var(--text-mini);
   }
 }
 
@@ -8015,3 +8039,46 @@ a:focus-visible {
   }
 }
 
+
+/* Tombol "Saring" di layar Tamu. Ukurannya mengikuti isian pencarian di
+   sebelahnya supaya keduanya terbaca sebagai satu baris kontrol, bukan
+   tombol yang kebetulan menempel. */
+.tamu-saring-tombol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  /* `flex: 0 0 auto` bukan `flex: none` yang juga mematikan `align-self`.
+     Pencarian di sebelahnya memakai `flex: 1 1 200px`, jadi di 390px tombol
+     ini tidak muat sebaris dan turun ke baris kedua. Di sana ia tidak boleh
+     melebar penuh, karena lebarnya akan terbaca sebagai aksi utama layar
+     padahal yang utama adalah "Tambah tamu" di kepala. */
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-kontrol);
+  background: var(--color-kartu-putih);
+  color: var(--color-ink);
+  font: inherit;
+  font-size: var(--text-kecil);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 150ms ease;
+}
+
+.tamu-saring-tombol:hover {
+  border-color: var(--color-muted);
+}
+
+.tamu-saring-tombol:focus-visible {
+  outline: 2px solid var(--color-marigold);
+  outline-offset: 2px;
+}
+
+@media (max-width: 639px) {
+  .tamu-saring-tombol {
+    align-self: flex-start;
+  }
+}
