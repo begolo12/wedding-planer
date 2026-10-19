@@ -42,6 +42,7 @@ Beberapa hal yang terasa langsung:
 - Lembar "Lainnya" di bilah bawah membuka Laporan, Akun, dan mode tampilan dari layar sempit
 - Tombol "Masuk dengan Google" dan "Daftar dengan Akun Google" tersedia di layar masuk dan daftar
 - Kalau server bermasalah, pesan galat sekarang menyebut kode pendek. Sebutkan kode itu saat melapor supaya bisa dicari di log
+- Laporan dan tautan bagikan sekarang bisa dibuka lagi. Sebelumnya keduanya gagal dimuat karena database produksi tertinggal dari kode
 - Bagikan laporan jenis tautan tidak lagi mengirim kalimat "Tautan belum dibuat." ke WhatsApp. Kalau belum ada tautan, aplikasi meminta kamu membuatnya dulu
 
 ### Catatan untuk pengembang
@@ -107,6 +108,8 @@ Rilis ini menggabungkan empat bagian `[Belum dirilis]` yang menumpuk. Di dalam t
 
 - Klaim bahwa `GET /api/kesehatan` 200 berarti database produksi terhubung dihapus dari `docs/18` dan `docs/23`. Endpoint itu sengaja tidak menyentuh database, dan komentarnya di `src/app/api/kesehatan/route.ts` menjelaskan alasannya. Pemeriksaan pasca-deploy sekarang memakai `GET /api/plans` dengan sesi sebagai bukti database benar-benar terbaca
 - Suite e2e tidak lagi kehabisan heap. `playwright.config.ts` sekarang menjalankan dev server uji dengan `BATCH_DEV_MB=2048`, karena heap bawaan 1 GB habis di tengah suite sehingga server uji mati dengan `Ineffective mark-compacts near heap limit` dan dua spec terakhir gagal dengan `ECONNRESET`. Sebelumnya kegagalan itu terbaca seperti test rapuh, padahal penyebabnya batas memori
+- Database produksi tertinggal dari kode. `milestones` tidak punya kolom `invitation_url`, dan tabel `idempotency_keys` tidak ada sama sekali, karena produksi dibuat dengan `db:push` dan tidak pernah menjalankan `db:migrate`. Akibatnya `GET /milestones`, `GET /report`, `POST /report/share-text`, dan `GET /api/public/share/{token}` menjawab 500, sehingga fitur Laporan dan tautan keluarga tidak bisa dipakai. Kolom dan tabel yang hilang ditambahkan, lalu `drizzle.__drizzle_migrations` diisi tiga baris supaya migrasi berikutnya tidak mengulang dari nol. Bukti: kelima endpoint 200 atau 201, selisih kolom produksi dengan lokal 0
+- Pemeriksaan pasca-deploy di `docs/23` sekarang memeriksa satu endpoint yang membaca tabel, karena health check tidak menyentuh database dan tidak bisa menangkap selisih skema
 - Bagikan laporan jenis tautan tidak lagi mengirim "Tautan belum dibuat." ke WhatsApp. Kalau `linkId` tidak dikirim, server memakai tautan terbaru milik plan; kalau plan belum punya tautan, balasannya 422 dengan pesan yang menyuruh membuat tautan dulu. Ditemukan saat menguji kontrak, dan sebelumnya kalimat itu benar-benar bisa terkirim ke keluarga
 - Angka test di `docs/18` dan `docs/22` diselaraskan dengan kenyataan: 18 berkas 162 test Vitest, 17 test Playwright di 8 berkas spec
 - Jumlah tabel pada ukuran migrasi di `docs/18` naik dari 15 ke 16, karena migrasi `0002` menambah `idempotency_keys`

@@ -73,6 +73,8 @@ flowchart LR
 
 Yang sengaja tidak dicatat: isi body permintaan, nama tamu, nomor telepon, jumlah uang, dan alamat surel. Baris log hanya memuat metadata permintaan. Alasannya, log dibaca orang dan disimpan platform, sedangkan isi body adalah data pribadi.
 
+Bukti bahwa jalur ini bekerja: pada 19 Oktober 2026, satu permintaan `POST /report/share-text` di produksi membalas 500 dengan rujukan `25a16603`. Rujukan itu dicari di log platform dan menemukan baris yang menyebut query gagal pada kolom `invitation_url`. Penyebabnya bukan kode yang baru diubah, melainkan database produksi yang tertinggal dari skema. Tanpa rujukan itu, yang terlihat hanya "500" tanpa petunjuk apa pun. Perbaikannya ada di [`18`](18-Rencana-Produksi-dan-Pemakaian-Harian.md) bagian 5.1.
+
 Keterbatasan: log platform punya masa simpan terbatas, dan belum ada agregasi. Kalau `ref` dilaporkan setelah masa simpannya lewat, barisnya tidak bisa dicari lagi. Itu alasan agregasi log tetap ada di daftar pekerjaan.
 
 ### 2.2 Kenapa GitHub Actions, bukan layanan uptime

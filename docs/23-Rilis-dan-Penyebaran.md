@@ -115,6 +115,7 @@ Dijalankan dalam lima menit setelah deploy selesai.
 
 | Pemeriksaan | Perintah | Hasil yang diterima |
 |---|---|---|
+| Skema produksi | `GET /api/plans/{id}/milestones` dengan sesi | 200. Kalau 500, artinya database produksi tertinggal dari kode, dan itu pernah terjadi pada 19 Oktober 2026. Lihat `docs/18` bagian 5.1 |
 | Kesehatan proses | `curl -s https://wedding-planer-self.vercel.app/api/kesehatan` | `{"ok":true}`. Ini hanya membuktikan proses hidup, bukan database |
 | Kesehatan database | Masuk, lalu `GET /api/plans` | 200 dengan `{"plans":[...]}`. Ini satu-satunya bukti database terbaca |
 | Header | `curl -sI .../masuk` | 5 header keamanan ada |

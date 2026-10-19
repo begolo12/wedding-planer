@@ -43,3 +43,8 @@ anti-slop
 
 # hasil cadangan lokal
 cadangan/
+
+# jar cookie dari pengujian manual
+/cookies*.txt
+/c[0-9].txt
+/cp[0-9]*.txt

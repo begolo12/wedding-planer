@@ -129,6 +129,51 @@ Keputusan yang diambil:
 | Deploy memakai `db:migrate`, bukan `db:push` | `db:push` menyesuaikan bentuk saat ini ke bentuk yang diminta, tanpa memberi langkah yang bisa diulang. Kalau gagal di tengah, bentuk setengah jadi tidak ada di mana pun |
 | `drizzle-kit check` masuk CI | Migrasi yang foldernya tidak konsisten baru ketahuan saat deploy. Lebih baik ketahuan saat build |
 
+### 5.1 Selisih skema produksi, ditemukan dan diperbaiki 19 Oktober 2026
+
+Database produksi dibuat dengan `db:push` sebelum folder migrasi ada, dan tidak pernah menjalankan `db:migrate`. Akibatnya bentuknya tertinggal dari kode. Dua selisih ditemukan saat memeriksa endpoint laporan:
+
+| Selisih | Akibat nyata |
+|---|---|
+| `milestones` tidak punya kolom `invitation_url` | `GET /api/plans/{id}/milestones`, `GET .../report`, `POST .../report/share-text`, dan `GET /api/public/share/{token}` menjawab 500. Fitur Laporan dan tautan keluarga tidak bisa dipakai sama sekali |
+| Tabel `idempotency_keys` tidak ada | Setiap endpoint tulis yang memakai `sekaliPerKunci` akan gagal saat klaim kunci, sehingga kiriman ulang dari antrean luring berakhir 500 |
+
+Bukti sebelum perbaikan: `GET /api/plans/{id}/report` menjawab 500, dan baris log menyebut `Failed query: select ... "invitation_url" ... from "milestones"`. Rujukan log itu datang dari mekanisme baru di `docs/25` bagian 2.1.
+
+Perbaikan yang dijalankan ke database produksi, semuanya idempoten:
+
+```sql
+alter table milestones add column if not exists invitation_url text;
+
+create table if not exists idempotency_keys (
+  key text primary key not null,
+  plan_id uuid not null,
+  status integer not null,
+  body text not null,
+  created_at timestamp with time zone default now() not null
+);
+
+alter table idempotency_keys add constraint idempotency_keys_plan_id_plans_id_fk
+  foreign key (plan_id) references plans(id) on delete cascade;
+
+create index if not exists idempotency_keys_plan_idx on idempotency_keys (plan_id, created_at);
+```
+
+Sesudah itu `drizzle.__drizzle_migrations` dibuat dan diisi tiga baris untuk 0000, 0001, dan 0002, memakai hash sha256 tiap berkas migrasi dan `when` dari `meta/_journal.json`. Tujuannya supaya `db:migrate` berikutnya hanya menjalankan migrasi baru, bukan mengulang dari nol.
+
+Bukti sesudah perbaikan:
+
+| Pemeriksaan | Sebelum | Sesudah |
+|---|---|---|
+| `GET /api/plans/{id}/milestones` | 500 | 200 |
+| `GET /api/plans/{id}/report` | 500 | 200 |
+| `POST /api/plans/{id}/report/share-text` varian tautan | 500 | 200 dengan tautan `https://wedding-planer-self.vercel.app/bagikan/...` |
+| `GET /api/public/share/{token}` | 500 | 200 |
+| `POST /api/plans/{id}/budget-items` dengan `Idempotency-Key` | 500 | 201, dan satu baris masuk `idempotency_keys` |
+| Selisih kolom produksi dengan lokal | 2 tabel | 0 |
+
+Pelajaran yang ditulis supaya tidak terulang: `docs/23` bagian 3.2 mewajibkan `db:migrate` sebagai langkah rilis, tapi langkah itu belum pernah dijalankan ke produksi sejak folder migrasi ada. Sekarang ada dua pengaman tambahan: `docs/23` bagian 3.4 memeriksa satu endpoint yang membaca tabel, dan `docs/25` bagian 2.1 memberi rujukan log saat gagal.
+
 ---
 
 ## 6. P0 Koneksi database
