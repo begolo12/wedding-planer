@@ -169,26 +169,29 @@ iOS tidak punya API install prompt. Satu-satunya cara adalah tombol Bagikan lalu
 
 ## Update dan versi
 
-Service worker punya dua versi cache: `current` dan `previous`. Saat versi baru terpasang, cache lama tetap ada sampai semua tab yang memakai versi lama ditutup.
-
-Aturan:
+Service worker memakai satu versi cache (`VERSI = "v2"` di `public/sw.js`). Tidak ada pasangan `current` dan `previous`: saat versi baru aktif, cache lama langsung dihapus. Nama cache tetap berawalan `haribesar-` walau nama produk sekarang "Rapi Nikah", alasannya tertulis di `CHANGELOG.md` 0.14.0.
 
 | Nama aset | Pola |
 |---|---|
-| Aset statis | Versi baru langsung mengganti yang lama |
-| Navigasi | Versi baru mengganti yang lama |
-| API cache | Tidak pernah mengganti, selalu dibuang saat update |
+| Aset statis (`/_next/static/`, `/ikon/`) | Cache first, aman karena nama berkas sudah ber-hash |
+| Navigasi | Network first dengan batas 3 detik, baru cache |
+| API | Tidak pernah di-cache, selalu ke jaringan |
+| Tautan baca-saja (`/bagikan/`) | Tidak pernah di-cache, supaya tautan yang dicabut langsung mati |
+| Font | Cache first dengan batas 30 entri |
 
 Alur update:
 
 ```
-1. Service worker baru terpasang dan masuk status waiting
-2. Tidak langsung aktif, tunggu semua tab lama ditutup
-3. Saat aktif, hapus cache lama
-4. Tampilkan pengingat "Ada versi baru" yang bisa ditutup
+1. Service worker baru terpasang
+2. Halaman luring dan halaman pemasangan didahulukan, lalu skipWaiting
+3. Saat aktif, cache lama yang namanya tidak ada di daftar dihapus,
+   lalu clients.claim
+4. Tanpa aksi ini, tab lama tetap memakai versi lama sampai ditutup
 ```
 
-Jangan perbarui paksa di tengah pemakaian, karena user mungkin sedang isi form.
+`skipWaiting` dipanggil di `install`, jadi versi baru tidak menunggu semua tab ditutup. Handler pesan `ambil-alih` tetap ada supaya halaman bisa memicunya sendiri kalau nanti perlu, tapi belum dipakai.
+
+Jangan perbarui paksa di tengah pemakaian, karena user mungkin sedang isi form. Karena itu `clients.claim` hanya mengubah pengendali, tidak memuat ulang halaman yang sedang dibuka.
 
 ---
 

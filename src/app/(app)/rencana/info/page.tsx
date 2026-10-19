@@ -227,11 +227,11 @@ export default function HalamanInfo() {
       ) : null}
 
       {/* Susunan dua kolom: daftar pengumuman di kolom utama, ringkasan
-          jumlah terbit/disematkan di rel kanan (DESIGN.md komposisi desktop
+          jumlah terbit/disematkan di rel kanan (
           poin 3). Di bawah 1023px tetap satu kolom, seperti /tamu/impor. */}
       <div className="grid-daftar">
       {/* Satu panel untuk tab modul, daftar pengumuman, dan keadaan
-          kosongnya (DESIGN.md komposisi desktop poin 5 dan 6). */}
+          kosongnya (satu keadaan kosong dan gagal per layar, masing-masing dengan satu jalan keluar). */}
       <div className="panel-daftar" aria-label="Pengumuman untuk keluarga">
         <div className="panel-daftar-kepala">
       <TabRencana />
@@ -246,7 +246,7 @@ export default function HalamanInfo() {
             <>
               {/* Kepala halaman sudah memakai tombol utama "Tambah
                   pengumuman", jadi ajakan di keadaan kosong ini sekunder
-                  (DESIGN.md komposisi desktop poin 11). */}
+                  satu aksi utama per layar. */}
               <button type="button" className="tombol tombol-sekunder" onClick={bukaTambah}>
                 Tambah pengumuman
               </button>
@@ -332,7 +332,7 @@ export default function HalamanInfo() {
 
       {/* Rel kanan: ringkasan jumlah catatan terbit/disematkan. Isi rel hanya
           ringkasan atau aksi cepat, jadi kartu rekap yang pindah ke sini,
-          bukan daftarnya (DESIGN.md komposisi desktop poin 3). */}
+          bukan daftarnya satu kolom isi plus satu rel ringkasan di layar lebar. */}
       {summary && summary.total > 0 ? (
         <aside className="rel-samping">
           <div className="rekap rekap-tiga">
@@ -444,7 +444,7 @@ export default function HalamanInfo() {
               className="tombol tombol-utama"
               disabled={sedangSimpan}
             >
-              {sedangSimpan ? "Menyimpan..." : "Simpan pengumuman"}
+              {sedangSimpan ? "Menyimpan…" : "Simpan pengumuman"}
             </button>
           </div>
         </form>

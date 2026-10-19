@@ -92,6 +92,7 @@ export default function HalamanTugas() {
 
   // Lembar tambah / ubah tugas
   const [lembarBuka, setLembarBuka] = useState(false);
+  const [lembarSaring, setLembarSaring] = useState(false);
   const [tugasDiedit, setTugasDiedit] = useState<TugasLengkap | null>(null);
   const [sedangSimpan, setSedangSimpan] = useState(false);
 
@@ -301,6 +302,57 @@ export default function HalamanTugas() {
     return tugasSelesai;
   }
 
+  // Chip saringan aktif untuk ditampilkan di badan layar (docs/21-Arah-Tampilan.md v5.0
+  // Pola 4). Tiap chip bisa dilepas sendiri, dan ada satu tombol untuk
+  // melepas semuanya. Urutannya tetap: cepat, kategori, penanggung jawab,
+  // lalu tampilkan selesai.
+  const chipAktif = useMemo(() => {
+    const daftar: { kunci: string; label: string; lepas: () => void }[] = [];
+    if (saring !== "semua") {
+      const label = SARINGAN.find((s) => s.id === saring)?.label ?? saring;
+      daftar.push({ kunci: "cepat", label, lepas: () => setSaring("semua") });
+    }
+    if (kataKunci.trim()) {
+      daftar.push({
+        kunci: "cari",
+        label: `"${kataKunci.trim()}"`,
+        lepas: () => setKataKunci(""),
+      });
+    }
+    if (kategoriPilihan !== "semua") {
+      daftar.push({
+        kunci: "kategori",
+        label: kategoriPilihan,
+        lepas: () => setKategoriPilihan("semua"),
+      });
+    }
+    if (penugasanPilihan !== "semua") {
+      daftar.push({
+        kunci: "penugasan",
+        label: LABEL_PENUGASAN[penugasanPilihan as keyof typeof LABEL_PENUGASAN] ?? penugasanPilihan,
+        lepas: () => setPenugasanPilihan("semua"),
+      });
+    }
+    if (tampilkanSelesai && saring !== "selesai") {
+      daftar.push({
+        kunci: "selesai",
+        label: "Tampilkan selesai",
+        lepas: () => setTampilkanSelesai(false),
+      });
+    }
+    return daftar;
+  }, [saring, kataKunci, kategoriPilihan, penugasanPilihan, tampilkanSelesai]);
+
+  const jumlahSaringAktif = chipAktif.length;
+
+  function hapusSemuaSaring() {
+    setSaring("semua");
+    setKataKunci("");
+    setKategoriPilihan("semua");
+    setPenugasanPilihan("semua");
+    setTampilkanSelesai(false);
+  }
+
   // Filter tugas
   const tugasTersaring = useMemo(() => {
     return semuaTugas.filter((t) => {
@@ -383,7 +435,7 @@ export default function HalamanTugas() {
     <div className="rencana">
       {/* Kepala halaman: judul di kiri, satu aksi utama di kanan. Tombol
           melayang disembunyikan di `expanded` supaya aksi yang sama tidak punya
-          dua pemicu (DESIGN.md komposisi desktop poin 11). */}
+          dua pemicu satu aksi utama per layar. */}
       <div className="kepala-halaman">
         <div>
           <h1>Tugas</h1>
@@ -400,12 +452,15 @@ export default function HalamanTugas() {
         ) : null}
       </div>
 
-      {/* Jalan pintas template, satu-satunya jalan kedua menuju tugas pertama. */}
-      <div className="aksi-baris">
+      {/* Jalan pintas template: tombol sendiri di layar lebar. Di layar sempit
+          tombol ini disembunyikan dan digantikan pil "Muat template" di baris
+          saringan (lihat .rencana-template-inline), supaya daftar tugas tidak
+          ditunda satu baris penuh. */}
+      <div className="aksi-baris aksi-template">
         {bisaUbah ? (
           <button
             type="button"
-            className="tombol tombol-sekunder"
+            className="tombol tombol-sekunder rencana-template-pil"
             onClick={() => setLembarTemplate(true)}
           >
             Muat template
@@ -421,88 +476,73 @@ export default function HalamanTugas() {
       ) : null}
 
       {/* Dua kolom di desktop: kolom utama berisi panel daftar, rel kanan
-          berisi kartu ringkasan progres (DESIGN.md komposisi desktop poin 3).
+          berisi kartu ringkasan progres satu kolom isi plus satu rel ringkasan di layar lebar.
           Di bawah 1023px tetap satu kolom seperti sekarang. */}
       <div className="grid-daftar">
       {/* Satu panel untuk tab modul, saringan, daftar, dan keadaan kosongnya,
           supaya keadaan kosong tidak lagi mengambang di kanvas kosong dan
           perataannya sama dengan baris saringan di atasnya
-          (DESIGN.md komposisi desktop poin 5 dan 6). */}
+          (satu keadaan kosong dan gagal per layar, masing-masing dengan satu jalan keluar). */}
       <div className="panel-daftar" aria-label="Daftar tugas">
         <div className="panel-daftar-kepala">
       <TabRencana />
         </div>
 
-      {/* Saringan cepat dan pencarian */}
+      {/* Saringan sesuai pola lembar saringan di docs/21-Arah-Tampilan.md bagian 5.
+          Sebelumnya lima kontrol (pil cepat, pencarian, dua dropdown, tombol
+          tampilkan selesai) duduk bertumpuk di badan layar. Di lebar 390px
+          tumpukan itu menghabiskan lebih dari 250px, jadi daftar tugas baru
+          mulai jauh di bawah lipatan. Sekarang yang tampil di badan layar
+          hanya satu baris: tombol "Saring" plus chip saringan yang aktif.
+          Sisanya masuk lembar bawah. */}
       <section className="rencana-saring" aria-label="Saringan tugas">
-        <div className="rencana-saring-pil" role="group">
-          {SARINGAN.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              className="rencana-pil"
-              data-aktif={saring === p.id ? "ya" : undefined}
-              aria-pressed={saring === p.id}
-              onClick={() => {
-                setSaring(p.id);
-                if (p.id === "selesai") setTampilkanSelesai(true);
-              }}
-            >
-              {p.label}
-              {hitungSaring(p.id) > 0 ? (
-                <span className="rencana-pil-angka">{hitungSaring(p.id)}</span>
-              ) : null}
-            </button>
-          ))}
-        </div>
-
-        <div className="rencana-cari">
-          <input
-            className="isian"
-            type="search"
-            placeholder="Cari tugas..."
-            aria-label="Cari tugas"
-            value={kataKunci}
-            onChange={(e) => setKataKunci(e.target.value)}
-          />
-
-          <select
-            className="isian"
-            aria-label="Saring kategori"
-            value={kategoriPilihan}
-            onChange={(e) => setKategoriPilihan(e.target.value)}
-          >
-            <option value="semua">Semua Kategori</option>
-            {KATEGORI_TUGAS.map((k) => (
-              <option key={k} value={k}>
-                {k}
-              </option>
-            ))}
-          </select>
-
-          <select
-            className="isian"
-            aria-label="Saring penanggung jawab"
-            value={penugasanPilihan}
-            onChange={(e) => setPenugasanPilihan(e.target.value)}
-          >
-            <option value="semua">Semua penanggung jawab</option>
-            {PENUGASAN.map((p) => (
-              <option key={p} value={p}>
-                {LABEL_PENUGASAN[p]}
-              </option>
-            ))}
-          </select>
-
+        <div className="rencana-saring-baris">
           <button
             type="button"
-            className="tombol tombol-sekunder"
-            aria-pressed={tampilkanSelesai}
-            onClick={() => setTampilkanSelesai(!tampilkanSelesai)}
+            className="tombol tombol-sekunder rencana-saring-tombol"
+            onClick={() => setLembarSaring(true)}
+            aria-haspopup="dialog"
           >
-            {tampilkanSelesai ? "Sembunyikan selesai" : "Tampilkan selesai"}
+            <IkonSaring />
+            Saring
+            {jumlahSaringAktif > 0 ? (
+              <span className="rencana-saring-jumlah">{jumlahSaringAktif}</span>
+            ) : null}
           </button>
+
+          {bisaUbah ? (
+            <button
+              type="button"
+              className="rencana-template-inline"
+              onClick={() => setLembarTemplate(true)}
+            >
+              Muat template
+            </button>
+          ) : null}
         </div>
+
+        {/* Chip saringan aktif, maksimal satu baris. Gunanya supaya pengguna
+            tahu daftar sedang tersaring dan bisa melepasnya tanpa membuka
+            lembar. */}
+        {chipAktif.length > 0 ? (
+          <div className="rencana-chip-aktif">
+            {chipAktif.map((c) => (
+              <button
+                key={c.kunci}
+                type="button"
+                className="rencana-chip"
+                onClick={c.lepas}
+                aria-label={`Hapus saringan ${c.label}`}
+              >
+                {c.label}
+                <span aria-hidden="true">×</span>
+              </button>
+            ))}
+            <button type="button" className="rencana-chip-hapus" onClick={hapusSemuaSaring}>
+              Hapus semua
+            </button>
+          </div>
+        ) : null}
       </section>
 
       {semuaTugas.length === 0 ? (
@@ -606,21 +646,21 @@ export default function HalamanTugas() {
                           <div className="rencana-urut" role="group" aria-label={`Urutkan ${t.title}`}>
                             <button
                               type="button"
-                              className="tombol tombol-sekunder tombol-kecil"
+                              className="tombol tombol-sekunder tombol-kecil rencana-urut-tombol"
                               onClick={() => geserTugas(t, -1)}
                               disabled={sedangUrut}
                               aria-label={`Naikkan ${t.title}`}
                             >
-                              {"\u25B2"}
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m5 14 7-7 7 7" /></svg>
                             </button>
                             <button
                               type="button"
-                              className="tombol tombol-sekunder tombol-kecil"
+                              className="tombol tombol-sekunder tombol-kecil rencana-urut-tombol"
                               onClick={() => geserTugas(t, 1)}
                               disabled={sedangUrut}
                               aria-label={`Turunkan ${t.title}`}
                             >
-                              {"\u25BC"}
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m5 10 7 7 7-7" /></svg>
                             </button>
                           </div>
                         ) : null}
@@ -647,11 +687,11 @@ export default function HalamanTugas() {
 
       {/* Rel kanan: ringkasan progres tugas. Isi rel hanya ringkasan atau
           aksi cepat, jadi kartu ini yang pindah ke sini, bukan daftarnya
-          (DESIGN.md komposisi desktop poin 3). */}
+          satu kolom isi plus satu rel ringkasan di layar lebar. */}
       <aside className="rel-samping">
         {/* Kartu progres: angka besar, bar, dan satu kalimat yang jujur
             mengikuti keadaan, bukan pujian yang tidak cocok dengan 0 persen
-            (DESIGN.md bagian 6). */}
+            (docs/21-Arah-Tampilan.md bagian 5). */}
         <section className="kartu-progres">
           <p className="kartu-progres-angka">
             {totalTugas > 0 ? (
@@ -750,7 +790,7 @@ export default function HalamanTugas() {
               id="formCatatan"
               className="isian"
               rows={3}
-              placeholder="Keterangan dokumen, kontak, atau syarat..."
+              placeholder="Keterangan dokumen, kontak, atau syarat…"
               value={formCatatan}
               onChange={(e) => setFormCatatan(e.target.value)}
             />
@@ -769,7 +809,7 @@ export default function HalamanTugas() {
               className="tombol tombol-utama"
               disabled={sedangSimpan}
             >
-              {sedangSimpan ? "Menyimpan..." : "Simpan"}
+              {sedangSimpan ? "Menyimpan…" : "Simpan"}
             </button>
           </div>
         </form>
@@ -809,13 +849,116 @@ export default function HalamanTugas() {
               onClick={muatTemplate}
               disabled={sedangMuatTemplate}
             >
-              {sedangMuatTemplate ? "Memuat..." : "Muat tugas"}
+              {sedangMuatTemplate ? "Memuat…" : "Muat tugas"}
             </button>
           </div>
         </div>
       </Lembar>
 
-      {/* Dialog Konfirmasi Hapus */}
+      {/* Lembar Saringan (pola lembar saringan di docs/21-Arah-Tampilan.md bagian 5).
+          Semua kontrol penyaring berkumpul di sini supaya badan layar bersih
+          dan daftar tugas mulai dekat dengan kepala layar. */}
+      <Lembar buka={lembarSaring} judul="Saring tugas" onTutup={() => setLembarSaring(false)}>
+        <div className="tumpuk-sedang">
+          <div>
+            <span className="rencana-lembar-label" id="saring-cepat-label">
+              Tampilkan
+            </span>
+            <div className="rencana-saring-pil" role="group" aria-labelledby="saring-cepat-label">
+              {SARINGAN.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  className="rencana-pil"
+                  data-aktif={saring === p.id ? "ya" : undefined}
+                  aria-pressed={saring === p.id}
+                  onClick={() => {
+                    setSaring(p.id);
+                    if (p.id === "selesai") setTampilkanSelesai(true);
+                  }}
+                >
+                  {p.label}
+                  {hitungSaring(p.id) > 0 ? (
+                    <span className="rencana-pil-angka">{hitungSaring(p.id)}</span>
+                  ) : null}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <label className="rencana-lembar-isian">
+            <span className="rencana-lembar-label">Cari</span>
+            <input
+              className="isian"
+              type="search"
+              placeholder="Cari tugas…"
+              aria-label="Cari tugas"
+              value={kataKunci}
+              onChange={(e) => setKataKunci(e.target.value)}
+            />
+          </label>
+
+          <label className="rencana-lembar-isian">
+            <span className="rencana-lembar-label">Kategori</span>
+            <select
+              className="isian"
+              aria-label="Saring kategori"
+              value={kategoriPilihan}
+              onChange={(e) => setKategoriPilihan(e.target.value)}
+            >
+              <option value="semua">Semua Kategori</option>
+              {KATEGORI_TUGAS.map((k) => (
+                <option key={k} value={k}>
+                  {k}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="rencana-lembar-isian">
+            <span className="rencana-lembar-label">Penanggung jawab</span>
+            <select
+              className="isian"
+              aria-label="Saring penanggung jawab"
+              value={penugasanPilihan}
+              onChange={(e) => setPenugasanPilihan(e.target.value)}
+            >
+              <option value="semua">Semua penanggung jawab</option>
+              {PENUGASAN.map((p) => (
+                <option key={p} value={p}>
+                  {LABEL_PENUGASAN[p]}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="sakelar">
+            <input
+              type="checkbox"
+              checked={tampilkanSelesai}
+              onChange={(e) => setTampilkanSelesai(e.target.checked)}
+            />
+            <span className="sakelar-jalur" aria-hidden="true">
+              <span className="sakelar-titik" />
+            </span>
+            Tampilkan tugas yang sudah selesai
+          </label>
+
+          <div className="dialog-tombol">
+            <button type="button" className="tombol tombol-sekunder" onClick={hapusSemuaSaring}>
+              Hapus semua
+            </button>
+            <button
+              type="button"
+              className="tombol tombol-utama"
+              onClick={() => setLembarSaring(false)}
+            >
+              Terapkan
+            </button>
+          </div>
+        </div>
+      </Lembar>
+
       <DialogKonfirmasi
         buka={Boolean(tugasDihapus)}
         judul="Hapus tugas"
@@ -830,11 +973,10 @@ export default function HalamanTugas() {
         <button
           type="button"
           className="rencana-fab tanpa-cetak"
-          aria-label="Tambah tugas baru"
+          aria-label="Tambah tugas"
           onClick={bukaTambah}
         >
-          <IkonTambah size={18} />
-          Tambah Tugas Baru
+          <IkonTambah size={22} />
         </button>
       ) : null}
     </div>
@@ -859,6 +1001,25 @@ function LencanaStatus({ tugas, kelompok }: { tugas: TugasLengkap; kelompok: Kel
 }
 
 /** Ikon plus untuk tombol tambah tugas. */
+function IkonSaring({ size = 18 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M3 5h18M6 12h12M10 19h4" />
+    </svg>
+  );
+}
+
 function IkonTambah({ size = 18 }: { size?: number }) {
   return (
     <svg

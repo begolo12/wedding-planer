@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { and, asc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { budgetItems, payments, vendors } from "@/db/schema";
+import { jumlahPembayaranVendor } from "@/lib/agregat-uang";
 import { bacaJson, bungkus } from "@/lib/galat";
 import { cariParam, konteksPlan, pastikanPosAnggaran } from "@/lib/api";
+import { HEADER_KUNCI, sekaliPerKunci } from "@/lib/idempotensi";
 import { skemaVendor } from "@/lib/skema";
 
 type Params = { params: Promise<{ planId: string }> };
@@ -41,12 +43,8 @@ export const GET = bungkus(async (req: Request, { params }: Params) => {
       budgetItemId: vendors.budgetItemId,
       budgetItemName: budgetItems.name,
       plannedAmount: budgetItems.plannedAmount,
-      paidAmount: sql<number>`(
-        select coalesce(sum(${payments.amount}), 0)::int
-        from ${payments}
-        where ${payments.vendorId} = ${vendors.id}
-          and ${payments.planId} = ${planId}
-      )`,
+      // Alasan cast `::bigint` dan `mapWith(Number)` ada di src/lib/agregat-uang.ts.
+      paidAmount: jumlahPembayaranVendor(planId, vendors.id),
       jumlahPembayaran: sql<number>`(
         select count(*)::int
         from ${payments}
@@ -55,7 +53,10 @@ export const GET = bungkus(async (req: Request, { params }: Params) => {
       )`,
     })
     .from(vendors)
-    .leftJoin(budgetItems, eq(vendors.budgetItemId, budgetItems.id))
+    .leftJoin(
+      budgetItems,
+      and(eq(vendors.budgetItemId, budgetItems.id), eq(budgetItems.planId, planId)),
+    )
     .where(and(...saringan))
     .orderBy(asc(vendors.name));
 
@@ -86,22 +87,24 @@ export const POST = bungkus(async (req: Request, { params }: Params) => {
   // bisa tertaut diam-diam.
   if (isi.budgetItemId) await pastikanPosAnggaran(planId, isi.budgetItemId);
 
-  const [baris] = await db
-    .insert(vendors)
-    .values({
-      planId,
-      name: isi.name,
-      category: isi.category,
-      budgetItemId: isi.budgetItemId ?? null,
-      contactName: isi.contactName ?? null,
-      // Nomor WhatsApp sudah dinormalkan ke 628xx oleh skema; tidak ada
-      // normalisasi kedua di route.
-      phone: isi.phone ?? null,
-      address: isi.address ?? null,
-      status: isi.status,
-      notes: isi.notes ?? null,
-    })
-    .returning();
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    const [baris] = await db
+      .insert(vendors)
+      .values({
+        planId,
+        name: isi.name,
+        category: isi.category,
+        budgetItemId: isi.budgetItemId ?? null,
+        contactName: isi.contactName ?? null,
+        // Nomor WhatsApp sudah dinormalkan ke 628xx oleh skema; tidak ada
+        // normalisasi kedua di route.
+        phone: isi.phone ?? null,
+        address: isi.address ?? null,
+        status: isi.status,
+        notes: isi.notes ?? null,
+      })
+      .returning();
 
-  return NextResponse.json({ vendor: baris }, { status: 201 });
+    return NextResponse.json({ vendor: baris }, { status: 201 });
+  });
 });

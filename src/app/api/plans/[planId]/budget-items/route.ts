@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { asc, desc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { budgetItems, payments, vendors } from "@/db/schema";
+import { jumlahPembayaran } from "@/lib/agregat-uang";
 import { bacaJson, bungkus } from "@/lib/galat";
 import { konteksPlan } from "@/lib/api";
 import { HEADER_KUNCI, sekaliPerKunci } from "@/lib/idempotensi";
@@ -43,7 +44,7 @@ export const GET = bungkus(async (_req: Request, { params }: Params) => {
         notes: payments.notes,
       })
       .from(payments)
-      .innerJoin(vendors, eq(payments.vendorId, vendors.id))
+      .innerJoin(vendors, and(eq(payments.vendorId, vendors.id), eq(vendors.planId, planId)))
       .where(eq(payments.planId, planId))
       .orderBy(desc(payments.paidAt), desc(payments.createdAt)),
     db
@@ -65,10 +66,11 @@ export const GET = bungkus(async (_req: Request, { params }: Params) => {
   const terpakaiPerPos = await db
     .select({
       budgetItemId: vendors.budgetItemId,
-      total: sql<number>`coalesce(sum(${payments.amount}), 0)::int`,
+      // Alasan cast `::bigint` dan `mapWith(Number)` ada di src/lib/agregat-uang.ts.
+      total: jumlahPembayaran,
     })
     .from(payments)
-    .innerJoin(vendors, eq(payments.vendorId, vendors.id))
+    .innerJoin(vendors, and(eq(payments.vendorId, vendors.id), eq(vendors.planId, planId)))
     .where(eq(payments.planId, planId))
     .groupBy(vendors.budgetItemId);
 

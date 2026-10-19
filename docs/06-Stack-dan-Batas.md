@@ -28,7 +28,7 @@ Empat aturan dipakai untuk setiap pilihan teknologi.
 | Auth | Better Auth | Cukup untuk email dan Google. Sesi di cookie, jadi tidak butuh token yang disimpan manual |
 | Validasi | Zod | Satu skema dipakai di form, di API, dan di tipe TypeScript |
 | Konfigurasi platform | `@neon/config` dan `@neon/env` | Dua paket dari Neon untuk file `neon.ts` (preview bucket) dan pembacaan variabel lingkungan. Tidak dipakai kode aplikasi, hanya konfigurasi deployment |
-| Styling | Tailwind CSS | Token warna dan spasi diambil dari `DESIGN.md`, jadi tidak ada tempat kedua untuk menentukan tampilan |
+| Styling | Tailwind CSS | Token warna dan spasi diambil dari `docs/21-Arah-Tampilan.md`, jadi tidak ada tempat kedua untuk menentukan tampilan |
 | PWA | Service worker tulis tangan | Strategi cache-nya spesifik untuk data plan. `next-pwa` tidak cukup fleksibel untuk itu |
 | Deployment | Satu platform, satu proses | Monolith, satu repo, satu deploy |
 

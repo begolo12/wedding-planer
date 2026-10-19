@@ -61,7 +61,7 @@ export function TombolGoogle({
           />
         </svg>
       </span>
-      <span>{sedangJalan ? "Menghubungkan ke Google..." : label}</span>
+      <span>{sedangJalan ? "Menghubungkan ke Google…" : label}</span>
     </button>
   );
 }

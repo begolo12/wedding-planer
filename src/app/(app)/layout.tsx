@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
-import { KepalaApp, NavBawah, NavSisi } from "@/components/nav";
+import { NavBawah, NavSisi } from "@/components/nav";
 import { ToastHost } from "@/components/toast";
 import { LuringBanner } from "@/components/luring-banner";
 import { DaftarServiceWorker, InstallPrompt } from "@/components/pwa";
@@ -21,12 +21,6 @@ export default async function LayoutApp({ children }: { children: ReactNode }) {
 
   return (
     <div className="tata-app">
-      {/* Pendaran ambient romantis bergaya Stitch Luxury */}
-      <div aria-hidden="true" className="stitch-ambient-glow">
-        <div className="stitch-orb stitch-orb-1" />
-        <div className="stitch-orb stitch-orb-2" />
-        <div className="stitch-orb stitch-orb-3" />
-      </div>
       <DaftarServiceWorker />
       <NavSisi namaPasangan={nama} />
       <a className="lompat" href="#konten">
@@ -35,7 +29,6 @@ export default async function LayoutApp({ children }: { children: ReactNode }) {
       <div className="isi-app">
         <LuringBanner />
         <InstallPrompt />
-        <KepalaApp />
         <main className="bungkus" id="konten">
           {children}
         </main>

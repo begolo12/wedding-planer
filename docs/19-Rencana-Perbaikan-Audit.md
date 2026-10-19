@@ -9,6 +9,8 @@ Tanggal audit: 2026-10-05. Commit dasar: `5914f06` (v0.16.0).
 Status mesin saat audit: `tsc --noEmit` bersih, `next build` sukses, `vitest` 137/137 hijau, em dash 0 di seluruh repo.
 
 > Status terkini: 13 temuan sudah selesai dikerjakan dan diverifikasi. Perubahan tercatat di [`CHANGELOG.md`](../CHANGELOG.md).
+>
+> Susulan: audit menyeluruh kedua dikerjakan pada 2026-10-05 dengan cakupan lebih luas (idempotency, mode gelap sistem, naskah teks, dan sinkronisasi dokumen). Hasil dan perbaikannya ada di [`20-Hasil-Audit-Menyeluruh.md`](20-Hasil-Audit-Menyeluruh.md).
 
 ---
 
@@ -208,7 +210,7 @@ docs/18, bukan menaruh angka di kode tanpa sumber.
 
 **Bukti.** `WARNA_SEBARAN` di `src/app/(app)/anggaran/page.tsx` memuat marigold, terracotta, badge-latar, aksen-gelap, sage, line, kotak-abu, badge-teks, dan netral.
 
-**Dampak.** Satu layar memakai sembilan keluarga warna. [`AGENTS.md`](../AGENTS.md) bagian 6 dan [`DESIGN.md`](../DESIGN.md) membatasi dua warna inti plus satu aksen. Aksesibilitas aman karena ada legenda, tapi anggaran warnanya dilanggar.
+**Dampak.** Satu layar memakai sembilan keluarga warna. [`AGENTS.md`](../AGENTS.md) bagian 6 dan `docs/21-Arah-Tampilan.md` membatasi dua warna inti plus satu aksen. Aksesibilitas aman karena ada legenda, tapi anggaran warnanya dilanggar.
 
 **Perbaikan.** Pakai paling banyak tiga token dan ulang secara siklik, atau satu token dengan beberapa tingkat alfa. Perbarui legenda kalau warnanya berkurang.
 
@@ -218,7 +220,7 @@ docs/18, bukan menaruh angka di kode tanpa sumber.
 
 ## 11. Token `--color-tertiary-container` tidak terdefinisi
 
-**Bukti.** `globals.css` memakai `background: var(--color-tertiary-container, #d5c5de)`. Token itu tidak ada di `@theme` maupun di blok mode gelap. Nilai jatuhnya `#d5c5de`, ungu yang tidak ada di palet [`DESIGN.md`](../DESIGN.md).
+**Bukti.** `globals.css` memakai `background: var(--color-tertiary-container, #d5c5de)`. Token itu tidak ada di `@theme` maupun di blok mode gelap. Nilai jatuhnya `#d5c5de`, ungu yang tidak ada di palet `docs/21-Arah-Tampilan.md`.
 
 **Dampak.** Lencana di layar auth memakai warna di luar palet, dan tidak pernah ditimpa di mode gelap sehingga tetap ungu terang di latar gelap.
 
@@ -240,11 +242,11 @@ docs/18, bukan menaruh angka di kode tanpa sumber.
 - `src/app/(app)/rencana/tanggal/page.tsx`
 - `src/app/(app)/rencana/info/page.tsx`
 
-`DESIGN.md` bagian 5 poin 3 mewajibkan `.grid-daftar` (1,6fr : 1fr) mulai 1023px.
+`docs/21-Arah-Tampilan.md` bagian 5 poin 3 mewajibkan `.grid-daftar` (1,6fr : 1fr) mulai 1023px.
 
 **Dampak.** Di desktop daftar melebar penuh sampai 1200px, dan rel ringkasan yang diwajibkan tidak ada.
 
-**Perbaikan.** Bungkus `.panel-daftar` dalam `.grid-daftar`, pindahkan ringkasan (`.rekap`) ke `<aside className="rel-samping">`. Kerjakan satu layar per commit supaya mudah dibandingkan. Kalau ada layar yang sengaja menyimpang, tulis alasannya di `DESIGN.md` dan jangan diubah.
+**Perbaikan.** Bungkus `.panel-daftar` dalam `.grid-daftar`, pindahkan ringkasan (`.rekap`) ke `<aside className="rel-samping">`. Kerjakan satu layar per commit supaya mudah dibandingkan. Kalau ada layar yang sengaja menyimpang, tulis alasannya di `docs/21-Arah-Tampilan.md` dan jangan diubah.
 
 **Pemeriksaan.** Buka tiap layar di 1440px, pastikan daftar tidak melebar penuh dan rel kanan terisi.
 

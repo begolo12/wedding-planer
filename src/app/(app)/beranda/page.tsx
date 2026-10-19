@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePlan } from "@/lib/use-plan";
 import { useMuat } from "@/lib/use-muat";
+import { useSession } from "@/lib/auth-client";
 import { useStatusLuring } from "@/lib/status-luring";
 import type { RingkasanPlan } from "@/lib/ringkasan";
 import { Kerangka, Kosong, Gagal } from "@/components/states";
@@ -37,15 +38,9 @@ import { jamDari, tanggalPanjangDari } from "@/lib/format";
  * unggah inspirasi, jadi tombolnya akan jadi tombol mati. Tempatnya dipakai
  * kartu "Tanggal Penting" yang datanya sudah ada.
  */
-type ItemRundown = {
-  id: string;
-  title: string;
-  startTime: string;
-  location: string | null;
-};
-
 export default function HalamanBeranda() {
   const { plan, planId, memuat: memuatPlan, galat: galatPlan, muatUlang: muatPlan } = usePlan();
+  const { data: sesi } = useSession();
 
   const { luring, dariPerangkat } = useStatusLuring();
   const bisaUbah = !luring && !dariPerangkat;
@@ -59,13 +54,10 @@ export default function HalamanBeranda() {
     aktif: Boolean(planId),
   });
 
-  // Rundown diambil terpisah karena /overview sengaja dibatasi lima sumber data.
+  // Rundown singkat ikut di dalam /overview, jadi Beranda cukup satu request.
   // Kartunya hanya muncul kalau sudah ada acara, jadi tidak menambah state
   // kosong kedua di Beranda yang tidak diatur docs/05 bagian 6.
-  const { data: dataRundown } = useMuat<{ rundown: ItemRundown[] }>(
-    planId ? `/api/plans/${planId}/rundown` : null,
-    { aktif: Boolean(planId) },
-  );
+  const rundownSingkat = ringkasan?.rundownSingkat ?? [];
 
   if (memuatPlan || (planId && memuatRingkasan && !ringkasan)) {
     return <Kerangka baris={6} />;
@@ -98,7 +90,6 @@ export default function HalamanBeranda() {
 
   const {
     hariBesar,
-    teksHitungMundur,
     hariKe,
     jumlahTugas,
     tugasTerdekat,
@@ -119,9 +110,17 @@ export default function HalamanBeranda() {
   const tugasSisa = jumlahTugas.total - jumlahTugas.selesai;
   const mingguLagi = hariKe !== null && hariKe > 0 ? Math.floor(hariKe / 7) : null;
 
-  const sapaan = plan.partnerName
-    ? `Halo, ${plan.partnerName}! Selamat merencanakan hari bahagia`
-    : "Halo! Selamat merencanakan hari bahagia";
+  // Sapaan menyebut kedua nama, sama seperti judul di navigasi samping.
+  // Sebelumnya hanya nama pasangan yang disebut ("Halo, Rangga!"), padahal
+  // yang sedang membuka aplikasi bisa saja pemilik akun yang lain, sehingga
+  // sapaan itu terasa salah alamat. Nama pemilik akun diambil dari sesi
+  // karena tabel plans tidak menyimpannya.
+  const namaSaya = sesi?.user?.name ? sesi.user.name.trim().split(/\s+/)[0] : null;
+  const sapaan = plan.partnerName && namaSaya
+    ? `Halo, ${namaSaya} & ${plan.partnerName}! Selamat merencanakan hari bahagia`
+    : plan.partnerName
+      ? `Halo, ${plan.partnerName}! Selamat merencanakan hari bahagia`
+      : "Halo! Selamat merencanakan hari bahagia";
 
   if (!hariBesar && jumlahTugas.total === 0 && jumlahVendor === 0) {
     return (
@@ -171,18 +170,9 @@ export default function HalamanBeranda() {
         ) : null}
       </div>
 
-      <section className="beranda-hero shimmer-container">
+      <section className="beranda-hero">
         <div className="beranda-hero-isi">
           <div className="beranda-hero-kiri">
-            <div className="flex items-center gap-2">
-              <span className="beranda-pil-aksen">
-                <IkonHati size={14} />
-                Hitung Mundur Bahagia
-              </span>
-              <span className="px-3 py-0.5 rounded-full text-[12px] font-bold bg-white/80 text-[var(--color-ink)] border border-white/70 shadow-xs">
-                Fase 2
-              </span>
-            </div>
             <p className="beranda-sapa">{sapaan}</p>
             <p className="beranda-tanggal">
               <IkonKalender size={18} />
@@ -199,41 +189,68 @@ export default function HalamanBeranda() {
             </p>
             <span className="beranda-kutip">
               <IkonKutip size={14} />
-              Setiap langkah kecil membawamu makin dekat ke pelaminan impian.
+              Setiap langkah kecil membawamu makin dekat ke hari besar.
             </span>
           </div>
 
           {hariKe !== null ? (
             <div className="beranda-mundur">
-              <div className="beranda-mundur-kotak">
-                <span className="beranda-mundur-besar animate-breath">
-                  {hariKe < 0 ? Math.abs(hariKe) : hariKe}
-                </span>
-                <span className="beranda-mundur-kecil">
-                  {hariKe < 0 ? "Hari Berlalu" : "Hari Lagi!"}
-                </span>
-              </div>
-              <div className="beranda-mundur-sisi">
-                <div className="beranda-mundur-grid">
-                  <div className="beranda-mundur-sel">
-                    <span className="beranda-mundur-nilai">
-                      {hariKe < 0 ? 0 : Math.abs(hariKe)}
+              {hariKe < 0 ? (
+                <>
+                  <div className="beranda-mundur-kotak">
+                    <span className="beranda-mundur-besar">✓</span>
+                    <span className="beranda-mundur-kecil">Hari Bahagia Berlalu</span>
+                  </div>
+                  <div className="beranda-mundur-sisi">
+                    <p className="beranda-mundur-pita">
+                      Hari pernikahan sudah lewat. Semua kenangan dan catatan tetap bisa dibuka
+                      di menu Laporan.
+                    </p>
+                    <Link className="beranda-kartu-tautan" href="/laporan">
+                      Lihat laporan
+                      <IkonPanah size={16} />
+                    </Link>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="beranda-mundur-kotak">
+                    <span className="beranda-mundur-besar">{hariKe}</span>
+                    <span className="beranda-mundur-kecil">
+                      {hariKe === 0 ? "Hari Ini!" : "Hari Lagi!"}
                     </span>
-                    <span className="beranda-mundur-sel-label">Hari</span>
                   </div>
-                  <div className="beranda-mundur-sel">
-                    <span className="beranda-mundur-nilai">{mingguLagi ?? "-"}</span>
-                    <span className="beranda-mundur-sel-label">Minggu</span>
+                  <div className="beranda-mundur-sisi">
+                    <div className="beranda-mundur-grid">
+                      {hariKe > 0 ? (
+                        <div className="beranda-mundur-sel">
+                          <span className="beranda-mundur-nilai">{mingguLagi ?? "-"}</span>
+                          <span className="beranda-mundur-sel-label">Minggu</span>
+                        </div>
+                      ) : null}
+                      <div className="beranda-mundur-sel">
+                        <span className="beranda-mundur-nilai">{tugasSisa}</span>
+                        {/* "Tugas" saja menggantung: pembaca tidak tahu 10 itu
+                            total, sisa, atau terlambat. "Tugas sisa" menyebut
+                            yang mana, dan angkanya memang tugas yang belum
+                            selesai (total dikurangi selesai). */}
+                        <span className="beranda-mundur-sel-label">Tugas sisa</span>
+                      </div>
+                    </div>
+                    {/* Pita ini sempat bermasalah dua kali. Awalnya berbunyi
+                        "38 hari", mengulang angka yang sudah tampil besar di
+                        kiri. Lalu diganti tanggal, dan ternyata tanggalnya
+                        sudah ada di baris atas kartu ("14 November 2026").
+                        Jadi sekarang isinya kalimat pengantar yang tidak
+                        mengulang angka mana pun di kartu ini. */}
+                    <p className="beranda-mundur-pita">
+                      {hariKe === 0
+                        ? "Hari bahagia sudah tiba. Selamat menikah!"
+                        : "Semua persiapan ini menuju satu hari yang kamu tunggu."}
+                    </p>
                   </div>
-                  <div className="beranda-mundur-sel">
-                    <span className="beranda-mundur-nilai">{tugasSisa}</span>
-                    <span className="beranda-mundur-sel-label">Tugas</span>
-                  </div>
-                </div>
-                <p className="beranda-mundur-pita">
-                  {teksHitungMundur ?? "Menuju hari pernikahan"}
-                </p>
-              </div>
+                </>
+              )}
             </div>
           ) : (
             <div className="beranda-mundur">
@@ -250,81 +267,43 @@ export default function HalamanBeranda() {
         </div>
       </section>
 
-      {/* Bento Quick Actions Stitch (Ergonomic Thumb Zone) */}
-      <section className="flex flex-col gap-2 mt-6">
-        <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-2">
-            <span className="text-[var(--color-marigold)] flex items-center">
-              <IkonHati size={16} />
-            </span>
-            <h2 className="text-base font-bold">Aksi Cepat</h2>
-          </div>
-          <span className="text-xs text-[var(--color-muted)] font-medium">
-            Ketuk untuk mulai
-          </span>
-        </div>
+      {/* Aksi cepat. Empat pintu ke layar kerja yang paling sering dibuka. */}
+      <section className="beranda-aksi-cepat">
+        <h2>Aksi cepat</h2>
         <div className="bento-aksi-grid">
-          <Link
-            className="bento-aksi-tombol luxury-card shimmer-container"
-            href="/rencana"
-          >
-            <span
-              className="bento-aksi-ikon-lingkaran"
-              style={{ background: "var(--color-terracotta)", color: "var(--color-di-atas-blush)" }}
-            >
+          <Link className="bento-aksi-tombol" href="/rencana">
+            <span className="bento-aksi-ikon-lingkaran">
               <IkonChecklist size={22} />
             </span>
-            <span className="bento-aksi-label">+ Tugas</span>
-            <span className="bento-aksi-sub">Checklist</span>
+            <span className="bento-aksi-label">Tugas</span>
           </Link>
 
-          <Link
-            className="bento-aksi-tombol luxury-card shimmer-container"
-            href="/anggaran"
-          >
-            <span
-              className="bento-aksi-ikon-lingkaran"
-              style={{ background: "var(--color-badge-latar)", color: "var(--color-badge-teks)" }}
-            >
+          <Link className="bento-aksi-tombol" href="/anggaran">
+            <span className="bento-aksi-ikon-lingkaran">
               <IkonUang size={22} />
             </span>
-            <span className="bento-aksi-label">Catat Biaya</span>
-            <span className="bento-aksi-sub">Anggaran</span>
+            <span className="bento-aksi-label">Anggaran</span>
           </Link>
 
-          <Link
-            className="bento-aksi-tombol luxury-card shimmer-container"
-            href="/tamu"
-          >
-            <span
-              className="bento-aksi-ikon-lingkaran"
-              style={{ background: "var(--color-kotak-abu)", color: "var(--color-marigold)" }}
-            >
+          <Link className="bento-aksi-tombol" href="/tamu">
+            <span className="bento-aksi-ikon-lingkaran">
               <IkonTamu size={22} />
             </span>
-            <span className="bento-aksi-label">Undangan</span>
-            <span className="bento-aksi-sub">Tamu Baru</span>
+            <span className="bento-aksi-label">Tamu</span>
           </Link>
 
-          <Link
-            className="bento-aksi-tombol luxury-card shimmer-container"
-            href="/rencana/vendor"
-          >
-            <span
-              className="bento-aksi-ikon-lingkaran"
-              style={{ background: "var(--color-netral)", color: "var(--color-sage)" }}
-            >
+          <Link className="bento-aksi-tombol" href="/rencana/vendor">
+            <span className="bento-aksi-ikon-lingkaran">
               <IkonVendor size={22} />
             </span>
             <span className="bento-aksi-label">Vendor</span>
-            <span className="bento-aksi-sub">Hubungi</span>
           </Link>
         </div>
       </section>
 
       <div className="beranda-grid">
         <div className="beranda-kolom-utama">
-          {dataRundown && dataRundown.rundown.length > 0 ? (
+          {rundownSingkat.length > 0 ? (
             <section className="kartu beranda-kartu">
               <div className="beranda-kartu-kepala">
                 <span className="label-bagian">Rundown hari ini</span>
@@ -334,7 +313,7 @@ export default function HalamanBeranda() {
                 </Link>
               </div>
               <div className="tumpuk-rapat">
-                {dataRundown.rundown.slice(0, 4).map((r) => (
+                {rundownSingkat.map((r) => (
                   <div className="butir" key={r.id}>
                     <span className="lencana lencana-aksen angka">{jamDari(r.startTime)}</span>
                     <div className="butir-isi">
@@ -348,7 +327,7 @@ export default function HalamanBeranda() {
           ) : null}
 
           <div className="beranda-metrik">
-            <section className="luxury-glass beranda-kartu p-5">
+            <section className="kartu beranda-kartu">
               <div className="beranda-kartu-kepala">
                 <span className="label-bagian">Checklist Siap</span>
                 <span className="beranda-ikon-bulat beranda-ikon-utama">
@@ -384,7 +363,7 @@ export default function HalamanBeranda() {
               )}
             </section>
 
-            <section className="luxury-glass beranda-kartu p-5">
+            <section className="kartu beranda-kartu">
               <div className="beranda-kartu-kepala">
                 <span className="label-bagian">Konfirmasi Tamu</span>
                 <span className="beranda-ikon-bulat beranda-ikon-tersier">
@@ -424,7 +403,7 @@ export default function HalamanBeranda() {
               </div>
             </section>
 
-            <section className="luxury-glass beranda-kartu p-5">
+            <section className="kartu beranda-kartu">
               <div className="beranda-kartu-kepala">
                 <span className="label-bagian">Anggaran Terbayar</span>
                 <span className="beranda-ikon-bulat beranda-ikon-kedua">
@@ -522,7 +501,7 @@ export default function HalamanBeranda() {
                     {tanggalBerikut.selisihHari === 0
                       ? "Hari ini"
                       : tanggalBerikut.selisihHari < 0
-                        ? `${Math.abs(tanggalBerikut.selisihHari)} hari lalu`
+                        ? `${Math.abs(tanggalBerikut.selisihHari)} hari lewat`
                         : `${tanggalBerikut.selisihHari} hari lagi`}
                   </span>
                 </div>
@@ -584,11 +563,11 @@ export default function HalamanBeranda() {
           <section className="beranda-catatan">
             <span className="beranda-catatan-kepala">
               <IkonHati size={18} />
-              Catatan Manis Pasangan
+              Catatan untuk berdua
             </span>
             <p className="beranda-catatan-teks">
               Luangkan waktu santai berdua malam ini tanpa membahas vendor, anggaran, atau
-              persiapan pernikahan. Seduh teh hangat dan saling bertukar senyum ya.
+              persiapan pernikahan. Seduh teh hangat dan saling bertukar cerita.
             </p>
           </section>
         </aside>

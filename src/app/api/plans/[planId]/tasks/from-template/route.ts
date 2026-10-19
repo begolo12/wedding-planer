@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { plans, tasks } from "@/db/schema";
 import { bacaJson, bungkus } from "@/lib/galat";
 import { konteksPlan } from "@/lib/api";
+import { HEADER_KUNCI, sekaliPerKunci } from "@/lib/idempotensi";
 import { KATEGORI_TUGAS, type KategoriTugas } from "@/lib/konstanta";
 import { TEMPLATE_TUGAS, tanggalDariHMinus } from "@/lib/template";
 
@@ -24,6 +25,9 @@ const skemaTemplate = z.object({
  * 2. Tenggat dihitung dari hari besar, bukan dari hari ini. Kalau dihitung
  *    dari hari ini, tugas administrasi yang seharusnya dikerjakan enam bulan
  *    lalu jadi terlihat belum lewat tenggat, dan urutannya jadi salah.
+ *
+ * Ditambah kunci idempotency: kiriman ulang dari antrean luring dibalas
+ * dengan hasil yang sama, tanpa membaca ulang plan dan tanpa menulis lagi.
  */
 export const POST = bungkus(async (req: Request, { params }: Params) => {
   const { planId } = await params;
@@ -31,38 +35,43 @@ export const POST = bungkus(async (req: Request, { params }: Params) => {
 
   const { category } = skemaTemplate.parse(await bacaJson(req));
 
-  const [plan] = await db
-    .select({ weddingDate: plans.weddingDate, isDayOfDate: plans.isDayOfDate })
-    .from(plans)
-    .where(eq(plans.id, planId))
-    .limit(1);
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    const [plan] = await db
+      .select({ weddingDate: plans.weddingDate, isDayOfDate: plans.isDayOfDate })
+      .from(plans)
+      .where(eq(plans.id, planId))
+      .limit(1);
 
-  const hariBesar = plan?.isDayOfDate ?? plan?.weddingDate ?? null;
-  const bawaan = TEMPLATE_TUGAS[category as KategoriTugas];
+    const hariBesar = plan?.isDayOfDate ?? plan?.weddingDate ?? null;
+    const bawaan = TEMPLATE_TUGAS[category as KategoriTugas];
 
-  const sudahAda = await db
-    .select({ title: tasks.title })
-    .from(tasks)
-    .where(and(eq(tasks.planId, planId), eq(tasks.category, category)));
+    const sudahAda = await db
+      .select({ title: tasks.title })
+      .from(tasks)
+      .where(and(eq(tasks.planId, planId), eq(tasks.category, category)));
 
-  const judulAda = new Set(sudahAda.map((t) => t.title.toLowerCase()));
-  const baru = bawaan
-    .filter((t) => !judulAda.has(t.title.toLowerCase()))
-    .map((t, i) => ({
-      planId,
-      title: t.title,
-      category,
-      dueDate: tanggalDariHMinus(hariBesar, t.hMinus),
-      status: "belum",
-      priority: t.priority,
-      sortOrder: i,
-    }));
+    const judulAda = new Set(sudahAda.map((t) => t.title.toLowerCase()));
+    const baru = bawaan
+      .filter((t) => !judulAda.has(t.title.toLowerCase()))
+      .map((t, i) => ({
+        planId,
+        title: t.title,
+        category,
+        dueDate: tanggalDariHMinus(hariBesar, t.hMinus),
+        status: "belum",
+        priority: t.priority,
+        sortOrder: i,
+      }));
 
-  if (baru.length === 0) {
-    return NextResponse.json({ tasks: [], dilewati: bawaan.length });
-  }
+    if (baru.length === 0) {
+      return NextResponse.json({ tasks: [], dilewati: bawaan.length });
+    }
 
-  const dibuat = await db.insert(tasks).values(baru).returning();
+    const dibuat = await db.insert(tasks).values(baru).returning();
 
-  return NextResponse.json({ tasks: dibuat, dilewati: bawaan.length - baru.length }, { status: 201 });
+    return NextResponse.json(
+      { tasks: dibuat, dilewati: bawaan.length - baru.length },
+      { status: 201 },
+    );
+  });
 });

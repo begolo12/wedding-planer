@@ -59,30 +59,53 @@ Modul lain (vendor, rundown, info) masuk lewat halaman Rencana, bukan lewat item
 ## 4. Peta halaman
 
 ```
-Beranda
+Beranda  (/beranda)
 ├── Ringkasan hari ini
 ├── Hitung mundur hari-H
+├── Aksi cepat
 ├── Tugas terdekat (maks 5)
-├── Sisa anggaran
-└── Tanggal penting berikutnya
+└── Kartu anggaran, tamu, tanggal penting, dan vendor utama
 
-Rencana
-├── Tab: Tanggal
+Rencana  (/rencana)
 ├── Tab: Tugas
-├── Tab: Rundown
-├── Tab: Vendor
-├── Tab: Seragam
-└── Tab: Info
+├── Tab: Tanggal penting  (/rencana/tanggal)
+├── Tab: Rincian acara  (/rencana/plan)
+├── Tab: Vendor  (/rencana/vendor) dan detail vendor  (/rencana/vendor/:vendorId)
+├── Tab: Info keluarga  (/rencana/info)
+└── Tab: Busana  (/rencana/seragam)
 
-Laporan
+Anggaran  (/anggaran)
+Tamu  (/tamu)
+└── Impor daftar  (/tamu/impor)
+
+Hari-H  (/hari-h)
+└── Rundown acara
+
+Laporan  (/laporan)
 ├── Ringkasan keadaan
-├── Bagikan ke WhatsApp
+├── Bagikan ke WhatsApp  (/laporan/bagikan)
 └── Cetak PDF
+
+Akun  (/akun)
+├── Pilihan tema
+├── Ekspor data
+└── Keluar
+
+Di luar navigasi
+├── Masuk  (/masuk) dan Daftar  (/daftar)
+├── Pasang di layar utama  (/aplikasi)
+├── Kebijakan  (/kebijakan)
+├── Halaman baca-saja  (/bagikan/:token, tautan pendek /l/:token)
+└── Layar luring  (/luring)
 ```
+
+Bilah bawah memuat enam sel: Beranda, Rencana, Hari-H, Anggaran, Tamu, dan Lainnya. Hari-H naik ke bilah bawah supaya rundown bisa dibuka satu tap dari halaman mana pun, termasuk saat sinyal di lokasi acara sedang buruk. Lembar "Lainnya" memuat Laporan, Akun, dan mode tampilan, tiga tujuan yang tidak muat di bilah tanpa mengecilkan target sentuh. Di layar lebar, navigasi samping menjadi satu-satunya kepala: merek, nama pasangan, menu, tema, dan Akun semua di sana.
 
 Angka "maks 5" di Beranda bukan truncasi teknis, tapi batas perhatian. Menampilkan lebih dari lima tugas membuat daftar berubah jadi tembok teks yang tidak dibaca.
 
 Laporan tidak masuk tab Rencana karena bukan tempat bertanya "apa yang harus saya kerjakan", tapi tempat bertanya "ini sudah sejauh mana". Bentuk layarnya ada di [`12e-Wireframe-Laporan.md`](12e-Wireframe-Laporan.md).
+
+Halaman baca-saja (`/bagikan/:token`) tidak butuh sesi, dan hanya berisi data yang diizinkan `target` tautan. Aturannya ada di [`16-Laporan-dan-Bagikan.md`](16-Laporan-dan-Bagikan.md) bagian 4.
 
 ---
 
@@ -222,7 +245,7 @@ Daftar tamu dikelompokkan per kategori, dengan pencarian di atas yang selalu ter
 
 **Tujuan**: tahu urutan acara di hari-H.
 
-Daftar item rundown dengan jam di kiri. Sesi yang sedang berjalan ditandai dengan garis vertikal "garis itinerary" dari `DESIGN.md`, bukan dengan kotak berwarna.
+Daftar item rundown dengan jam di kiri. Sesi yang sedang berjalan ditandai dengan garis vertikal "garis itinerary" dari `docs/21-Arah-Tampilan.md`, bukan dengan kotak berwarna.
 
 Di `compact`, tiap item punya tinggi yang cukup untuk satu tap, dan seluruh rundown muat dalam satu layar penuh tanpa scroll kalau memungkinkan.
 

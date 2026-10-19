@@ -41,7 +41,7 @@ Saya mau mulai membangun aplikasi perencanaan pernikahan sesuai dokumen di repo 
 
 Baca dulu, urut dari yang paling penting:
 1. AGENTS.md
-2. DESIGN.md
+2. docs/21-Arah-Tampilan.md
 3. docs/01-PRD.md
 4. docs/03-Data-Model.md
 5. docs/04-API-Contract.md
@@ -101,7 +101,7 @@ Untuk satu komponen tampilan yang sudah dispesifikasikan di `docs/05-IA-dan-Laya
 Buat komponen [| nama |] sesuai spesifikasi [| nama layar |] di docs/05-IA-dan-Layar.md.
 
 Wajib:
-- Pakai token warna dari DESIGN.md, jangan tulis hex langsung
+- Pakai token warna dari docs/21-Arah-Tampilan.md, jangan tulis hex langsung
 - Sudut konsisten dengan design system
 - punya loading, kosong, dan gagal
 - Bisa dipakai tanpa terkurung di dalam satu layout
@@ -178,7 +178,7 @@ Sebelum menulis, jawab dulu:
 Rujukan yang wajib dibaca:
 - docs/05-IA-dan-Layar.md untuk perilaku di mobile dan desktop
 - docs/12-Wireframe.md untuk indeksnya, lalu docs/12a sampai 12e untuk isi layarnya
-- DESIGN.md untuk warna dan bentuk
+- docs/21-Arah-Tampilan.md untuk warna dan bentuk
 
 Wajib:
 - Mobile dan desktop dari komponen yang sama

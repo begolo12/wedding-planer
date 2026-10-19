@@ -19,7 +19,7 @@ Tidak dibangun: fitur baru, perubahan database/API, library UI/icon/chart,
 marketplace, chat, AI, payment gateway, atau penyalinan Stitch secara literal.
 
 URL Stitch menjadi inspirasi bila bisa dibuka. Karena akses MCP Stitch belum
-tersedia, keputusan implementasi tetap berpijak pada `DESIGN.md`, wireframe,
+tersedia, keputusan implementasi tetap berpijak pada `docs/21-Arah-Tampilan.md`, wireframe,
 dan perilaku produk yang sudah ada.
 
 ## Arah visual
@@ -34,7 +34,7 @@ alat kerja harian.
 5. Dekorasi hanya pada hero atau keadaan kosong.
 6. Label dan bentuk selalu membantu warna menjelaskan status.
 
-Token tetap berasal dari `src/app/globals.css` dan `DESIGN.md`: ivory
+Token tetap berasal dari `src/app/globals.css` dan `docs/21-Arah-Tampilan.md`: ivory
 `#FCF9F5`, pearl `#FFFFFF`, charcoal `#382A32`, rose `#FFA8B8`, honey
 `#FED5B9`, gold `#E2B887`, plum `#66556B`, berry `#864E5A`, dan border
 `#E6D5D8`. Token baru wajib semantik dan punya alasan.

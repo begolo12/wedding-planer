@@ -15,7 +15,7 @@ import {
   type JenisTanggal,
   LABEL_JENIS_TANGGAL,
 } from "@/lib/konstanta";
-import { tanggalPanjangDari, selisihHari, hariIni } from "@/lib/format";
+import { tanggalPanjangDari, selisihHari, hariIni, jamDari } from "@/lib/format";
 import type { milestones } from "@/db/schema";
 
 type Milestone = typeof milestones.$inferSelect;
@@ -251,11 +251,11 @@ export default function HalamanTanggal() {
       ) : null}
 
       {/* Susunan dua kolom: daftar tanggal di kolom utama, hitung mundur dan
-          jumlah per kelompok di rel kanan (DESIGN.md komposisi desktop poin
+          jumlah per kelompok di rel kanan ( poin
           3). Di bawah 1023px tetap satu kolom, seperti contoh di /tamu/impor. */}
       <div className="grid-daftar">
       {/* Satu panel untuk tab modul, pencarian, daftar tanggal, dan keadaan
-          kosongnya (DESIGN.md komposisi desktop poin 5 dan 6). */}
+          kosongnya (satu keadaan kosong dan gagal per layar, masing-masing dengan satu jalan keluar). */}
       <div className="panel-daftar" aria-label="Daftar tanggal penting">
         <div className="panel-daftar-kepala">
       <TabRencana />
@@ -270,7 +270,7 @@ export default function HalamanTanggal() {
             <>
               {/* Kepala halaman sudah memakai tombol utama "Tambah tanggal",
                   jadi ajakan di keadaan kosong ini sekunder supaya tidak ada
-                  dua tombol utama untuk satu aksi (DESIGN.md komposisi
+                  dua tombol utama untuk satu aksi (docs/21-Arah-Tampilan.md komposisi
                   desktop poin 11). */}
               <button type="button" className="tombol tombol-sekunder" onClick={bukaTambah}>
                 Tambah tanggal
@@ -283,7 +283,7 @@ export default function HalamanTanggal() {
           <input
             className="isian"
             type="search"
-            placeholder="Cari tanggal penting..."
+            placeholder="Cari tanggal penting…"
             aria-label="Cari tanggal penting"
             value={cariTanggal}
             onChange={(e) => setCariTanggal(e.target.value)}
@@ -315,7 +315,7 @@ export default function HalamanTanggal() {
                         : selisih === 0
                           ? "Hari ini"
                           : selisih < 0
-                            ? `${Math.abs(selisih)} hari lalu`
+                            ? `${Math.abs(selisih)} hari lewat`
                             : `${selisih} hari lagi`;
 
                     return (
@@ -338,7 +338,7 @@ export default function HalamanTanggal() {
 
                             <p className="paragraf-rapat">
                               {tanggalPanjangDari(m.eventDate)}
-                              {m.eventTime ? ` • Jam ${m.eventTime}` : ""}
+                              {m.eventTime ? ` • jam ${jamDari(m.eventTime)}` : ""}
                               {statusHari ? ` (${statusHari})` : ""}
                             </p>
 
@@ -393,7 +393,7 @@ export default function HalamanTanggal() {
 
       {/* Rel kanan: hitung mundur ke hari-H dan jumlah tanggal per kelompok.
           Isi rel hanya ringkasan atau aksi cepat, jadi angka ringkas yang
-          pindah ke sini, bukan daftarnya (DESIGN.md komposisi desktop poin
+          pindah ke sini, bukan daftarnya ( poin
           3). */}
       {daftar.length > 0 ? (
         <aside className="rel-samping">
@@ -401,9 +401,9 @@ export default function HalamanTanggal() {
             <div className="rekap-item">
               <span className="rekap-nilai">
                 {selisihBerikutnya === null
-                  ? "—"
+                  ? "-"
                   : selisihBerikutnya < 0
-                    ? `${Math.abs(selisihBerikutnya)} hari lalu`
+                    ? `${Math.abs(selisihBerikutnya)} hari lewat`
                     : selisihBerikutnya === 0
                       ? "Hari ini"
                       : `${selisihBerikutnya} hari lagi`}
@@ -534,7 +534,7 @@ export default function HalamanTanggal() {
               className="tombol tombol-utama"
               disabled={sedangSimpan}
             >
-              {sedangSimpan ? "Menyimpan..." : "Simpan"}
+              {sedangSimpan ? "Menyimpan…" : "Simpan"}
             </button>
           </div>
         </form>

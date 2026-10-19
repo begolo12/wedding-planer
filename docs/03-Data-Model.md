@@ -259,6 +259,26 @@ Batas lima tautan per plan dari `16-Laporan-dan-Bagikan.md`.
 
 ---
 
+## 13. idempotency_keys (kunci kiriman ulang)
+
+Tabel ini tidak ada di draf awal. Kodenya memakainya di `src/lib/idempotensi.ts` untuk mencegah antrean luring mengirim perubahan yang sama dua kali. Satu kunci mewakili satu item antrean, bukan satu permintaan.
+
+| Kolom | Tipe | Catatan |
+|---|---|---|
+| `key` | `text` | PK. Nilai dari header `Idempotency-Key`, bentuknya dibatasi skema Zod di klien |
+| `planId` | `uuid` | FK ke `plans`, cascade |
+| `status` | `integer` | Kode status balasan asli. `0` dipakai sebagai penanda "sedang diproses" |
+| `body` | `text` | Badan balasan asli, supaya kiriman ulang dibalas sama. Kosong untuk status tanpa body (204, 205, 304) |
+| `createdAt` | `timestamptz` | Dipakai untuk mengambil alih klaim yang ditinggalkan proses yang mati, setelah 60 detik |
+
+Index: `idempotency_keys_plan_idx` pada `(planId, createdAt)`.
+
+Kunci hanya ditulis kalau header dikirim dan bentuknya sah. Tanpa header, permintaan diperlakukan biasa. Barisnya ikut terhapus saat rencananya dihapus, lewat cascade `planId`.
+
+`GET /api/plans` (buat plan baru) tidak memakai kunci ini karena `planId` belum ada saat permintaan dibuat, dan tabelnya butuh `planId` untuk cascade. Alasan lengkapnya ada di `20-Hasil-Audit-Menyeluruh.md`.
+
+---
+
 ## Relasi
 
 ```
@@ -277,7 +297,7 @@ users
 
 Semua tabel anak cascade delete dari `plans`. Tidak ada cascade kedua dari `users`; tabel anak cukup dihapus lewat `plans`.
 
-`plans` juga punya `share_links` untuk tautan baca-saja. Diagram di atas tidak digambar ulang, tapi setiap tabel di dokumen ini adalah anak langsung `plans` kecuali `payments` yang juga menunjuk `vendors`.
+`plans` juga punya `share_links` dan `idempotency_keys` sebagai tabel pendukung. Diagram di atas tidak digambar ulang, tapi setiap tabel di dokumen ini adalah anak langsung `plans` kecuali `payments` yang juga menunjuk `vendors`.
 
 ---
 

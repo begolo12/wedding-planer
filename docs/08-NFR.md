@@ -237,7 +237,7 @@ Apa yang harus diukur sebelum rilis, dan apa yang boleh ditunda:
 | Dark mode per halaman | Sebelum rilis | Sudah diukur. 0 gagal kontras di mode gelap |
 | Tombol tanpa handler | Sebelum rilis | Sudah diukur. 0 di 17 rute |
 | PDF laporan | Sebelum rilis | Sudah diukur. 2 halaman, target paling banyak 3 |
-| Emoji di UI | Sebelum rilis | Sudah diukur. 0, sesuai `DESIGN.md` bagian 8 |
+| Emoji di UI | Sebelum rilis | Sudah diukur. 0, sesuai `docs/21-Arah-Tampilan.md` bagian 8 |
 | Lighthouse semua halaman | Sebelum rilis | Belum diukur |
 | LCP di 3G | Sebelum rilis | Belum diukur |
 | Uji keyboard penuh | Sebelum rilis | Belum diuji |

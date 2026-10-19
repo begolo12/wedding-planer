@@ -84,7 +84,7 @@ export default function HalamanLaporan() {
         >
           {/* Keadaan kosong ini memuat satu ajakan saja, jadi tombolnya
               sekunder: layar ini tidak punya kepala halaman dan tidak boleh
-              punya dua tombol utama (DESIGN.md komposisi desktop poin 11). */}
+              punya dua tombol utama satu aksi utama per layar. */}
           <Link className="tombol tombol-sekunder" href="/rencana">
             Mulai isi rencana
           </Link>
@@ -170,6 +170,18 @@ export default function HalamanLaporan() {
           {rep.uang.pos.length > 0 ? (
             <div className="tumpuk-rapat">
               <span className="label-bagian">Pos Pengeluaran Utama</span>
+              {/* Pembayaran dihitung per pos lewat vendor yang tertaut ke pos
+                  itu. Kalau belum ada satu pun pembayaran yang tertaut, semua
+                  pos tampil Rp 0 padahal total "Sudah dibayar" bukan nol, dan
+                  itu terbaca seperti angka yang bertentangan. Catatan ini
+                  menjelaskan kenapa, bukan menyembunyikan angkanya. */}
+              {rep.uang.paid > 0 && rep.uang.pos.every((p) => p.paid === 0) ? (
+                <p className="keterangan">
+                  Pembayaran sudah tercatat Rp <Rupiah nilai={rep.uang.paid} />, tetapi belum
+                  ditautkan ke pos anggaran mana pun, jadi rincian per pos masih nol. Buka
+                  vendor, lalu hubungkan ke pos anggarannya supaya rincian ini terisi.
+                </p>
+              ) : null}
               <div className="butir-kisi">
                 {rep.uang.pos.slice(0, 6).map((pos) => (
                   <div className="butir" key={pos.id}>
@@ -344,7 +356,7 @@ export default function HalamanLaporan() {
             <p className="keterangan">
               {rep.rundown.total > 0
                 ? `${rep.rundown.total} acara terdaftar, mulai ${jamDari(rep.rundown.jamMulai)} sampai ${jamDari(rep.rundown.jamSelesai)}`
-                : "Belum ada susunan acara rundown."}
+                : "Belum ada rundown."}
             </p>
 
             {rep.rundown.item.length > 0 ? (

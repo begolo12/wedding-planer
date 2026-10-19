@@ -198,7 +198,7 @@ export default function HalamanVendor() {
       </div>
 
       {/* Susunan dua kolom: daftar vendor di kolom utama, ringkasan keuangan
-          di rel kanan (DESIGN.md komposisi desktop poin 3). Di bawah 1023px
+          di rel kanan satu kolom isi plus satu rel ringkasan di layar lebar. Di bawah 1023px
           tetap satu kolom, seperti contoh di /tamu/impor. */}
       <div className="grid-daftar">
       {/* Satu panel untuk tab, saringan, dan daftar vendor. */}
@@ -219,7 +219,7 @@ export default function HalamanVendor() {
         <input
           type="search"
           className="isian"
-          placeholder="Cari nama vendor atau kontak..."
+          placeholder="Cari nama vendor atau kontak…"
           aria-label="Cari vendor"
           value={kataKunci}
           onChange={(e) => setKataKunci(e.target.value)}
@@ -371,7 +371,7 @@ export default function HalamanVendor() {
 
       {/* Rel kanan: ringkasan keuangan vendor. Isi rel hanya ringkasan atau
           aksi cepat, jadi kartu rekap yang pindah ke sini, bukan daftarnya
-          (DESIGN.md komposisi desktop poin 3). */}
+          satu kolom isi plus satu rel ringkasan di layar lebar. */}
       {vendors.length > 0 ? (
         <aside className="rel-samping">
           <div className="rekap">
@@ -498,7 +498,7 @@ export default function HalamanVendor() {
               className="tombol tombol-utama"
               disabled={sedangSimpan}
             >
-              {sedangSimpan ? "Menyimpan..." : "Simpan"}
+              {sedangSimpan ? "Menyimpan…" : "Simpan"}
             </button>
           </div>
         </form>

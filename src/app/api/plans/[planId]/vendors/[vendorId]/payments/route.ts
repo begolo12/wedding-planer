@@ -5,6 +5,7 @@ import { payments, vendors } from "@/db/schema";
 import { bacaJson, bungkus, idUuid, tidakDitemukan } from "@/lib/galat";
 import { konteksPlan } from "@/lib/api";
 import { batasi } from "@/lib/batas";
+import { HEADER_KUNCI, sekaliPerKunci } from "@/lib/idempotensi";
 import { skemaPembayaran } from "@/lib/skema";
 
 type Params = { params: Promise<{ planId: string; vendorId: string }> };
@@ -53,18 +54,23 @@ export const POST = bungkus(async (req: Request, { params }: Params) => {
 
   const isi = skemaPembayaran.parse(await bacaJson(req));
 
-  const [baris] = await db
-    .insert(payments)
-    .values({
-      planId,
-      vendorId,
-      amount: isi.amount,
-      paidAt: isi.paidAt,
-      method: isi.method,
-      isFinal: isi.isFinal,
-      notes: isi.notes ?? null,
-    })
-    .returning();
+  // Kunci idempotency wajib di sini: kiriman ulang dari antrean luring tidak
+  // boleh mencatat pembayaran yang sama dua kali. Catatan uang yang dobel
+  // membuat sisa tagihan salah dan lebih buruk daripada gagal terkirim.
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    const [baris] = await db
+      .insert(payments)
+      .values({
+        planId,
+        vendorId,
+        amount: isi.amount,
+        paidAt: isi.paidAt,
+        method: isi.method,
+        isFinal: isi.isFinal,
+        notes: isi.notes ?? null,
+      })
+      .returning();
 
-  return NextResponse.json({ payment: baris }, { status: 201 });
+    return NextResponse.json({ payment: baris }, { status: 201 });
+  });
 });

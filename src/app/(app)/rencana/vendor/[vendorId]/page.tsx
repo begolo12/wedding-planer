@@ -552,7 +552,7 @@ export default function HalamanDetailVendor() {
               className="tombol tombol-utama"
               disabled={sedangSimpanBayar}
             >
-              {sedangSimpanBayar ? "Menyimpan..." : "Simpan pembayaran"}
+              {sedangSimpanBayar ? "Menyimpan…" : "Simpan pembayaran"}
             </button>
           </div>
         </form>
@@ -645,7 +645,7 @@ export default function HalamanDetailVendor() {
               className="tombol tombol-utama"
               disabled={sedangSimpanVendor}
             >
-              {sedangSimpanVendor ? "Menyimpan..." : "Simpan"}
+              {sedangSimpanVendor ? "Menyimpan…" : "Simpan"}
             </button>
           </div>
         </form>

@@ -180,7 +180,7 @@ export default function HalamanHariH() {
     if (!planId) return;
 
     if (!form.judul.trim()) {
-      setFormGalat("Nama susunan acara wajib diisi.");
+      setFormGalat("Nama rundown wajib diisi.");
       return;
     }
 
@@ -366,7 +366,7 @@ export default function HalamanHariH() {
     <div className="hari-h">
       {/* Kepala halaman: judul di kiri, satu aksi utama di kanan. "Tambah
           acara" dipindah ke sini dari toolbar supaya layar ini punya satu
-          tombol utama saja (DESIGN.md komposisi desktop poin 11). */}
+          tombol utama saja satu aksi utama per layar. */}
       <div className="kepala-halaman">
         <div>
           <h1>Rundown hari-H</h1>
@@ -471,7 +471,7 @@ export default function HalamanHariH() {
       {items.length === 0 ? (
         <Kosong
           keadaan="Belum ada acara."
-          jalanKeluar="Tambahkan susunan acara, dari persiapan sampai acaranya selesai."
+          jalanKeluar="Tambahkan rundown, dari persiapan sampai acaranya selesai."
         >
           <div className="hari-h-kosong-aksi">
             {bisaUbah ? (
@@ -486,14 +486,14 @@ export default function HalamanHariH() {
                 {/* Kepala halaman sudah memakai tombol utama "Tambah acara".
                     Memasang template dan menyusun manual adalah dua cara
                     berbeda menuju rundown pertama, jadi keduanya sekunder
-                    (DESIGN.md komposisi desktop poin 11). */}
+                    satu aksi utama per layar. */}
                 <button
                   type="button"
                   className="tombol tombol-sekunder"
                   disabled={sedangPasangTemplate}
                   onClick={pasangTemplateStandar}
                 >
-                  {sedangPasangTemplate ? "Memasang..." : "Pakai template rundown"}
+                  {sedangPasangTemplate ? "Memasang…" : "Pakai template rundown"}
                 </button>
                 <button type="button" className="tombol tombol-halus" onClick={bukaTambah}>
                   Buat manual dari awal
@@ -506,7 +506,7 @@ export default function HalamanHariH() {
         <>
           {/* Satu panel untuk lompat jam dan daftar acara, supaya keadaan
               kosong tidak lagi mengambang di kanvas kosong
-              (DESIGN.md komposisi desktop poin 5 dan 6). */}
+              (satu keadaan kosong dan gagal per layar, masing-masing dengan satu jalan keluar). */}
           <div className="panel-daftar" aria-label="Daftar acara rundown">
             <div className="panel-daftar-kepala">
               <h2 className="label-bagian">Susunan Acara</h2>
@@ -622,7 +622,7 @@ export default function HalamanHariH() {
         onTutup={() => setLembarBuka(false)}
       >
         <form onSubmit={simpan} noValidate className="tumpuk-sedang">
-          <Isian label="Nama susunan acara" id="formJudul" galat={formGalat ?? undefined}>
+          <Isian label="Nama rundown" id="formJudul" galat={formGalat ?? undefined}>
             <input
               id="formJudul"
               className="isian"
@@ -709,7 +709,7 @@ export default function HalamanHariH() {
               className="tombol tombol-utama"
               disabled={sedangSimpan}
             >
-              {sedangSimpan ? "Menyimpan..." : "Simpan acara"}
+              {sedangSimpan ? "Menyimpan…" : "Simpan acara"}
             </button>
           </div>
         </form>

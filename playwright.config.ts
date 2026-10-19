@@ -47,6 +47,11 @@ export default defineConfig({
     // sudah disediakan untuk itu.
     env: {
       BETTER_AUTH_TRUSTED_ORIGINS: `http://localhost:${PORT},http://127.0.0.1:${PORT}`,
+      // Suite penuh mengompilasi seluruh route secara berurutan, dan heap
+      // bawaan 1 GB habis di tengah jalan. Tanpa ini server uji mati dengan
+      // "Ineffective mark-compacts near heap limit" lalu dua spec terakhir
+      // gagal dengan ECONNRESET. Terukur 19 Oktober 2026.
+      BATCH_DEV_MB: "2048",
     },
   },
 });

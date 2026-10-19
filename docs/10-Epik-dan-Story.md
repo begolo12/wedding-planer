@@ -62,7 +62,7 @@ E1 sampai E3 harus dikerjakan berurutan. E4 sampai E6 bisa setelah E3 selesai. E
 - **Ukuran:** satu hari
 - **Prioritas:** P0
 - **Selesai kalau:** token warna dan font ada di satu file, mode terang dan gelap keduanya terpasang
-- **Diterima kalau:** warnanya persis sama dengan `DESIGN.md`, mode gelap dibaca dengan kontras 4,5:1
+- **Diterima kalau:** warnanya persis sama dengan `docs/21-Arah-Tampilan.md`, mode gelap dibaca dengan kontras 4,5:1
 
 ### Story E1.3. Tema tanpa kedipan warna
 

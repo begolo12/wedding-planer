@@ -90,6 +90,25 @@ Satu-satunya endpoint tanpa sesi. Balasannya sengaja tidak membaca database: kal
 
 ---
 
+## Publik
+
+| Endpoint | Method | Body / Query | Returns |
+|---|---|---|---|
+| `/api/public/share/:token` | `GET` | - | Isi tautan baca-saja, tanpa sesi |
+
+Endpoint ini satu-satunya yang membalas data plan tanpa login, karena yang membukanya keluarga, bukan pengguna aplikasi. Token dipakai apa adanya sebagai kunci.
+
+Balasannya punya dua bentuk menurut asal token:
+
+| Tipe | Isi |
+|---|---|
+| `laporan` | Tautan dari `/report/links`. `target: "keluarga"` hanya berisi jadwal, rundown, dan busana; `target: "laporan"` berisi laporan penuh |
+| `pengumuman` | Tautan dari `/announcements/:id/share`. Hanya pengumuman yang sudah terbit (`publishedAt` terisi) |
+
+Plan yang sudah dihapus lembut atau token yang tidak ada sama-sama dibalas `NOT_FOUND` dengan pesan yang sama, supaya penebak tidak bisa membedakan "tokennya benar tapi sudah dicabut" dari "tokennya salah" (`src/app/api/public/share/[token]/route.ts`).
+
+---
+
 ## Plans
 
 | Endpoint | Method | Body / Query | Returns |
@@ -175,11 +194,13 @@ Satu-satunya endpoint tanpa sesi. Balasannya sengaja tidak membaca database: kal
 | `/api/plans/:planId/rundown/:id` | `PATCH`, `DELETE` | Item terbaru atau 204 |
 | `/api/plans/:planId/outfits` | `GET`, `POST` | Daftar atau item baru |
 | `/api/plans/:planId/outfits/:id` | `PATCH`, `DELETE` | Item terbaru atau 204 |
-| `/api/plans/:planId/announcements` | `GET`, `POST` | Daftar atau pengumuman baru |
+| `/api/plans/:planId/announcements` | `GET`, `POST`, `PATCH` | Daftar, pengumuman baru, atau terbit massal |
 | `/api/plans/:planId/announcements/:id` | `PATCH`, `DELETE` | Pengumuman terbaru atau 204 |
 | `/api/plans/:planId/announcements/:id/share` | `POST` | `{ url }` |
 
 `/share` mengembalikan tautan baca-saja. Endpoint ini butuh login karena membuat tautan mengubah data, tapi tautan yang dihasilkan tidak butuh login untuk dibuka.
+
+`PATCH /announcements` menerbitkan banyak pengumuman sekaligus. Body: `{ audience?, publishAll? }`, dan salah satunya wajib diisi. Dipakai menjelang hari-H supaya crew tidak membuka satu per satu di lokasi acara.
 
 Field `target` menentukan isi tautan. `keluarga` membuka Info untuk Keluarga, `laporan` membuka Laporan. Tanpa `target`, yang dibuka Info untuk Keluarga, sama seperti sebelumnya.
 
@@ -190,7 +211,7 @@ Field `target` menentukan isi tautan. `keluarga` membuka Info untuk Keluarga, `l
 | Endpoint | Method | Returns |
 |---|---|---|
 | `/api/plans/:planId/report` | `GET` | Laporan keadaan, sudah dihitung semua |
-| `/api/plans/:planId/report/share-text` | `POST` | `{ text, length }` |
+| `/api/plans/:planId/report/share-text` | `POST` | `{ text, length, limit, truncated, lines, variant, waUrl }` |
 | `/api/plans/:planId/report/links` | `GET`, `POST` | Daftar tautan, atau tautan baru |
 | `/api/plans/:planId/report/links/:id` | `DELETE` | 204 |
 

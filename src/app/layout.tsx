@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import { Plus_Jakarta_Sans, Be_Vietnam_Pro } from "next/font/google";
+import { Anton, Source_Sans_3 } from "next/font/google";
 import { NAMA_PRODUK, NAMA_PRODUK_PENDEK } from "@/lib/konstanta";
 import "./globals.css";
 /*
@@ -13,22 +13,32 @@ import "./globals.css";
 import "./cetak.css";
 
 /*
- * Dua keluarga huruf, satu untuk judul dan satu untuk isi, sesuai DESIGN.md.
- * Plus Jakarta Sans memegang judul dan label, Be Vietnam Pro memegang isi.
- * Nama variabelnya tetap `--font-judul` dan `--font-teks` supaya globals.css
+ * Dua keluarga huruf, dibagi menurut pekerjaan bukan menurut tingkat kepentingan.
+ *
+ * Anton memegang satu hal saja: angka dan kata hitung mundur, plus nama produk.
+ * Bentuknya tinggi, rapat, dan punya tekanan vertikal, jadi "37" terbaca sebagai
+ * angka yang dihitung menuju sesuatu, bukan sebagai teks judul biasa. Anton
+ * tidak punya huruf kecil, jadi tidak pernah dipakai untuk kalimat.
+ *
+ * Source Sans 3 memegang seluruh teks yang dibaca: judul, label, isi, dan angka
+ * di dalam tabel. Ia punya angka tabular, jadi kolom rupiah tetap sejajar.
+ * Dengan begitu angka hitung mundur dan angka rupiah tidak lagi terlihat sama,
+ * dan yang paling penting di layar langsung punya berat sendiri.
+ *
+ * Nama variabel token tetap --font-judul dan --font-teks supaya globals.css
  * tidak perlu tahu keluarga hurufnya apa.
  */
-const plusJakarta = Plus_Jakarta_Sans({
+const anton = Anton({
   subsets: ["latin"],
+  weight: "400",
   display: "swap",
-  variable: "--font-plus-jakarta",
+  variable: "--font-anton",
 });
 
-const beVietnam = Be_Vietnam_Pro({
+const sourceSans = Source_Sans_3({
   subsets: ["latin"],
   display: "swap",
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-be-vietnam",
+  variable: "--font-source-sans",
 });
 
 /**
@@ -49,14 +59,13 @@ export const metadata = {
     statusBarStyle: "default" as const,
   },
 };
-
 export const viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fcf9f5" },
-    { media: "(prefers-color-scheme: dark)", color: "#1a1317" },
+    { media: "(prefers-color-scheme: light)", color: "#F4F2EA" },
+    { media: "(prefers-color-scheme: dark)", color: "#0E0E14" },
   ],
 };
 
@@ -81,15 +90,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     // Peringatan itu memang diharapkan di sini, bukan cacat.
     <html
       lang="id"
-      className={`${plusJakarta.variable} ${beVietnam.variable}`}
+      className={`${anton.variable} ${sourceSans.variable}`}
       suppressHydrationWarning
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: skripTema }} />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-        />
       </head>
       <body>{children}</body>
     </html>

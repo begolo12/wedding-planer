@@ -46,7 +46,7 @@ Rencana sprint di [`docs/11-Delivery-Plan.md`](11-Delivery-Plan.md) memakai 55 h
 | Urutan | Apa yang dikerjakan | Selesai kalau |
 |---|---|---|
 | 1 | Inisialisasi proyek | Perintah dev dan build jalan |
-| 2 | Warna dan tipografi | Warna persis sama seperti `DESIGN.md` |
+| 2 | Warna dan tipografi | Warna persis sama seperti `docs/21-Arah-Tampilan.md` |
 | 3 | Tema tanpa kedip | Tidak ada layar putih sesaat di mode gelap |
 | 4 | Layout dan navigasi | Semua halaman bisa dicapai |
 | 5 | Database dan migrasi | Migrasi jalan di database kosong |
@@ -136,7 +136,7 @@ Lima hal ini inti produk. Kalau semuanya harus dipotong, lebih baik menunda rili
 | Total anggaran salah | Ada pembayaran tanpa vendor | Cek aturan data di `03-Data-Model.md` |
 | Offline tidak sinkron | Antrean tidak urut | Lihat urutan kirim di `07-PWA.md` |
 | Lambat di HP tapi cepat di laptop | Aset terlalu besar | Lihat Story E8.1 |
-| Mode gelap tidak terbaca | Warna dibalik tanpa diperiksa | Lihat aturan mode gelap di `DESIGN.md` |
+| Mode gelap tidak terbaca | Warna dibalik tanpa diperiksa | Lihat aturan mode gelap di `docs/21-Arah-Tampilan.md` |
 | Plan orang lain kelihatan | Kepemilikan tidak dicek | Berhenti, ini bukan bug kecil |
 
 Baris terakhir itu bukan bug kecil. Kalau sampai terlihat, yang lain menunggu sampai selesai.

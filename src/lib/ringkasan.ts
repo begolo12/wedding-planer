@@ -1,9 +1,10 @@
 import { and, asc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { budgetItems, guests, milestones, payments, plans, tasks, vendors } from "@/db/schema";
+import { budgetItems, guests, milestones, payments, plans, rundownItems, tasks, vendors } from "@/db/schema";
 import { kelompokkan, tanggalHariBesar, type KelompokWaktu } from "./plan";
 import { belumSelesai } from "./server-plan";
 import { hitungMundur, selisihHari } from "./format";
+import { LABEL_KATEGORI_UANG, type KategoriUang } from "./konstanta";
 import { ringkasTamu } from "./tamu";
 
 /**
@@ -73,13 +74,16 @@ export type RingkasanPlan = {
     type: string;
     selisihHari: number;
   } | null;
+  /** Empat item rundown paling awal, supaya Beranda cukup satu request.
+   * Tanpa ini Beranda butuh request kedua ke /rundown setelah /overview. */
+  rundownSingkat: { id: string; title: string; startTime: string; location: string | null }[];
 };
 
 export async function ringkasanPlan(planId: string): Promise<RingkasanPlan> {
   const [plan] = await db.select().from(plans).where(eq(plans.id, planId)).limit(1);
 
   // Semua query di bawah punya filter planId, sesuai aturan AGENTS.md bagian 5.
-  const [semuaTugas, posAnggaran, semuaPembayaran, daftarMilestone, daftarVendor, barisTamu] =
+  const [semuaTugas, posAnggaran, semuaPembayaran, daftarMilestone, daftarVendor, barisTamu, daftarRundown] =
     await Promise.all([
       db
         .select({
@@ -94,7 +98,10 @@ export async function ringkasanPlan(planId: string): Promise<RingkasanPlan> {
           nominal: budgetItems.plannedAmount,
         })
         .from(tasks)
-        .leftJoin(budgetItems, eq(tasks.budgetItemId, budgetItems.id))
+        .leftJoin(
+          budgetItems,
+          and(eq(tasks.budgetItemId, budgetItems.id), eq(budgetItems.planId, planId)),
+        )
         .where(eq(tasks.planId, planId))
         .orderBy(asc(tasks.dueDate), asc(tasks.sortOrder)),
       db
@@ -142,6 +149,19 @@ export async function ringkasanPlan(planId: string): Promise<RingkasanPlan> {
         })
         .from(guests)
         .where(eq(guests.planId, planId)),
+      // Empat item rundown paling awal untuk kartu Beranda. Diambil di sini
+      // supaya Beranda cukup satu request, bukan dua berurutan.
+      db
+        .select({
+          id: rundownItems.id,
+          title: rundownItems.title,
+          startTime: rundownItems.startTime,
+          location: rundownItems.location,
+        })
+        .from(rundownItems)
+        .where(eq(rundownItems.planId, planId))
+        .orderBy(asc(rundownItems.startTime))
+        .limit(4),
     ]);
 
   const rekapTamu = ringkasTamu(barisTamu);
@@ -219,7 +239,9 @@ export async function ringkasanPlan(planId: string): Promise<RingkasanPlan> {
     vendorUtama: daftarVendor.slice(0, 3).map((v) => ({
       id: v.id,
       name: v.name,
-      category: v.category,
+      // Kategori tersimpan sebagai slug kecil ("katering"); tampilkan labelnya
+      // sesuai Naskah Teks, bukan slug mentah.
+      category: LABEL_KATEGORI_UANG[v.category as KategoriUang] ?? v.category,
       phone: v.phone ?? null,
       status: v.status,
     })),
@@ -243,6 +265,12 @@ export async function ringkasanPlan(planId: string): Promise<RingkasanPlan> {
           selisihHari: selisihHari(berikut.eventDate) ?? 0,
         }
       : null,
+    rundownSingkat: daftarRundown.map((r) => ({
+      id: r.id,
+      title: r.title,
+      startTime: r.startTime,
+      location: r.location ?? null,
+    })),
   };
 }
 

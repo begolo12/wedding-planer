@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { tasks } from "@/db/schema";
 import { bacaJson, bungkus } from "@/lib/galat";
 import { konteksPlan } from "@/lib/api";
+import { HEADER_KUNCI, sekaliPerKunci } from "@/lib/idempotensi";
 
 type Params = { params: Promise<{ planId: string }> };
 
@@ -19,6 +20,9 @@ const skemaUrutan = z.object({
  * cuma "tugas A pindah ke atas B", satu request yang gagal di tengah jalan
  * bisa meninggalkan urutan yang setengah berubah, dan tidak ada cara tahu
  * mana yang sudah masuk. Daftar lengkap selalu bisa dikirim ulang.
+ *
+ * Ditambah kunci idempotency supaya kiriman ulang dari antrean luring dibalas
+ * tanpa menulis ulang seluruh urutan.
  */
 export const POST = bungkus(async (req: Request, { params }: Params) => {
   const { planId } = await params;
@@ -26,24 +30,26 @@ export const POST = bungkus(async (req: Request, { params }: Params) => {
 
   const { taskIds } = skemaUrutan.parse(await bacaJson(req));
 
-  // Hanya id yang memang milik plan ini yang boleh diubah urutannya.
-  const milikSaya = await db
-    .select({ id: tasks.id })
-    .from(tasks)
-    .where(and(eq(tasks.planId, planId), inArray(tasks.id, taskIds)));
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    // Hanya id yang memang milik plan ini yang boleh diubah urutannya.
+    const milikSaya = await db
+      .select({ id: tasks.id })
+      .from(tasks)
+      .where(and(eq(tasks.planId, planId), inArray(tasks.id, taskIds)));
 
-  const boleh = new Set(milikSaya.map((t) => t.id));
+    const boleh = new Set(milikSaya.map((t) => t.id));
 
-  await Promise.all(
-    taskIds
-      .filter((id) => boleh.has(id))
-      .map((id, urutan) =>
-        db
-          .update(tasks)
-          .set({ sortOrder: urutan })
-          .where(and(eq(tasks.planId, planId), eq(tasks.id, id))),
-      ),
-  );
+    await Promise.all(
+      taskIds
+        .filter((id) => boleh.has(id))
+        .map((id, urutan) =>
+          db
+            .update(tasks)
+            .set({ sortOrder: urutan })
+            .where(and(eq(tasks.planId, planId), eq(tasks.id, id))),
+        ),
+    );
 
-  return new NextResponse(null, { status: 204 });
+    return new NextResponse(null, { status: 204 });
+  });
 });

@@ -335,7 +335,7 @@ export default function HalamanTamu() {
     <div className="tamu">
       {/* Kepala halaman: judul di kiri, satu aksi utama di kanan. Aksi yang
           sama tidak diulang di tombol melayang, karena `.tamu-fab` sudah
-          disembunyikan di `expanded` (DESIGN.md komposisi desktop poin 11). */}
+          disembunyikan di `expanded` satu aksi utama per layar. */}
       <div className="kepala-halaman">
         <div>
           <h1>Tamu</h1>
@@ -372,7 +372,7 @@ export default function HalamanTamu() {
       ) : null}
 
       {/* Susunan dua kolom: daftar di kolom utama, ringkasan di rel kanan
-          (DESIGN.md komposisi desktop poin 3). Di bawah 1023px tetap satu
+          satu kolom isi plus satu rel ringkasan di layar lebar. Di bawah 1023px tetap satu
           kolom, seperti contoh di /tamu/impor. */}
       <div className="grid-daftar">
       {/* Ringkasan tamu */}
@@ -396,11 +396,15 @@ export default function HalamanTamu() {
               </p>
             </div>
 
-            {/* Lencana bulat: bagian yang sudah pasti hadir */}
+            {/* Lencana bulat: bagian yang sudah pasti hadir.
+                Angka orangnya ikut ditulis di bawah persen supaya "59%"
+                tidak menggantung tanpa pembagi. Sebelumnya cincin ini hanya
+                berbunyi "59% hadir" dan pembacanya harus menebak 59 persen
+                dari apa. */}
             <div
               className="tamu-lencana"
               role="img"
-              aria-label={`${persenHadir} persen tamu sudah konfirmasi hadir`}
+              aria-label={`${summary.hadir} dari ${summary.orang} orang sudah konfirmasi hadir, ${persenHadir} persen`}
             >
               <svg viewBox="0 0 80 80" width="80" height="80" aria-hidden="true">
                 <circle cx="40" cy="40" r="34" className="tamu-lencana-jalur" />
@@ -415,7 +419,9 @@ export default function HalamanTamu() {
               </svg>
               <span className="tamu-lencana-teks">
                 <strong>{persenHadir}%</strong>
-                <span>hadir</span>
+                <span className="tamu-lencana-pembagi">
+                  {summary.hadir} dari {summary.orang} orang
+                </span>
               </span>
             </div>
           </div>
@@ -461,7 +467,7 @@ export default function HalamanTamu() {
       {/* Satu panel untuk pencarian, saringan, daftar, dan keadaan kosongnya,
           supaya keadaan kosong tidak lagi mengambang di kanvas kosong dan
           perataannya sama dengan baris saringan di atasnya
-          (DESIGN.md komposisi desktop poin 5 dan 6). */}
+          (satu keadaan kosong dan gagal per layar, masing-masing dengan satu jalan keluar). */}
       <div className="panel-daftar" aria-label="Daftar tamu">
         <div className="panel-daftar-kepala">
           <h2 className="label-bagian">Daftar Tamu</h2>
@@ -479,7 +485,7 @@ export default function HalamanTamu() {
             type="search"
             className="isian tamu-cari"
             aria-label="Cari nama tamu"
-            placeholder="Cari nama atau nomor HP..."
+            placeholder="Cari nama atau nomor HP…"
             value={cari}
             onChange={(e) => setCari(e.target.value)}
           />
@@ -568,7 +574,7 @@ export default function HalamanTamu() {
                     Dua jalan masuk ke tambah itu, satu per satu dan tempel
                     daftar, adalah dua cara berbeda, jadi di keadaan kosong
                     keduanya sekunder supaya hanya ada satu tombol utama
-                    (DESIGN.md komposisi desktop poin 11). */}
+                    satu aksi utama per layar. */}
                 <Link className="tombol tombol-sekunder" href="/tamu/impor">
                   Tempel daftar
                 </Link>
@@ -787,11 +793,10 @@ export default function HalamanTamu() {
         <button
           type="button"
           className="tamu-fab tanpa-cetak"
-          aria-label="Tambah satu tamu baru"
+          aria-label="Tambah tamu"
           onClick={bukaTambah}
         >
-          <IkonTambahTamu size={18} />
-          Tambah tamu
+          <IkonTambahTamu size={22} />
         </button>
       ) : null}
 
@@ -910,7 +915,7 @@ export default function HalamanTamu() {
               className="tombol tombol-utama"
               disabled={sedangSimpan}
             >
-              {sedangSimpan ? "Menyimpan..." : "Simpan data tamu"}
+              {sedangSimpan ? "Menyimpan…" : "Simpan data tamu"}
             </button>
           </div>
         </form>

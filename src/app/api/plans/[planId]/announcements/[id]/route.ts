@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { announcements } from "@/db/schema";
 import { bacaJson, bungkus, idUuid, tidakDitemukan } from "@/lib/galat";
 import { konteksPlan } from "@/lib/api";
+import { HEADER_KUNCI, sekaliPerKunci } from "@/lib/idempotensi";
 import { skemaPengumumanUbah } from "@/lib/skema";
 
 type Params = { params: Promise<{ planId: string; id: string }> };
@@ -34,27 +35,31 @@ export const PATCH = bungkus(async (req: Request, { params }: Params) => {
 
   const isi = skemaPengumumanUbah.parse(await bacaJson(req));
 
-  const [baris] = await db
-    .update(announcements)
-    .set({
-      title: isi.title,
-      body: isi.body,
-      audience: isi.audience,
-      isPinned: isi.isPinned,
-    })
-    .where(and(eq(announcements.planId, planId), eq(announcements.id, id)))
-    .returning();
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    const [baris] = await db
+      .update(announcements)
+      .set({
+        title: isi.title,
+        body: isi.body,
+        audience: isi.audience,
+        isPinned: isi.isPinned,
+      })
+      .where(and(eq(announcements.planId, planId), eq(announcements.id, id)))
+      .returning();
 
-  return NextResponse.json({ announcement: baris });
+    return NextResponse.json({ announcement: baris });
+  });
 });
 
-export const DELETE = bungkus(async (_req: Request, { params }: Params) => {
+export const DELETE = bungkus(async (req: Request, { params }: Params) => {
   const { planId, id } = await params;
   await konteksPlan(planId);
   await ambil(planId, id);
 
-  await db
-    .delete(announcements)
-    .where(and(eq(announcements.planId, planId), eq(announcements.id, id)));
-  return new NextResponse(null, { status: 204 });
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    await db
+      .delete(announcements)
+      .where(and(eq(announcements.planId, planId), eq(announcements.id, id)));
+    return new NextResponse(null, { status: 204 });
+  });
 });

@@ -45,7 +45,7 @@ test.describe("kontrak visual dasar", () => {
       await expect(page.locator('[data-visual-screen="auth-card"]')).toBeVisible();
       await expect(page.locator("form.auth-form")).toBeVisible();
       await expect(page.locator("body")).toHaveJSProperty("scrollWidth", 390);
-      await expect(page.locator(".auth-tombol-google")).toHaveCSS("border-radius", "16px");
+      await expect(page.locator(".auth-tombol-google")).toHaveCSS("border-radius", "14px");
 
       const tinggiTombol = await page.locator("form.auth-form button[type=submit]").evaluate(
         (button) => button.getBoundingClientRect().height,

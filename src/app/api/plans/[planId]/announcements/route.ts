@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { announcements } from "@/db/schema";
 import { bacaJson, bungkus, tidakDitemukan } from "@/lib/galat";
 import { konteksPlan } from "@/lib/api";
+import { HEADER_KUNCI, sekaliPerKunci } from "@/lib/idempotensi";
 import { skemaPengumuman, skemaTerbitPengumuman } from "@/lib/skema";
 import { buatToken } from "@/lib/tautan";
 
@@ -43,20 +44,22 @@ export const POST = bungkus(async (req: Request, { params }: Params) => {
 
   const isi = skemaPengumuman.parse(await bacaJson(req));
 
-  const [baris] = await db
-    .insert(announcements)
-    .values({
-      planId,
-      title: isi.title,
-      body: isi.body,
-      audience: isi.audience,
-      isPinned: isi.isPinned,
-      publishedAt: isi.publishedAt ?? null,
-      shareToken: buatToken(),
-    })
-    .returning();
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    const [baris] = await db
+      .insert(announcements)
+      .values({
+        planId,
+        title: isi.title,
+        body: isi.body,
+        audience: isi.audience,
+        isPinned: isi.isPinned,
+        publishedAt: isi.publishedAt ?? null,
+        shareToken: buatToken(),
+      })
+      .returning();
 
-  return NextResponse.json({ announcement: baris }, { status: 201 });
+    return NextResponse.json({ announcement: baris }, { status: 201 });
+  });
 });
 
 /**
@@ -79,16 +82,18 @@ export const PATCH = bungkus(async (req: Request, { params }: Params) => {
   // database 500, padahal kontraknya 422.
   const isi = skemaTerbitPengumuman.parse(await bacaJson(req));
 
-  const saringan = [eq(announcements.planId, planId)];
-  if (isi.audience) saringan.push(eq(announcements.audience, isi.audience));
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    const saringan = [eq(announcements.planId, planId)];
+    if (isi.audience) saringan.push(eq(announcements.audience, isi.audience));
 
-  const berubah = await db
-    .update(announcements)
-    .set({ publishedAt: new Date() })
-    .where(and(...saringan))
-    .returning({ id: announcements.id });
+    const berubah = await db
+      .update(announcements)
+      .set({ publishedAt: new Date() })
+      .where(and(...saringan))
+      .returning({ id: announcements.id });
 
-  if (berubah.length === 0) throw tidakDitemukan("Pengumuman");
+    if (berubah.length === 0) throw tidakDitemukan("Pengumuman");
 
-  return NextResponse.json({ published: berubah.length });
+    return NextResponse.json({ published: berubah.length });
+  });
 });

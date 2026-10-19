@@ -330,7 +330,7 @@ export default function HalamanBagikanPublik({
               ))}
             </div>
           ) : (
-            <p className="bagikan-kosong">Belum ada susunan acara rundown yang dimasukkan.</p>
+            <p className="bagikan-kosong">Belum ada rundown yang dimasukkan.</p>
           )}
         </section>
 

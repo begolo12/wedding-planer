@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { announcements } from "@/db/schema";
 import { bacaJson, bungkus, idUuid, tidakDitemukan } from "@/lib/galat";
 import { konteksPlan } from "@/lib/api";
+import { HEADER_KUNCI, sekaliPerKunci } from "@/lib/idempotensi";
 import { buatToken, urlTautan } from "@/lib/tautan";
 import { skemaBagikanPengumuman } from "@/lib/skema";
 
@@ -41,20 +42,25 @@ export const POST = bungkus(async (req: Request, { params }: Params) => {
   // diminta, yang mematikan tautan yang sudah disebar ke keluarga.
   const isi = skemaBagikanPengumuman.parse(await bacaJson(req));
 
-  let token = baris.shareToken;
-  if (isi.rotate) {
-    token = buatToken();
-    await db
-      .update(announcements)
-      .set({ shareToken: token })
-      // Filter planId tetap ikut walau id sudah unik, supaya tidak ada satu
-      // pun query tulis di aplikasi ini yang bisa jalan tanpa planId.
-      .where(and(eq(announcements.planId, planId), eq(announcements.id, id)));
-  }
+  // Dibungkus idempotency: kiriman ulang tombol yang sama tidak boleh memutar
+  // token dua kali, karena token yang baru dibuat lewat kiriman pertama akan
+  // langsung mati oleh kiriman kedua.
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    let token = baris.shareToken;
+    if (isi.rotate) {
+      token = buatToken();
+      await db
+        .update(announcements)
+        .set({ shareToken: token })
+        // Filter planId tetap ikut walau id sudah unik, supaya tidak ada satu
+        // pun query tulis di aplikasi ini yang bisa jalan tanpa planId.
+        .where(and(eq(announcements.planId, planId), eq(announcements.id, id)));
+    }
 
-  return NextResponse.json({
-    url: urlTautan(token),
-    rotated: isi.rotate,
-    published: baris.publishedAt !== null,
+    return NextResponse.json({
+      url: urlTautan(token),
+      rotated: isi.rotate,
+      published: baris.publishedAt !== null,
+    });
   });
 });

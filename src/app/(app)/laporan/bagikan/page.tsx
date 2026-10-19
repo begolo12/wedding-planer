@@ -374,7 +374,7 @@ export default function HalamanBagikanLaporan() {
             ) : null}
 
             <div className="kotak-mono">
-              {sedangMenyusun ? "Menyusun teks terbaru..." : teksHasil}
+              {sedangMenyusun ? "Menyusun teks terbaru…" : teksHasil}
             </div>
 
             <div className="aksi-baris">
@@ -426,7 +426,7 @@ export default function HalamanBagikanLaporan() {
               className="tombol tombol-utama"
               disabled={sedangBuatTautan}
             >
-              {sedangBuatTautan ? "Membuat..." : "Buat tautan"}
+              {sedangBuatTautan ? "Membuat…" : "Buat tautan"}
             </button>
           </div>
         </form>

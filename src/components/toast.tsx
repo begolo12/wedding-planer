@@ -93,7 +93,7 @@ export function DialogKonfirmasi({
           onClick={onYa}
           disabled={sedangJalan}
         >
-          {sedangJalan ? "Sebentar..." : tombolYa}
+          {sedangJalan ? "Sebentar…" : tombolYa}
         </button>
       </div>
     </dialog>

@@ -13,8 +13,15 @@ import { Gagal } from "@/components/states";
  * Gaya inline di bawah ini sengaja ditulis ulang seadanya: global-error
  * menggantikan layout root, dan `globals.css` tidak dijamin ikut termuat saat
  * root gagal. Tanpa gaya cadangan ini, layar bisa tampil tanpa warna dan
- * tanpa jarak, dan pesannya jadi sulit dibaca. Warnanya sama dengan token
- * di `globals.css`, bukan warna baru.
+ * tanpa jarak, dan pesannya jadi sulit dibaca. Dua nilai warnanya diambil
+ * dari token `--color-base` dan `--color-ink` di `globals.css`, bukan warna
+ * baru, supaya layar gagal tidak terasa asing dari aplikasi.
+ *
+ * Mode gelap tidak bisa mengandalkan atribut `data-theme`, karena skrip tema
+ * ada di layout root yang justru sedang gagal. Karena itu pasangan gelapnya
+ * ditulis lewat `<style>` dengan `prefers-color-scheme`, satu-satunya sinyal
+ * tema yang masih bisa dipercaya di sini. Tanpa ini, layar gagal menyala
+ * terang di perangkat gelap.
  */
 export default function GlobalError({
   reset,
@@ -24,12 +31,21 @@ export default function GlobalError({
 }) {
   return (
     <html lang="id">
+      <head>
+        <style
+          dangerouslySetInnerHTML={{
+            __html:
+              "@media (prefers-color-scheme: dark){body{background:#0e0e14;color:#edebe6}}",
+          }}
+        />
+      </head>
       <body
         style={{
           margin: 0,
           padding: "48px 16px",
-          background: "#fffdf9",
-          color: "#4a3b43",
+          background: "#f4f2ea",
+          color: "#1b1b21",
+          colorScheme: "light dark",
           fontFamily: "system-ui, -apple-system, sans-serif",
           fontSize: "16px",
           lineHeight: 1.5,

@@ -2,7 +2,7 @@
 
 Semua kalimat yang muncul di aplikasi ini ditulis di sini satu per satu, supaya tidak ada yang terlewat. Teks yang ditulis langsung di kode adalah hasil karangan saat sedang terburu-buru.
 
-Nada bahasa sudah ditetapkan di [`DESIGN.md`](../DESIGN.md) bagian 2. Dokumen ini tidak mengulang aturan nada, tapi jadi tempat teks yang jadi.
+Nada bahasa sudah ditetapkan di [`docs/21-Arah-Tampilan.md`](21-Arah-Tampilan.md) bagian 8. Dokumen ini tidak mengulang aturan nada, tapi jadi tempat teks yang jadi.
 
 ---
 
@@ -194,7 +194,7 @@ Setiap layar kosong menyebut apa yang belum ada, lalu memberi jalan keluar. Kali
 | Pembayaran | "Belum ada pembayaran untuk vendor ini. Catat DP pertama di sini." |
 | Tamu | "Belum ada tamu. Tambahkan nama satu per satu, atau tempel dari daftar yang sudah ada." |
 | Undangan | "Belum ada undangan. Buat undangan, lalu bagikan tautannya ke tamu." |
-| Rundown | "Belum ada acara. Tambahkan susunan acara, dari persiapan sampai acaranya selesai." |
+| Rundown | "Belum ada acara. Tambahkan rundown, dari persiapan sampai acaranya selesai." |
 | Info keluarga | "Belum ada pengumuman. Tulis satu pengumuman yang perlu dibaca semua orang." |
 | Busana | "Belum ada barang busana. Tambahkan baju yang perlu dijahit atau disewa." |
 | Pencarian | "Tidak ada yang cocok dengan pencarian itu." |

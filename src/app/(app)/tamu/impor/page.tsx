@@ -217,13 +217,13 @@ export default function HalamanImporTamu() {
               className="tombol tombol-utama"
               disabled={sedangPeriksa}
             >
-              {sedangPeriksa ? "Membaca data..." : "Periksa daftar (Lanjut) →"}
+              {sedangPeriksa ? "Membaca data…" : "Periksa daftar (Lanjut) →"}
             </button>
           </div>
         </form>
 
           {/* Rel kanan: format yang dibaca layar ini. Isi rel hanya
-              ringkasan atau aksi cepat (DESIGN.md komposisi desktop poin 3),
+              ringkasan atau aksi cepat satu kolom isi plus satu rel ringkasan di layar lebar,
               jadi penjelasan format ditaruh di sini, bukan di bawah form
               supaya baris isian tidak melebar penuh di desktop. */}
           <aside className="rel-samping">
@@ -256,7 +256,7 @@ export default function HalamanImporTamu() {
         <div className="grid-daftar">
           {/* Kolom utama: pilihan dan daftar pratinjau. Angka rekap dan
               tombol simpan pindah ke rel kanan supaya angka dan tindakannya
-              tidak terpisah (DESIGN.md komposisi desktop poin 3). */}
+              tidak terpisah satu kolom isi plus satu rel ringkasan di layar lebar. */}
           <div className="tumpuk-rapat">
           <label className="pilih-kartu">
             <input
@@ -340,7 +340,7 @@ export default function HalamanImporTamu() {
                 onClick={simpanHasil}
               >
                 {sedangSimpan
-                  ? "Menyimpan ke daftar tamu..."
+                  ? "Menyimpan ke daftar tamu…"
                   : `Simpan ${dipilih.size} tamu ke daftar`}
               </button>
               <button

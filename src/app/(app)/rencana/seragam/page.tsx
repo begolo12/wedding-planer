@@ -299,11 +299,11 @@ export default function HalamanSeragam() {
       </div>
 
       {/* Susunan dua kolom: daftar busana di kolom utama, ringkasan dan
-          aksi anggaran di rel kanan (DESIGN.md komposisi desktop poin 3).
+          aksi anggaran di rel kanan satu kolom isi plus satu rel ringkasan di layar lebar.
           Di bawah 1023px tetap satu kolom, seperti contoh di /tamu/impor. */}
       <div className="grid-daftar">
       {/* Satu panel untuk tab modul, saringan, daftar busana, dan keadaan
-          kosongnya (DESIGN.md komposisi desktop poin 5 dan 6). */}
+          kosongnya (satu keadaan kosong dan gagal per layar, masing-masing dengan satu jalan keluar). */}
       <div className="panel-daftar" aria-label="Daftar barang busana">
         <div className="panel-daftar-kepala">
       <TabRencana />
@@ -493,7 +493,7 @@ export default function HalamanSeragam() {
 
       {/* Rel kanan: ringkasan jumlah busana dan aksi memasukkan biayanya ke
           anggaran. Isi rel hanya ringkasan atau aksi cepat, jadi rekap dan
-          kartu anggaran yang pindah ke sini, bukan daftarnya (DESIGN.md
+          kartu anggaran yang pindah ke sini, bukan daftarnya (docs/21-Arah-Tampilan.md
           komposisi desktop poin 3). */}
       {summary && summary.total > 0 ? (
         <aside className="rel-samping">
@@ -667,7 +667,7 @@ export default function HalamanSeragam() {
               className="tombol tombol-utama"
               disabled={sedangSimpan}
             >
-              {sedangSimpan ? "Menyimpan..." : "Simpan busana"}
+              {sedangSimpan ? "Menyimpan…" : "Simpan busana"}
             </button>
           </div>
         </form>

@@ -56,7 +56,7 @@ type IsiAnggaran = {
 
 // Warna bagian bilah sebaran, dipakai bergiliran.
 //
-// Tiga token saja, sesuai batas "dua warna inti plus satu aksen" di DESIGN.md
+// Tiga token saja, sesuai batas "dua warna inti plus satu aksen" di docs/21-Arah-Tampilan.md
 // bagian 3. Sebelumnya ada sembilan, dan satu layar dengan sembilan keluarga
 // warna membuat tidak ada lagi yang menonjol; legenda tetap ada, jadi warna
 // memang bukan satu-satunya penanda, tapi anggaran warnanya tetap dilanggar.
@@ -363,7 +363,7 @@ export default function HalamanAnggaran() {
     <div className="anggaran">
       {/* Kepala halaman: judul di kiri, satu aksi utama di kanan. Tombol
           melayang disembunyikan di `expanded` supaya aksi yang sama tidak punya
-          dua pemicu (DESIGN.md komposisi desktop poin 11). */}
+          dua pemicu satu aksi utama per layar. */}
       <div className="kepala-halaman">
         <div>
           <h1>Anggaran</h1>
@@ -391,7 +391,7 @@ export default function HalamanAnggaran() {
             disabled={sedangMuatBawaan}
             onClick={pasangPosBawaan}
           >
-            {sedangMuatBawaan ? "Memasang..." : "Muat pos bawaan"}
+            {sedangMuatBawaan ? "Memasang…" : "Muat pos bawaan"}
           </button>
         ) : null}
       </div>
@@ -448,29 +448,23 @@ export default function HalamanAnggaran() {
             </p>
           )}
 
-          <div className="anggaran-realisasi">
-            <div>
-              <span className="anggaran-realisasi-label">Realisasi Dana ({persenTerpakai}%)</span>
-              <span className="anggaran-realisasi-nilai">{rupiah(totals.paid)}</span>
-            </div>
-            <span className="anggaran-realisasi-ket">dari {jumlahKategori} kategori terisi</span>
-          </div>
-
           <div className="anggaran-stat-grid">
             <div className="anggaran-stat-kotak">
               <span className="anggaran-stat-label">Terpakai Saat Ini</span>
               <span className="anggaran-stat-nilai">{rupiah(totals.paid)}</span>
-              <span className="anggaran-stat-ket">{persenTerpakai}% dari rencana</span>
+              <span className="anggaran-stat-ket">
+                {persenTerpakai}% dari rencana, {jumlahKategori} kategori terisi
+              </span>
             </div>
             <div className="anggaran-stat-kotak">
               <span className="anggaran-stat-label">
-                {lewatBatas ? "Defisit Anggaran" : "Sisa Anggaran Aman"}
+                {lewatBatas ? "Defisit Anggaran" : "Sisa Anggaran"}
               </span>
               <span className="anggaran-stat-nilai" data-lewat={lewatBatas ? "ya" : "tidak"}>
                 {rupiah(totals.remaining)}
               </span>
               <span className="anggaran-stat-ket">
-                {lewatBatas ? "Perlu ditambah atau ditekan" : `${persenSisa}% cadangan`}
+                {lewatBatas ? "Perlu ditambah atau ditekan" : `${persenSisa}% dari rencana`}
               </span>
             </div>
           </div>
@@ -487,7 +481,7 @@ export default function HalamanAnggaran() {
 
       {/* Satu panel untuk tab, saringan, daftar pos, dan rincian pengeluaran,
           supaya keadaan kosong tidak lagi mengambang di kanvas kosong
-          (DESIGN.md komposisi desktop poin 5 dan 6). */}
+          (satu keadaan kosong dan gagal per layar, masing-masing dengan satu jalan keluar). */}
       <div className="panel-daftar" aria-label="Daftar anggaran">
         <div className="panel-daftar-kepala">
           <div className="anggaran-tab" role="tablist" aria-label="Bagian anggaran">
@@ -525,7 +519,7 @@ export default function HalamanAnggaran() {
             <input
               type="search"
               className="isian anggaran-cari"
-              placeholder="Cari pos anggaran..."
+              placeholder="Cari pos anggaran…"
               aria-label="Cari pos anggaran"
               value={cari}
               onChange={(e) => setCari(e.target.value)}
@@ -559,14 +553,14 @@ export default function HalamanAnggaran() {
                       Dua jalan menuju penambahan (muat bawaan atau tulis
                       sendiri) jadi dua cara berbeda, jadi di keadaan kosong
                       keduanya sekunder supaya hanya ada satu tombol utama
-                      (DESIGN.md komposisi desktop poin 11). */}
+                      satu aksi utama per layar. */}
                   <button
                     type="button"
                     className="tombol tombol-sekunder"
                     disabled={sedangMuatBawaan}
                     onClick={pasangPosBawaan}
                   >
-                    {sedangMuatBawaan ? "Memasang..." : "Muat pos bawaan"}
+                    {sedangMuatBawaan ? "Memasang…" : "Muat pos bawaan"}
                   </button>
                   <button type="button" className="tombol tombol-sekunder" onClick={bukaTambah}>
                     Tulis pos sendiri
@@ -670,7 +664,7 @@ export default function HalamanAnggaran() {
               jalanKeluar="Catat pembayaran dari halaman vendor supaya rinciannya muncul di sini."
             >
               {/* Mengarahkan ke daftar vendor, bukan menambah apa pun di layar
-                  ini, jadi bukan aksi utama layar (DESIGN.md komposisi desktop
+                  ini, jadi bukan aksi utama layar (
                   poin 11). */}
               <Link className="tombol tombol-sekunder" href="/rencana/vendor">
                 Buka daftar vendor
@@ -803,7 +797,7 @@ export default function HalamanAnggaran() {
               Batal
             </button>
             <button type="submit" className="tombol tombol-utama" disabled={sedangSimpan}>
-              {sedangSimpan ? "Menyimpan..." : "Simpan pos"}
+              {sedangSimpan ? "Menyimpan…" : "Simpan pos"}
             </button>
           </div>
         </form>
@@ -824,11 +818,10 @@ export default function HalamanAnggaran() {
         <button
           type="button"
           className="anggaran-fab tanpa-cetak"
-          aria-label="Tambah pos anggaran baru"
+          aria-label="Tambah pos anggaran"
           onClick={bukaTambah}
         >
-          <IkonTambah size={18} />
-          Tambah Pos Baru
+          <IkonTambah size={22} />
         </button>
       ) : null}
     </div>

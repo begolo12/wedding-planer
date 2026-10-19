@@ -282,7 +282,7 @@ export default function HalamanPlan() {
                     className="tombol tombol-utama"
                     disabled={sedangSimpan}
                   >
-                    {sedangSimpan ? "Menyimpan..." : "Simpan perubahan"}
+                    {sedangSimpan ? "Menyimpan…" : "Simpan perubahan"}
                   </button>
                 </>
               ) : null}
@@ -348,7 +348,7 @@ export default function HalamanPlan() {
               className="tombol tombol-utama"
               disabled={sedangBuatBaru}
             >
-              {sedangBuatBaru ? "Membuat..." : "Buat rencana"}
+              {sedangBuatBaru ? "Membuat…" : "Buat rencana"}
             </button>
           </div>
         </form>

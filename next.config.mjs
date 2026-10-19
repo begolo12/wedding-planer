@@ -22,7 +22,7 @@ const nextConfig = {
    * Header keamanan untuk semua rute. Lima header ini diputuskan di
    * docs/18-Rencana-Produksi-dan-Pemakaian-Harian.md bagian 8. CSP sengaja
    * tidak ada: CSP yang terlalu ketat bisa merusak service worker dan inline
-   * style dari DESIGN.md, dan belum ada kejadian nyata yang perlu diblokir.
+   * style dari docs/21-Arah-Tampilan.md, dan belum ada kejadian nyata yang perlu diblokir.
    */
   async headers() {
     return [

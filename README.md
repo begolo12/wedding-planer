@@ -10,7 +10,10 @@ Kode aplikasi berada di direktori `src/`, dibangun dengan Next.js 15, PostgreSQL
 
 | Dokumen | Isi |
 |---|---|
-| [`DESIGN.md`](DESIGN.md) | Sistem desain. Warna, tipografi, bentuk, nada bahasa, dan keputusan tentang apa yang tidak dipakai |
+| [`docs/21-Arah-Tampilan.md`](docs/21-Arah-Tampilan.md) | Sistem desain. Warna, tipografi, bentuk, nada bahasa, dan keputusan tentang apa yang tidak dipakai |
+| [`docs/22-Rencana-Uji-dan-UAT.md`](docs/22-Rencana-Uji-dan-UAT.md) | Test Plan, Test Case, Laporan Bug, dan UAT Sign-off. Cakupan per epik dan alasannya |
+| [`docs/23-Rilis-dan-Penyebaran.md`](docs/23-Rilis-dan-Penyebaran.md) | Prosedur rilis, urutan migrasi, rollback, dan risiko khusus rilis berikutnya |
+| [`docs/24-Infrastruktur-dan-Operasi.md`](docs/24-Infrastruktur-dan-Operasi.md) | Topologi, region, rahasia, akses, cadangan, dan batas yang belum ditetapkan |
 | [`docs/01-PRD.md`](docs/01-PRD.md) | Product requirements. Masalah, persona, scope, use case, metrik, dan syarat penerimaan |
 | [`docs/02-Domain-Spec.md`](docs/02-Domain-Spec.md) | Indeks spesifikasi domain |
 | [`docs/02a-Perencanaan.md`](docs/02a-Perencanaan.md) | Tanggal penting, daftar tugas, anggaran, vendor dan pembayaran |
@@ -39,6 +42,7 @@ Kode aplikasi berada di direktori `src/`, dibangun dengan Next.js 15, PostgreSQL
 | [`docs/17-Rencana-Build.md`](docs/17-Rencana-Build.md) | Rencana teknis dan langkah implementasi kode aplikasi |
 | [`docs/18-Rencana-Produksi-dan-Pemakaian-Harian.md`](docs/18-Rencana-Produksi-dan-Pemakaian-Harian.md) | Sisa pekerjaan supaya aplikasi siap dipakai setiap hari, diurutkan dari P0 sampai P3 |
 | [`docs/19-Rencana-Perbaikan-Audit.md`](docs/19-Rencana-Perbaikan-Audit.md) | Hasil audit, bukti tiap temuan, dan urutan perbaikannya |
+| [`docs/20-Hasil-Audit-Menyeluruh.md`](docs/20-Hasil-Audit-Menyeluruh.md) | Hasil audit menyeluruh kedua: idempotency, mode gelap sistem, naskah teks, dan sinkronisasi dokumen |
 | [`AGENTS.md`](AGENTS.md) | Aturan kerja untuk AI yang menulis di repo ini, termasuk daftar periksa sebelum kirim |
 | [`CHANGELOG.md`](CHANGELOG.md) | Catatan setiap perubahan, dari sudut pandang pembaca |
 
@@ -141,10 +145,10 @@ Kalau baru pertama kali dan mau cepat paham produknya, baca urutan ini:
 
 1. [`01-PRD.md`](docs/01-PRD.md) untuk masalah dan scope
 2. [`02a-Perencanaan.md`](docs/02a-Perencanaan.md) sampai [`02c-Hari-H.md`](docs/02c-Hari-H.md) untuk isinya
-3. [`DESIGN.md`](DESIGN.md) untuk tampilan dan nada bahasa
+3. [`docs/21-Arah-Tampilan.md`](docs/21-Arah-Tampilan.md) untuk tampilan dan nada bahasa
 4. [`06-Stack-dan-Batas.md`](docs/06-Stack-dan-Batas.md) kalau mau tahu kenapa stack ini dipilih begitu
 
-Kalau mau langsung ke implementasi, urutannya lain: `AGENTS.md`, `DESIGN.md`, `03-Data-Model.md`, `04-API-Contract.md`, `05-IA-dan-Layar.md`, `14-Naskah-Teks.md`, lalu `10-Epik-dan-Story.md`.
+Kalau mau langsung ke implementasi, urutannya lain: `AGENTS.md`, `docs/21-Arah-Tampilan.md`, `03-Data-Model.md`, `04-API-Contract.md`, `05-IA-dan-Layar.md`, `14-Naskah-Teks.md`, lalu `10-Epik-dan-Story.md`.
 
 ---
 

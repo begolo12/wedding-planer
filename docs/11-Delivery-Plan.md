@@ -25,7 +25,7 @@ Urutannya bukan pilihan gaya. Data dulu, tampilan belakangan. Layar yang dibuat 
 | Urutan | Berkas | Untuk apa |
 |---|---|---|
 | 1 | `AGENTS.md` | Aturan kerja dan daftar periksa sebelum kirim |
-| 2 | `DESIGN.md` | Warna, bentuk, dan jarak |
+| 2 | `docs/21-Arah-Tampilan.md` | Warna, bentuk, dan jarak |
 | 3 | [`03-Data-Model.md`](03-Data-Model.md) | Nama tabel dan kolom, jangan ditebak |
 | 4 | [`04-API-Contract.md`](04-API-Contract.md) | Bentuk request, response, dan error |
 | 5 | [`05-IA-dan-Layar.md`](05-IA-dan-Layar.md) | Layar mana memakai data mana |
@@ -36,7 +36,7 @@ Urutannya bukan pilihan gaya. Data dulu, tampilan belakangan. Layar yang dibuat 
 | Langkah | Yang dibuat | Bagian |
 |---|---|---|
 | 1 | Proyek Next.js, TypeScript, Tailwind, satu perintah dev dan build | Fase 0 |
-| 2 | Token warna dan font dari `DESIGN.md`, tema tanpa kedipan | Fase 0 |
+| 2 | Token warna dan font dari `docs/21-Arah-Tampilan.md`, tema tanpa kedipan | Fase 0 |
 | 3 | Layout dasar, navigasi bawah dan samping, skip link | Fase 0 |
 | 4 | Drizzle, koneksi Postgres, sebelas tabel, migrasi pertama | Fase 0 |
 | 5 | Better Auth, daftar, masuk, keluar, sesi 30 hari | Fase 0 |
@@ -94,7 +94,7 @@ Estimasi: 5 hari
 | 1 | Inisialisasi Next.js, TypeScript, Tailwind | `npm run dev` jalan |
 | 2 | Drizzle, koneksi Postgres, migrasi pertama | `drizzle-kit push` jalan, tabel users ada |
 | 3 | Better Auth, login, register | Bisa daftar dan masuk |
-| 4 | Setup tema, font, palet dari `DESIGN.md` | Warna dan font sama persis dengan dokumen |
+| 4 | Setup tema, font, palet dari `docs/21-Arah-Tampilan.md` | Warna dan font sama persis dengan dokumen |
 | 5 | Layout dasar, navigasi, skip link | Pindah halaman jalan di mobile dan desktop |
 
 **Yang tidak boleh ada di Fase 0:** fitur apa pun yang menyentuh domain plan. Semua layar harus kosong dulu. Alasannya, bugs di layout dan tema jauh lebih sulit dicari kalau sudah ada data di dalamnya.
@@ -259,7 +259,7 @@ Kalau hanya menjumlah estimasi per story di [`10-Epik-dan-Story.md`](10-Epik-dan
 | Fork ke produksi per fitur | Satu orang, tidak butuh kelola cabang |
 | Staging environment | Satu server, dev dan produksi cukup. Kalau butuh staging, itu tanda sudah perlu lingkungan sendiri |
 | Tinjau dan siklus persetujuan | Tidak ada tim untuk meninjau |
-| Tim desain terpisah | Semua dari `DESIGN.md` |
+| Tim desain terpisah | Semua dari `docs/21-Arah-Tampilan.md` |
 | Dokumentasi API terpisah | Ada di `04-API-Contract.md`, tidak perlu Swagger |
 | Uji beban | NFR-nya masih belum diukur. Uji beban dengan 5 orang itu tidak berarti apa-apa |
 
@@ -335,7 +335,7 @@ Semua keputusan di dokumen ini diambil sendiri karena belum ada jawaban. Berikut
 
 | Keputusan | Dokumen | Kalau berubah |
 |---|---|---|
-| Nama produk "Rapi Nikah" | `DESIGN.md` | Nama ditulis satu kali di `NAMA_PRODUK` (`src/lib/konstanta.ts`). Menggantinya tidak mengubah palette dan font |
+| Nama produk "Rapi Nikah" | `docs/21-Arah-Tampilan.md` | Nama ditulis satu kali di `NAMA_PRODUK` (`src/lib/konstanta.ts`). Menggantinya tidak mengubah palette dan font |
 | Tidak ada marketplace vendor | `01-PRD.md` | Menambah beberapa bulan |
 | Tidak ada payment gateway | `01-PRD.md` | Menambah pembayaran sungguhan, bukan catatan |
 | Monolit Next.js | `06-Stack-dan-Batas.md` | Mengubah seluruh rencana kerja |

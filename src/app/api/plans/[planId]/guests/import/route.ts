@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { and, asc, eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db";
 import { guests } from "@/db/schema";
 import { bacaJson, bungkus, tidakValid } from "@/lib/galat";
 import { konteksPlan } from "@/lib/api";
+import { HEADER_KUNCI, sekaliPerKunci } from "@/lib/idempotensi";
 import { skemaImporTamu, bendera } from "@/lib/skema";
 import { bacaDaftarTamu } from "@/lib/impor-tamu";
 
@@ -28,6 +29,9 @@ const skemaLanjutan = skemaImporTamu.extend({
  * terbaca, masing masing dengan catatan kenapa perlu dilihat lagi. Baris
  * kembar tidak dibuat ulang walau dicentang, karena dua baris dengan nama
  * sama membuat hitungan kursi salah.
+ *
+ * Langkah simpan dibalasi sekali per kunci: kiriman ulang dari antrean luring
+ * tidak boleh menambah baris tamu yang sama dua kali.
  */
 export const POST = bungkus(async (req: Request, { params }: Params) => {
   const { planId } = await params;
@@ -35,42 +39,51 @@ export const POST = bungkus(async (req: Request, { params }: Params) => {
 
   const isi = skemaLanjutan.parse(await bacaJson(req));
 
-  const sudahAda = await db
-    .select({ name: guests.name })
-    .from(guests)
-    .where(eq(guests.planId, planId))
-    .orderBy(asc(guests.name));
-
-  const preview = bacaDaftarTamu(isi.teks, sudahAda.map((g) => g.name));
-
   if (isi.previewOnly) {
+    const sudahAda = await db
+      .select({ name: guests.name })
+      .from(guests)
+      .where(eq(guests.planId, planId))
+      .orderBy(asc(guests.name));
+
+    const preview = bacaDaftarTamu(isi.teks, sudahAda.map((g) => g.name));
     return NextResponse.json({ preview, created: 0 });
   }
 
-  const dipilih = isi.pilih ? new Set(isi.pilih) : null;
-  const akanDibuat = preview.filter(
-    (b) => !b.kembar && (!dipilih || dipilih.has(b.name)),
-  );
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    const sudahAda = await db
+      .select({ name: guests.name })
+      .from(guests)
+      .where(eq(guests.planId, planId))
+      .orderBy(asc(guests.name));
 
-  if (akanDibuat.length === 0) {
-    throw tidakValid("Tidak ada baris baru yang bisa disimpan.", {
-      teks: "Semua baris sudah ada di daftar, atau belum ada yang dipilih.",
-    });
-  }
+    const preview = bacaDaftarTamu(isi.teks, sudahAda.map((g) => g.name));
 
-  const dibuat = await db
-    .insert(guests)
-    .values(
-      akanDibuat.map((b) => ({
-        planId,
-        name: b.name,
-        phone: b.phone,
-        category: isi.category,
-        rsvpStatus: "belum",
-        guestCount: b.guestCount,
-      })),
-    )
-    .returning();
+    const dipilih = isi.pilih ? new Set(isi.pilih) : null;
+    const akanDibuat = preview.filter(
+      (b) => !b.kembar && (!dipilih || dipilih.has(b.name)),
+    );
 
-  return NextResponse.json({ preview, created: dibuat.length }, { status: 201 });
+    if (akanDibuat.length === 0) {
+      throw tidakValid("Tidak ada baris baru yang bisa disimpan.", {
+        teks: "Semua baris sudah ada di daftar, atau belum ada yang dipilih.",
+      });
+    }
+
+    const dibuat = await db
+      .insert(guests)
+      .values(
+        akanDibuat.map((b) => ({
+          planId,
+          name: b.name,
+          phone: b.phone,
+          category: isi.category,
+          rsvpStatus: "belum",
+          guestCount: b.guestCount,
+        })),
+      )
+      .returning();
+
+    return NextResponse.json({ preview, created: dibuat.length }, { status: 201 });
+  });
 });

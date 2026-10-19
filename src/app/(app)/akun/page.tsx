@@ -283,9 +283,9 @@ export default function HalamanAkun() {
         <p className="akun-sapa-teks">
           Semua pengaturan akun dan rencana ada di satu tempat.
         </p>
-        {hariBesar ? (
-          <span className="akun-sapa-lencana">{hari !== null && hari > 0 ? `H-${hari}` : hari === 0 ? "Hari ini" : "Sudah lewat"}</span>
-        ) : null}
+        {/* Lencana "H-38" di sini dihapus: kartu Hitung mundur di bawah sudah
+            menulis "38 hari lagi menuju hari bahagia", jadi lencana itu
+            mengulang fakta yang sama di layar yang sama. */}
       </div>
 
       <section className="akun-kartu akun-profil">
@@ -302,7 +302,7 @@ export default function HalamanAkun() {
           disabled={sedangKeluar}
           onClick={tanganiKeluar}
         >
-          {sedangKeluar ? "Keluar..." : "Keluar akun"}
+          {sedangKeluar ? "Keluar…" : "Keluar akun"}
         </button>
       </section>
 
@@ -355,6 +355,18 @@ export default function HalamanAkun() {
                 value={tanggalNikah}
                 onChange={(e) => setTanggalNikah(e.target.value)}
               />
+              {/* Pemilih tanggal bawaan browser menampilkan tanggal menurut
+                  locale perangkat. Di perangkat ber-locale Amerika, tanggal
+                  14 November 2026 tampil sebagai "11/14/2026" dan terbaca
+                  keliru sebagai 11 April. Formatnya tidak bisa dipaksa dari
+                  CSS atau atribut, jadi tanggal yang sama diulang di bawah
+                  dalam format Indonesia yang dipakai seluruh aplikasi. */}
+              {tanggalNikah ? (
+                <p className="akun-tanggal-baca">
+                  <IkonKalenderKecil />
+                  {tanggalPanjangDari(tanggalNikah)}
+                </p>
+              ) : null}
             </div>
 
             {teksMundur ? (
@@ -516,7 +528,7 @@ export default function HalamanAkun() {
           onClick={unduhCadanganJson}
         >
           <IkonUnduh />
-          {sedangUnduh ? "Mengunduh..." : "Unduh Cadangan JSON"}
+          {sedangUnduh ? "Mengunduh…" : "Unduh Cadangan JSON"}
         </button>
       </section>
 
@@ -595,7 +607,7 @@ export default function HalamanAkun() {
             className="akun-tombol akun-tombol-utama akun-aksi-utama"
             disabled={sedangSimpan}
           >
-            {sedangSimpan ? "Menyimpan..." : "Simpan data dasar"}
+            {sedangSimpan ? "Menyimpan…" : "Simpan data dasar"}
             <IkonPanah />
           </button>
         ) : null}
@@ -639,7 +651,7 @@ export default function HalamanAkun() {
               className="tombol tombol-bahaya"
               disabled={sedangHapusAkun}
             >
-              {sedangHapusAkun ? "Menghapus..." : "Hapus akun"}
+              {sedangHapusAkun ? "Menghapus…" : "Hapus akun"}
             </button>
           </div>
         </form>
@@ -701,6 +713,25 @@ function IkonJamPasir({ size = 16 }: { size?: number }) {
       <path d="M7 3h10M7 21h10" />
       <path d="M8 3v3.5c0 2.2 4 3.8 4 5.5s-4 3.3-4 5.5V21" />
       <path d="M16 3v3.5c0 2.2-4 3.8-4 5.5s4 3.3 4 5.5V21" />
+    </svg>
+  );
+}
+
+function IkonKalenderKecil({ size = 15 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M3 10h18M8 3v4M16 3v4" />
     </svg>
   );
 }

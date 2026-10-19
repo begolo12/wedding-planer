@@ -4,7 +4,7 @@ Dokumen ini mengubah semua dokumen sebelumnya menjadi urutan pekerjaan yang bisa
 
 Kalau dokumen ini bertentangan dengan [`03-Data-Model.md`](03-Data-Model.md), [`04-API-Contract.md`](04-API-Contract.md), atau [`05-IA-dan-Layar.md`](05-IA-dan-Layar.md), dokumen itu yang menang, dan dokumen ini yang diperbaiki.
 
-Aturan kerja tetap dari [`AGENTS.md`](../AGENTS.md). Warna dan bentuk dari [`DESIGN.md`](../DESIGN.md).
+Aturan kerja tetap dari [`AGENTS.md`](../AGENTS.md). Warna dan bentuk dari `docs/21-Arah-Tampilan.md`.
 
 ---
 
@@ -52,7 +52,7 @@ Sepuluh langkah. Tiap langkah berakhir dengan aplikasi yang masih jalan, karena 
 | | |
 |---|---|
 | Berkas | `package.json`, `tsconfig.json`, `next.config.ts`, `postcss.config.mjs`, `src/app/globals.css`, `src/app/layout.tsx`, `src/app/page.tsx` |
-| Selesai kalau | `npm run dev` jalan, `npm run build` jalan, warna di layar sama persis dengan `DESIGN.md` bagian 3, font Plus Jakarta Sans dan Be Vietnam Pro termuat |
+| Selesai kalau | `npm run dev` jalan, `npm run build` jalan, warna di layar sama persis dengan `docs/21-Arah-Tampilan.md` bagian 3, font Plus Jakarta Sans dan Be Vietnam Pro termuat |
 
 ### Langkah 2. Database
 
@@ -125,7 +125,7 @@ Sepuluh langkah. Tiap langkah berakhir dengan aplikasi yang masih jalan, karena 
 src/
 ├── app/
 │   ├── layout.tsx              root, font, skrip tema tanpa kedipan
-│   ├── globals.css             token warna dan jarak dari DESIGN.md
+│   ├── globals.css             token warna dan jarak dari docs/21-Arah-Tampilan.md
 │   ├── page.tsx                arahkan ke /beranda atau /masuk
 │   ├── manifest.ts             manifest PWA
 │   ├── cetak.css               aturan @media print
@@ -330,7 +330,7 @@ Satu langkah selesai kalau semua baris di bawah ini benar. Kalau ada satu yang t
 
 ### Khusus
 
-- [x] Warna persis dari `DESIGN.md` bagian 3, maksimal satu marigold per layar
+- [x] Warna persis dari `docs/21-Arah-Tampilan.md` bagian 3, maksimal satu marigold per layar
 - [x] Radius `4px`, `8px`, `14px`. Tidak ada pill
 - [x] Mode gelap diuji dengan mata, bukan hanya ada
 - [x] Setiap keputusan baru ditulis alasannya di `CHANGELOG.md`

@@ -6,19 +6,17 @@ import { AuthHero } from "@/components/auth-hero";
 import { NAMA_PRODUK } from "@/lib/konstanta";
 
 /**
- * Kerangka layar masuk dan daftar. Susunannya mengikuti layar Stitch: kepala
- * berisi chip merek, satu badge kecil, lambang bulat dengan kabut di
- * belakangnya, lalu sapaan. Isi form ada di kartu putih.
+ * Kerangka layar masuk dan daftar.
  *
- * Kepala (badge, lambang, sapaan) ada di komponen `AuthHero`, karena layar
- * "Masuk" dan "Daftar" di Stitch punya kepala yang berbeda. Chip merek dan
- * kartu form tetap di sini karena kedua layar memakainya sama.
+ * Susunannya satu kolom rata kiri: baris identitas berisi chip merek dan
+ * tombol tema, satu sapaan, form, lalu satu catatan keamanan di kaki.
  *
- * Lambang merek diambil dari logo Stitch lewat komponen `Merek`, jadi kepala
- * dan lambang besar memakai gambar yang sama persis dengan desain aslinya.
- *
- * Badge di Stitch dipakai untuk CTA. Di sini badge tidak bisa diklik, karena
- * tombol yang tidak berfungsi lebih buruk daripada tidak ada tombol.
+ * Versi sebelumnya mengikuti layar Stitch dengan badan penuh hiasan: badge
+ * melengkung, lambang bulat 96px, lencana di sudutnya, pita keunggulan, dan
+ * dua kabut kabur di belakang kartu. Yang tersisa sekarang hanya yang dipakai
+ * orang: nama produk, kalimat sambutan, form, dan satu keterangan bahwa
+ * datanya tidak bisa dibuka orang lain. Hal yang tidak menambah kemampuan
+ * tapi menambah tinggi layar dibuang, jadi form mulai lebih dekat ke atas.
  */
 export default function LayoutAuth({ children }: { children: ReactNode }) {
   return (
@@ -47,8 +45,6 @@ export default function LayoutAuth({ children }: { children: ReactNode }) {
         </div>
 
         <div className="auth-kartu" data-visual-screen="auth-card">
-          <span className="auth-kabut auth-kabut-atas" aria-hidden="true" />
-          <span className="auth-kabut auth-kabut-bawah" aria-hidden="true" />
           {children}
         </div>
 

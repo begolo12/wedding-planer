@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { tasks } from "@/db/schema";
 import { bungkus, idUuid, tidakDitemukan } from "@/lib/galat";
 import { konteksPlan } from "@/lib/api";
+import { HEADER_KUNCI, sekaliPerKunci } from "@/lib/idempotensi";
 
 type Params = { params: Promise<{ planId: string; taskId: string }> };
 
@@ -15,30 +16,36 @@ type Params = { params: Promise<{ planId: string; taskId: string }> };
  * permintaan tambahan untuk aksi yang paling sering dipakai di seluruh
  * aplikasi. Di sini server yang membalik statusnya, jadi layar cukup menekan
  * sekali tanpa membaca dulu.
+ *
+ * Balikannya harus sekali per kunci: kiriman ulang dari antrean luring tidak
+ * boleh membalik status dua kali, karena tugas yang sudah dicentang akan
+ * kembali belum selesai tanpa ada yang menyentuhnya.
  */
-export const POST = bungkus(async (_req: Request, { params }: Params) => {
+export const POST = bungkus(async (req: Request, { params }: Params) => {
   const { planId, taskId } = await params;
   await konteksPlan(planId);
   idUuid(taskId, "Tugas");
 
-  const [sekarang] = await db
-    .select({ id: tasks.id, status: tasks.status })
-    .from(tasks)
-    .where(and(eq(tasks.planId, planId), eq(tasks.id, taskId)))
-    .limit(1);
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    const [sekarang] = await db
+      .select({ id: tasks.id, status: tasks.status })
+      .from(tasks)
+      .where(and(eq(tasks.planId, planId), eq(tasks.id, taskId)))
+      .limit(1);
 
-  if (!sekarang) throw tidakDitemukan("Tugas");
+    if (!sekarang) throw tidakDitemukan("Tugas");
 
-  const jadiSelesai = sekarang.status !== "selesai";
+    const jadiSelesai = sekarang.status !== "selesai";
 
-  const [tugas] = await db
-    .update(tasks)
-    .set({
-      status: jadiSelesai ? "selesai" : "belum",
-      completedAt: jadiSelesai ? new Date() : null,
-    })
-    .where(and(eq(tasks.planId, planId), eq(tasks.id, taskId)))
-    .returning();
+    const [tugas] = await db
+      .update(tasks)
+      .set({
+        status: jadiSelesai ? "selesai" : "belum",
+        completedAt: jadiSelesai ? new Date() : null,
+      })
+      .where(and(eq(tasks.planId, planId), eq(tasks.id, taskId)))
+      .returning();
 
-  return NextResponse.json({ task: tugas });
+    return NextResponse.json({ task: tugas });
+  });
 });

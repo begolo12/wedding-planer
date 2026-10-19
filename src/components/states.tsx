@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 /**
- * Empat tampilan wajib tiap data dari DESIGN.md R-27: isi, kosong, memuat,
+ * Empat tampilan wajib tiap data dari docs/21-Arah-Tampilan.md R-27: isi, kosong, memuat,
  * gagal, plus luring. Ditulis sekali di sini supaya tidak ada layar yang
  * lupa salah satunya.
  */

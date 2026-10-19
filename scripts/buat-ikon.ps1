@@ -1,22 +1,44 @@
-Add-Type -AssemblyName System.Drawing
+﻿Add-Type -AssemblyName System.Drawing
 
-# Sumber tunggal: lambang Stitch yang sudah transparan di public/merek/merek-1024.png
+# Ikon PWA digambar langsung dari bentuk lambang, bukan lagi dari berkas PNG
+# hasil potong. Sumber gambar lama (public/merek/merek-1024.png) sudah dihapus,
+# jadi skrip ini tidak punya ketergantungan pada berkas luar.
+#
+# Bentuknya harus sama dengan `src/components/merek.tsx`: kotak bersudut tumpul
+# berwarna aksen, dengan pita penanda buku yang dilubangi dari kotak itu. Kalau
+# salah satu berubah, yang lain harus ikut berubah, karena keduanya lambang
+# yang sama.
+
 $akar = Resolve-Path (Join-Path $PSScriptRoot '..')
-$sumber = Join-Path $akar 'public\merek\merek-1024.png'
-if (-not (Test-Path $sumber)) { throw "Sumber lambang tidak ada: $sumber" }
+$ikon = Join-Path $akar 'public\ikon'
+if (-not (Test-Path $ikon)) { New-Item -ItemType Directory -Path $ikon | Out-Null }
 
-$lambang = [System.Drawing.Image]::FromFile($sumber)
+# Warna disamakan dengan token di globals.css.
+#   --color-aksen-permukaan #b23a2e
+#   --color-base            #f4f2ea
+#   --color-kartu-putih     #ffffff
+$aksen = [System.Drawing.Color]::FromArgb(255, 0xb2, 0x3a, 0x2e)
+$kertas = [System.Drawing.Color]::FromArgb(255, 0xf4, 0xf2, 0xea)
 
-# Warna latar disamakan dengan --color-base di globals.css (#fffdf9).
-$latar = [System.Drawing.Color]::FromArgb(255, 0xff, 0xfd, 0xf9)
+function New-JalurBulat {
+  param([double]$X, [double]$Y, [double]$Lebar, [double]$Tinggi, [double]$Radius)
+  $jalur = New-Object System.Drawing.Drawing2D.GraphicsPath
+  $d = $Radius * 2
+  $jalur.AddArc($X, $Y, $d, $d, 180, 90)
+  $jalur.AddArc($X + $Lebar - $d, $Y, $d, $d, 270, 90)
+  $jalur.AddArc($X + $Lebar - $d, $Y + $Tinggi - $d, $d, $d, 0, 90)
+  $jalur.AddArc($X, $Y + $Tinggi - $d, $d, $d, 90, 90)
+  $jalur.CloseFigure()
+  return $jalur
+}
 
 function Buat-Ikon {
   param(
     [int]$Ukuran,
     [string]$Tujuan,
-    [double]$Rasio,          # bagian sisi kanvas yang ditempati lambang
-    [bool]$SudutBulat,       # true: sudut tumpul ala iOS/Android biasa
-    [bool]$Melingkar         # true: kanvas bulat penuh (maskable)
+    [double]$Rasio,        # bagian sisi kanvas yang ditempati lambang
+    [bool]$SudutBulat,     # true: sudut tumpul ala iOS/Android biasa
+    [bool]$Melingkar       # true: kanvas bulat penuh (maskable)
   )
 
   $bmp = New-Object System.Drawing.Bitmap($Ukuran, $Ukuran, [System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
@@ -25,48 +47,63 @@ function Buat-Ikon {
   $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
   $g.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
 
-  # Bentuk kanvas: bulat penuh, atau kotak bersudut tumpul, atau kotak.
-  $jalur = New-Object System.Drawing.Drawing2D.GraphicsPath
+  # Kanvas: bulat penuh, kotak bersudut tumpul, atau kotak penuh.
   if ($Melingkar) {
-    $jalur.AddEllipse(0, 0, $Ukuran, $Ukuran)
+    $kanvas = New-Object System.Drawing.Drawing2D.GraphicsPath
+    $kanvas.AddEllipse(0, 0, $Ukuran, $Ukuran)
   }
   elseif ($SudutBulat) {
-    $r = [Math]::Round($Ukuran * 0.22)
-    $d = $r * 2
-    $jalur.AddArc(0, 0, $d, $d, 180, 90)
-    $jalur.AddArc($Ukuran - $d, 0, $d, $d, 270, 90)
-    $jalur.AddArc($Ukuran - $d, $Ukuran - $d, $d, $d, 0, 90)
-    $jalur.AddArc(0, $Ukuran - $d, $d, $d, 90, 90)
-    $jalur.CloseFigure()
+    $kanvas = New-JalurBulat -X 0 -Y 0 -Lebar $Ukuran -Tinggi $Ukuran -Radius ([Math]::Round($Ukuran * 0.22))
   }
   else {
-    $jalur.AddRectangle((New-Object System.Drawing.Rectangle(0, 0, $Ukuran, $Ukuran)))
+    $kanvas = New-Object System.Drawing.Drawing2D.GraphicsPath
+    $kanvas.AddRectangle((New-Object System.Drawing.Rectangle(0, 0, $Ukuran, $Ukuran)))
   }
+  $kuasKanvas = New-Object System.Drawing.SolidBrush($kertas)
+  $g.FillPath($kuasKanvas, $kanvas)
 
-  $kuas = New-Object System.Drawing.SolidBrush($latar)
-  $g.FillPath($kuas, $jalur)
-
-  # Tempatkan lambang di tengah, skala sesuai rasio.
-  $sisi = [Math]::Round($Ukuran * $Rasio)
+  # Lambang di tengah, diskalakan sesuai rasio.
+  $sisi = [double][Math]::Round($Ukuran * $Rasio)
   $x = [Math]::Round(($Ukuran - $sisi) / 2)
   $y = [Math]::Round(($Ukuran - $sisi) / 2)
-  $tujuanKotak = New-Object System.Drawing.Rectangle($x, $y, $sisi, $sisi)
-  $g.DrawImage($lambang, $tujuanKotak, 0, 0, $lambang.Width, $lambang.Height, [System.Drawing.GraphicsUnit]::Pixel)
+
+  $kotak = New-JalurBulat -X $x -Y $y -Lebar $sisi -Tinggi $sisi -Radius ([Math]::Round($sisi * 0.23))
+  $kuasAksen = New-Object System.Drawing.SolidBrush($aksen)
+  $g.FillPath($kuasAksen, $kotak)
+
+  # Pita penanda buku, koordinat relatif terhadap kotak lambang dalam satuan
+  # 24 seperti di SVG, supaya bentuknya identik dengan yang di layar.
+  $s = $sisi / 24.0
+  function P([double]$nx, [double]$ny) {
+    return New-Object System.Drawing.PointF([single]($x + ($nx * $s)), [single]($y + ($ny * $s)))
+  }
+  $pita = New-Object System.Drawing.Drawing2D.GraphicsPath
+  $titik = @(
+    (P 8.6 5.0),
+    (P 15.4 5.0),
+    (P 15.4 19.4),
+    (P 12.0 16.4),
+    (P 8.6 19.4)
+  )
+  $pita.AddPolygon($titik)
+  $kuasPita = New-Object System.Drawing.SolidBrush($kertas)
+  $g.FillPath($kuasPita, $pita)
 
   $g.Dispose()
-  $kuas.Dispose()
-  $jalur.Dispose()
+  $kuasKanvas.Dispose()
+  $kuasAksen.Dispose()
+  $kuasPita.Dispose()
+  $kanvas.Dispose()
+  $kotak.Dispose()
+  $pita.Dispose()
 
   $bmp.Save($Tujuan, [System.Drawing.Imaging.ImageFormat]::Png)
   $bmp.Dispose()
   "  $([System.IO.Path]::GetFileName($Tujuan)) : ${Ukuran}x${Ukuran} (rasio $Rasio)"
 }
 
-$ikon = Join-Path $akar 'public\ikon'
-if (-not (Test-Path $ikon)) { New-Item -ItemType Directory -Path $ikon | Out-Null }
-
-"Menulis ulang ikon PWA dari lambang Stitch:"
-# Ikon biasa: latar penuh warna dasar, sudut tumpul supaya enak dilihat di peluncur.
+"Menulis ulang ikon PWA dari bentuk lambang:"
+# Ikon biasa: kanvas penuh warna kertas, sudut tumpul supaya enak dilihat di peluncur.
 Buat-Ikon -Ukuran 192 -Tujuan (Join-Path $ikon 'ikon-192.png') -Rasio 0.80 -SudutBulat $true -Melingkar $false
 Buat-Ikon -Ukuran 512 -Tujuan (Join-Path $ikon 'ikon-512.png') -Rasio 0.80 -SudutBulat $true -Melingkar $false
 # Maskable: kanvas bulat penuh, lambang dikecilkan ke zona aman (<= 80%).
@@ -74,5 +111,4 @@ Buat-Ikon -Ukuran 512 -Tujuan (Join-Path $ikon 'ikon-maskable-512.png') -Rasio 0
 # Apple touch: iOS memakai kanvas penuh dan membulatkan sendiri.
 Buat-Ikon -Ukuran 180 -Tujuan (Join-Path $ikon 'apple-touch-icon.png') -Rasio 0.80 -SudutBulat $false -Melingkar $false
 
-$lambang.Dispose()
 "Selesai."

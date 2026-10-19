@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
-import { and, asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { budgetItems, payments, vendors } from "@/db/schema";
+import { jumlahPembayaran } from "@/lib/agregat-uang";
 import { bacaJson, bungkus, idUuid, tidakDitemukan } from "@/lib/galat";
 import { konteksPlan, pastikanPosAnggaran } from "@/lib/api";
+import { HEADER_KUNCI, sekaliPerKunci } from "@/lib/idempotensi";
 import { skemaVendorUbah } from "@/lib/skema";
 
 type Params = { params: Promise<{ planId: string; vendorId: string }> };
@@ -40,7 +42,8 @@ export const GET = bungkus(async (_req: Request, { params }: Params) => {
     .orderBy(asc(payments.paidAt));
 
   const [jumlah] = await db
-    .select({ total: sql<number>`coalesce(sum(${payments.amount}), 0)::int` })
+    // Alasan cast `::bigint` dan `mapWith(Number)` ada di src/lib/agregat-uang.ts.
+    .select({ total: jumlahPembayaran })
     .from(payments)
     .where(and(eq(payments.planId, planId), eq(payments.vendorId, vendorId)));
 
@@ -68,13 +71,15 @@ export const PATCH = bungkus(async (req: Request, { params }: Params) => {
   // Sama seperti create: pos anggaran yang ditunjuk harus milik plan ini.
   if (isi.budgetItemId) await pastikanPosAnggaran(planId, isi.budgetItemId);
 
-  const [baris] = await db
-    .update(vendors)
-    .set(isi)
-    .where(and(eq(vendors.planId, planId), eq(vendors.id, vendorId)))
-    .returning();
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    const [baris] = await db
+      .update(vendors)
+      .set(isi)
+      .where(and(eq(vendors.planId, planId), eq(vendors.id, vendorId)))
+      .returning();
 
-  return NextResponse.json({ vendor: baris });
+    return NextResponse.json({ vendor: baris });
+  });
 });
 
 /**
@@ -85,15 +90,17 @@ export const PATCH = bungkus(async (req: Request, { params }: Params) => {
  * jumlah yang bisa dijelaskan pasangan. Yang tidak jelas asalnya lebih
  * berbahaya daripada yang ikut terhapus.
  */
-export const DELETE = bungkus(async (_req: Request, { params }: Params) => {
+export const DELETE = bungkus(async (req: Request, { params }: Params) => {
   const { planId, vendorId } = await params;
   await konteksPlan(planId);
   await ambil(planId, vendorId);
 
-  await db.transaction(async (tx) => {
-    await tx.delete(payments).where(and(eq(payments.planId, planId), eq(payments.vendorId, vendorId)));
-    await tx.delete(vendors).where(and(eq(vendors.planId, planId), eq(vendors.id, vendorId)));
-  });
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    await db.transaction(async (tx) => {
+      await tx.delete(payments).where(and(eq(payments.planId, planId), eq(payments.vendorId, vendorId)));
+      await tx.delete(vendors).where(and(eq(vendors.planId, planId), eq(vendors.id, vendorId)));
+    });
 
-  return new NextResponse(null, { status: 204 });
+    return new NextResponse(null, { status: 204 });
+  });
 });

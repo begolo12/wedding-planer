@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { guests } from "@/db/schema";
 import { bacaJson, bungkus } from "@/lib/galat";
 import { konteksPlan } from "@/lib/api";
+import { HEADER_KUNCI, sekaliPerKunci } from "@/lib/idempotensi";
 import { awalHariJakarta } from "@/lib/format";
 import { skemaTandaiUndangan } from "@/lib/skema";
 
@@ -16,25 +17,31 @@ type Params = { params: Promise<{ planId: string }> };
  * ulang daftar tidak menimpa tanggal pengiriman yang sudah dicatat satu per
  * satu. Tanggalnya awal hari menurut Asia/Jakarta, sama dengan tombol per
  * tamu, supaya "kapan dikirim" tidak bergantung zona server.
+ *
+ * Dibalasi sekali per kunci supaya kiriman ulang dari antrean luring tidak
+ * menghitung ulang jumlah tamu yang berubah.
  */
 export const POST = bungkus(async (req: Request, { params }: Params) => {
   const { planId } = await params;
   await konteksPlan(planId);
 
   const isi = skemaTandaiUndangan.parse(await bacaJson(req));
-  const undanganPada = awalHariJakarta();
 
-  const saringan = [eq(guests.planId, planId), isNull(guests.invitedAt)];
-  if (!isi.semua) saringan.push(inArray(guests.id, isi.ids ?? []));
+  return sekaliPerKunci(planId, req.headers.get(HEADER_KUNCI), async () => {
+    const undanganPada = awalHariJakarta();
 
-  const diubah = await db
-    .update(guests)
-    .set({ invitedAt: undanganPada })
-    .where(and(...saringan))
-    .returning({ id: guests.id });
+    const saringan = [eq(guests.planId, planId), isNull(guests.invitedAt)];
+    if (!isi.semua) saringan.push(inArray(guests.id, isi.ids ?? []));
 
-  return NextResponse.json({
-    updated: diubah.length,
-    invitedAt: undanganPada.toISOString(),
+    const diubah = await db
+      .update(guests)
+      .set({ invitedAt: undanganPada })
+      .where(and(...saringan))
+      .returning({ id: guests.id });
+
+    return NextResponse.json({
+      updated: diubah.length,
+      invitedAt: undanganPada.toISOString(),
+    });
   });
 });

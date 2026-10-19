@@ -27,17 +27,103 @@ Aturan singkat:
 | Tulis alasan kalau tidak jelas | Pembaca versi berikutnya tidak perlu menebak |
 | Tambah entri baru di atas | Yang terbaru selalu di paling atas |
 
-## [Belum dirilis]
+## [0.18.0] - 2026-10-19
+
+Rilis ini menggabungkan empat bagian `[Belum dirilis]` yang menumpuk. Di dalam tiap kelompok, urutan dari keputusan terbaru ke terlama; kalau dua entri bertentangan, yang lebih atas yang berlaku.
 
 ### Tambah
 
+- `docs/22-Rencana-Uji-dan-UAT.md` untuk Test Plan, Test Case, Laporan Bug, dan UAT Sign-off. Isinya cakupan per epik dari 42 story, kode kasus yang bisa dilacak ke `10-Epik-dan-Story.md`, kolom wajib laporan bug, dan delapan skenario UAT. UAT ditandai belum bisa dikerjakan karena aplikasi belum dipakai pengguna sungguhan, dan menandatanganinya sekarang berarti mengarang bukti
+- README menautkan dokumen 22
+- `docs/23-Rilis-dan-Penyebaran.md` untuk prosedur rilis: gerbang pra-rilis, urutan migrasi expand dan contract, commit dan tag, pemeriksaan pasca-deploy, rollback kode dan batas rollback database. Isinya juga mencatat bahwa produksi masih menjalankan kode 5 Oktober, tag `v0.17.0` menunjuk commit yang versinya masih `0.16.0`, dan empat berkas sumber belum masuk Git
+- README dan `AGENTS.md` menautkan dokumen 23
+- `docs/24-Infrastruktur-dan-Operasi.md` untuk topologi, pemisahan peran DevOps, Cloud Architect, dan SysAdmin, inventaris yang terverifikasi, rahasia, akses, cadangan, dan tujuh risiko yang perlu ditutup. Isinya juga mencatat bahwa repositori bersifat publik dan pemisahan database preview belum dipastikan
+- Lembar "Lainnya" di bilah bawah mobile: pintu ke Laporan, Akun, dan mode tampilan. Sebelumnya ketiganya tidak terjangkau di layar sempit karena kepala aplikasi disembunyikan
 - Tombol "Masuk dengan Google" di layar masuk dan "Daftar dengan Akun Google" di layar daftar. Pengguna bisa masuk satu klik tanpa mengingat kata sandi, dan akun Google otomatis jadi akun yang sah
 - Bukti tangkapan layar tiap halaman (desktop dan mobile) di `public/screenshots/`, dipakai sebagai evidence pengecekan visual
 
 ### Ubah
 
+- Arah tampilan diganti total ke "Kedai Undangan". Sumber bentuknya benda yang benar-benar ada di dunia pemakainya: kartu undangan cetak. Kertas gading, satu tinta pekat, dan satu aksen, bukan tema blush atau lavender yang dipakai hampir semua aplikasi pernikahan. Aturannya sekarang di `docs/21-Arah-Tampilan.md`; berkas `DESIGN.md` v5.0 dihapus dan seluruh rujukannya sudah dialihkan
+- Palet diganti: kanvas `#F4F2EA` (kertas), tinta `#1B1B21`, aksen `#B23A2E`. Versi sebelumnya memakai blush dan plum `#66556B`. Mode gelap ikut diganti ke latar biru-abu tua `#0E0E14` dengan aksen `#E8756A`. Semua pasangan tetap diukur dengan rumus kontras WCAG 2.1, dan teks di atas bidang aksen tetap 4,8:1
+- Tipografi jadi dua keluarga dengan pembagian menurut pekerjaan, bukan tingkat kepentingan. `Anton` memegang angka hitung mundur dan nama produk, karena bentuknya tinggi dan rapat sehingga "37" terbaca sebagai angka yang dihitung menuju sesuatu. `Source Sans 3` memegang seluruh teks yang dibaca dan punya angka tabular supaya kolom rupiah tetap sejajar. Sebelumnya satu keluarga, Plus Jakarta Sans, untuk semua peran
+- Susunan Beranda diganti. Kepala layar tidak lagi berupa kartu: tidak ada tepi, sudut, atau bayangan, hanya garis rambut dan jarak, jadi terasa seperti tulisan di halaman. Tiga kartu angka ringkasan yang bentuknya kembar diganti satu baris data dengan garis rambut sebagai pemisah kolom. Ukuran huruf judul layar diturunkan dan jarak antarbagian dirapatkan
+- Tab aktif di navigasi bawah dan samping tidak lagi mengisi sel dengan bidang aksen. Sekarang ditandai bilah tipis 2px dan warna ikon, karena sebelumnya enam tombol navigasi berubah jadi enam bidang berwarna dan tidak ada lagi yang menonjol
+- Tab aktif di Anggaran dan chip aktif di Tamu sekarang memakai bidang aksen `--color-aksen-permukaan`, bukan bidang tinta. Sebelumnya chip yang cuma menandai sesuatu terlihat sama seperti tombol yang bisa ditekan
+- docs/21-Arah-Tampilan.md naik ke v5.0 "Padat dan Cepat". v4.0 dinilai pengguna "terlalu padat, ngga kayak aplikasi handphone pada umumnya yang intuitif dan enak dipakai". v5.0 mempertahankan palet dan huruf v4.0 karena sudah lolos uji kontras, lalu mengganti susunannya: tiga tingkat permukaan (kanvas, grup, sorotan) menggantikan kebiasaan membungkus semua bagian dalam kartu, empat pola layar baku (baris nilai, baris isi, kartu sorotan, lembar saringan), radius turun dari 16px ke 12px, skala jarak lebih rapat, satu kartu sorotan dan satu bidang plum maksimal per layar, dan target kepadatan yang bisa diukur
+- Saringan di layar Tugas pindah ke lembar bawah. Sebelumnya lima kontrol (pil cepat, pencarian, dua dropdown, tombol tampilkan selesai) bertumpuk di badan layar. Terukur di 390x844: kontrol sebelum daftar turun dari 5 jadi 2, dan tugas pertama naik dari y=454 ke y=294. Yang tampil di badan layar sekarang cuma tombol "Saring" dengan lencana jumlah saringan aktif, plus chip saringan aktif yang bisa dilepas satu per satu
+- Tombol aksi memakai radius 12px, bukan pill. docs/21-Arah-Tampilan.md v5.0 menetapkan batas ini karena di v4.0 tombol aksi dan chip informatif berbentuk sama, sehingga pengguna tidak bisa membedakan mana yang bisa ditekan untuk melakukan sesuatu dan mana yang cuma keterangan. Yang diubah: "Keluar akun", tombol status persiapan, tombol aksi tamu, tombol RSVP, tombol ukuran huruf rundown, dan tombol aksi beranda
+- Halaman Tugas di layar sempit dirampingkan: deskripsi kepala disembunyikan, "Muat template" pindah ke baris pil saringan sebagai pil bergaris putus, pencarian dan dua saringan turun jadi grid dua kolom, dan tombol "Tampilkan selesai" jadi pil kecil. Terukur: daftar tugas yang tadinya baru terlihat di y=642 dari 740 (360px) sekarang mulai di y=413, jadi lebih dari setengah layar pertama dipakai daftar, bukan kendali. Bentuk desktop tidak berubah
+- Bilah bawah mobile jadi enam sel: Beranda, Rencana, Hari-H, Anggaran, Tamu, Lainnya. Hari-H naik ke bilah bawah supaya rundown bisa dibuka satu tap dari halaman mana pun, sesuai janji produk ketiga di AGENTS.md
+- Navigasi samping jadi satu-satunya kepala di layar lebar: merek, nama pasangan, menu, tombol tema, dan Akun semuanya di sana. Kepala aplikasi atas dihapus karena hanya mendulang identitas sidebar
 - Penyegaran visual seluruh layar dengan hierarki editorial hangat, permukaan kartu yang konsisten, fokus keyboard yang terlihat, dan wrapping mobile tanpa mengubah alur data
 - Menambahkan pola wildcard port lokal (`http://localhost:*`, `http://127.0.0.1:*`, dan subnet lokal) ke `trustedOrigins` Better Auth, serta melonggarkan batas rate limit di mode dev agar pendaftaran di local environment pada port selain 3000 tidak ditolak 403 INVALID_ORIGIN atau terkunci 429 RATE_LIMITED
+- Pendaftaran manual hanya menerima email `@gmail.com` atau `@googlemail.com`, supaya akun yang terdaftar selalu akun Google yang valid. Pengguna tanpa email Google diarahkan memakai tombol Google langsung
+- Dokumen disinkronkan lagi dengan kode sesudah audit menyeluruh kedua: docs/03 mencatat tabel `idempotency_keys`, docs/04 mencatat endpoint publik dan `PATCH /announcements`, docs/05 memuat peta halaman lengkap, docs/07 disamakan dengan service worker satu versi, dan docs/18 memakai jumlah test yang benar (156 unit, 17 berkas, 8 berkas spec e2e)
+- `NEXT_PUBLIC_APP_URL` ditambahkan ke `.env.example` karena `src/lib/auth-client.ts` membacanya
+
+### Perbaiki
+
+- Klaim bahwa `GET /api/kesehatan` 200 berarti database produksi terhubung dihapus dari `docs/18` dan `docs/23`. Endpoint itu sengaja tidak menyentuh database, dan komentarnya di `src/app/api/kesehatan/route.ts` menjelaskan alasannya. Pemeriksaan pasca-deploy sekarang memakai `GET /api/plans` dengan sesi sebagai bukti database benar-benar terbaca
+- Suite e2e tidak lagi kehabisan heap. `playwright.config.ts` sekarang menjalankan dev server uji dengan `BATCH_DEV_MB=2048`, karena heap bawaan 1 GB habis di tengah suite sehingga server uji mati dengan `Ineffective mark-compacts near heap limit` dan dua spec terakhir gagal dengan `ECONNRESET`. Sebelumnya kegagalan itu terbaca seperti test rapuh, padahal penyebabnya batas memori
+- Angka test di `docs/18` dan `docs/22` diselaraskan dengan kenyataan: 16 berkas 153 test Vitest, 17 test Playwright di 8 berkas spec
+- Label bagian tidak lagi ditulis dengan huruf besar semua dan jarak antarhuruf lebar. Delapan tempat memakai pola itu tanpa alasan, dan pola itu justru tanda paling umum tulisan yang belum dipilih
+- Bayangan seragam di 25 bidang dihapus. Semua kartu memakai bayangan lembut yang sama, jadi kedalamannya tidak lagi membedakan apa pun. Yang tersisa hanya bayangan untuk elemen yang benar-benar mengambang: toast dan dialog
+- Radius tidak lagi satu nilai untuk semua hal. Sekarang empat tingkat menurut peran: batang penanda 4px, badge dan chip 8px, tombol dan bidang 14px, dan elemen yang memang bulat seperti lingkaran ikon dan jalur sakelar tetap pill. Sebelumnya tombol aksi, chip keterangan, dan bilah progres memakai bentuk yang sama
+- `e2e/tampilan.spec.ts` memeriksa radius tombol Google 14px, dan `tests/unit/tampilan.test.ts` yang mengunci token geometri versi lama dihapus karena isinya sudah tidak benar
+- Lencana "H-38" di kepala layar Akun dihapus karena kartu Hitung mundur di bawahnya sudah menulis "38 hari lagi menuju hari bahagia". Dua tempat menulis fakta yang sama di satu layar
+- Rincian pos di Laporan memberi catatan penjelas saat pembayaran belum tertaut ke pos anggaran. Sebelumnya semua pos tampil Rp 0 padahal total "Sudah dibayar" bukan nol, dan itu terbaca seperti angka yang bertentangan. Penyebabnya pembayaran dihitung per pos lewat vendor yang tertaut, sedangkan pada data contoh tidak ada satu pun vendor yang tertaut. Catatannya menjelaskan kenapa dan apa yang perlu dilakukan, bukan menyembunyikan angkanya
+- Kartu hitung mundur di Beranda dipadatkan. Terukur di 390x844: tinggi kartu turun dari 493px ke 469px dan sapaan dari 81px ke 46px, karena jarak dalam kartu turun dari 20px ke 14px, padding dari 20px ke 16px, dan ukuran sapaan dari h2 (28px) ke h3 (22px). Satu angka besar per layar sudah dipakai "38", jadi sapaan tidak perlu ikut besar
+- Pita di kartu hitung mundur Beranda tidak lagi mengulang informasi. Pita ini salah dua kali: mula-mula berbunyi "38 hari" (mengulang angka besar di kiri), lalu diganti tanggal dan ternyata tanggalnya sudah ada di baris atas kartu yang sama, jadi cuma memindahkan duplikasi. Sekarang isinya kalimat pengantar yang tidak mengulang angka mana pun
+- Tautan "N tugas lewat tenggat" di kartu Checklist beranda memenuhi target sentuh 44px. Sebelumnya tingginya cuma 18px, jadi jempol sulit mengenainya. Ruangnya ditambah lewat padding vertikal 13px, bukan `min-height`, supaya jarak antar kartu tidak berubah
+- Tautan merek "Rapi Nikah" di puncak navigasi samping memenuhi target sentuh 44px. Tingginya tadinya 32px karena mengikuti lambang. `min-height` ditaruh di `.nav-merek`, bukan di `.nav-merek-lambang`, supaya ukuran gambar lambang tidak berubah
+- Teks di atas bidang aksen tidak lagi tenggelam di mode gelap. Token `sage`, `terracotta`, `marigold`, dan `primary` berbalik jadi nilai terang di mode gelap karena dipakai juga sebagai warna teks dan ikon, sementara tulisan di atasnya tetap putih. Terukur sebelum perbaikan: tombol utama 3,9:1, pil kehadiran beranda dan tombol ukuran huruf Hari-H 2,11:1, semuanya di bawah batas 4,5:1. Ditambahkan token `--color-aksen-permukaan` bernilai tetap `#66556B`, sesuai docs/21-Arah-Tampilan.md bagian 2 yang sudah menetapkan plum tetap dipakai di mode gelap. Setelah perbaikan: nol elemen gagal kontras di tujuh layar, kedua tema
+- Label bilah navigasi bawah yang sedang aktif tidak lagi tenggelam di mode gelap, dari 2,11:1 jadi lolos. Penyebabnya sama seperti di atas, dan `.nav-item[data-aktif="ya"]` tertinggal saat perbaikan pertama. Cacat ini tidak tertangkap audit desktop karena bilah bawah disembunyikan di layar lebar, jadi audit kontras sekarang dijalankan di lebar 390px juga
+- Tab "Rincian Pengeluaran" di Anggaran tidak lagi terpotong 17px di lebar 390px. Penyebabnya `white-space: nowrap` pada pil tab, sedangkan ruangnya hanya 144px untuk teks 161px. Label dibiarkan membungkus dengan `line-height: 1.2` supaya tingginya tetap 44px, dan ini juga lebih aman saat pengguna memperbesar huruf sistem
+- Blok "Realisasi Dana" di Anggaran dihapus karena menampilkan angka yang sama persis dengan kotak "Terpakai Saat Ini" tepat di bawahnya, sehingga dua label berbeda membawa satu angka yang sama. Wireframe `docs/12b-Wireframe-Uang.md` baris 17 hanya meminta tiga angka: total, terpakai, sisa. Kotak "Sisa Anggaran Aman" juga jadi "Sisa Anggaran" supaya lebih pendek
+- Pita hitung mundur di Beranda tidak lagi mengulang angka hari. Sebelumnya satu kartu menampilkan "38" besar, sel "5 Minggu", lalu pita "38 hari", jadi angka yang sama muncul tiga kali tanpa informasi baru. Pita sekarang menampilkan tanggal hari besar
+- Cincin konfirmasi tamu tidak lagi menggantung tanpa pembagi. Sebelumnya hanya "59% hadir", sekarang "59%" dengan "20 dari 34 orang" di bawahnya, dan label aria menyebut pembaginya juga
+- Sapaan Beranda menyapa kedua nama, bukan hanya nama pasangan. Sebelumnya tertulis "Halo, Rangga!" padahal yang login adalah pemilik akun, dan sidebar sudah menulis "Dewi & Rangga". Nama pemilik diambil dari sesi karena tabel plans tidak menyimpannya
+- Pemilih tanggal di Akun diikuti tanggal format Indonesia di bawahnya. Perangkat ber-locale Amerika menampilkan "11/14/2026" yang bisa terbaca keliru sebagai 11 April, dan format bawaan browser tidak bisa dipaksa dari CSS maupun atribut. Tanggal yang sama sekarang diulang sebagai "14 November 2026"
+- Label "Tugas" di kartu hitung mundur Beranda jadi "Tugas sisa". Angka 10 tanpa keterangan membuat pembaca menebak apakah itu total, sisa, atau terlambat
+- Enam label bilah bawah mobile tidak lagi saling menempel dan menumpuk di HP sempit. `grid-template-columns` memakai `minmax(0, 1fr)` supaya sel boleh menyusut, label diberi `white-space: nowrap` plus elipsis, dan di layar sempit label mengecil ke 10px. Di bawah 340px label disembunyikan, ikon saja seperti bilah aplikasi bawaan, karena enam label memang tidak mungkin muat (terukur: "BerandaRencanaHari-" berdempet di 320px sebelum perbaikan)
+- Hero hitung mundur tidak lagi menampilkan tiga angka yang saling bertentangan saat tanggal pernikahan sudah lewat. Sebelumnya kotak menulis "98 Hari Berlalu", grid menampilkan "0 Hari - Minggu", dan pita mengulang "98 hari lewat". Sekarang hero menampilkan satu status: "Hari Bahagia Berlalu" dengan tautan ke Laporan, dan grid Hari/Minggu hanya muncul saat tanggal masih di depan
+- Kata untuk tanggal yang sudah lewat diseragamkan jadi "hari lewat" di semua layar (sebelumnya "beranda" dan "tanggal penting" memakai "hari lalu", sedangkan hitung mundur memakai "lewat")
+- Jam di daftar tanggal penting ditulis "jam 08.00" memakai pemformat yang sama dengan layar lain, bukan "Jam 08:00:00" yang membocorkan detik
+- Kategori vendor di kartu "Vendor Utama" Beranda memakai label resmi ("Katering"), bukan slug mentah ("katering")
+- Sentuhan di layar sentuh terasa langsung: `touch-action: manipulation` mematikan jeda 300ms dan `-webkit-tap-highlight-color` dibuang pada tombol, tautan, dan isian
+- Lembar "Lainnya" menahan gulir di dalamnya (`overscroll-behavior: contain`) supaya menggulir isi lembar tidak ikut menggulir halaman di belakangnya, dan isinya bisa digulir bila layar terlalu pendek
+- Titik tiga literal "..." pada teks antarmuka diganti karakter elipsis "…" di 15 berkas, sesuai aturan tipografi AGENTS.md
+- Tipografi dirapikan hasil audit ukuran langsung: dua H2 di Beranda kini sama 28px/600 (sebelumnya 28px lawan 21px), semua tombol satu bobot 600 (sebelumnya 700 lawan 600 di satu baris), bobot 800 di angka display diturunkan ke 700 sesuai skala docs/21-Arah-Tampilan.md, dan nilai `font-size` mentah di globals.css dipindah ke token
+- Klaim kunci idempotency dibuat atomik: satu permintaan mengklaim kunci lebih dulu lewat `insert ... on conflict do nothing returning`, yang lain menunggu hasilnya. Sebelumnya dua tab yang mengirim antrean yang sama sama-sama lolos pengecekan dan sama-sama menulis
+- Kunci idempotency dibaca dan ditulis dengan filter `planId`, supaya rencana yang berbeda tidak lagi saling menimpa balasan
+- `sekaliPerKunci` dipasang di seluruh endpoint tulis ber-`planId` yang belum memakainya, termasuk pembayaran, vendor, pengumuman, tautan laporan, impor tamu, tandai undangan, tugas dari templat, dan urut ulang tugas
+- Tombol selesai tugas tidak lagi terbalik dua kali saat kiriman ulang, karena endpoint toggle kini dibalas sekali per kunci
+- Batas lima tautan laporan dijaga transaksi berkunci `pg_advisory_xact_lock`, sehingga dua permintaan bersamaan tidak bisa sama-sama menulis tautan kelima
+- Balasan 204, 205, dan 304 dari kunci idempotency tidak lagi melempar error, karena dikirim tanpa body sesuai spesifikasi Fetch
+- Jumlah pembayaran memakai cast `::bigint`, supaya total di atas 2.147.483.647 tidak menjawab 500
+- Hasil agregat `::bigint` dikonversi ke `number` lewat `mapWith(Number)` di `src/lib/agregat-uang.ts`. Tanpa itu driver `postgres` mengembalikan string, dan `totalTerbayar += paidAmount` di layar vendor jadi penggabungan teks sehingga "Sudah terbayar" menampilkan angka yang jauh lebih besar
+- Tiga join ke tabel anak (vendor, pos anggaran, ringkasan) ditambah filter `planId`, supaya baris rencana lain tidak ikut terbaca
+- Tema gelap dari pengaturan sistem kini juga menimpa kelas kustom Beranda dan kelas kaca, selama pengguna belum memilih tema terang
+- Layar gagal global memakai token palet dan mengikuti mode gelap sistem, bukan lagi warna di luar palet yang menyala terang
+- Tombol Google memakai token warna yang terdefinisi, bukan nilai cadangan di luar palet, dan teks syarat auth dinaikkan ke tinggi minimum 44px
+- Istilah "susunan acara" diganti "rundown" di layar Hari-H, Laporan, halaman bagikan, dan naskah teks, dan em dash di kartu tanggal penting diganti tanda hubung biasa
+- Lencana "Fase 2" di Beranda dihapus karena tidak punya arti, dan warna ikon aksi cepat diseragamkan ke satu aksen
+- `CHANGELOG.md` diberi entri `v0.17.0` yang hilang, `package.json` disejajarkan ke `0.17.0`, dan hasil audit dicatat di `docs/20-Hasil-Audit-Menyeluruh.md`
+
+### Hapus
+
+- `DESIGN.md` dihapus. Isinya digantikan `docs/21-Arah-Tampilan.md`, dan seluruh rujukan di `AGENTS.md`, `README.md`, kode, dan 16 berkas dokumen sudah dialihkan ke sana
+- Badge, bulatan lambang 96px, lencana di sudutnya, pita "100% Gratis", dan dua kabut kabur di belakang kartu masuk dihapus dari layar masuk dan daftar. Semuanya hiasan yang tidak menambah kemampuan tapi menambah tinggi layar, dan pita "100% Gratis" itu janji yang tidak diukur di mana pun
+- Lambang merek diganti dari gambar PNG hasil potong layar Stitch jadi SVG sebaris. Bentuknya kotak aksen dengan pita penanda buku, bukan dua cincin atau hati, karena kedua gambar itu dipakai hampir semua aplikasi pernikahan. Karena digambar dari token warna, lambang ini tidak perlu berkas kedua di mode gelap
+- Berkas `public/merek/*.png`, `scripts/buat-merek.ps1`, `scripts/potong-logo.ps1`, dan `scripts/periksa-merek.ps1` dihapus. Ikon PWA di `public/ikon/` sekarang digambar langsung dari bentuk lambang yang sama lewat `scripts/buat-ikon.ps1`, jadi tidak ada lagi ketergantungan pada berkas potongan layar
+
+## [0.17.0] - 5 Oktober 2026
+
+Rilis ini menutup audit keamanan pertama (13 temuan di `docs/19-Rencana-Perbaikan-Audit.md`), membuat antrean luring idempoten, dan memperjelas navigasi berikon.
+
+### Ubah
+
 - Dokumen disinkronkan dengan kode: docs/18 memakai nomor baris dan jumlah test yang benar (150 unit, 9 e2e), baris nama produk diperbarui karena manifest sudah memakai `NAMA_PRODUK`, docs/19 diberi penanda 13 temuan selesai
 - Port uji e2e pindah dari 3100 ke 3110. Di mesin pengembangan port 3100 dipegang `next start` dari proyek lain, dan karena Playwright memakai ulang server yang sudah mendengar di port itu, test menabrak aplikasi yang salah sampai tiga test gagal dengan koneksi ditolak
 - Batas laju POST pembayaran diukur: 60 permintaan pertama menjawab 201, percobaan ke-61 menjawab 429 dengan header `X-Retry-After`. Sebelumnya kodenya ada tapi belum terukur, dan sekarang celah itu tertutup di docs/18
@@ -47,7 +133,6 @@ Aturan singkat:
 - Beranda kosong memakai kepala halaman dan panel awal. Aksi tambah disembunyikan saat luring agar tidak menawarkan perubahan yang belum bisa dikirim
 - Hero Beranda memakai label tanpa bidang aksen tambahan, hitung mundur tanpa bayangan, dan kolom yang bisa menyusut agar hierarki lebih tenang dan layar sempit tidak melebar
 - Pratinjau lokal tersedia lewat task `Wedding UI preview` pada port 3015 (tersimpan di `.vscode/tasks.json`). Aturan navigasi aktif dilindungi unit test
-- Pendaftaran manual hanya menerima email `@gmail.com` atau `@googlemail.com`, supaya akun yang terdaftar selalu akun Google yang valid. Pengguna tanpa email Google diarahkan memakai tombol Google langsung
 
 ## [0.16.2] - 5 Oktober 2026
 
@@ -71,7 +156,7 @@ Aturan singkat:
 
 ## [0.16.0] - 4 Oktober 2026
 
-Putaran ini memperbaiki komposisi tampilan di layar lebar. Owner produk melaporkan halaman Rencana di desktop terlihat setengah jadi: kolom konten hanya memakai sekitar 830px dari 1568px, keadaan kosong melayang di tengah sementara saringan rata kiri, dan dua tombol untuk aksi yang sama. Aturan komposisi desktop sekarang ditulis di `DESIGN.md` bagian 5 dan berlaku seragam.
+Putaran ini memperbaiki komposisi tampilan di layar lebar. Owner produk melaporkan halaman Rencana di desktop terlihat setengah jadi: kolom konten hanya memakai sekitar 830px dari 1568px, keadaan kosong melayang di tengah sementara saringan rata kiri, dan dua tombol untuk aksi yang sama. Aturan komposisi desktop sekarang ditulis di `docs/21-Arah-Tampilan.md` bagian 5 dan berlaku seragam.
 
 ### Tambah
 
@@ -149,7 +234,7 @@ Perubahan identitas produk. Nama yang terlihat pengguna ikut berganti, jadi ini 
 ### Catatan
 
 - Nama lama sengaja tetap dipakai di kunci perangkat, bukan karena kelewat: database IndexedDB `haribesar-luring` dan `haribesar-baca`, kunci localStorage `haribesar-tema`, `haribesar-email-ingat`, dan `haribesar-install-ditolak`, nama cache service worker `haribesar-halaman-*`, `haribesar-aset-*`, `haribesar-font-*`, serta nama event `haribesar-toast`. Alasannya, menggantinya membuat data pengguna yang sudah ada (antrean luring, tema, email yang diingat, cache luring) tidak terbaca lagi atau terbuang, padahal nama kunci itu tidak pernah terlihat pengguna. Kunci tema lama `aisyah-theme` juga masih dibaca sekali seperti sebelumnya
-- Dokumen yang menyebut nama produk ikut diperbarui: `DESIGN.md`, `docs/01-PRD.md`, `docs/07-PWA.md`, `docs/11-Delivery-Plan.md`, `docs/13-Rencana-Kerja.md`, `docs/14-Naskah-Teks.md`, `docs/18-Rencana-Produksi-dan-Pemakaian-Harian.md`, dan `README.md`
+- Dokumen yang menyebut nama produk ikut diperbarui: `docs/21-Arah-Tampilan.md`, `docs/01-PRD.md`, `docs/07-PWA.md`, `docs/11-Delivery-Plan.md`, `docs/13-Rencana-Kerja.md`, `docs/14-Naskah-Teks.md`, `docs/18-Rencana-Produksi-dan-Pemakaian-Harian.md`, dan `README.md`
 
 ## [0.13.0] - 4 Oktober 2026
 
@@ -169,7 +254,7 @@ Aplikasi sekarang bisa dibaca saat luring dari cadangan perangkat, dan pekerjaan
 
 - Satuan "undangan belum dikirim" di Laporan diseragamkan ke orang, sama dengan halaman Tamu
 - Daftar tugas dan daftar tamu punya pencarian dan tombol "Muat lebih" 20 baris sekali
-- Gradasi dikurangi dari 20 menjadi 1, sesuai `DESIGN.md` bagian 5
+- Gradasi dikurangi dari 20 menjadi 1, sesuai `docs/21-Arah-Tampilan.md` bagian 5
 - Nama produk di manifest PWA mengikuti `NAMA_PRODUK`, jadi "Hari Besar" ikut berubah kalau namanya diganti
 - Versi naik dari 0.12.1 ke 0.13.0
 
@@ -178,7 +263,7 @@ Aplikasi sekarang bisa dibaca saat luring dari cadangan perangkat, dan pekerjaan
 - `report/share-text` dan tautan publik `/bagikan/{token}` memakai bentuk error dan skema yang sama dengan endpoint lain, jadi client bisa membaca `error.code`
 - Skema PATCH tidak lagi mengisi nilai bawaan saat sebagian kolom diubah. Sebelumnya mengubah nama tamu ikut mereset status kehadiran dan jumlah orangnya
 - Halaman error dan 404 memakai komponen yang sama, dan `global-error` tetap terbaca kalau `globals.css` tidak ikut termuat
-- Emoji di UI dihapus dan kontras diperbaiki, sesuai `DESIGN.md` bagian 7 dan 8
+- Emoji di UI dihapus dan kontras diperbaiki, sesuai `docs/21-Arah-Tampilan.md` bagian 7 dan 8
 - 429 dari batas laju aplikasi sendiri sekarang mengirim header `X-Retry-After`; sebelumnya hanya 429 bawaan pustaka autentikasi yang membawanya
 
 ## [0.12.1] - 4 Oktober 2026
@@ -288,7 +373,7 @@ Layar anggaran, tamu, dan akun disusun ulang supaya susunannya sama dengan ranca
 - `src/app/(app)/tamu/page.tsx` disusun ulang mengikuti `daftar_tamu_rsvp_web_app`: kartu tamu bergradasi dengan cincin persentase, pil saringan kategori, kartu tamu dengan pilihan RSVP, dan daftar meja
 - `src/app/(app)/akun/page.tsx` disusun ulang mengikuti `atur_rencana_profil_calon_pengantin`: kartu identitas, formulir data dasar rencana, daftar rencana aktif, pilihan tema, unduh cadangan, dan baris informasi aplikasi
 - Kunci penyimpanan tema di layar akun disamakan jadi `haribesar-tema`. Sebelumnya layar itu memakai kunci lain, jadi pilihan gelap hilang setelah halaman dimuat ulang
-- Lambang merek di `DESIGN.md` tidak lagi disebut "dua cincin yang bertaut" karena yang dipakai sekarang gambar jadi dari Stitch
+- Lambang merek di `docs/21-Arah-Tampilan.md` tidak lagi disebut "dua cincin yang bertaut" karena yang dipakai sekarang gambar jadi dari Stitch
 
 ### Perbaiki
 
@@ -346,7 +431,7 @@ Arah desain diganti total ke "Blushing Romance" dari proyek Cute Wedding Planner
 - `src/app/layout.tsx` huruf diganti dari Fraunces dan Public Sans ke Plus Jakarta Sans dan Be Vietnam Pro, sumber dari `desain.json`
 - `viewport.themeColor` jadi `#FFFDF9` di mode terang dan `#1F181C` di mode gelap
 - Garis pemisah tipis di daftar diganti baris kartu terpisah sesuai aturan daftar di Stitch: `.pratinjau-baris`, `.tamu-kartu-bawah`, `.auth-kartu`
-- `DESIGN.md` ditulis ulang ke v2.0. Palet, tipografi, radius, dan aturan pill diperbarui. Larangan pill di v1.0 dihapus karena arah baru memang memakai pill
+- `docs/21-Arah-Tampilan.md` ditulis ulang ke v2.0. Palet, tipografi, radius, dan aturan pill diperbarui. Larangan pill di v1.0 dihapus karena arah baru memang memakai pill
 
 ### Perbaiki
 
@@ -369,8 +454,8 @@ Tampilan auth dirapikan dan tema global diratakan supaya setiap halaman memakai 
 ### Ubah
 
 - Lambang brand di layar auth mengecil dari 64px ke 56px dan kehilangan bayangan, diganti garis 1px
-- Sudut kartu auth mengikuti `--radius-panel` (14px), sebelumnya 32px, dan bayangannya diganti garis atas 1px karena DESIGN.md melarang bayangan pada kartu
-- Warna teks lambang dikembalikan ke `--text-h1` seperti yang tertulis di DESIGN.md, sebelumnya diteruskan ke `--text-h2`
+- Sudut kartu auth mengikuti `--radius-panel` (14px), sebelumnya 32px, dan bayangannya diganti garis atas 1px karena docs/21-Arah-Tampilan.md melarang bayangan pada kartu
+- Warna teks lambang dikembalikan ke `--text-h1` seperti yang tertulis di docs/21-Arah-Tampilan.md, sebelumnya diteruskan ke `--text-h2`
 - Gradien pada `.auth-kepala` dihapus, jaraknya dipindah ke token `--jarak-*`
 
 ---
@@ -445,7 +530,7 @@ Audit visual di browser pada lebar 390px, mode terang dan mode gelap, atas sepul
 
 #### Perbaiki
 
-- Empat pasangan warna gagal ambang kontras `4.5:1` di mode terang, semuanya kurang sedikit. Semuanya diperbaiki, tidak ada tebakan: nilainya dihitung di browser lalu dipasang sebagai nilai baru di [`src/app/globals.css`](src/app/globals.css). Tabel lengkap ada di `DESIGN.md` bagian 7
+- Empat pasangan warna gagal ambang kontras `4.5:1` di mode terang, semuanya kurang sedikit. Semuanya diperbaiki, tidak ada tebakan: nilainya dihitung di browser lalu dipasang sebagai nilai baru di [`src/app/globals.css`](src/app/globals.css). Tabel lengkap ada di `docs/21-Arah-Tampilan.md` bagian 7
   - Teks muted di layar: 4,282 menjadi 4,569. Perbaikannya naik dari tinta 62% ke 64%
   - Tulisan putih di tombol utama: 4,327 menjadi 4,555. Warnanya bukan diganti, tapi dicampur 93% terracotta dengan hitam, bukan 97%
   - Teks sage di label dan angka: 4,489 menjadi 4,565. Warnanya `#5B796A`, satu persen lebih gelap dari rancangan awal
@@ -460,8 +545,8 @@ Audit visual di browser pada lebar 390px, mode terang dan mode gelap, atas sepul
 
 #### Dokumentasi
 
-- [`DESIGN.md`](DESIGN.md) bagian 7 sekarang memuat tabel koreksi kontras, jadi angka di bagian 3 dan di bagian 7 tidak lagi berbeda
-- [`DESIGN.md`](DESIGN.md) memakai nama produk yang benar, `Hari Besar`. Sebelumnya masih menyebut nama pasangan contoh dan mencatat bahwa nama produk belum ditentukan
+- `docs/21-Arah-Tampilan.md` bagian 7 sekarang memuat tabel koreksi kontras, jadi angka di bagian 3 dan di bagian 7 tidak lagi berbeda
+- `docs/21-Arah-Tampilan.md` memakai nama produk yang benar, `Hari Besar`. Sebelumnya masih menyebut nama pasangan contoh dan mencatat bahwa nama produk belum ditentukan
 - Kunci penyimpanan tema di [`src/app/layout.tsx`](src/app/layout.tsx) sudah `haribesar-tema`; dokumen masih menyebut kunci lama. Sekarang sama
 
 ---
@@ -553,10 +638,10 @@ Audit kepatuhan terhadap `AGENTS.md` dan `docs/` menemukan enam cacat nyata pada
 
 #### Perbaiki
 
-- Sebelas kata yang dilarang `docs/15-Glosarium.md` bagian 7 masih dipakai di luar glosarium. Semuanya diganti: "dashboard" jadi "beranda" di `DESIGN.md` dan `docs/01-PRD.md`, "output" jadi "dokumen", "payment gateway" jadi "gerbang pembayaran", "marketplace" jadi "lokapasar", "onboarding" jadi "langkah pertama" di `docs/01-PRD.md` dan `docs/14-Naskah-Teks.md`, "planner profesional" jadi "perencana profesional", dan "approval cycle" jadi "siklus persetujuan" di `docs/11-Delivery-Plan.md`
+- Sebelas kata yang dilarang `docs/15-Glosarium.md` bagian 7 masih dipakai di luar glosarium. Semuanya diganti: "dashboard" jadi "beranda" di `docs/21-Arah-Tampilan.md` dan `docs/01-PRD.md`, "output" jadi "dokumen", "payment gateway" jadi "gerbang pembayaran", "marketplace" jadi "lokapasar", "onboarding" jadi "langkah pertama" di `docs/01-PRD.md` dan `docs/14-Naskah-Teks.md`, "planner profesional" jadi "perencana profesional", dan "approval cycle" jadi "siklus persetujuan" di `docs/11-Delivery-Plan.md`
 - Pemeriksaan ulang seluruh berkas Markdown memastikan tidak ada kata lain dari daftar larangan yang tersisa. Tiga baris di `docs/14-Naskah-Teks.md` sengaja tetap memuat kata terlarang karena tugasnya memang menunjukkan penulisan yang ditolak
-- Satu kalimat rusak di `DESIGN.md` bagian 1 dirapikan: "Yang varies di sini bukan seksi" jadi "Yang berubah di sini bukan bagian layar". Ini jenis kerusakan yang sama dengan sepuluh kata rusak yang diperbaiki di rilis 0.1.0, yaitu frasa Inggris yang menyisip ke kalimat Indonesia
-- Dua puluh lima temuan kata Inggris yang menyisip diperiksa di semua berkas. Semuanya sah kecuali satu di `DESIGN.md`: nama produk seperti "Next.js", sintaks SQL seperti `IS NULL` dan `ON DELETE CASCADE`, nama strategi cache seperti "network first", dan contoh teks yang sengaja dikutip seperti `"No data"`. Yang bukan prosa tidak diterjemahkan
+- Satu kalimat rusak di `docs/21-Arah-Tampilan.md` bagian 1 dirapikan: "Yang varies di sini bukan seksi" jadi "Yang berubah di sini bukan bagian layar". Ini jenis kerusakan yang sama dengan sepuluh kata rusak yang diperbaiki di rilis 0.1.0, yaitu frasa Inggris yang menyisip ke kalimat Indonesia
+- Dua puluh lima temuan kata Inggris yang menyisip diperiksa di semua berkas. Semuanya sah kecuali satu di `docs/21-Arah-Tampilan.md`: nama produk seperti "Next.js", sintaks SQL seperti `IS NULL` dan `ON DELETE CASCADE`, nama strategi cache seperti "network first", dan contoh teks yang sengaja dikutip seperti `"No data"`. Yang bukan prosa tidak diterjemahkan
 
 #### Keputusan
 
@@ -635,14 +720,14 @@ Audit kepatuhan terhadap `AGENTS.md` dan `docs/` menemukan enam cacat nyata pada
 
 #### Perbaiki
 
-- Dua rujukan ke `docs/07-NFR.md` di `DESIGN.md` dan `docs/01-PRD.md` menunjuk ke `docs/08-NFR.md`, karena NFR ada di nomor delapan
+- Dua rujukan ke `docs/07-NFR.md` di `docs/21-Arah-Tampilan.md` dan `docs/01-PRD.md` menunjuk ke `docs/08-NFR.md`, karena NFR ada di nomor delapan
 - Salah ketik di README pada bagian alasan pemilihan stack diperbaiki
 - Sepuluh kata rusak di delapan dokumen diperbaiki, termasuk "rencanaTIA" di `03-Data-Model.md` dan "intiPlanning" di `02c-Hari-H.md`. Semuanya kata Indonesia yang disisipi fragmen asing
 - Bagian 10 dan 11 di `docs/14-Naskah-Teks.md` ditulis ulang karena tabelnya sempat kehilangan judul kolom
 
 #### Tambah
 
-- `DESIGN.md` untuk sistem desain: warna, tipografi, bentuk, nada bahasa, dan keputusan tentang apa yang tidak dipakai
+- `docs/21-Arah-Tampilan.md` untuk sistem desain: warna, tipografi, bentuk, nada bahasa, dan keputusan tentang apa yang tidak dipakai
 - `docs/01-PRD.md` untuk masalah, persona, scope, use case, metrik, dan syarat penerimaan
 - `docs/02-Domain-Spec.md` sebagai indeks, plus `02a` sampai `02d` untuk tiga belas modul dalam empat kelompok
 - `docs/03-Data-Model.md` untuk sebelas tabel PostgreSQL dalam sintaks Drizzle
@@ -675,3 +760,9 @@ Audit kepatuhan terhadap `AGENTS.md` dan `docs/` menemukan enam cacat nyata pada
 - Kode aplikasi
 - Angka hasil pengukuran, karena belum ada aplikasi untuk diukur
 - Harga dan model bisnis
+
+## 2026-10-06
+
+- Redesign total frontend: dibuat 4 layar utama di Google Stitch (project "Rapi Nikah Redesign"): Beranda, Anggaran, Tamu, Rundown. Semua mobile, satu design system.
+- docs/21-Arah-Tampilan.md ditulis ulang ke v4.0 "Serene Nuptials: Clean Minimal": putih dominan, satu aksen plum #66556B, satu font Plus Jakarta Sans, radius 16px tunggal, border 1px #E8E4EA, tanpa gradasi, tanpa animasi transform. Alasan: v3.0 dinilai terlalu ramai dan terasa hiasan.
+- Kode frontend belum diubah. Perubahan token di docs/21-Arah-Tampilan.md baru berlaku setelah `globals.css` dan komponen disesuaikan.

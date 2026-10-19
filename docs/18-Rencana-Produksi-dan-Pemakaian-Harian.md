@@ -6,7 +6,7 @@ Isinya bukan alasan baru. Setiap keputusan sudah punya alasannya di dokumen yang
 
 Kalau dokumen ini bertentangan dengan [`01-PRD.md`](01-PRD.md), [`03-Data-Model.md`](03-Data-Model.md), [`04-API-Contract.md`](04-API-Contract.md), atau [`05-IA-dan-Layar.md`](05-IA-dan-Layar.md), dokumen itu yang menang, dan dokumen ini yang diperbaiki.
 
-Aturan kerja tetap dari [`AGENTS.md`](../AGENTS.md). Warna dan bentuk dari [`DESIGN.md`](../DESIGN.md).
+Aturan kerja tetap dari [`AGENTS.md`](../AGENTS.md). Warna dan bentuk dari `docs/21-Arah-Tampilan.md`.
 
 ---
 
@@ -170,7 +170,7 @@ Keterbatasan yang harus ditulis jujur: map in memory hilang saat proses restart,
 | `X-Frame-Options` | `DENY` | Tidak ada halaman aplikasi yang perlu dibuka di dalam frame |
 | `Permissions-Policy` | `camera=(), microphone=(), geolocation=()` | Tidak ada fitur yang memakai ketiganya. Bukti pembayaran diinput sebagai nama berkas, bukan dari kamera |
 | `Strict-Transport-Security` | `max-age=63072000; includeSubDomains` | Hanya berlaku di HTTPS, dan platform yang dipakai akan mengaktifkan HTTPS |
-| `Content-Security-Policy` | Ditunda ke Fase 2 | CSP yang terlalu ketat merusak PWA dan inline style yang dipakai `DESIGN.md`. Belum ada kejadian nyata yang perlu diblokir |
+| `Content-Security-Policy` | Ditunda ke Fase 2 | CSP yang terlalu ketat merusak PWA dan inline style yang dipakai `docs/21-Arah-Tampilan.md`. Belum ada kejadian nyata yang perlu diblokir |
 
 Keputusan yang diambil:
 
@@ -233,13 +233,15 @@ Kalau nanti masuk Fase 2, urutan yang benar: lupa kata sandi dulu, baru verifika
 
 Keputusan pemilik produk 4 Oktober 2026: target deploy adalah Vercel, tersambung ke repositori GitHub `begolo12/wedding-planer`, dan deploy terpicu otomatis setiap push ke cabang `main`. Produksi sudah tayang di `https://wedding-planer-self.vercel.app`.
 
-Bukti diperiksa 4 Oktober 2026 setelah commit `5914f06` (v0.16.0): `GET /api/kesehatan` menjawab 200 dalam 2,43 detik (artinya database produksi terhubung), `/manifest.webmanifest` memuat name dan short_name "Rapi Nikah", `HEAD /masuk` mengirim lima header keamanan tanpa CSP, dan `GET /kebijakan` menjawab 200.
+Bukti diperiksa 4 Oktober 2026 setelah commit `5914f06` (v0.16.0): `GET /api/kesehatan` menjawab 200 dalam 2,43 detik, `/manifest.webmanifest` memuat name dan short_name "Rapi Nikah", `HEAD /masuk` mengirim lima header keamanan tanpa CSP, dan `GET /kebijakan` menjawab 200.
+
+**Koreksi 19 Oktober 2026.** Kalimat lama di sini menulis bahwa jawaban 200 dari `/api/kesehatan` berarti database produksi terhubung. Itu tidak benar. `src/app/api/kesehatan/route.ts` sengaja tidak menyentuh database, dan alasannya tertulis di berkas itu: kalau endpoint ini ikut membaca database, satu gangguan database akan terbaca sebagai "sedang luring" di semua perangkat padahal internetnya baik. Jadi endpoint itu hanya membuktikan proses Next.js hidup, bukan database hidup. Bukti bahwa database produksi terhubung harus datang dari endpoint lain yang benar-benar membaca tabel, misalnya `GET /api/plans` dengan sesi.
 
 | Yang sudah berlaku | Keadaan | Alasan atau bukti |
 |---|---|---|
 | Target deploy | Vercel, tersambung ke repositori GitHub, deploy otomatis saat push ke `main` | Bukti di paragraf atas. Pilihan "satu platform terkelola, satu proses" di `06-Stack-dan-Batas.md` bagian 2 sudah terjawab |
 | Cara menjalankan migrasi | `db:migrate` sebagai langkah release, bukan dijalankan saat aplikasi start | Kalau migrasi jalan saat start, dua instance yang start bersamaan bisa menjalankan migrasi yang sama dua kali |
-| Pemantauan | Health check di `/api/kesehatan` plus log server biasa | `06-Stack-dan-Batas.md` bagian 3 sudah menolak Sentry. Health check sudah ada, tinggal diberi tahu platform |
+| Pemantauan | `/api/kesehatan` hanya membuktikan proses hidup, tidak membaca database, dan tidak ada yang memanggilnya secara berkala | `06-Stack-dan-Batas.md` bagian 3 sudah menolak Sentry. Belum ada health check yang dikonfigurasi di Vercel, jadi endpoint ini belum dipakai siapa pun secara otomatis |
 
 Yang masih belum:
 
@@ -247,8 +249,8 @@ Yang masih belum:
 |---|---|---|
 | Backup harian database | Belum ada bukti dump harian berjalan | Jadwal dump dan storage tujuan |
 | Restore yang pernah diuji | Belum pernah dicoba memulihkan dari dump | Satu uji restore ke database terpisah |
-| Pemantauan dan agregasi log | Health check sudah ada, tetapi belum ada yang memberi tahu saat gagal, dan log belum diagregasi | Pemberitahuan dari platform atau alat pemantauan |
-| Pemisahan database produksi | Database produksi memang terhubung, dibuktikan `GET /api/kesehatan` 200, tetapi belum dipastikan terpisah dari database pengembangan | Konfirmasi nama dan host database produksi berbeda dari pengembangan |
+| Pemantauan dan agregasi log | `/api/kesehatan` hanya membuktikan proses hidup, tidak membaca database, dan tidak ada yang memanggilnya secara berkala. Log belum diagregasi | Pemberitahuan dari platform atau alat pemantauan, plus health check yang benar-benar dikonfigurasi |
+| Pemisahan database produksi | Belum dipastikan terpisah dari database pengembangan. `GET /api/kesehatan` tidak bisa dipakai sebagai bukti karena tidak membaca database | Konfirmasi nama dan host database produksi berbeda dari pengembangan |
 
 Catatan: baris "Image container" dengan `output: "standalone"` dan `Dockerfile` tidak dipakai. Vercel yang menangani build dan proses, jadi tidak ada container yang dibangun dari repo. Kalau nanti pindah platform, keputusan itu ditulis ulang di sini.
 
@@ -263,7 +265,7 @@ Warna sudah berpasangan dan sudah punya pasangan untuk dark mode. Yang belum ada
 | Kontras teks | Hitung rasio semua pasangan warna di `src/app/globals.css` untuk mode terang dan gelap | Aturan di `AGENTS.md` bagian 8 menulis minimal 4.5:1. Belum pernah dihitung, jadi sekarang baru jadi klaim |
 | Target sentuh | Ukur tinggi dan lebar setiap tombol dan link di layar mobile | Target 44x44px ada di CSS, tetapi belum diukur di semua layar |
 | Keyboard | Jalankan seluruh alur utama tanpa tetikus | `docs/08-NFR.md` menulis jalur ini harus bisa dipakai dengan keyboard, tetapi belum pernah diuji |
-| Focus | Pastikan semua elemen interaktif punya `:focus-visible` yang terlihat | Aturannya ada di `DESIGN.md`, tetapi belum diperiksa di semua komponen |
+| Focus | Pastikan semua elemen interaktif punya `:focus-visible` yang terlihat | Aturannya ada di `docs/21-Arah-Tampilan.md`, tetapi belum diperiksa di semua komponen |
 | Dark mode | Ganti tema lalu periksa kontrasnya, bukan hanya membaca kodenya | Aturan di `AGENTS.md` bagian 6 menulis dark mode harus diuji, bukan hanya ada |
 
 ---
@@ -294,7 +296,7 @@ Tabel ini status, bukan lagi rencana. Tiap status diambil dari bukti yang bisa d
 | 5 | Koneksi database | P0 | Selesai di kode | `prepare: false` dan `ssl: "require"` untuk host bukan localhost | Jalur ssl remote belum teruji runtime karena `DATABASE_URL` di mesin ini localhost |
 | 6 | Rate limit | P0 | Selesai | better-auth bawaan untuk sign-up 5 per jam per IP dan sign-in 10 per 15 menit per IP, badan 429 diterjemahkan ke bentuk standar; `src/lib/batas.ts` untuk POST plans 30 per jam per pengguna dan POST payments 60 per jam per pengguna. Terukur: percobaan sign-in ke-11 menjawab 429 dengan `X-Retry-After` 900 dan `{"error":{"code":"RATE_LIMITED"}}`; POST `/api/plans` 30 kali pertama menjawab 422, percobaan ke-31 menjawab 429 dengan `{"error":{"code":"RATE_LIMITED"}}` dan header `X-Retry-After`, tanpa satu pun plan dibuat; POST payments 60 kali pertama menjawab 201, percobaan ke-61 menjawab 429 dengan `X-Retry-After: 3598` | Tidak ada |
 | 7 | Security headers | P1 | Selesai | Lima header terkirim tanpa CSP | Tidak ada |
-| 8 | Test otomatis | P1 | Selesai | Vitest 15 berkas 150 test hijau (format, plan, skema, status-luring, cache-baca, api-client-luring, batas laju, navigasi, antrean luring, integrasi kepemilikan plan, integrasi laporan, dan lain-lain); Playwright 9 test hijau di port 3110 (alur utama, alur luring, batas laju plans, hapus akun, kontrak share-text, tamu dan ekspor, zona dan tenggat) | Tanpa `TEST_DATABASE_URL`, test integrasi memakai database pengembangan dan tiap test membuat lalu menghapus datanya sendiri |
+| 8 | Test otomatis | P1 | Selesai | Vitest 16 berkas 153 test hijau (format, plan, skema, status-luring, cache-baca, api-client-luring, batas laju, navigasi, antrean luring, integrasi kepemilikan plan, integrasi laporan, integrasi agregat uang, dan lain-lain); Playwright 8 berkas spec di port 3110 (alur utama, alur luring, batas laju plans, hapus akun, kontrak share-text, tampilan, tamu dan ekspor, zona dan tenggat) | Tanpa `TEST_DATABASE_URL`, test integrasi memakai database pengembangan dan tiap test membuat lalu menghapus datanya sendiri |
 | 9 | Perbaikan kontrak | P1 | Selesai | `/api/public/share/{token}` menjawab `{"error":{"code":"NOT_FOUND"}}` (terukur 404); POST `report/share-text` memakai `skemaBagikanTeks` dengan field `variant`, `message`, `linkId` | Tidak ada |
 | 10 | Keselarasan dokumen | P3 | Selesai | Daftar berkasnya ada di laporan pekerja dokumen | Tidak ada |
 
@@ -327,16 +329,16 @@ Ukuran di bawah sudah diukur, kecuali baris yang ditandai belum di bagian 18.
 | Plan sampai pembayaran | Ya, Rp 5.000.000 | e2e Playwright alur utama |
 | Antrean luring tidak kehilangan data | Ya, 3 perubahan terkirim berurutan; isi object store antrean 1 lalu 3 lalu 0 | e2e alur luring |
 | Bentuk tabel bisa dijelaskan tanpa membuka database | Ya | Migrasi ter-commit, dan `docs/03-Data-Model.md` sudah dilengkapi |
-| Build dan tipe | Hijau | `npm run lint`, 150 test, `npm run build` 26 rute statis dan dinamis |
+| Build dan tipe | Hijau | `npm run lint`, 153 test, `npm run build` 26 rute statis dan dinamis |
 | Kontras | 0 gagal di terang dan gelap; rasio terburuk 4,55 di terang dan 5,35 di gelap | Diukur di 17 rute pada 390 dan 1440 px |
-| Test | 150 test unit dan integrasi hijau, plus 9 e2e hijau | Vitest dan Playwright |
+| Test | 153 test unit dan integrasi hijau, plus 17 test e2e di 8 berkas spec | Vitest dan Playwright |
 | Migrasi dari nol | 15 tabel terbentuk, "migrations applied successfully" | `db:migrate` ke database sementara `wedding_uji_20261004`, lalu di-DROP |
 | Batas laju endpoint plan | 30 kali 422, percobaan ke-31 429 dengan `X-Retry-After` | Diukur lewat request, tanpa plan yang dibuat |
 | Batas laju endpoint pembayaran | 60 kali 201, percobaan ke-61 429 dengan `X-Retry-After: 3598` | Diukur lewat request, 5 Oktober 2026 |
 | Tanpa geser horizontal | Tidak ada geser di 360, 390, dan 1440 px | Diukur lewat browser |
 | Tombol tanpa handler | 0 di 17 rute | Diukur lewat browser |
-| Gradasi | 1, turun dari 20 | Diukur, sesuai `DESIGN.md` bagian 5 |
-| Emoji di UI | 0 | Diukur, sesuai `DESIGN.md` bagian 8 |
+| Gradasi | 1, turun dari 20 | Diukur, sesuai `docs/21-Arah-Tampilan.md` bagian 5 |
+| Emoji di UI | 0 | Diukur, sesuai `docs/21-Arah-Tampilan.md` bagian 8 |
 | PDF laporan | 2 halaman | Diukur (target paling banyak 3) |
 | Manifest dan ikon | Manifest dan 3 ikon menjawab 200 | Diukur lewat request |
 | Service worker | Mengontrol halaman | Diukur lewat browser |
@@ -349,7 +351,7 @@ Celah di bawah disengaja belum dikerjakan, atau sudah selesai di kode tapi belum
 
 | Celah | Alasan | Yang dibutuhkan |
 |---|---|---|
-| Backup harian database, restore teruji, pemantauan dan agregasi log, dan pemastian pemisahan database produksi | Deploy produksi sudah ada dan tayang di `https://wedding-planer-self.vercel.app` sejak 4 Oktober 2026. `GET /api/kesehatan` menjawab 200, artinya database produksi terhubung, tetapi backup harian belum terbukti berjalan, restore belum pernah diuji, belum ada pemberitahuan saat gagal, dan pemisahan database produksi dari database pengembangan belum dipastikan | Jadwal dan uji backup, alat pemantauan dan agregasi log, konfirmasi database produksi terpisah |
+| Backup harian database, restore teruji, pemantauan dan agregasi log, dan pemastian pemisahan database produksi | Deploy produksi sudah ada dan tayang di `https://wedding-planer-self.vercel.app` sejak 4 Oktober 2026. `GET /api/kesehatan` menjawab 200, tetapi endpoint itu tidak membaca database sehingga tidak membuktikan database produksi terhubung. Backup harian belum terbukti berjalan, restore belum pernah diuji, belum ada pemberitahuan saat gagal, dan pemisahan database produksi dari database pengembangan belum dipastikan | Jadwal dan uji backup, alat pemantauan dan agregasi log, konfirmasi database produksi terpisah |
 | Lighthouse dan Core Web Vitals | Belum diukur, padahal aplikasi sudah tayang di `https://wedding-planer-self.vercel.app` sejak 4 Oktober 2026, jadi pengukurannya bisa dijalankan kapan saja | Jalankan Lighthouse, lalu catat hasilnya |
 | Screen reader dan jalur keyboard penuh | Belum diuji. Keyboard dasar jalan, tapi seluruh alur belum dijalankan tanpa tetikus | Uji manual, lalu catat |
 | Jalur ssl remote | Host remote belum tersedia, dan `DATABASE_URL` di mesin ini localhost | Koneksi remote untuk uji ssl |
